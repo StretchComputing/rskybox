@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee"
+  xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+  version="2.5">
+  <servlet>
+    <servlet-name>Sandbox</servlet-name>
+    <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
+    <init-param>
+      <param-name>org.restlet.application</param-name>
+      <param-value>com.stretchcom.sandbox.server.MobilePulseApplication</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Sandbox</servlet-name>
+    <url-pattern>/rest/*</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>Audio</servlet-name>
+    <servlet-class>com.stretchcom.sandbox.server.AudioServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>Audio</servlet-name>
+    <url-pattern>/audio/*</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>CrashStackData</servlet-name>
+    <servlet-class>com.stretchcom.sandbox.server.CrashStackDataServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>CrashStackData</servlet-name>
+    <url-pattern>/crashStackData/*</url-pattern>
+  </servlet-mapping>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+
+  <security-constraint>
+    <web-resource-collection>
+      <url-pattern>/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+</web-app>
