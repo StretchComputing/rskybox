@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Mobile Pulse" default="jekyll" basedir=".">
+    <target name="jekyll">
+        <copy todir="war">
+            <fileset dir="html/_site"/>
+        </copy>
+    </target>
+</project>
