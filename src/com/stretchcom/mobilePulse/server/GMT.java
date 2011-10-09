@@ -1,4 +1,4 @@
-package com.stretchcom.sandbox.server;
+package com.stretchcom.mobilePulse.server;
 
 import java.text.DateFormat;
 import java.text.ParseException;
