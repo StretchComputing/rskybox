@@ -2,9 +2,7 @@ package com.stretchcom.mobilePulse.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
@@ -53,16 +51,21 @@ public class UsersResource extends ServerResource {
         }
     }
 
+    // Handles 'Create User API'
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("UserResource in post");
-        return new JsonRepresentation(save_user(entity));
+        return save_user(entity);
     }
 
+    // Handles 'Update User API'
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("UserResource in put");
-        return new JsonRepresentation(save_user(entity));
+		if (this.id == null || this.id.length() == 0) {
+			return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
+		}
+        return save_user(entity);
     }
 
     @Delete("json")
@@ -90,6 +93,7 @@ public class UsersResource extends ServerResource {
         EntityManager em = EMF.get().createEntityManager();
         
 		String apiStatus = ApiStatusCode.SUCCESS;
+        this.setStatus(Status.SUCCESS_OK);
         try {
             List<User> users = new ArrayList<User>();
             JSONArray ja = new JSONArray();
@@ -134,12 +138,13 @@ public class UsersResource extends ServerResource {
         return new JsonRepresentation(getUserJson(user, apiStatus));
     }
 
-    private JSONObject save_user(Representation entity) {
+    private JsonRepresentation save_user(Representation entity) {
         EntityManager em = EMF.get().createEntityManager();
 
         User user = null;
-        em.getTransaction().begin();
 		String apiStatus = ApiStatusCode.SUCCESS;
+        this.setStatus(Status.SUCCESS_CREATED);
+        em.getTransaction().begin();
         try {
             user = new User();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
@@ -147,6 +152,7 @@ public class UsersResource extends ServerResource {
             if (id != null) {
                 Key key = KeyFactory.stringToKey(id);
                 user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
+        		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
             }
             
@@ -177,7 +183,7 @@ public class UsersResource extends ServerResource {
             if (!isUpdate && json.has("mobileCarrierId") && user.getPhoneNumber() != null && user.getPhoneNumber().length() > 0) {
             	String carrierDomainName = MobileCarrier.findEmailDomainName(json.getString("mobileCarrierId"));
             	if(carrierDomainName == null) {
-    				return getUserJson(user, ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
+            		return Utility.apiError(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
             	}
             	String smsEmailAddress = user.getPhoneNumber() + carrierDomainName;
             	user.setSmsEmailAddress(smsEmailAddress);
@@ -210,7 +216,7 @@ public class UsersResource extends ServerResource {
             em.close();
         }
         
-        return getUserJson(user, apiStatus);
+        return new JsonRepresentation(getUserJson(user, apiStatus));
     }
     
     private JSONObject getUserJson(User user) {

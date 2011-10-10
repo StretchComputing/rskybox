@@ -1,6 +1,7 @@
 package com.stretchcom.mobilePulse.server;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -31,13 +32,13 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 public class FeedbackResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(FeedbackResource.class.getName());
-    private String feedbackId;
+    private String id;
     private String listStatus;
 
     @Override
     protected void doInit() throws ResourceException {
         log.info("in doInit");
-        feedbackId = (String) getRequest().getAttributes().get("id");
+        id = (String) getRequest().getAttributes().get("id");
         
 		Form form = getRequest().getResourceRef().getQueryAsForm();
 		for (Parameter parameter : form) {
@@ -54,59 +55,67 @@ public class FeedbackResource extends ServerResource {
     // Handles 'Get List of Feedback API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
-         JSONObject jsonReturn;
-
-        log.info("in get for Feedback resource");
-        if (feedbackId != null) {
+        if (id != null) {
             // Get Feedback Info API
         	log.info("in Get Feedback Info API");
-        	jsonReturn = getFeedbackInfoJson(feedbackId);
+        	return show(id);
         } else {
             // Get List of Feedback API
         	log.info("Get List of Feedbacks API");
-        	jsonReturn = getListOfFeedbacksJson();
+        	return index();
         }
-        
-        return new JsonRepresentation(jsonReturn);
     }
     
+    // Handles 'Create a new feedback' API
+    @Post("json")
+    public JsonRepresentation post(Representation entity) {
+        log.info("UserResource in post");
+        return save_feedback(entity);
+    }
+
     // Handles 'Update Feedback API'
     @Put("json")
     public JsonRepresentation put(Representation entity) {
-        log.info("in put for Feedback resource");
-        return new JsonRepresentation(updateFeedback(entity));
+        log.info("UserResource in put");
+		if (this.id == null || this.id.length() == 0) {
+			return Utility.apiError(ApiStatusCode.FEEDBACK_ID_REQUIRED);
+		}
+        return save_feedback(entity);
     }
 
-    // Handles 'Create a new feedback' API
-    @Post("json")
-    public JsonRepresentation createFeedback(Representation entity) {
-    	log.info("createFeedback(@Post) entered ..... ");
-        JSONObject jsonReturn = new JSONObject();
-		EntityManager em = EMF.get().createEntityManager();
-		
+    private JsonRepresentation save_feedback(Representation entity) {
+        EntityManager em = EMF.get().createEntityManager();
+
+        Feedback feedback = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
-		Feedback feedback = new Feedback();
-		this.setStatus(Status.SUCCESS_CREATED);
-		em.getTransaction().begin();
+        this.setStatus(Status.SUCCESS_CREATED);
+        em.getTransaction().begin();
         try {
-			JsonRepresentation jsonRep = new JsonRepresentation(entity);
-			log.info("jsonRep = " + jsonRep.toString());
-			JSONObject json = jsonRep.getJsonObject();
-			
-			if(json.has("voice")) {
+            feedback = new Feedback();
+            JSONObject json = new JsonRepresentation(entity).getJsonObject();
+            Boolean isUpdate = false;
+            if (id != null) {
+                Key key = KeyFactory.stringToKey(id);
+                feedback = (Feedback)em.createNamedQuery("Feedback.getByKey")
+                    	.setParameter("key", key)
+                    	.getSingleResult();
+        		this.setStatus(Status.SUCCESS_OK);
+                isUpdate = true;
+            }
+            
+			if(!isUpdate && json.has("voice")) {
 				feedback.setVoiceBase64(json.getString("voice"));
-				//feedback.setVoiceBase64("this is not voice data");
 				log.info("stored voice value = " + feedback.getVoiceBase64());
 			} else {
 				log.info("no JSON voice field found");
 			}
 			
-			if(json.has("userName")) {
+			if(!isUpdate && json.has("userName")) {
 				feedback.setUserName(json.getString("userName"));
 			}
-			
+            
 			// TODO support a time zone passed in
-			if(json.has("date")) {
+			if(!isUpdate && json.has("date")) {
 				String recordedDateStr = json.getString("date");
 				
 				if(recordedDateStr != null || recordedDateStr.trim().length() != 0) {
@@ -114,125 +123,89 @@ public class FeedbackResource extends ServerResource {
 					Date gmtRecordedDate = GMT.convertToGmtDate(recordedDateStr, true, tz);
 					if(gmtRecordedDate == null) {
 						log.info("invalid recorded date format passed in");
-						apiStatus = ApiStatusCode.INVALID_RECORDED_DATE_PARAMETER;
-						jsonReturn.put("apiStatus", apiStatus);
-						return new JsonRepresentation(jsonReturn);
+						return Utility.apiError(ApiStatusCode.INVALID_RECORDED_DATE_PARAMETER);
 					}
 					feedback.setRecordedGmtDate(gmtRecordedDate);
 				}
 			}
 			
-			if(json.has("instanceUrl")) {
+			if(!isUpdate && json.has("instanceUrl")) {
 				feedback.setInstanceUrl(json.getString("instanceUrl"));
 			}
 			
-			// Default status to 'new'
-			feedback.setStatus(Feedback.NEW_STATUS);
-		    
-			em.persist(feedback);
-			em.getTransaction().commit();
-			
-			String keyWebStr = KeyFactory.keyToString(feedback.getKey());
-			log.info("feedback with key " + keyWebStr + " created successfully");
+			if(isUpdate) {
+	            if(json.has("status")) {
+	            	String status = json.getString("status").toLowerCase();
+	            	if(feedback.isStatusValid(status)) {
+	                    feedback.setStatus(status);
+	            	} else {
+						log.info("invalid status = " + status);
+						return Utility.apiError(ApiStatusCode.INVALID_STATUS);
+	            	}
+	            }
+			} else {
+				// creating a feedback so default status to 'new'
+				feedback.setStatus(Feedback.NEW_STATUS);
+			}
 
-			// TODO URL should be filtered to have only legal characters
-			String baseUri = this.getRequest().getHostRef().getIdentifier();
-			this.getResponse().setLocationRef(baseUri + "/");
-
-			jsonReturn.put("id", keyWebStr);
-		} catch (IOException e) {
-			log.severe("error extracting JSON object from Post");
-			e.printStackTrace();
-			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-		} catch (JSONException e) {
-			log.severe("error converting json representation into a JSON object");
-			e.printStackTrace();
-			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-		} finally {
-		    if (em.getTransaction().isActive()) {
-		        em.getTransaction().rollback();
-		    }
-		    em.close();
-		}
-																																																																					
-		try {
-			jsonReturn.put("apiStatus", apiStatus);
-		} catch (JSONException e) {
-			log.severe("error creating JSON return object");
-			e.printStackTrace();
-		}
-		return new JsonRepresentation(jsonReturn);
+            em.persist(feedback);
+            em.getTransaction().commit();
+        } catch (IOException e) {
+            log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
+            e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        } catch (JSONException e) {
+            log.severe("exception = " + e.getMessage());
+            e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        } finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
+        
+        return new JsonRepresentation(getFeedbackJson(feedback, apiStatus));
     }
-    
-    private JSONObject getFeedbackInfoJson(String theFeedbackId) {
-       	EntityManager em = EMF.get().createEntityManager();
-    	JSONObject jsonReturn = new JSONObject();
-    	
+
+    private JsonRepresentation show(String id) {
+        log.info("UserResource in show()");
+        EntityManager em = EMF.get().createEntityManager();
+
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
+		Feedback feedback = null;
 		try {
-			if (this.feedbackId == null || this.feedbackId.length() == 0) {
-				apiStatus = ApiStatusCode.FEEDBACK_ID_REQUIRED;
-				jsonReturn.put("apiStatus", apiStatus);
-				return jsonReturn;
+			if (this.id == null || this.id.length() == 0) {
+				return Utility.apiError(ApiStatusCode.FEEDBACK_ID_REQUIRED);
 			}
 			
-			Key feedbackKey = KeyFactory.stringToKey(this.feedbackId);
-    		Feedback feedback = null;
+			Key feedbackKey = KeyFactory.stringToKey(this.id);
     		feedback = (Feedback)em.createNamedQuery("Feedback.getByKey")
 				.setParameter("key", feedbackKey)
 				.getSingleResult();
-
-    		jsonReturn.put("id", KeyFactory.keyToString(feedback.getKey()));
-			
-        	Date recordedDate = feedback.getRecordedGmtDate();
-        	// TODO support time zones
-        	if(recordedDate != null) {
-        		TimeZone tz = GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
-        		jsonReturn.put("date", GMT.convertToLocalDate(recordedDate, tz, MobilePulseApplication.INFO_DATE_FORMAT));
-        	}
-        	
-        	jsonReturn.put("userName", feedback.getUserName());
-        	jsonReturn.put("instanceUrl", feedback.getInstanceUrl());
-        	
-        	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
-        	String status = feedback.getStatus();
-        	if(status == null || status.length() == 0) {status = "new";}
-        	jsonReturn.put("status", status);
-        	
-            log.info("JSON return object built successfully");	
-		} catch (JSONException e) {
-			log.severe("error converting json representation into a JSON object");
-			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-			e.printStackTrace();
 		} catch (NoResultException e) {
-			// feedback ID passed in is not valid
-			log.info("Feedback ID not found");
+			log.info("Feedback not found");
 			apiStatus = ApiStatusCode.FEEDBACK_NOT_FOUND;
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more feedback have same key");
+			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
-    	
-		try {
-			jsonReturn.put("apiStatus", apiStatus);
-		} catch (JSONException e) {
-			log.severe("error converting json representation into a JSON object");
-			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-			e.printStackTrace();
-		}
-
-		return jsonReturn;
+        
+        return new JsonRepresentation(getFeedbackJson(feedback, apiStatus));
     }
     
-    private JSONObject getListOfFeedbacksJson() {
-       	EntityManager em = EMF.get().createEntityManager();
-    	JSONObject jsonReturn = new JSONObject();
-    	
+    private JsonRepresentation index() {
+        log.info("UserResource in index");
+        JSONObject json = new JSONObject();
+        EntityManager em = EMF.get().createEntityManager();
+        
 		String apiStatus = ApiStatusCode.SUCCESS;
-		this.setStatus(Status.SUCCESS_OK);
-		try {
+        this.setStatus(Status.SUCCESS_OK);
+        try {
 			List<Feedback> feedbacks = null;
+            JSONArray ja = new JSONArray();
+            
 			if(this.listStatus != null) {
 			    if(this.listStatus.equalsIgnoreCase(Feedback.NEW_STATUS) || this.listStatus.equalsIgnoreCase(Feedback.ARCHIVED_STATUS)){
 					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatus")
@@ -241,9 +214,7 @@ public class FeedbackResource extends ServerResource {
 			    } else if(this.listStatus.equalsIgnoreCase(Feedback.ALL_STATUS)) {
 					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAll").getResultList();
 			    } else {
-					apiStatus = ApiStatusCode.INVALID_STATUS_PARAMETER;
-					jsonReturn.put("apiStatus", apiStatus);
-					return jsonReturn;
+			    	return Utility.apiError(ApiStatusCode.INVALID_STATUS_PARAMETER);
 			    }
 			} else {
 				// by default, only get 'new' feedback
@@ -251,117 +222,49 @@ public class FeedbackResource extends ServerResource {
 						.setParameter("status", Feedback.NEW_STATUS)
 						.getResultList();
 			}
+            
+            for (Feedback fb : feedbacks) {
+                ja.put(getFeedbackJson(fb));
+            }
+            json.put("feedback", ja);
+            json.put("apiStatus", apiStatus);
+        } catch (JSONException e) {
+            log.severe("exception = " + e.getMessage());
+        	e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        }
+        return new JsonRepresentation(json);
+    }
+    
+    private JSONObject getFeedbackJson(Feedback feedback) {
+    	return getFeedbackJson(feedback, null);
+    }
 
-			JSONArray feedbackJsonArray = new JSONArray();
-			for (Feedback fb : feedbacks) {
-				JSONObject feedbackJsonObj = new JSONObject();
-				
-				feedbackJsonObj.put("id", KeyFactory.keyToString(fb.getKey()));
-				
-            	Date recordedDate = fb.getRecordedGmtDate();
+    private JSONObject getFeedbackJson(Feedback feedback, String theApiStatus) {
+        JSONObject json = new JSONObject();
+
+        try {
+        	if(theApiStatus != null) {
+        		json.put("apiStatus", theApiStatus);
+        	}
+        	if(theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS))) {
+        		json.put("id", KeyFactory.keyToString(feedback.getKey()));
+    			
+            	Date recordedDate = feedback.getRecordedGmtDate();
             	// TODO support time zones
             	if(recordedDate != null) {
             		TimeZone tz = GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		feedbackJsonObj.put("date", GMT.convertToLocalDate(recordedDate, tz, MobilePulseApplication.LIST_DATE_FORMAT));
+            		json.put("date", GMT.convertToLocalDate(recordedDate, tz, MobilePulseApplication.INFO_DATE_FORMAT));
             	}
             	
-            	feedbackJsonObj.put("userName", fb.getUserName());
-            	feedbackJsonObj.put("instanceUrl", fb.getInstanceUrl());
-            	
-            	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
-            	String status = fb.getStatus();
-            	if(status == null || status.length() == 0) {status = "new";}
-            	feedbackJsonObj.put("status", status);
-				
-				feedbackJsonArray.put(feedbackJsonObj);
-			}
-			jsonReturn.put("feedback", feedbackJsonArray);
-		} catch (JSONException e) {
-			log.severe("error converting json representation into a JSON object");
-			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-			e.printStackTrace();
-		} catch (Exception e) {
-			log.severe("getListOfFeedbacksJson(): exception = " + e.getMessage());
-			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-			e.printStackTrace();
-		}
-    	
-		try {
-			jsonReturn.put("apiStatus", apiStatus);
-		} catch (JSONException e) {
-			log.severe("error converting json representation into a JSON object");
-			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-			e.printStackTrace();
-		}
-
-		return jsonReturn;
-    }
-
-
-    private JSONObject updateFeedback(Representation entity) {
-        EntityManager em = EMF.get().createEntityManager();
-    	JSONObject jsonReturn = new JSONObject();
-    	
-		String apiStatus = ApiStatusCode.SUCCESS;
-		this.setStatus(Status.SUCCESS_OK);
-
-		Feedback feedback = null;
-        em.getTransaction().begin();
-        try {
-			if (this.feedbackId == null || this.feedbackId.length() == 0) {
-				apiStatus = ApiStatusCode.FEEDBACK_ID_REQUIRED;
-				jsonReturn.put("apiStatus", apiStatus);
-				return jsonReturn;
-			}
-			
-            feedback = new Feedback();
-            JSONObject json = new JsonRepresentation(entity).getJsonObject();
-            if (this.feedbackId != null) {
-                Key key = KeyFactory.stringToKey(this.feedbackId);
-                feedback = (Feedback)em.createNamedQuery("Feedback.getByKey")
-                	.setParameter("key", key)
-                	.getSingleResult();
-            }
-            if(json.has("status")) {
-            	String status = json.getString("status").toLowerCase();
-            	if(feedback.isStatusValid(status)) {
-                    feedback.setStatus(status);
-            	} else {
-            		apiStatus = ApiStatusCode.INVALID_STATUS;
-            	}
-            }
-            em.persist(feedback);
-            em.getTransaction().commit();
-        } catch (IOException e) {
-            log.severe("error extracting JSON object from Post");
-            e.printStackTrace();
-            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+            	json.put("userName", feedback.getUserName());
+            	json.put("instanceUrl", feedback.getInstanceUrl());
+        	}
+        	log.info("Feedback JSON object = " + feedback.toString());
         } catch (JSONException e) {
-            e.printStackTrace();
+        	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        } catch (NoResultException e) {
-			// feedback ID passed in is not valid
-			log.info("Feedback ID not found");
-			apiStatus = ApiStatusCode.FEEDBACK_NOT_FOUND;
-		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more feedback have same key");
-			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-		} finally {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            em.close();
         }
-    	
-		try {
-			jsonReturn.put("apiStatus", apiStatus);
-		} catch (JSONException e) {
-			log.severe("error converting json representation into a JSON object");
-			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-			e.printStackTrace();
-		}
-
-		return jsonReturn;
+        return json;
     }
-
 }
