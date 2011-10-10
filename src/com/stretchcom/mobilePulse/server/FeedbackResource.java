@@ -29,6 +29,7 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.stretchcom.mobilePulse.models.Feedback;
 
 public class FeedbackResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(FeedbackResource.class.getName());
@@ -58,7 +59,7 @@ public class FeedbackResource extends ServerResource {
         if (id != null) {
             // Get Feedback Info API
         	log.info("in Get Feedback Info API");
-        	return show(id);
+        	return show();
         } else {
             // Get List of Feedback API
         	log.info("Get List of Feedbacks API");
@@ -95,7 +96,13 @@ public class FeedbackResource extends ServerResource {
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
             if (id != null) {
-                Key key = KeyFactory.stringToKey(id);
+                Key key;
+				try {
+					key = KeyFactory.stringToKey(this.id);
+				} catch (Exception e) {
+					log.info("ID provided cannot be converted to a Key");
+					return Utility.apiError(ApiStatusCode.FEEDBACK_NOT_FOUND);
+				}
                 feedback = (Feedback)em.createNamedQuery("Feedback.getByKey")
                     	.setParameter("key", key)
                     	.getSingleResult();
@@ -158,7 +165,13 @@ public class FeedbackResource extends ServerResource {
             log.severe("exception = " + e.getMessage());
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        } finally {
+        } catch (NoResultException e) {
+			log.info("Feedback not found");
+			apiStatus = ApiStatusCode.FEEDBACK_NOT_FOUND;
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more users have same key");
+			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
@@ -168,7 +181,7 @@ public class FeedbackResource extends ServerResource {
         return new JsonRepresentation(getFeedbackJson(feedback, apiStatus));
     }
 
-    private JsonRepresentation show(String id) {
+    private JsonRepresentation show() {
         log.info("UserResource in show()");
         EntityManager em = EMF.get().createEntityManager();
 
@@ -180,9 +193,15 @@ public class FeedbackResource extends ServerResource {
 				return Utility.apiError(ApiStatusCode.FEEDBACK_ID_REQUIRED);
 			}
 			
-			Key feedbackKey = KeyFactory.stringToKey(this.id);
+            Key key;
+			try {
+				key = KeyFactory.stringToKey(this.id);
+			} catch (Exception e) {
+				log.info("ID provided cannot be converted to a Key");
+				return Utility.apiError(ApiStatusCode.FEEDBACK_NOT_FOUND);
+			}
     		feedback = (Feedback)em.createNamedQuery("Feedback.getByKey")
-				.setParameter("key", feedbackKey)
+				.setParameter("key", key)
 				.getSingleResult();
 		} catch (NoResultException e) {
 			log.info("Feedback not found");
@@ -247,7 +266,7 @@ public class FeedbackResource extends ServerResource {
         	if(theApiStatus != null) {
         		json.put("apiStatus", theApiStatus);
         	}
-        	if(theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS))) {
+        	if(feedback != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
         		json.put("id", KeyFactory.keyToString(feedback.getKey()));
     			
             	Date recordedDate = feedback.getRecordedGmtDate();
@@ -259,8 +278,10 @@ public class FeedbackResource extends ServerResource {
             	
             	json.put("userName", feedback.getUserName());
             	json.put("instanceUrl", feedback.getInstanceUrl());
+            	json.put("status", feedback.getStatus());
+            	
+            	log.info("Feedback JSON object = " + feedback.toString());
         	}
-        	log.info("Feedback JSON object = " + feedback.toString());
         } catch (JSONException e) {
         	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);

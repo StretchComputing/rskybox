@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.mobilePulse.models;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -25,9 +25,11 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.stretchcom.mobilePulse.models.MobileCarrier;
+import com.stretchcom.mobilePulse.models.User;
 
-public class UserResource extends ServerResource {
-    private static final Logger log = Logger.getLogger(UserResource.class.getName());
+public class UsersResource extends ServerResource {
+    private static final Logger log = Logger.getLogger(UsersResource.class.getName());
     private String id;
 
     @Override
@@ -43,7 +45,7 @@ public class UserResource extends ServerResource {
         if (id != null) {
             // Get User Info API
         	log.info("in Get User Info API");
-        	return show(id);
+        	return show();
         } else {
             // Get List of Feedback API
         	log.info("Get List of Users API");
@@ -54,14 +56,14 @@ public class UserResource extends ServerResource {
     // Handles 'Create User API'
     @Post("json")
     public JsonRepresentation post(Representation entity) {
-        log.info("UserResource in post");
+        log.info("in post");
         return save_user(entity);
     }
 
     // Handles 'Update User API'
     @Put("json")
     public JsonRepresentation put(Representation entity) {
-        log.info("UserResource in put");
+        log.info("in put");
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
 		}
@@ -70,10 +72,20 @@ public class UserResource extends ServerResource {
 
     @Delete("json")
     public JsonRepresentation delete() {
-        log.info("UserResource in delete");
+        log.info("in delete");
         EntityManager em = EMF.get().createEntityManager();
         try {
-            Key key = KeyFactory.stringToKey(id);
+			if (this.id == null || this.id.length() == 0) {
+				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
+			}
+			
+            Key key;
+			try {
+				key = KeyFactory.stringToKey(this.id);
+			} catch (Exception e) {
+				log.info("ID provided cannot be converted to a Key");
+				return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+			}
             em.getTransaction().begin();
             User user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
             em.remove(user);
@@ -88,7 +100,7 @@ public class UserResource extends ServerResource {
     }
     
     private JsonRepresentation index() {
-        log.info("UserResource in index");
+        log.info("in index");
         JSONObject json = new JSONObject();
         EntityManager em = EMF.get().createEntityManager();
         
@@ -111,8 +123,8 @@ public class UserResource extends ServerResource {
         return new JsonRepresentation(json);
     }
 
-    private JsonRepresentation show(String id) {
-        log.info("UserResource in show()");
+    private JsonRepresentation show() {
+        log.info("in show()");
         EntityManager em = EMF.get().createEntityManager();
 
 		String apiStatus = ApiStatusCode.SUCCESS;
@@ -123,7 +135,13 @@ public class UserResource extends ServerResource {
 				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
 			}
 			
-			Key key = KeyFactory.stringToKey(this.id);
+            Key key;
+			try {
+				key = KeyFactory.stringToKey(this.id);
+			} catch (Exception e) {
+				log.info("ID provided cannot be converted to a Key");
+				return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+			}
     		user = (User)em.createNamedQuery("User.getByKey")
 				.setParameter("key", key)
 				.getSingleResult();
@@ -150,7 +168,7 @@ public class UserResource extends ServerResource {
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
             if (id != null) {
-                Key key = KeyFactory.stringToKey(id);
+                Key key = KeyFactory.stringToKey(this.id);
                 user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
@@ -209,7 +227,13 @@ public class UserResource extends ServerResource {
             log.severe("exception = " + e.getMessage());
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        } finally {
+        } catch (NoResultException e) {
+			log.info("User not found");
+			apiStatus = ApiStatusCode.USER_NOT_FOUND;
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more users have same key");
+			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
@@ -230,7 +254,7 @@ public class UserResource extends ServerResource {
         	if(theApiStatus != null) {
         		json.put("apiStatus", theApiStatus);
         	}
-        	if(theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS))) {
+        	if(user != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
                 json.put("id", KeyFactory.keyToString(user.getKey()));
                 json.put("firstName", user.getFirstName());
                 json.put("lastName", user.getLastName());
@@ -238,8 +262,9 @@ public class UserResource extends ServerResource {
                 json.put("phoneNumber", user.getPhoneNumber());
                 json.put("sendEmailNotifications", user.getSendEmailNotifications());
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
+                
+            	log.info("User JSON object = " + user.toString());
         	}
-        	log.info("User JSON object = " + user.toString());
         } catch (JSONException e) {
         	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);

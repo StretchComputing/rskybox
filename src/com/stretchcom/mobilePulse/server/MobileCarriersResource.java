@@ -25,9 +25,10 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.stretchcom.mobilePulse.models.MobileCarrier;
 
-public class MobileCarrierResource extends ServerResource {
-    private static final Logger log = Logger.getLogger(MobileCarrierResource.class.getName());
+public class MobileCarriersResource extends ServerResource {
+    private static final Logger log = Logger.getLogger(MobileCarriersResource.class.getName());
 
     @Override
     protected void doInit() throws ResourceException {

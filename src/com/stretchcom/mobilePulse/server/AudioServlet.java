@@ -17,6 +17,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
+import com.stretchcom.mobilePulse.models.Feedback;
 
 @SuppressWarnings("serial")
 public class AudioServlet extends HttpServlet {
@@ -103,7 +104,15 @@ public class AudioServlet extends HttpServlet {
         // using the feedbackID, retrieve the appropriate feedback record
         EntityManager em = EMF.get().createEntityManager();
         try {
-            Key feedbackKey = KeyFactory.stringToKey(theFeedbackId);
+            Key feedbackKey;
+			try {
+				feedbackKey = KeyFactory.stringToKey(theFeedbackId);
+			} catch (Exception e) {
+				log.severe("exception = " + e.getMessage());
+				e.printStackTrace();
+				return null;
+			}
+			
             Feedback feedback = null;
             feedback = (Feedback) em.createNamedQuery("Feedback.getByKey").setParameter("key", feedbackKey)
                 .getSingleResult();

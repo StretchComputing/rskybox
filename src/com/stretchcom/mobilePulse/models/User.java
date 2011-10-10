@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.mobilePulse.models;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

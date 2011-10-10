@@ -1,8 +1,7 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.mobilePulse.models;
 
 import java.util.Date;
 
-import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,26 +15,28 @@ import com.google.appengine.api.datastore.Text;
 @Entity
 @NamedQueries({
     @NamedQuery(
-    		name="Feedback.getAll",
-    		query="SELECT fb FROM Feedback fb ORDER BY fb.recordedGmtDate DESC"
+    		name="CrashDetect.getAll",
+    		query="SELECT cd FROM CrashDetect cd ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
-    		name="Feedback.getByStatus",
-    		query="SELECT fb FROM Feedback fb WHERE fb.status = :status ORDER BY fb.recordedGmtDate DESC"
+    		name="CrashDetect.getByStatus",
+    		query="SELECT cd FROM CrashDetect cd WHERE cd.status = :status ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
-    		name="Feedback.getByKey",
-    		query="SELECT fb FROM Feedback fb WHERE fb.key = :key"
+    		name="CrashDetect.getByKey",
+    		query="SELECT cd FROM CrashDetect cd WHERE cd.key = :key"
     ),
 })
-public class Feedback {
+public class CrashDetect {
 	public final static String NEW_STATUS = "new";
 	public final static String ARCHIVED_STATUS = "archived";
 	public final static String ALL_STATUS = "all";
-	
-	@Basic private Text voiceBase64;
-	private Date recordedGmtDate;
+
+	private String summary;
+	// TODO support time zone and GMT for dates
+	private Date detectedGmtDate;
 	private String userName;
+	private Text stackDataBase64;
 	private String instanceUrl;
 	private String status;
 
@@ -47,20 +48,20 @@ public class Feedback {
         return key;
     }
 
-	public String getVoiceBase64() {
-		return this.voiceBase64 == null? null : this.voiceBase64.getValue();
+    public String getSummary() {
+		return summary;
 	}
 
-	public void setVoiceBase64(String voiceBase64) {
-		this.voiceBase64 = new Text(voiceBase64);
-	}
-	
-	public Date getRecordedGmtDate() {
-		return recordedGmtDate;
+	public void setSummary(String summary) {
+		this.summary = summary;
 	}
 
-	public void setRecordedGmtDate(Date recordedGmtDate) {
-		this.recordedGmtDate = recordedGmtDate;
+	public Date getDetectedGmtDate() {
+		return detectedGmtDate;
+	}
+
+	public void setDetectedGmtDate(Date detectedGmtDate) {
+		this.detectedGmtDate = detectedGmtDate;
 	}
 
 	public String getUserName() {
@@ -71,6 +72,14 @@ public class Feedback {
 		this.userName = userName;
 	}
 
+	public String getStackDataBase64() {
+		return this.stackDataBase64 == null? null : this.stackDataBase64.getValue();
+	}
+
+	public void setStackDataBase64(String stackDataBase64) {
+		this.stackDataBase64 = new Text(stackDataBase64);
+	}
+
 	public String getInstanceUrl() {
 		return instanceUrl;
 	}
@@ -78,7 +87,7 @@ public class Feedback {
 	public void setInstanceUrl(String instanceUrl) {
 		this.instanceUrl = instanceUrl;
 	}
-
+	
 	public String getStatus() {
 		return status;
 	}
@@ -88,7 +97,8 @@ public class Feedback {
 	}
 	
 	public Boolean isStatusValid(String theStatus) {
-		if(theStatus.equals(Feedback.NEW_STATUS) || theStatus.equals(Feedback.ARCHIVED_STATUS)) return true;
+		if(theStatus.equals(CrashDetect.NEW_STATUS) || theStatus.equals(CrashDetect.ARCHIVED_STATUS)) return true;
 		return false;
 	}
+	
 }
