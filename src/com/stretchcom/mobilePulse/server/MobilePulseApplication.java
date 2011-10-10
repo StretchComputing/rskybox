@@ -21,8 +21,8 @@ public class MobilePulseApplication extends Application {
         Router router = new Router(getContext());
         log.info("in createInboundRoot");
 
-        router.attach("/users", UsersResource.class);
-        router.attach("/users/{id}", UsersResource.class);
+        router.attach("/users", UserResource.class);
+        router.attach("/users/{id}", UserResource.class);
 
         router.attach("/crashDetects", CrashDetectResource.class);
         router.attach("/crashDetects/{id}", CrashDetectResource.class);
@@ -33,6 +33,8 @@ public class MobilePulseApplication extends Application {
         router.attach("/clientLogs", ClientLogResource.class);
         router.attach("/clientLogs/{id}", ClientLogResource.class);
 
+        router.attach("/mobileCarriers", MobileCarrierResource.class);
+        
         return router;
     }
 }
