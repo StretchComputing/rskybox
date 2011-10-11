@@ -212,14 +212,12 @@ public class UsersResource extends ServerResource {
             }
             
             // TODO strip special characters out of phone number
-            // phoneNumber can only be set on create
-            if (!isUpdate && json.has("phoneNumber")) {
+            if (json.has("phoneNumber")) {
                 user.setPhoneNumber(json.getString("phoneNumber"));
             }
             
             // mobileCarrier only relevant if phoneNumber has been provided -- otherwise ignore.
-            // mobileCarrier can only be set on create
-            if (!isUpdate && json.has("mobileCarrierId") && user.getPhoneNumber() != null && user.getPhoneNumber().length() > 0) {
+            if (json.has("mobileCarrierId") && user.getPhoneNumber() != null && user.getPhoneNumber().length() > 0) {
             	String carrierDomainName = MobileCarrier.findEmailDomainName(json.getString("mobileCarrierId"));
             	if(carrierDomainName == null) {
             		return Utility.apiError(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
@@ -279,12 +277,21 @@ public class UsersResource extends ServerResource {
                 json.put("id", KeyFactory.keyToString(user.getKey()));
                 json.put("firstName", user.getFirstName());
                 json.put("lastName", user.getLastName());
-                json.put("emailAddress", user.getEmailAddress());
                 json.put("phoneNumber", user.getPhoneNumber());
+                json.put("emailAddress", user.getEmailAddress());
                 json.put("sendEmailNotifications", user.getSendEmailNotifications());
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
                 
-            	log.info("User JSON object = " + user.toString());
+                if(user.getSmsEmailAddress() != null && user.getSmsEmailAddress().length() > 0) {
+                	String emailDomainName = Utility.getEmailDomainNameFromSmsEmailAddress(user.getSmsEmailAddress());
+                	MobileCarrier mobileCarrier = MobileCarrier.findMobileCarrier(emailDomainName);
+                	if(mobileCarrier != null) {
+                        json.put("mobileCarrierName", mobileCarrier.getName());
+                        json.put("mobileCarrierId", mobileCarrier.getCode());
+                	}
+                }
+                
+                log.info("User JSON object = " + user.toString());
         	}
         } catch (JSONException e) {
         	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());

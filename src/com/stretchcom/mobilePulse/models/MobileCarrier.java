@@ -94,6 +94,32 @@ public final class MobileCarrier {
 		return emailDomainName;
 	}
 	
+	// returns null if the Code not found
+	// theEmailDomainName passed in does contain the leading "@"
+	public static String findCode(String theEmailDomainName) {
+		String code = null;
+		for(MobileCarrier mc : mobileCarriers) {
+			if(mc.getEmailDomainName().equalsIgnoreCase(theEmailDomainName)) {
+				code = mc.getCode();
+				break;
+			}
+		}
+		return code;
+	}
+	
+	// returns null if the MobileCarrier not found
+	// theEmailDomainName passed in does contain the leading "@"
+	public static MobileCarrier findMobileCarrier(String theEmailDomainName) {
+		MobileCarrier mobileCarrier = null;
+		for(MobileCarrier mc : mobileCarriers) {
+			if(mc.getEmailDomainName().equalsIgnoreCase(theEmailDomainName)) {
+				mobileCarrier = mc;
+				break;
+			}
+		}
+		return mobileCarrier;
+	}
+	
 	// for now, it is assumed that only ATT supports use of the from address as opposed to the 'return-path'
 	public static Boolean usesFromAddress(String theSmsEmailAddress) {
 		if(theSmsEmailAddress == null) {return false;}
