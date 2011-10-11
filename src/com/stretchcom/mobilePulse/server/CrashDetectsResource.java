@@ -30,6 +30,7 @@ import org.restlet.resource.ServerResource;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.mobilePulse.models.CrashDetect;
+import com.stretchcom.mobilePulse.models.User;
 
 public class CrashDetectsResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(CrashDetectsResource.class.getName());
@@ -228,6 +229,8 @@ public class CrashDetectsResource extends ServerResource {
             
             em.persist(crashDetect);
             em.getTransaction().commit();
+            
+            if(!isUpdate) User.sendNotifications("new crash detected");
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

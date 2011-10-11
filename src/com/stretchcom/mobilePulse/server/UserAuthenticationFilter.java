@@ -29,6 +29,7 @@ public class UserAuthenticationFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
         ServletException {
     	
+    	// TODO
     	// allow LiveFeed Rest calls used a priori token. If it fails, send 401 error.
     	// allow mobilePulse rest calls. If it fails, send 401 error.
     	// for *.html, redirect to Google login URL.
@@ -75,12 +76,16 @@ public class UserAuthenticationFilter implements Filter {
                 log.info("modified URI: " + uri);
                 RequestDispatcher rd = httpRequest.getRequestDispatcher(uri);
                 rd.forward(request, response);
-        		
-        		chain.doFilter(request, response);
+                return;
         	}
         } else {
         	log.info("***** request is NOT an instance of HttpServletRequest *******");
         }
+        
+        // **********************NOTE::PUNT **********************
+        // tried calling chain.doFilter() after the RequestDispatcher.forward() above (as suggested by some postings I found), but it didn't work.
+        // Not sure why. So I punted and am only calling it if RequestDispatcher.forward() is not called
+		chain.doFilter(request, response);
     }
 
     @Override

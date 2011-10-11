@@ -30,6 +30,7 @@ import org.restlet.resource.ServerResource;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.mobilePulse.models.Feedback;
+import com.stretchcom.mobilePulse.models.User;
 
 public class FeedbackResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(FeedbackResource.class.getName());
@@ -157,6 +158,8 @@ public class FeedbackResource extends ServerResource {
 
             em.persist(feedback);
             em.getTransaction().commit();
+            
+            if(!isUpdate) User.sendNotifications("new feedback received");
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

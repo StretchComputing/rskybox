@@ -1,13 +1,25 @@
 package com.stretchcom.mobilePulse.models;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.restlet.data.Status;
+
 import com.google.appengine.api.datastore.Key;
+import com.stretchcom.mobilePulse.server.ApiStatusCode;
+import com.stretchcom.mobilePulse.server.EMF;
+import com.stretchcom.mobilePulse.server.UsersResource;
 
 @Entity
 @NamedQueries({
@@ -25,6 +37,7 @@ import com.google.appengine.api.datastore.Key;
     ),
 })
 public class User {
+    private static final Logger log = Logger.getLogger(User.class.getName());
 	public static final String CURRENT = "current";
 	
 	private String firstName;
@@ -34,7 +47,7 @@ public class User {
 	private String smsEmailAddress;
 	private Boolean sendEmailNotifications;
 	private Boolean sendSmsNotifications;
-	private Boolean isAdmin;
+	private Boolean isAdmin = false;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,5 +112,32 @@ public class User {
 	}
 	public void setSendSmsNotifications(Boolean sendSmsNotifications) {
 		this.sendSmsNotifications = sendSmsNotifications;
+	}
+	
+	public static void sendNotifications(String theMessage) {
+        EntityManager em = EMF.get().createEntityManager();
+        
+        try {
+            List<User> users = new ArrayList<User>();
+            JSONArray ja = new JSONArray();
+            users = (List<User>) em.createNamedQuery("User.getAll").getResultList();
+            
+            if(users.size() > 0) {
+            	log.info("email/SMS message to be sent = " + theMessage);
+            }
+            for (User user : users) {
+                if(user.getSendEmailNotifications()) {
+                	log.info("sending email to " + user.getEmailAddress());
+                	// TODO acutally send email
+                }
+                if(user.getSendSmsNotifications()) {
+                	log.info("sending SMS to " + user.getSmsEmailAddress());
+                	// TODO acutally send SMS
+                }
+            }
+        } catch (Exception e) {
+            log.severe("exception = " + e.getMessage());
+        	e.printStackTrace();
+        }
 	}
 }

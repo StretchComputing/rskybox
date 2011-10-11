@@ -142,10 +142,13 @@ public class UsersResource extends ServerResource {
 	        	UserService userService = UserServiceFactory.getUserService();
 	        	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
 	        	if(currentUser == null) {
+	        		// TODO commenteed out next line just for testing
 	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 	        	}
 	        	
+	        	// TODO more test code
 	        	String emailAddress = currentUser.getEmail();
+	        	//String emailAddress = "joepwro@gmail.com";
 	    		user = (User)em.createNamedQuery("User.getByEmailAddress")
 					.setParameter("emailAddress", emailAddress)
 					.getSingleResult();
