@@ -19,8 +19,14 @@ import com.google.appengine.api.datastore.Key;
     		name="User.getByKey",
     		query="SELECT u FROM User u WHERE u.key = :key"
     ),
+    @NamedQuery(
+    		name="User.getByEmailAddress",
+    		query="SELECT u FROM User u WHERE u.emailAddress = :emailAddress"
+    ),
 })
 public class User {
+	public static final String CURRENT = "current";
+	
 	private String firstName;
 	private String lastName;
 	private String emailAddress;

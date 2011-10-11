@@ -25,6 +25,8 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.stretchcom.mobilePulse.models.MobileCarrier;
 import com.stretchcom.mobilePulse.models.User;
 
@@ -135,16 +137,32 @@ public class UsersResource extends ServerResource {
 				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
 			}
 			
-            Key key;
-			try {
-				key = KeyFactory.stringToKey(this.id);
-			} catch (Exception e) {
-				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+			if(this.id.equalsIgnoreCase(User.CURRENT)) {
+				// special case: id = "current" so return info on currently logged in Google Account user
+	        	UserService userService = UserServiceFactory.getUserService();
+	        	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
+	        	if(currentUser == null) {
+	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+	        	}
+	        	
+	        	String emailAddress = currentUser.getEmail();
+	    		user = (User)em.createNamedQuery("User.getByEmailAddress")
+					.setParameter("emailAddress", emailAddress)
+					.getSingleResult();
+			} else {
+				// id of user specified
+	            Key key;
+				try {
+					key = KeyFactory.stringToKey(this.id);
+				} catch (Exception e) {
+					log.info("ID provided cannot be converted to a Key");
+					return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+				}
+				
+	    		user = (User)em.createNamedQuery("User.getByKey")
+					.setParameter("key", key)
+					.getSingleResult();
 			}
-    		user = (User)em.createNamedQuery("User.getByKey")
-				.setParameter("key", key)
-				.getSingleResult();
 		} catch (NoResultException e) {
 			log.info("User not found");
 			apiStatus = ApiStatusCode.USER_NOT_FOUND;
