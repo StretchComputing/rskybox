@@ -3,7 +3,14 @@
     <target name="jekyll">
         <exec dir="html" executable="jekyll"/>
         <copy todir="war">
-            <fileset dir="html/_site"/>
+            <fileset dir="html/_site">
+                <exclude name="*.html"/>
+            </fileset>
+        </copy>
+        <copy todir="war/WEB-INF/html">
+            <fileset dir="html/_site">
+                <include name="*.html"/>
+            </fileset>
         </copy>
     </target>
 </project>
