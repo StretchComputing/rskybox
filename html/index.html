@@ -20,14 +20,27 @@ options: Options
 <script>
   $('#options').live('pageshow', function() {
     $.mobile.showPageLoadingMsg();
-    $.getJSON('/rest/options', function(data) {
-      options(data);
-      $.mobile.hidePageLoadingMsg();
-    })
+    $.getJSON('/rest/mobileCarriers', function(carriers) {
+      populateCarrierList(carriers);
+      $.getJSON('/rest/users', function(user) {
+        options(user);
+        $.mobile.hidePageLoadingMsg();
+      })
+    });
   });
 
+  function populateCarrierList(carriers) {
+    var list = carriers['mobileCarriers'];
+    var select = $('#carrier');
+    select.html('');
+    var markup = '';
+    for (i = 0; i < list.length; i++) {
+      markup += '<option value="' + list[i]['id'] + '">' + list[i]['name'] + '</option>';
+    }
+  }
+
   function options(data) {
-    $('#options_form').reset();
+    $('#options').find('form')[0].reset();
   }
 </script>
 
@@ -40,12 +53,17 @@ options: Options
         <div data-role="fieldcontain">
           <input type="checkbox" name="email" id="email"> <label for="email">Email Notifications?</label>
         </div>
+        <fieldset>
+        <legend>SMS Notificaitons</legend>
         <div data-role="fieldcontain">
-          <input type="checkbox" name="sms" id="sms"> <label for="sms">SMS Notifications?</label>
+          <input type="checkbox" name="sms" id="sms"> <label for="sms">Yes, please.</label>
           <div id="sms_details" style="display: none;">
             <input type="tel" name="phone_number" id="phone_number" placeholder="Phone Number" required>
+            <select name="carrier" id="carrier">
+            </select>
           </div>
         </div>
+        </fieldset>
         <input type="submit" value="Save">
       </form>
     </div>
