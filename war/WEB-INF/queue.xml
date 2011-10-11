@@ -1,0 +1,7 @@
+<queue-entries>
+  <queue>
+    <name>email</name>
+    <rate>20000/d</rate>
+    <bucket-size>5</bucket-size>
+  </queue>
+</queue-entries>

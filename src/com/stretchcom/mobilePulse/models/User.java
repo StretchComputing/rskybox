@@ -20,6 +20,8 @@ import com.google.appengine.api.datastore.Key;
 import com.stretchcom.mobilePulse.server.ApiStatusCode;
 import com.stretchcom.mobilePulse.server.EMF;
 import com.stretchcom.mobilePulse.server.UsersResource;
+import com.stretchcom.mobilePulse.server.Emailer;
+import com.stretchcom.mobilePulse.server.Utility;
 
 @Entity
 @NamedQueries({
@@ -125,14 +127,16 @@ public class User {
             if(users.size() > 0) {
             	log.info("email/SMS message to be sent = " + theMessage);
             }
+            
+            String subject = "notification";
             for (User user : users) {
                 if(user.getSendEmailNotifications()) {
                 	log.info("sending email to " + user.getEmailAddress());
-                	// TODO acutally send email
+                	Emailer.send(user.getEmailAddress(), subject, theMessage, Emailer.NO_REPLY);
                 }
                 if(user.getSendSmsNotifications()) {
                 	log.info("sending SMS to " + user.getSmsEmailAddress());
-                	// TODO acutally send SMS
+                	Emailer.send(user.getSmsEmailAddress(), subject, theMessage, Emailer.NO_REPLY);
                 }
             }
         } catch (Exception e) {

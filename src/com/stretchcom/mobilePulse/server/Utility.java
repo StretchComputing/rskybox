@@ -22,4 +22,41 @@ public class Utility {
 		}
 		return new JsonRepresentation(json);
 	}
+	
+	// returns true if all characters are digits
+	public static Boolean isPhoneNumber(String thePotentialNumber) {
+		if(thePotentialNumber == null) {return false;}
+		int originalSize = thePotentialNumber.length();
+		
+		// remove all non-digits from the string
+		thePotentialNumber = thePotentialNumber.replaceAll("\\D", "");
+		int modifiedSize = thePotentialNumber.length();
+		return originalSize == modifiedSize;
+	}
+	
+	public static Boolean doesEmailAddressStartWithPhoneNumber(String theEmailAddress) {
+		if(theEmailAddress == null) {return false;}
+		
+		int index = theEmailAddress.indexOf("@");
+		if(index >= 1) {
+			String potentialPhoneNumber = theEmailAddress.substring(0, index);
+			if(isPhoneNumber(potentialPhoneNumber)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	// returns email domain name (with the leading "@") if found, otherwise returns null
+	public static String getEmailDomainNameFromSmsEmailAddress(String theSmsEmailAddress) {
+		if(theSmsEmailAddress == null) {return null;}
+		
+		int index = theSmsEmailAddress.indexOf("@");
+		if(index >= 0) {
+			String emailDomainName = theSmsEmailAddress.substring(index);
+			return emailDomainName;
+		}
+		return null;
+	}
 }
