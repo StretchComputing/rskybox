@@ -33,15 +33,7 @@
 </div>
 
 <script>
-  (function($) {
-    $.fn.serializeJSON = function() {
-      var json = {};
-      jQuery.map($(this).serializeArray(), function(n, i) {
-        json[n['name']] = n['value'];
-      });
-      return json;
-    };
-  })(jQuery);
+  var NO_CARRIER = '-1';
 
   $('#options').live('pagecreate', function() {
     $(this).find('form').submit(save);
@@ -63,7 +55,7 @@
 
   function populateCarrierList(carriers) {
     var list = carriers['mobileCarriers'];
-    var markup = '<option value="-1">Mobile Carrier</option>';
+    var markup = '<option value="' + NO_CARRIER + '">Mobile Carrier</option>';
     for (i = 0; i < list.length; i++) {
       markup += '<option value="' + list[i]['id'] + '">' + list[i]['name'] + '</option>';
     }
@@ -81,6 +73,8 @@
   }
 
   function save() {
+    if (!validateSms()) { return false; }
+
     var json = JSON.stringify({
       'phoneNumber' : $('#phoneNumber').val(),
       'mobileCarrierId' : $('#mobileCarrierId').val(),
@@ -103,6 +97,25 @@
   function toggleSmsDetails(disabled) {
     $('#phoneNumber').prop('disabled', disabled);
     $('#mobileCarrierId').prop('disabled', disabled);
+  }
+
+  function validateSms() {
+    if (!$('#sendSmsNotifications').prop('checked')) { return true; }
+
+    if (!validPhoneNumber($('#phoneNumber').val())) {
+      alert('Please enter a valid phone number.');
+      return false;
+    }
+    if ($('#mobileCarrierId').val() == NO_CARRIER) {
+      alert('Please select a mobile carrier.');
+      return false;
+    }
+
+    return true;
+  }
+
+  function validPhoneNumber(phoneNumber) {
+    return /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(phoneNumber);
   }
 </script>
 
