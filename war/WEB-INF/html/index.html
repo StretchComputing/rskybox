@@ -36,43 +36,42 @@
   var NO_CARRIER = '-1';
 
   $('#options').live('pagecreate', function() {
-    $(this).find('form').submit(save);
+    $(this).find('form').submit(saveOptions);
     $('#sendSmsNotifications').change(function() {
-      toggleSmsDetails(!$('#sendSmsNotifications').prop('checked'));
+      enableSmsDetails($('#sendSmsNotifications').prop('checked'));
     });
   });
 
   $('#options').live('pageshow', function() {
     $.mobile.showPageLoadingMsg();
     $.getJSON('/rest/mobileCarriers', function(carriers) {
-      populateCarrierList(carriers);
+      $('#mobileCarrierId').html(carrierOptions(carriers['mobileCarriers']));
       $.getJSON('/rest/users/current', function(user) {
-        options(user);
+        setOptionFields(user);
         $.mobile.hidePageLoadingMsg();
       })
     });
   });
 
-  function populateCarrierList(carriers) {
-    var list = carriers['mobileCarriers'];
+  function carrierOptions(carriers) {
     var markup = '<option value="' + NO_CARRIER + '">Mobile Carrier</option>';
-    for (i = 0; i < list.length; i++) {
-      markup += '<option value="' + list[i]['id'] + '">' + list[i]['name'] + '</option>';
+    for (i = 0; i < carriers.length; i++) {
+      markup += '<option value="' + carriers[i]['id'] + '">' + carriers[i]['name'] + '</option>';
     }
-    $('#mobileCarrierId').html(markup);
+    return markup;
   }
 
-  function options(user) {
+  function setOptionFields(user) {
     $('#options').find('form')[0].reset();
     $('#id').val(user['id']);
     $('#sendEmailNotifications').prop('checked', user['sendEmailNotifications']).checkboxradio('refresh');
     $('#sendSmsNotifications').prop('checked', user['sendSmsNotifications']).checkboxradio('refresh');
-    toggleSmsDetails(!user['sendSmsNotifications']);
+    enableSmsDetails(!user['sendSmsNotifications']);
     $('#phoneNumber').val(user['phoneNumber']);
     $('#mobileCarrierId').val(user['mobileCarrierId']).selectmenu('refresh');
   }
 
-  function save() {
+  function saveOptions() {
     if (!validateSms()) { return false; }
 
     var json = JSON.stringify({
@@ -94,9 +93,9 @@
     return false;
   }
 
-  function toggleSmsDetails(disabled) {
-    $('#phoneNumber').prop('disabled', disabled);
-    $('#mobileCarrierId').prop('disabled', disabled);
+  function enableSmsDetails(enabled) {
+    $('#phoneNumber').prop('disabled', !enabled);
+    $('#mobileCarrierId').prop('disabled', !enabled);
   }
 
   function validateSms() {
