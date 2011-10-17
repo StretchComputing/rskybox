@@ -11,12 +11,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.restlet.data.Status;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.stretchcom.mobilePulse.server.ApiStatusCode;
 import com.stretchcom.mobilePulse.server.EMF;
 import com.stretchcom.mobilePulse.server.UsersResource;
@@ -143,5 +148,22 @@ public class User {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
         }
+	}
+	
+	public static Boolean isAuthenticated(String theEmailAddress) {
+        EntityManager em = EMF.get().createEntityManager();
+        Boolean isAuthenticated = false;
+
+		try {
+    		User user = (User)em.createNamedQuery("User.getByEmailAddress")
+				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+				.getSingleResult();
+    		isAuthenticated = true;
+		} catch (NoResultException e) {
+			log.info("Google account user not found");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more google account users have same key");
+		}
+		return isAuthenticated;
 	}
 }

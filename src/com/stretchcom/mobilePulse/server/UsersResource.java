@@ -128,6 +128,7 @@ public class UsersResource extends ServerResource {
     private JsonRepresentation show() {
         log.info("in show()");
         EntityManager em = EMF.get().createEntityManager();
+        Boolean isAdmin = null;
 
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
@@ -141,13 +142,14 @@ public class UsersResource extends ServerResource {
 				// special case: id = "current" so return info on currently logged in Google Account user
 	        	UserService userService = UserServiceFactory.getUserService();
 	        	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
+	        	isAdmin = userService.isUserAdmin();
 	        	if(currentUser == null) {
 	        		// TODO commenteed out next line just for testing
 	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 	        	}
 	        	
 	        	// TODO more test code
-	        	String emailAddress = currentUser.getEmail();
+	        	String emailAddress = currentUser.getEmail().toLowerCase();
 	        	//String emailAddress = "joepwro@gmail.com";
 	    		user = (User)em.createNamedQuery("User.getByEmailAddress")
 					.setParameter("emailAddress", emailAddress)
@@ -174,7 +176,7 @@ public class UsersResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getUserJson(user, apiStatus));
+        return new JsonRepresentation(getUserJson(user, apiStatus, isAdmin));
     }
 
     private JsonRepresentation save_user(Representation entity) {
@@ -208,7 +210,7 @@ public class UsersResource extends ServerResource {
             // emailAddress can only be set on create
             // TODO add email validation
             if (!isUpdate && json.has("emailAddress")) {
-                user.setEmailAddress(json.getString("emailAddress"));
+                user.setEmailAddress(json.getString("emailAddress").toLowerCase());
             }
             
             // TODO strip special characters out of phone number
@@ -265,8 +267,12 @@ public class UsersResource extends ServerResource {
     private JSONObject getUserJson(User user) {
     	return getUserJson(user, null);
     }
-
+    
     private JSONObject getUserJson(User user, String theApiStatus) {
+    	return getUserJson(user, theApiStatus, null);
+    }
+
+    private JSONObject getUserJson(User user, String theApiStatus, Boolean isCurrentUserAdmin) {
         JSONObject json = new JSONObject();
 
         try {
@@ -281,6 +287,7 @@ public class UsersResource extends ServerResource {
                 json.put("emailAddress", user.getEmailAddress());
                 json.put("sendEmailNotifications", user.getSendEmailNotifications());
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
+                if(isCurrentUserAdmin != null) json.put("isAdmin", isCurrentUserAdmin);
                 
                 if(user.getSmsEmailAddress() != null && user.getSmsEmailAddress().length() > 0) {
                 	String emailDomainName = Utility.getEmailDomainNameFromSmsEmailAddress(user.getSmsEmailAddress());
