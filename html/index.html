@@ -1,11 +1,11 @@
 ---
 layout: default
-title: Mobile Pulse
+title: MobilePulse
 options: Options
 ---
 <div data-role="page" id="index" data-title="{{ page.title }}">
   <div data-role="header">
-    <a href="#options" data-icon="gear">Options</a>
+    <a href="#options" data-icon="gear">{{ page.options }}</a>
     <h1>{{ page.title }}</h1>
   </div>
   <div data-role="content">
@@ -21,46 +21,88 @@ options: Options
 </div>
 
 <script>
+  var NO_CARRIER = '-1';
+
   $('#options').live('pagecreate', function() {
-    $(this).find('form').submit(save);
-    $('#sms').change(function() {
-      toggleSmsDetails($(this).prop('checked'));
+    $(this).find('form').submit(saveOptions);
+    $('#sendSmsNotifications').change(function() {
+      enableSmsDetails($('#sendSmsNotifications').prop('checked'));
     });
   });
 
   $('#options').live('pageshow', function() {
     $.mobile.showPageLoadingMsg();
     $.getJSON('/rest/mobileCarriers', function(carriers) {
-      populateCarrierList(carriers);
-      $.getJSON('/rest/users', function(user) {
-        options(user);
+      $('#mobileCarrierId').html(carrierOptions(carriers['mobileCarriers']));
+      $.getJSON('/rest/users/current', function(user) {
+        setOptionFields(user);
         $.mobile.hidePageLoadingMsg();
       })
     });
   });
 
-  function populateCarrierList(carriers) {
-    var list = carriers['mobileCarriers'];
-    var markup = '<option value="-1">Mobile Carrier</option>';
-    for (i = 0; i < list.length; i++) {
-      markup += '<option value="' + list[i]['id'] + '">' + list[i]['name'] + '</option>';
+  function carrierOptions(carriers) {
+    var markup = '<option value="' + NO_CARRIER + '">Mobile Carrier</option>';
+    for (i = 0; i < carriers.length; i++) {
+      markup += '<option value="' + carriers[i]['id'] + '">' + carriers[i]['name'] + '</option>';
     }
-    $('#carrier').html(markup);
+    return markup;
   }
 
-  function options(data) {
-    var page = $('#options');
-    page.find('form')[0].reset();
-    $('#carrier').val('-1').selectmenu('refresh');
+  function setOptionFields(user) {
+    $('#options').find('form')[0].reset();
+    $('#id').val(user['id']);
+    $('#sendEmailNotifications').prop('checked', user['sendEmailNotifications']).checkboxradio('refresh');
+    $('#sendSmsNotifications').prop('checked', user['sendSmsNotifications']).checkboxradio('refresh');
+    enableSmsDetails(!user['sendSmsNotifications']);
+    $('#phoneNumber').val(user['phoneNumber']);
+    $('#mobileCarrierId').val(user['mobileCarrierId']).selectmenu('refresh');
   }
-  
-  function save() {
-    console.log('save() called');
+
+  function saveOptions() {
+    if (!validateSms()) { return false; }
+
+    var json = JSON.stringify({
+      'phoneNumber' : $('#phoneNumber').val(),
+      'mobileCarrierId' : $('#mobileCarrierId').val(),
+      'sendEmailNotifications' : $('#sendEmailNotifications').prop('checked'),
+      'sendSmsNotifications' : $('#sendSmsNotifications').prop('checked')
+    });
+    $.ajax({
+      type : 'PUT',
+      url : '/rest/users/' + $('#id').val(),
+      contentType : 'application/json',
+      data : json,
+      success : function(data) {
+        history.back();
+      },
+      dataType : 'json'
+    });
+    return false;
   }
-  
-  function toggleSmsDetails(checked) {
-    $('#phone_number').prop('disabled', !checked);
-    $('#carrier').prop('disabled', !checked);
+
+  function enableSmsDetails(enabled) {
+    $('#phoneNumber').prop('disabled', !enabled);
+    $('#mobileCarrierId').prop('disabled', !enabled);
+  }
+
+  function validateSms() {
+    if (!$('#sendSmsNotifications').prop('checked')) { return true; }
+
+    if (!validPhoneNumber($('#phoneNumber').val())) {
+      alert('Please enter a valid phone number.');
+      return false;
+    }
+    if ($('#mobileCarrierId').val() == NO_CARRIER) {
+      alert('Please select a mobile carrier.');
+      return false;
+    }
+
+    return true;
+  }
+
+  function validPhoneNumber(phoneNumber) {
+    return /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(phoneNumber);
   }
 </script>
 
@@ -69,16 +111,17 @@ options: Options
     <h1>{{ page.options }}</h1>
   </div>
   <div data-role="content">
-    <form id="options_form">
-      <div data-role="fieldcontain">
-        <input type="checkbox" name="email" id="email"> <label for="email">Email Notifications</label>
-      </div>
-      <div data-role="fieldcontain">
-        <input type="checkbox" name="sms" id="sms"> <label for="sms">SMS Notifications</label>
-        <input type="tel" name="phone_number" id="phone_number" placeholder="Phone Number" required disabled>
-        <select name="carrier" id="carrier" disabled>
-        </select>
-      </div>
+    <form>
+      <input id="id" type="hidden">
+      <input type="checkbox" name="sendEmailNotifications" id="sendEmailNotifications">
+      <label for="sendEmailNotifications">Email Notifications</label>
+      <hr>
+      <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications">
+      <label for="sendSmsNotifications">SMS Notifications</label>
+      <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" required disabled>
+      <select name="mobileCarrierId" id="mobileCarrierId" disabled>
+      </select>
+      <hr>
       <input type="submit" value="Save">
     </form>
   </div>

@@ -3,19 +3,23 @@
   xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
   version="2.5">
-	<filter>
-		<filter-name>UserAuthenticationFilter</filter-name>
-		<filter-class>com.stretchcom.mobilePulse.server.UserAuthenticationFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>UserAuthenticationFilter</filter-name>
-		<url-pattern>/rest/*</url-pattern>
-	</filter-mapping>
-	<filter-mapping>
-	  <filter-name>UserAuthenticationFilter</filter-name>
-	  <url-pattern>*.html</url-pattern>
-	</filter-mapping>
-  
+  <filter>
+    <filter-name>UserAuthenticationFilter</filter-name>
+    <filter-class>com.stretchcom.mobilePulse.server.UserAuthenticationFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>UserAuthenticationFilter</filter-name>
+    <url-pattern>/rest/*</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>UserAuthenticationFilter</filter-name>
+    <url-pattern>*.html</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>UserAuthenticationFilter</filter-name>
+    <url-pattern>/</url-pattern>
+  </filter-mapping>
+
   <servlet>
     <servlet-name>MobilePulse</servlet-name>
     <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
@@ -48,16 +52,16 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
     <welcome-file>index.html</welcome-file>
   </welcome-file-list>
 
-	<servlet>
-		<servlet-name>EmailTaskServlet</servlet-name>
-		<servlet-class>com.stretchcom.mobilePulse.server.EmailTaskServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EmailTaskServlet</servlet-name>
-		<url-pattern>/sendEmailTask</url-pattern>
-	</servlet-mapping>
-  
-  
+  <servlet>
+    <servlet-name>EmailTaskServlet</servlet-name>
+    <servlet-class>com.stretchcom.mobilePulse.server.EmailTaskServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>EmailTaskServlet</servlet-name>
+    <url-pattern>/sendEmailTask</url-pattern>
+  </servlet-mapping>
+
+
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Admin</web-resource-name>

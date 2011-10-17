@@ -8,7 +8,7 @@ function getParameterByName(url, name) {
 }
 
 
-// Livefeed Code
+// MobilePulse Code
 // -----------------
 
 // Show the list of items.
@@ -42,6 +42,7 @@ function showList(page, list) {
     var display = item['date'] + ' - ' + item['userName'] + ' - ' + item['instanceUrl'];
     markup += '<li><a href="#item?id=' + item['id'] + '">' + display + '</a></li>';
   }
+  markup += '</ul>'
   content.html(markup);
   content.find(':jqmData(role=listview)').listview();
 }
@@ -94,7 +95,7 @@ function showItem(url, options, change_status) {
   }
 }
 
-// Sets up commone elments of the item page. Calls itemDetails for item-specific
+// Sets up common elments of the item page. Calls itemDetails for item-specific
 // elements.
 function setupItem(item, url, options) {
   var id = url.hash.replace(/.*id=/, '');
@@ -111,7 +112,7 @@ function setupItem(item, url, options) {
   h1.after(link);
   content.html(itemDetails(item));
   // Not exactly sure why we need both of these, but they are required to get
-  // the archive link to be styled appropriately.
+  // the archive link to be styled properly.
   page.page();
   page.trigger('create');
   options.dataUrl = url.href;
