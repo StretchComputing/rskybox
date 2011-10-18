@@ -73,28 +73,54 @@
 <script>
   var NO_CARRIER = '-1';
 
+//   function saveOtherItem() {
+//     var method, url;
+//     if ($('#id').val().length > 0) {
+//       method = 'PUT';
+//       url = '/rest/users/' + $('#id').val();
+//     } else {
+//       method = 'POST';
+//       url = '/rest/users';
+//     }
+//     var json = JSON.stringify($(this).serializeJSON());
+//     $.ajax({
+//       type : method,
+//       url : url,
+//       contentType : 'application/json',
+//       data : json,
+//       success : function(data) {
+//         display_user(data);
+//       },
+//       dataType : 'json'
+//     });
+//     return false;
+//   }
+
   function saveItem() {
-    var method, url;
-    if ($('#id').val().length > 0) {
-      method = 'PUT';
-      url = '/rest/users/' + $('#id').val();
-    } else {
-      method = 'POST';
-      url = '/rest/users';
-    }
-    var json = JSON.stringify($(this).serializeJSON());
+    if (!validateSms()) { return false; }
+
+    var json = JSON.stringify({
+      'firstName' : $('#firstName'),
+      'lastName' : $('#lastName'),
+      'emailAddress' : $('#emailAddress'),
+      'phoneNumber' : $('#phoneNumber').val(),
+      'mobileCarrierId' : $('#mobileCarrierId').val(),
+      'sendEmailNotifications' : $('#sendEmailNotifications').prop('checked'),
+      'sendSmsNotifications' : $('#sendSmsNotifications').prop('checked')
+    });
     $.ajax({
-      type : method,
-      url : url,
+      type : 'PUT',
+      url : '/rest/users/' + $('#id').val(),
       contentType : 'application/json',
       data : json,
       success : function(data) {
-        display_user(data);
+        history.back();
       },
       dataType : 'json'
     });
     return false;
   }
+
 
   function showItem(url, options) {
     $.mobile.showPageLoadingMsg();
@@ -103,19 +129,17 @@
     $.getJSON('/rest/mobileCarriers', function(carriers) {
       $('#mobileCarrierId').html(carrierOptions(carriers['mobileCarriers']));
       if (id == 'new') {
-        setupItem(item, url, options);
+        switchPage(url, options);
       } else {
         $.getJSON('/rest/users/' + id, function(item) {
           setupItem(item, url, options);
+          switchPage(url, options);
         });
       }
     });
   }
   
-  function setupItem(item, url, options) {
-    var pageSelector = url.hash.replace(/\?.*$/, '');
-    var page = $(pageSelector);
-
+  function setupItem(item) {
     $('#id').val(item['id']);
     $('#firstName').val(item['firstName']);
     $('#lastName').val(item['lastName']);
@@ -125,6 +149,16 @@
     $('#sendSmsNotifications').prop('checked', item['sendSmsNotifications']);
     $('#phoneNumber').val(item['phoneNumber']);
     $('#mobileCarrierId').val(item['mobileCarrierId']);
+  }
+
+  function switchPage(url, options) {
+    var pageSelector = url.hash.replace(/\?.*$/, '');
+    var page = $(pageSelector);
+
+    enableSmsDetails($('#sendSmsNotifications').prop('checked'));
+    page.page();
+    page.trigger('create');
+
     options.dataUrl = url.href;
     $.mobile.changePage(page, options);
     $.mobile.hidePageLoadingMsg();
@@ -163,14 +197,15 @@
   }
 
   $('#item').live('pagecreate', function() {
+    console.log('pagecreate fired');
     $(this).find('form').submit(saveItem);
     $('#sendSmsNotifications').change(function() {
       enableSmsDetails($('#sendSmsNotifications').prop('checked'));
     });
   });
 
-  $('#item').live('pageshow', function() {
-    enableSmsDetails($('#sendSmsNotifications').prop('checked'));
+  $('#item').live('pageload', function() {
+    console.log('pageload fired');
   });
 </script>
 
