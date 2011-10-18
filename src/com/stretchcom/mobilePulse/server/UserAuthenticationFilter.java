@@ -83,7 +83,7 @@ public class UserAuthenticationFilter implements Filter {
     		// a client request - even though it may be a client request with a bad token. But the right thing will happen because without the a priori
     		// token, the code will determine the request is NOT authenticated.
     		if(!isMobilePulseClientWithValidToken(httpRequest)) {
-    			handleMobilePulseAppRequestAuthorized(httpRequest, httpResponse, thisURL);
+    			handleMobilePulseAppRequest(httpRequest, httpResponse, chain, thisURL);
     			
     	        // ::PUNT:: Tried allowing this to fall thru so chain.doFilter() is called below, but could not get RequestDispatcher.forward()
     			//          to play nice with chain.doFilter(). If an answer is found, this code would have to be restructured because not all
@@ -99,13 +99,16 @@ public class UserAuthenticationFilter implements Filter {
     
     private Boolean isMobilePulseClientWithValidToken(HttpServletRequest httpRequest) {
     	String token = getToken(httpRequest);
+    	log.info("a priori token = " + token);
     	if(token != null && token.equals(A_PRIORI_TOKEN)) {
+    		log.info("a priori token is valid");
     		return true;
     	}
+    	log.info("a priori token is NOT valid or is NOT present");
     	return false;
     }
     
-    private void handleMobilePulseAppRequestAuthorized(HttpServletRequest httpRequest, HttpServletResponse httpResponse, String thisURL) {
+    private void handleMobilePulseAppRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain chain, String thisURL) {
     	// All mobilePulse users must be currently logged into a Google account.
 		try {
 	    	UserService userService = UserServiceFactory.getUserService();
@@ -141,12 +144,14 @@ public class UserAuthenticationFilter implements Filter {
 	    			}
 	    			
 	    			// If this is an Admin REST request, then return HTTP 401 Unauthorized status since user is not admin
-	    			if(isAdminRestRequest(thisURL)) {
+	    			if(isAdminRestRequest(thisURL, httpRequest)) {
 	    				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 	    				log.info("Admin REST request, but user is not and admin -- returning HTTP 401");
 	    				return;
 	    			}
 	    		}
+	    		
+	    		// If we made it this far, user is authorized for request made, so continue on ....
 	    		
 	            // HTML files are stored in WEB-INF/html allowing HTML requests to be handled by app engine and thus this filter invoked for HTML files.
 	    		if(thisURL.contains(".html")) {
@@ -159,19 +164,27 @@ public class UserAuthenticationFilter implements Filter {
 					} catch (ServletException e) {
 						e.printStackTrace();
 					} 
+	    		} else {
+	    			// REST request
+	    			chain.doFilter(httpRequest, httpResponse);
 	    		}
 	    	}
 		} catch (IOException e) {
 			log.severe("handleMobilePulseAppRequest() IOException. Exception = " + e.getMessage());
+			e.printStackTrace();
+		} catch (ServletException e) {
+			log.severe("handleMobilePulseAppRequest() ServletException. Exception = " + e.getMessage());
 			e.printStackTrace();
 		}
 		
         return;
     }
     
-    private Boolean isAdminRestRequest(String thisURL) {
-    	// currently, only the Users REST calls are considered 'Admin'
-    	if(thisURL.toLowerCase().contains("/rest/users")) {
+    private Boolean isAdminRestRequest(String thisURL, HttpServletRequest httpRequest) {
+    	// currently, only the Users Create and Delete REST calls are considered 'Admin'
+    	log.info("isAdminRestRequest(): method = " + httpRequest.getMethod());
+    	if(thisURL.toLowerCase().contains("/rest/users") &&
+           (httpRequest.getMethod().equalsIgnoreCase("post") || httpRequest.getMethod().equalsIgnoreCase("delete"))  ) {
     		return true;
     	}
     	return false;
