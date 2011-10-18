@@ -72,10 +72,15 @@ public class UsersResource extends ServerResource {
         return save_user(entity);
     }
 
+    // Handles 'Delete User API'
     @Delete("json")
     public JsonRepresentation delete() {
         log.info("in delete");
+        JSONObject json = new JSONObject();
         EntityManager em = EMF.get().createEntityManager();
+        
+		String apiStatus = ApiStatusCode.SUCCESS;
+        this.setStatus(Status.SUCCESS_OK);
         try {
 			if (this.id == null || this.id.length() == 0) {
 				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
@@ -92,13 +97,27 @@ public class UsersResource extends ServerResource {
             User user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
             em.remove(user);
             em.getTransaction().commit();
-        } finally {
+        } catch (NoResultException e) {
+			log.info("User not found");
+			apiStatus = ApiStatusCode.USER_NOT_FOUND;
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more users have same key");
+			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             em.close();
         }
-        return null;
+        
+        try {
+			json.put("apiStatus", apiStatus);
+		} catch (JSONException e) {
+            log.severe("exception = " + e.getMessage());
+        	e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		}
+        return new JsonRepresentation(json);
     }
     
     private JsonRepresentation index() {
@@ -128,6 +147,7 @@ public class UsersResource extends ServerResource {
     private JsonRepresentation show() {
         log.info("in show()");
         EntityManager em = EMF.get().createEntityManager();
+        Boolean isAdmin = null;
 
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
@@ -141,13 +161,14 @@ public class UsersResource extends ServerResource {
 				// special case: id = "current" so return info on currently logged in Google Account user
 	        	UserService userService = UserServiceFactory.getUserService();
 	        	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
+	        	isAdmin = userService.isUserAdmin();
 	        	if(currentUser == null) {
 	        		// TODO commenteed out next line just for testing
 	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 	        	}
 	        	
 	        	// TODO more test code
-	        	String emailAddress = currentUser.getEmail();
+	        	String emailAddress = currentUser.getEmail().toLowerCase();
 	        	//String emailAddress = "joepwro@gmail.com";
 	    		user = (User)em.createNamedQuery("User.getByEmailAddress")
 					.setParameter("emailAddress", emailAddress)
@@ -174,7 +195,7 @@ public class UsersResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getUserJson(user, apiStatus));
+        return new JsonRepresentation(getUserJson(user, apiStatus, isAdmin));
     }
 
     private JsonRepresentation save_user(Representation entity) {
@@ -195,20 +216,21 @@ public class UsersResource extends ServerResource {
                 isUpdate = true;
             }
             
-            // firstName can only be set on create
-            if (!isUpdate && json.has("firstName")) {
+            if (json.has("firstName")) {
                 user.setFirstName(json.getString("firstName"));
             }
             
-            // lastName can only be set on create
-            if (!isUpdate && json.has("lastName")) {
+            if (json.has("lastName")) {
                 user.setLastName(json.getString("lastName"));
             }
             
-            // emailAddress can only be set on create
             // TODO add email validation
-            if (!isUpdate && json.has("emailAddress")) {
-                user.setEmailAddress(json.getString("emailAddress"));
+            if (json.has("emailAddress")) {
+            	String emailAddress = json.getString("emailAddress").toLowerCase();
+            	if(isEmailAddressAlreadyUsed(user, emailAddress, isUpdate)) {
+            		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_ALREADY_USED);
+            	}
+            	user.setEmailAddress(emailAddress);
             }
             
             // TODO strip special characters out of phone number
@@ -262,11 +284,45 @@ public class UsersResource extends ServerResource {
         return new JsonRepresentation(getUserJson(user, apiStatus));
     }
     
+    private Boolean isEmailAddressAlreadyUsed(User theUserBeingUpdated, String theEmailAddress, Boolean theIsUpdate) {
+    	Boolean isEmailAddressAlreadyUsed = false;
+    	List<User> usersWithEmailAddress = User.getUsersWithEmailAddress(theEmailAddress);
+    	
+    	if(usersWithEmailAddress != null && usersWithEmailAddress.size() > 0) {
+        	if(!theIsUpdate) {
+        		// a new user is being created. If anyone using this email address, then it is used.
+        		log.info("new user being created and another user is already using email address = " + theEmailAddress);
+        		isEmailAddressAlreadyUsed = true;
+        	} else {
+        		// an existing user is being updated. Only one user can have the email address -- the user being updated
+        		if(usersWithEmailAddress.size() > 1) {
+        			// this should not happen, but clearly the email address in in use
+            		log.info("user being updated, but at least 2 other users are already using email address = " + theEmailAddress);
+        			isEmailAddressAlreadyUsed = true;
+        		} else {
+        			// if we are here, there is exactly one user using this email address. If it is not the user being modified then the address is in use
+        			Key userBeingUpdatedKey = theUserBeingUpdated.getKey();
+        			Key userWithMatchingEmailKey = usersWithEmailAddress.get(0).getKey();
+        			if(!userBeingUpdatedKey.equals(userWithMatchingEmailKey)) {
+                		log.info("user being updated, and a user other than the one being modified is already using email address = " + theEmailAddress);
+        				isEmailAddressAlreadyUsed = true;
+        			}
+        		}
+        	}
+    	}
+    	
+    	return isEmailAddressAlreadyUsed;
+    }
+    
     private JSONObject getUserJson(User user) {
     	return getUserJson(user, null);
     }
-
+    
     private JSONObject getUserJson(User user, String theApiStatus) {
+    	return getUserJson(user, theApiStatus, null);
+    }
+
+    private JSONObject getUserJson(User user, String theApiStatus, Boolean isCurrentUserAdmin) {
         JSONObject json = new JSONObject();
 
         try {
@@ -281,6 +337,7 @@ public class UsersResource extends ServerResource {
                 json.put("emailAddress", user.getEmailAddress());
                 json.put("sendEmailNotifications", user.getSendEmailNotifications());
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
+                if(isCurrentUserAdmin != null) json.put("isAdmin", isCurrentUserAdmin);
                 
                 if(user.getSmsEmailAddress() != null && user.getSmsEmailAddress().length() > 0) {
                 	String emailDomainName = Utility.getEmailDomainNameFromSmsEmailAddress(user.getSmsEmailAddress());

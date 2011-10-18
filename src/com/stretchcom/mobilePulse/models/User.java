@@ -11,14 +11,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.restlet.data.Status;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.stretchcom.mobilePulse.server.ApiStatusCode;
 import com.stretchcom.mobilePulse.server.EMF;
+import com.stretchcom.mobilePulse.server.MobilePulseApplication;
 import com.stretchcom.mobilePulse.server.UsersResource;
 import com.stretchcom.mobilePulse.server.Emailer;
 import com.stretchcom.mobilePulse.server.Utility;
@@ -129,19 +135,58 @@ public class User {
             }
             
             String subject = "notification";
+            String enhancedEmailMessage = theMessage + "<br><br>" + MobilePulseApplication.APPLICATION_WELCOME_PAGE;
+            String enhancedSmsMessage = theMessage + "  " + MobilePulseApplication.APPLICATION_WELCOME_PAGE;
             for (User user : users) {
                 if(user.getSendEmailNotifications()) {
                 	log.info("sending email to " + user.getEmailAddress());
-                	Emailer.send(user.getEmailAddress(), subject, theMessage, Emailer.NO_REPLY);
+                    // Add embedded URL to MobilePulse application
+                	Emailer.send(user.getEmailAddress(), subject, enhancedEmailMessage, Emailer.NO_REPLY);
                 }
                 if(user.getSendSmsNotifications()) {
                 	log.info("sending SMS to " + user.getSmsEmailAddress());
-                	Emailer.send(user.getSmsEmailAddress(), subject, theMessage, Emailer.NO_REPLY);
+                    // Add embedded URL to MobilePulse application
+                	Emailer.send(user.getSmsEmailAddress(), subject, enhancedSmsMessage, Emailer.NO_REPLY);
                 }
             }
         } catch (Exception e) {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
         }
+	}
+	
+	// Returns list of users matching specified email address; null if no matching users found.
+	public static List<User> getUsersWithEmailAddress(String theEmailAddress) {
+        EntityManager em = EMF.get().createEntityManager();
+        Boolean isAuthenticated = false;
+        List<User> users = null;
+
+		try {
+    		users = (List<User>)em.createNamedQuery("User.getByEmailAddress")
+				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+				.getResultList();
+		} catch (NoResultException e) {
+			// do nothing - ok if email address specified is not currently in use
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more Users have the same email address");
+		}
+		return users;
+	}
+	
+	public static Boolean isAuthenticated(String theEmailAddress) {
+        EntityManager em = EMF.get().createEntityManager();
+        Boolean isAuthenticated = false;
+
+		try {
+    		User user = (User)em.createNamedQuery("User.getByEmailAddress")
+				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+				.getSingleResult();
+    		isAuthenticated = true;
+		} catch (NoResultException e) {
+			log.info("Google account user not found");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more google account users have same key");
+		}
+		return isAuthenticated;
 	}
 }
