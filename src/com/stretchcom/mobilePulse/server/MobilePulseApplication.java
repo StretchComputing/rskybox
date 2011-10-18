@@ -8,7 +8,8 @@ import org.restlet.routing.Router;
 
 public class MobilePulseApplication extends Application {
     private static final Logger log = Logger.getLogger(MobilePulseApplication.class.getName());
-    public static final String APPLICATION_BASE_URL = "https://mobile-pulse.appspot.com/";
+    public static final String APPLICATION_BASE_URL = "https://1-2.mobile-pulse.appspot.com/";
+    public static final String APPLICATION_WELCOME_PAGE = APPLICATION_BASE_URL + "index.html";
     public static final String LIST_DATE_FORMAT = "MM/dd/yy kk:mm";
     public static final String INFO_DATE_FORMAT = "MM/dd/yyyy 'at' hh:mm a";
     public static final String DEFAULT_LOCAL_TIME_ZONE = "America/Chicago";
