@@ -1,50 +1,41 @@
-// Utility Functions
-// -----------------
-
-// Get a query paramter from a url by its name.
-function getParameterByName(url, name) {
-  var match = RegExp('[?&]' + name + '=([^&]*)').exec(url);
-  return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
-}
-
-
-// MobilePulse Code
-// -----------------
-
-// Show the list of items.
-//
-// Listen for when the index/list page is shown to display a new list.
+// Each type of item has its own index and archives page.
+// The following blocks set up event handlers for these internal pages.
 $('#index').live('pageshow', function() {
-  getList($('#index'));
+  setupListPage($('#index'));
 });
 
 $('#archives').live('pageshow', function() {
-  getList($('#archives'), 'archived');
+  setupListPage($('#archives'), 'archived');
 });
 
-function getList(page, status) {
-  $.mobile.showPageLoadingMsg();
+// Retrieves and displays the appropriate list for the given page.
+//
+// page: the page we are setting up
+// status (optional): default is 'new', but this parameter can override the default
+function setupListPage(page, status) {
   var restUrl = '/rest/' + itemName() + (status ? '?status='+ status : '');
+
+  $.mobile.showPageLoadingMsg();
   $.getJSON(restUrl, function(list) {
-    showList(page, list);
+    pageContent(page, getMarkup(list)).find(':jqmData(role=listview)').listview();
     $.mobile.hidePageLoadingMsg();
   });
 }
 
-// Generic function to show the list of items.
-// Calls listItem which needs to be defined per type of item.
-function showList(page, list) {
-  var header = page.children(':jqmData(role=header)');
-  var content = page.children(':jqmData(role=content)');
+// Generic function to build the list of items.
+//
+// Calls listItem which is defined per type of item in its HTML file.
+// list: JSON object containing the list elements
+function getMarkup(list) {
   var markup = '<ul data-role="listview">';
+
   for (i = 0; i < list[itemName()].length; i++) {
     var item = list[itemName()][i];
     var display = item['date'] + ' - ' + item['userName'] + ' - ' + item['instanceUrl'];
     markup += '<li><a href="#item?id=' + item['id'] + '">' + display + '</a></li>';
   }
   markup += '</ul>'
-  content.html(markup);
-  content.find(':jqmData(role=listview)').listview();
+  return markup;
 }
 
 // Dynamically inject item pages
