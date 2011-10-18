@@ -1,3 +1,7 @@
+// A place to easily update the version of rest we're using.
+var REST_PREFIX = '/rest/';
+
+
 // Each type of item has its own index and archives page.
 // The following blocks set up event handlers for these internal pages.
 $('#index').live('pageshow', function() {
@@ -13,7 +17,7 @@ $('#archives').live('pageshow', function() {
 // page: the page we are setting up
 // status (optional): default is 'new', but this parameter can override the default
 function listPage(page, status) {
-  var restUrl = '/rest/' + itemName() + (status ? '?status='+ status : '');
+  var restUrl = REST_PREFIX + itemName() + (status ? '?status='+ status : '');
 
   jsonPage(restUrl, page, buildListPage)
 }
@@ -37,60 +41,48 @@ function buildListPage(page, list) {
 
 // set up the page(s) we need to build dynamically
 dynamicPages([{
-  'page' : 'item',
-  'function' : showItem
+  page : 'item',
+  'function' : itemPage
 }]);
 
 // Generic function to show the item page.
 //
-// url: the url object of the current page
-// options: jqm options for the current page (is this a correct statement?)
-function showItem(url, options) {
-  var changeStatus = getParameterByName(url.hash, 'changeStatus');
-  var restUrl = '/rest/' + itemName() + '/' + getParameterByName(url.hash, 'id');
-  $.mobile.showPageLoadingMsg();
+// url: the URL object of the current page
+// options: JQM options for the current page (is this a correct statement?)
+function itemPage(url, options) {
+  var changeStatus = getParameterByName(url, 'changeStatus');
+  var restUrl = REST_PREFIX + itemName() + '/' + getParameterByName(url, 'id');
+  // Get the page hash portion of the URL, make a jQuery element out of it.
+  var page = $(getPageName(url));
 
   if (changeStatus) {
-    $.ajax({
-      url: restUrl,
-      type: 'PUT',
-      contentType : 'application/json',
-      data: '{ status : ' + changeStatus + '}',
-      success: function(item) {
-        $.getJSON(restUrl, function(item) {
-          setupItem(item, url, options);
-        });
-      },
-      dataType: 'json'
+    putJson(restUrl, '{ status: ' + changeStatus + '}', function(data) {
+      jsonPage(restUrl, page, buildItemPage);
     });
   } else {
-    $.getJSON(restUrl, function(item) {
-      setupItem(item, url, options);
-    });
+    jsonPage(restUrl, page, buildItemPage);
   }
+  options.dataUrl = url.href;
+  $.mobile.changePage(page, options);
 }
 
 // Sets up common elements of the item page. Calls itemDetails for item-specific
 // elements.
-function setupItem(item, url, options) {
-  var id = url.hash.replace(/.*id=/, '');
-  var pageSelector = url.hash.replace(/\?.*$/, '');
-  var page = $(pageSelector);
-  var header = page.children(':jqmData(role=header)');
-  var content = page.children(':jqmData(role=content)');
-  var h1 = header.find('h1');
+function buildItemPage(page, item) {
+  var h1 = pageHeader(page).find('h1');
   var status = item['status'] == 'new' ? 'archived' : 'new';
-  var link = '<a href="#item?id=' + id + '&changeStatus=' + status + '" class="ui-btn-right" data-theme="b">';
-  link += item['status'] == 'new' ? 'Archive' : 'Un-archive';
+  var link;
+
+  link  = '<a href="#item?id=' + item['id'] + '&changeStatus=' + status + '" class="ui-btn-right" data-theme="b">';
+  link +=   item['status'] == 'new' ? 'Archive' : 'Un-archive';
   link += '</a>';
+
   h1.next('a').remove();
   h1.after(link);
-  content.html(itemDetails(item));
+  pageContent(page, itemDetails(item));
+
   // Not exactly sure why we need both of these, but they are required to get
   // the archive link to be styled properly.
   page.page();
   page.trigger('create');
-  options.dataUrl = url.href;
-  $.mobile.changePage(page, options);
-  $.mobile.hidePageLoadingMsg();
 }

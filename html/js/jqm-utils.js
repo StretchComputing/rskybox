@@ -29,26 +29,47 @@ function dynamicPages(pages) {
 
 // Set up a page with JSON data.
 //
-// Makes a JSON call to the given url, then calls the given function to set up
-// the page.
+// Makes a Ajax REST call to the given URL, then calls the given function to set
+// up the page.
 //
-// restUrl: the url for the REST call to get the JSON data
+// restUrl: the URL for the REST call to get the JSON data
 // page: the page to be built
-// callback: the function to call to actually build the page
-function jsonPage(restUrl, page, callback) {
+// success: the function to call to actually build the page on success
+function jsonPage(restUrl, page, success) {
   $.mobile.showPageLoadingMsg();
   $.getJSON(restUrl, function(data) {
-    callback(page, data);
+    success(page, data);
     $.mobile.hidePageLoadingMsg();
   });
 }
 
 
-// Set the content area of a page to the given HTML.
-// Return the Content element in case the caller needs to do something with it.
+// Do an Ajax PUT call to update some data on the server.
+//
+// restUrl: URL for the REST call
+// data: the data to be sent with the request
+// callback: a function to call on success
+function putJson(restUrl, data, success) {
+  $.ajax({
+    url: restUrl,
+    type: 'PUT',
+    contentType : 'application/json',
+    data: data,
+    success: success,
+    dataType: 'json'
+  });
+}
+
+
+// Get the name of the page from a JQM URL.
+function getPageName(url) {
+  return url.hash.replace(/\?.*$/, '');
+}
+
+// Set/Get the header area of a page.
 //
 // page: the page we're working with
-// markup (optional): if not specified, just return the content element
+// markup (optional): if not specified, just return the element
 function pageContent(page, markup) {
   var content = page.children(':jqmData(role=content)');
 
@@ -59,9 +80,23 @@ function pageContent(page, markup) {
 }
 
 
-// Returns the value of a named parameter from a given URL.
+// Set/Get the content area of a page.
+//
+// page: the page we're working with
+// markup (optional): if not specified, just return the element
+function pageHeader(page, markup) {
+  var header = page.children(':jqmData(role=header)');
+
+  if (markup) {
+    header.html(markup);
+  }
+  return header;
+}
+
+
+// Returns the value of a named parameter from a given JQM URL.
 function getParameterByName(url, name) {
-  var match = RegExp('[?&]' + name + '=([^&]*)').exec(url);
+  var match = RegExp('[?&]' + name + '=([^&]*)').exec(url.hash);
   return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
 }
 
