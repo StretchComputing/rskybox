@@ -70,11 +70,11 @@ public class UserAuthenticationFilter implements Filter {
     		
     		// ::::::::::::::::::::::::::::TESTING ONLY:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     		// uncomment during testing to allow all rest calls
-//    		if(thisURL.contains("/rest/")) {
-//    			chain.doFilter(request, response);
-//    			log.info("**********  REST Filter by pass -- SHOULD ONLY BE USED DURING TESTING  **********");
-//    			return;
-//    		}
+    		if(thisURL.contains("/rest/")) {
+    			chain.doFilter(request, response);
+    			log.info("**********  REST Filter by pass -- SHOULD ONLY BE USED DURING TESTING  **********");
+    			return;
+    		}
     		//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     		
     		

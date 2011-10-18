@@ -30,7 +30,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
   </servlet>
   <servlet-mapping>
     <servlet-name>MobilePulse</servlet-name>
-    <url-pattern>/rest/*</url-pattern>
+    <url-pattern>/rest/v1/*</url-pattern>
   </servlet-mapping>
   <servlet>
     <servlet-name>Audio</servlet-name>
