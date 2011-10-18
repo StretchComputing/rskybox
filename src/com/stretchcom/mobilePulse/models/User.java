@@ -135,8 +135,8 @@ public class User {
             }
             
             String subject = "notification";
-            String enhancedEmailMessage = theMessage + "<br><br>" + MobilePulseApplication.APPLICATION_WELCOME_PAGE;
-            String enhancedSmsMessage = theMessage + "  " + MobilePulseApplication.APPLICATION_WELCOME_PAGE;
+            String enhancedEmailMessage = theMessage + "<br><br>" + MobilePulseApplication.APPLICATION_BASE_URL;
+            String enhancedSmsMessage = theMessage + "  " + MobilePulseApplication.APPLICATION_BASE_URL;
             for (User user : users) {
                 if(user.getSendEmailNotifications()) {
                 	log.info("sending email to " + user.getEmailAddress());

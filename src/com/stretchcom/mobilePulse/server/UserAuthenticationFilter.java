@@ -185,7 +185,8 @@ public class UserAuthenticationFilter implements Filter {
     private Boolean isAdminRestRequest(String thisURL, HttpServletRequest httpRequest) {
     	// currently, only the Users Create and Delete REST calls are considered 'Admin'
     	log.info("isAdminRestRequest(): method = " + httpRequest.getMethod());
-    	if(thisURL.toLowerCase().contains("/rest/users") &&
+    	if(thisURL.toLowerCase().contains("/rest") &&
+           thisURL.toLowerCase().contains("/users") &&
            (httpRequest.getMethod().equalsIgnoreCase("post") || httpRequest.getMethod().equalsIgnoreCase("delete"))  ) {
     		return true;
     	}
