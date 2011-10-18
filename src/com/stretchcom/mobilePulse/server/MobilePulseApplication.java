@@ -35,6 +35,9 @@ public class MobilePulseApplication extends Application {
         router.attach("/clientLogs/{id}", ClientLogsResource.class);
 
         router.attach("/mobileCarriers", MobileCarriersResource.class);
+
+        router.attach("/betaTesters", BetaTestersResource.class);
+        router.attach("/betaTesters/{id}", BetaTestersResource.class);
         
         return router;
     }
