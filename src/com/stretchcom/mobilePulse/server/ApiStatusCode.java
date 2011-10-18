@@ -18,6 +18,7 @@ public class ApiStatusCode {
 	public static final String INVALID_DETECTED_DATE_PARAMETER = "402";
 	public static final String INVALID_EMAIL_ADDRESS_PARAMETER = "403";
 	public static final String INVALID_MOBILE_CARRIER_PARAMETER = "404";
+	public static final String EMAIL_ADDRESS_ALREADY_USED = "405";
 
 	public static final String USER_NOT_FOUND = "600";
 	public static final String FEEDBACK_NOT_FOUND = "601";

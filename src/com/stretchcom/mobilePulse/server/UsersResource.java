@@ -226,7 +226,11 @@ public class UsersResource extends ServerResource {
             
             // TODO add email validation
             if (json.has("emailAddress")) {
-                user.setEmailAddress(json.getString("emailAddress").toLowerCase());
+            	String emailAddress = json.getString("emailAddress").toLowerCase();
+            	if(isEmailAddressAlreadyUsed(user, emailAddress, isUpdate)) {
+            		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_ALREADY_USED);
+            	}
+            	user.setEmailAddress(emailAddress);
             }
             
             // TODO strip special characters out of phone number
@@ -278,6 +282,36 @@ public class UsersResource extends ServerResource {
         }
         
         return new JsonRepresentation(getUserJson(user, apiStatus));
+    }
+    
+    private Boolean isEmailAddressAlreadyUsed(User theUserBeingUpdated, String theEmailAddress, Boolean theIsUpdate) {
+    	Boolean isEmailAddressAlreadyUsed = false;
+    	List<User> usersWithEmailAddress = User.getUsersWithEmailAddress(theEmailAddress);
+    	
+    	if(usersWithEmailAddress != null && usersWithEmailAddress.size() > 0) {
+        	if(!theIsUpdate) {
+        		// a new user is being created. If anyone using this email address, then it is used.
+        		log.info("new user being created and another user is already using email address = " + theEmailAddress);
+        		isEmailAddressAlreadyUsed = true;
+        	} else {
+        		// an existing user is being updated. Only one user can have the email address -- the user being updated
+        		if(usersWithEmailAddress.size() > 1) {
+        			// this should not happen, but clearly the email address in in use
+            		log.info("user being updated, but at least 2 other users are already using email address = " + theEmailAddress);
+        			isEmailAddressAlreadyUsed = true;
+        		} else {
+        			// if we are here, there is exactly one user using this email address. If it is not the user being modified then the address is in use
+        			Key userBeingUpdatedKey = theUserBeingUpdated.getKey();
+        			Key userWithMatchingEmailKey = usersWithEmailAddress.get(0).getKey();
+        			if(!userBeingUpdatedKey.equals(userWithMatchingEmailKey)) {
+                		log.info("user being updated, and a user other than the one being modified is already using email address = " + theEmailAddress);
+        				isEmailAddressAlreadyUsed = true;
+        			}
+        		}
+        	}
+    	}
+    	
+    	return isEmailAddressAlreadyUsed;
     }
     
     private JSONObject getUserJson(User user) {
