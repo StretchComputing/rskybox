@@ -38,40 +38,26 @@ function getMarkup(list) {
   return markup;
 }
 
-// Dynamically inject item pages
-//
-// JQM doc page located at <jqm site>/<version>/docs/pages/page-dynamic.html.
-$(document).bind('pagebeforechange', function(event, data) {
-  // Only handle changepage calls whens loading a page URL.
-  if (typeof data.toPage === "string") {
-    // Only hanlde requests for the item page.
-    var url = $.mobile.path.parseUrl(data.toPage);
-    if (url.hash.search(/^#item/) != -1) {
-      var change_status = getParameterByName(url.hash, 'change_status');
-      if (change_status) {
-        url.hash = url.hash.replace(/&.*/, '');
-      }
-      showItem(url, data.options, change_status);
-      event.preventDefault();
-    }
-  }
-});
+dynamicPages([{
+  'page' : 'item',
+  'function' : showItem
+}]);
 
 // Generic function to show the item page.
 //
 // url: the url object of the current page
 // options: jqm options for the current page (is this a correct statement?)
-// change_status: whether the status of the item needs to be changed
-function showItem(url, options, change_status) {
+function showItem(url, options) {
+  var changeStatus = getParameterByName(url.hash, 'changeStatus');
+  var restUrl = '/rest/' + itemName() + '/' + getParameterByName(url.hash, 'id');
   $.mobile.showPageLoadingMsg();
-  var restUrl = '/rest/' + itemName() + '/' + url.hash.replace(/.*id=/, '');
 
-  if (change_status) {
+  if (changeStatus) {
     $.ajax({
       url: restUrl,
       type: 'PUT',
       contentType : 'application/json',
-      data: '{ status : ' + change_status + '}',
+      data: '{ status : ' + changeStatus + '}',
       success: function(item) {
         $.getJSON(restUrl, function(item) {
           setupItem(item, url, options);
@@ -86,7 +72,7 @@ function showItem(url, options, change_status) {
   }
 }
 
-// Sets up common elments of the item page. Calls itemDetails for item-specific
+// Sets up common elements of the item page. Calls itemDetails for item-specific
 // elements.
 function setupItem(item, url, options) {
   var id = url.hash.replace(/.*id=/, '');
@@ -96,7 +82,7 @@ function setupItem(item, url, options) {
   var content = page.children(':jqmData(role=content)');
   var h1 = header.find('h1');
   var status = item['status'] == 'new' ? 'archived' : 'new';
-  var link = '<a href="#item?id=' + id + '&change_status=' + status + '" class="ui-btn-right" data-theme="b">';
+  var link = '<a href="#item?id=' + id + '&changeStatus=' + status + '" class="ui-btn-right" data-theme="b">';
   link += item['status'] == 'new' ? 'Archive' : 'Un-archive';
   link += '</a>';
   h1.next('a').remove();
