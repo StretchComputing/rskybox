@@ -70,11 +70,11 @@ public class UserAuthenticationFilter implements Filter {
     		
     		// ::::::::::::::::::::::::::::TESTING ONLY:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     		// uncomment during testing to allow all rest calls
-    		if(thisURL.contains("/rest/")) {
-    			chain.doFilter(request, response);
-    			log.info("**********  REST Filter by pass -- SHOULD ONLY BE USED DURING TESTING  **********");
-    			return;
-    		}
+//    		if(thisURL.contains("/rest/")) {
+//    			chain.doFilter(request, response);
+//    			log.info("**********  REST Filter by pass -- SHOULD ONLY BE USED DURING TESTING  **********");
+//    			return;
+//    		}
     		//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     		
     		
@@ -94,7 +94,8 @@ public class UserAuthenticationFilter implements Filter {
         	log.info("***** request is NOT an instance of HttpServletRequest *******");
         }
         
-		chain.doFilter(request, response);
+        log.info("calling chain.doFilter() in doFilter() ...");
+        chain.doFilter(request, response);
     }
     
     private Boolean isMobilePulseClientWithValidToken(HttpServletRequest httpRequest) {
@@ -157,7 +158,7 @@ public class UserAuthenticationFilter implements Filter {
 	    		if(thisURL.contains(".html")) {
 		    		String uri = httpRequest.getRequestURI();
 		            uri = HTML_DIR + uri;
-		            log.info("modified URI: " + uri);
+		            log.info("Calling RequestDispatcher modified URI: " + uri);
 		            RequestDispatcher rd = httpRequest.getRequestDispatcher(uri);
 		            try {
 						rd.forward(httpRequest, httpResponse);
@@ -166,6 +167,7 @@ public class UserAuthenticationFilter implements Filter {
 					} 
 	    		} else {
 	    			// REST request
+	    			log.info("calling chain.doFilter() in handleMobilePulseAppRequest() ...");
 	    			chain.doFilter(httpRequest, httpResponse);
 	    		}
 	    	}
