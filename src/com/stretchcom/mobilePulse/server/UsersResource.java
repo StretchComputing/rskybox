@@ -72,10 +72,15 @@ public class UsersResource extends ServerResource {
         return save_user(entity);
     }
 
+    // Handles 'Delete User API'
     @Delete("json")
     public JsonRepresentation delete() {
         log.info("in delete");
+        JSONObject json = new JSONObject();
         EntityManager em = EMF.get().createEntityManager();
+        
+		String apiStatus = ApiStatusCode.SUCCESS;
+        this.setStatus(Status.SUCCESS_OK);
         try {
 			if (this.id == null || this.id.length() == 0) {
 				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
@@ -92,13 +97,27 @@ public class UsersResource extends ServerResource {
             User user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
             em.remove(user);
             em.getTransaction().commit();
-        } finally {
+        } catch (NoResultException e) {
+			log.info("User not found");
+			apiStatus = ApiStatusCode.USER_NOT_FOUND;
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more users have same key");
+			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
             }
             em.close();
         }
-        return null;
+        
+        try {
+			json.put("apiStatus", apiStatus);
+		} catch (JSONException e) {
+            log.severe("exception = " + e.getMessage());
+        	e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		}
+        return new JsonRepresentation(json);
     }
     
     private JsonRepresentation index() {
@@ -197,19 +216,16 @@ public class UsersResource extends ServerResource {
                 isUpdate = true;
             }
             
-            // firstName can only be set on create
-            if (!isUpdate && json.has("firstName")) {
+            if (json.has("firstName")) {
                 user.setFirstName(json.getString("firstName"));
             }
             
-            // lastName can only be set on create
-            if (!isUpdate && json.has("lastName")) {
+            if (json.has("lastName")) {
                 user.setLastName(json.getString("lastName"));
             }
             
-            // emailAddress can only be set on create
             // TODO add email validation
-            if (!isUpdate && json.has("emailAddress")) {
+            if (json.has("emailAddress")) {
                 user.setEmailAddress(json.getString("emailAddress").toLowerCase());
             }
             

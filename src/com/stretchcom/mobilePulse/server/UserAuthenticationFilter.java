@@ -40,14 +40,16 @@ public class UserAuthenticationFilter implements Filter {
     	// * MobilePulse welcome-file with Google account token
     	// * MobilePulse HTML requests with Google account token
     	// * MobilePulse REST calls with Google account token
+    	// * MobilePulse Admin REST calls with Google account token
     	//
     	// -------------------------------------------
     	// Authentication (for above type of requests)
     	// -------------------------------------------
-    	// * MobilePulse Client application REST calls with a priori token
+    	// * MobilePulse Client application REST calls with valid a priori token are given full access to the app (for now, including admin REST calls)
     	// * All mobilePulse users must be currently logged into a Google account.
     	// * If user is an admin of this mobilePulse app engine application, they are given full access to the app.
     	// * If user is not and admin, they must be in the User table. Lookup is via Google account email address.
+    	// * Only an admin can access Admin related REST calls.
     	//
     	// --------------------------------
     	// Authentication failure responses
@@ -55,10 +57,7 @@ public class UserAuthenticationFilter implements Filter {
     	// * If HTML request and user is not logged into Google account, user is redirected to Google login screen.
     	// * If REST request and user is not logged into Google account, HTTP 401 Unauthorized status is returned.
     	// * If HTML/REST request and user is not admin and not in User table, HTTP 401 Unauthorized status is returned.
-    	
-    	// *********************************************************************************
-    	// TODO How to restrict the REST admin calls from MobilePulse client ***************
-    	// *********************************************************************************
+    	// * If an Admin REST reqeust and user is not admin, HTTP 401 Unauthorized status is returned.
     	
     	log.info("**********  entered doFilter()  **********");
 
@@ -69,14 +68,25 @@ public class UserAuthenticationFilter implements Filter {
     		String thisURL = getURL(httpRequest);
     		log.info("thisURL = " + thisURL);
     		
-    		// MobilePulse Client application REST calls with a priori token. So if this is a mobilePulse client, just flow thru to chain.doFilter() below.
-    		// If there is no a priori token, this codes assumes it was NOT a client request - even though it may be a client request with a bad token. But
-    		// the right thing will happen because without the a priori token, the code will determine the request is NOT authenticated.
-    		if(!isMobilePulseClient(httpRequest)) {
+    		// ::::::::::::::::::::::::::::TESTING ONLY:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    		// uncomment during testing to allow all rest calls
+//    		if(thisURL.contains("/rest/")) {
+//    			chain.doFilter(request, response);
+//    			log.info("**********  REST Filter by pass -- SHOULD ONLY BE USED DURING TESTING  **********");
+//    			return;
+//    		}
+    		//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    		
+    		
+    		// MobilePulse Client application REST calls with valid a priori token are given full access to the app (for now, including admin REST calls)
+    		// So if this is a mobilePulse client, just flow thru to chain.doFilter() below.  If there is no a priori token, this codes assumes it was NOT
+    		// a client request - even though it may be a client request with a bad token. But the right thing will happen because without the a priori
+    		// token, the code will determine the request is NOT authenticated.
+    		if(!isMobilePulseClientWithValidToken(httpRequest)) {
     			handleMobilePulseAppRequestAuthorized(httpRequest, httpResponse, thisURL);
     			
     	        // ::PUNT:: Tried allowing this to fall thru so chain.doFilter() is called below, but could not get RequestDispatcher.forward()
-    			//          to play nice with chain.doFilter(). If an answer is found, the code would have to be restructured because not all
+    			//          to play nice with chain.doFilter(). If an answer is found, this code would have to be restructured because not all
     			//          code paths in handleMobilePulseAppRequestAuthorized() should flow thru to chain.doFilter().
     			return;
     		}
@@ -87,7 +97,7 @@ public class UserAuthenticationFilter implements Filter {
 		chain.doFilter(request, response);
     }
     
-    private Boolean isMobilePulseClient(HttpServletRequest httpRequest) {
+    private Boolean isMobilePulseClientWithValidToken(HttpServletRequest httpRequest) {
     	String token = getToken(httpRequest);
     	if(token != null && token.equals(A_PRIORI_TOKEN)) {
     		return true;
@@ -105,11 +115,13 @@ public class UserAuthenticationFilter implements Filter {
 					// If REST request and user is not logged into Google account, HTTP 401 Unauthorized status is returned.
 					httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 					log.info("REST request, but user is not logged into Google account -- returning HTTP 401");
+					return;
 				} else {
 					// If HTML request and user is not logged into Google account, user is redirected to Google login screen.
 	        		String loginUrl = userService.createLoginURL(thisURL);
 	        		httpResponse.sendRedirect(loginUrl);
 	        		log.info("HTML request, but user is not logged into Google account -- redirecting to loginUrl = " + loginUrl);
+	        		return;
 				}
 	    	} else {
 	    		log.info("current user email address = " + currentUser.getEmail());
@@ -125,6 +137,14 @@ public class UserAuthenticationFilter implements Filter {
 	    				// If HTML/REST request and user is not admin and not in User table, HTTP 401 Unauthorized status is returned.
 	    				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 	    				log.info("HTML/REST request, but user is not and admin and is not in User table -- returning HTTP 401");
+	    				return;
+	    			}
+	    			
+	    			// If this is an Admin REST request, then return HTTP 401 Unauthorized status since user is not admin
+	    			if(isAdminRestRequest(thisURL)) {
+	    				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+	    				log.info("Admin REST request, but user is not and admin -- returning HTTP 401");
+	    				return;
 	    			}
 	    		}
 	    		
@@ -147,6 +167,14 @@ public class UserAuthenticationFilter implements Filter {
 		}
 		
         return;
+    }
+    
+    private Boolean isAdminRestRequest(String thisURL) {
+    	// currently, only the Users REST calls are considered 'Admin'
+    	if(thisURL.toLowerCase().contains("/rest/users")) {
+    		return true;
+    	}
+    	return false;
     }
     
 	private String getToken(HttpServletRequest httpRequest) {
