@@ -1,32 +1,28 @@
 // Each type of item has its own index and archives page.
 // The following blocks set up event handlers for these internal pages.
 $('#index').live('pageshow', function() {
-  setupListPage($('#index'));
+  listPage($('#index'));
 });
 
 $('#archives').live('pageshow', function() {
-  setupListPage($('#archives'), 'archived');
+  listPage($('#archives'), 'archived');
 });
 
 // Retrieves and displays the appropriate list for the given page.
 //
 // page: the page we are setting up
 // status (optional): default is 'new', but this parameter can override the default
-function setupListPage(page, status) {
+function listPage(page, status) {
   var restUrl = '/rest/' + itemName() + (status ? '?status='+ status : '');
 
-  $.mobile.showPageLoadingMsg();
-  $.getJSON(restUrl, function(list) {
-    pageContent(page, getMarkup(list)).find(':jqmData(role=listview)').listview();
-    $.mobile.hidePageLoadingMsg();
-  });
+  jsonPage(restUrl, page, buildListPage)
 }
 
 // Generic function to build the list of items.
 //
 // Calls listItem which is defined per type of item in its HTML file.
 // list: JSON object containing the list elements
-function getMarkup(list) {
+function buildListPage(page, list) {
   var markup = '<ul data-role="listview">';
 
   for (i = 0; i < list[itemName()].length; i++) {
@@ -35,9 +31,11 @@ function getMarkup(list) {
     markup += '<li><a href="#item?id=' + item['id'] + '">' + display + '</a></li>';
   }
   markup += '</ul>'
-  return markup;
+  pageContent(page, markup).find(':jqmData(role=listview)').listview();
 }
 
+
+// set up the page(s) we need to build dynamically
 dynamicPages([{
   'page' : 'item',
   'function' : showItem

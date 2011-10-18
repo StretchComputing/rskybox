@@ -27,6 +27,22 @@ function dynamicPages(pages) {
   });
 }
 
+// Set up a page with JSON data.
+//
+// Makes a JSON call to the given url, then calls the given function to set up
+// the page.
+//
+// restUrl: the url for the REST call to get the JSON data
+// page: the page to be built
+// callback: the function to call to actually build the page
+function jsonPage(restUrl, page, callback) {
+  $.mobile.showPageLoadingMsg();
+  $.getJSON(restUrl, function(data) {
+    callback(page, data);
+    $.mobile.hidePageLoadingMsg();
+  });
+}
+
 
 // Set the content area of a page to the given HTML.
 // Return the Content element in case the caller needs to do something with it.
