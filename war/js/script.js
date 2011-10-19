@@ -38,8 +38,8 @@ function buildListPage(page, list) {
 // The page(s) we need to handle and build dynamically. Let's us get information
 // from the URL and do special handling for these dynamically injected pages.
 dynamicPages([{
-  page : '#item',
-  'function' : itemPage
+  page: '#item',
+  'function': itemPage
 }]);
 
 
@@ -52,7 +52,7 @@ function itemPage(page, url) {
   var restUrl = REST_PREFIX + '/' + itemName() + '/' + getParameterByName(url, 'id');
 
   if (changeStatus) {
-    putJson(restUrl, '{ status: ' + changeStatus + '}', function(data) {
+    putJson(restUrl, '{ status: ' + changeStatus + ' }', function(data) {
       jsonPage(restUrl, page, buildItemPage);
     });
   } else {
