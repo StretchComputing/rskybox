@@ -33,32 +33,19 @@ $('#item').live('pagecreate', function() {
   });
 });
 
-$('#delete').live('pagecreate', function() {
-  $('#delete_item').click(function() {
-    $.ajax({
-      type : 'DELETE',
-      url : REST_PREFIX + '/users/' + $('#id').val(),
-      contentType : 'application/json',
-      success : function(data) {
-        $.mobile.changePage('#index');
-      },
-      dataType : 'json'
-    });
-  });
-});
-
 function itemPage(page, url) {
   var id = getParameterByName(url, 'id');
   var restUrl = REST_PREFIX + '/mobileCarriers';
 
-  
   page.find('form')[0].reset();
   jsonPopulate(restUrl, $('#mobileCarrierId'), function(select, carriers) {
     select.html(carrierOptions(carriers['mobileCarriers']));
     if (id == 'new') {
       $('#id').val('');
+      $('#mobileCarrierId').val(NO_CARRIER).selectmenu('refresh');
       $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
       $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
+      enableSmsDetails(false);
     } else {
       restUrl = REST_PREFIX + '/users/' + id;
       jsonPopulate(restUrl, page, buildItemPage);
@@ -78,20 +65,7 @@ function buildItemPage(page, item) {
   $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
   enableSmsDetails(smsEnabled);
   $('#phoneNumber').val(item['phoneNumber']);
-  $('#mobileCarrierId').val(item['mobileCarrierId']);
-
-  page.page();
-  page.trigger('create');
-}
-
-function switchPage(url, options) {
-  var pageSelector = url.hash.replace(/\?.*$/, '');
-  var page = $(pageSelector);
-
-  enableSmsDetails($('#sendSmsNotifications').prop('checked'));
-  options.dataUrl = url.href;
-  $.mobile.changePage(page, options);
-  $.mobile.hidePageLoadingMsg();
+  $('#mobileCarrierId').val(item['mobileCarrierId']).selectmenu('refresh');
 }
 
 //   function saveOtherItem() {
@@ -120,24 +94,33 @@ function switchPage(url, options) {
 function saveItem() {
   if (!validateSms()) { return false; }
 
+  var restUrl = REST_PREFIX + '/users/' + $('#id').val();
   var json = JSON.stringify({
-    'firstName' : $('#firstName'),
-    'lastName' : $('#lastName'),
-    'emailAddress' : $('#emailAddress'),
-    'phoneNumber' : $('#phoneNumber').val(),
-    'mobileCarrierId' : $('#mobileCarrierId').val(),
-    'sendEmailNotifications' : $('#sendEmailNotifications').prop('checked'),
-    'sendSmsNotifications' : $('#sendSmsNotifications').prop('checked')
+    'firstName': $('#firstName').val(),
+    'lastName': $('#lastName').val(),
+    'emailAddress': $('#emailAddress').val(),
+    'phoneNumber': $('#phoneNumber').val(),
+    'mobileCarrierId': $('#mobileCarrierId').val(),
+    'sendEmailNotifications': $('#sendEmailNotifications').prop('checked'),
+    'sendSmsNotifications': $('#sendSmsNotifications').prop('checked')
   });
-  $.ajax({
-    type : 'PUT',
-    url : REST_PREFIX + '/users/' + $('#id').val(),
-    contentType : 'application/json',
-    data : json,
-    success : function(data) {
-      history.back();
-    },
-    dataType : 'json'
-  });
+
+  putJson(restUrl, json, function() {
+    history.back();
+  })
   return false;
 }
+
+$('#delete').live('pagecreate', function() {
+  $('#delete_item').click(function() {
+    $.ajax({
+      type : 'DELETE',
+      url : REST_PREFIX + '/users/' + $('#id').val(),
+      contentType : 'application/json',
+      success : function(data) {
+        $.mobile.changePage('#index');
+      },
+      dataType : 'json'
+    });
+  });
+});
