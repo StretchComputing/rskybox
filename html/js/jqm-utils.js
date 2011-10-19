@@ -33,18 +33,18 @@ function dynamicPages(pairs) {
   });
 }
 
-// Set up a page with JSON data.
+// Populate an element with JSON data.
 //
 // Makes a Ajax REST call to the given URL, then calls the given function to set
-// up the page.
+// up the element.
 //
 // restUrl: the URL for the REST call to get the JSON data
-// page: the page to be built
+// element: the element to be populated
 // success: the function to call to actually build the page on success
-function jsonPage(restUrl, page, success) {
+function jsonPopulate(restUrl, element, success) {
   $.mobile.showPageLoadingMsg();
   $.getJSON(restUrl, function(data) {
-    success(page, data);
+    success(element, data);
     $.mobile.hidePageLoadingMsg();
   });
 }

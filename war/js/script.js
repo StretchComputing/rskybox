@@ -15,7 +15,7 @@ $('#archives').live('pageshow', function() {
 function listPage(page, status) {
   var restUrl = REST_PREFIX + '/' + itemName() + (status ? '?status='+ status : '');
 
-  jsonPage(restUrl, page, buildListPage)
+  jsonPopulate(restUrl, page, buildListPage)
 }
 
 // Generic function to build the list of items.
@@ -53,10 +53,10 @@ function itemPage(page, url) {
 
   if (changeStatus) {
     putJson(restUrl, '{ status: ' + changeStatus + ' }', function(data) {
-      jsonPage(restUrl, page, buildItemPage);
+      jsonPopulate(restUrl, page, buildItemPage);
     });
   } else {
-    jsonPage(restUrl, page, buildItemPage);
+    jsonPopulate(restUrl, page, buildItemPage);
   }
 }
 
