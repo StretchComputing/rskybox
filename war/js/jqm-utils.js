@@ -50,6 +50,23 @@ function jsonPopulate(restUrl, element, success) {
 }
 
 
+// Do an Ajax POST call to update some data on the server.
+//
+// restUrl: URL for the REST call
+// data: the data to be sent with the request
+// callback: a function to call on success
+function postJson(restUrl, data, success) {
+  $.ajax({
+    url: restUrl,
+    type: 'POST',
+    contentType : 'application/json',
+    data: data,
+    success: success,
+    dataType: 'json'
+  });
+}
+
+
 // Do an Ajax PUT call to update some data on the server.
 //
 // restUrl: URL for the REST call

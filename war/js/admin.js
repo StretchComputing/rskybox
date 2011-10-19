@@ -41,7 +41,7 @@ function itemPage(page, url) {
   jsonPopulate(restUrl, $('#mobileCarrierId'), function(select, carriers) {
     select.html(carrierOptions(carriers['mobileCarriers']));
     if (id == 'new') {
-      $('#id').val('');
+      $('#id').val('new');
       $('#mobileCarrierId').val(NO_CARRIER).selectmenu('refresh');
       $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
       $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
@@ -94,7 +94,7 @@ function buildItemPage(page, item) {
 function saveItem() {
   if (!validateSms()) { return false; }
 
-  var restUrl = REST_PREFIX + '/users/' + $('#id').val();
+  var restUrl = REST_PREFIX + '/users';
   var json = JSON.stringify({
     'firstName': $('#firstName').val(),
     'lastName': $('#lastName').val(),
@@ -105,9 +105,16 @@ function saveItem() {
     'sendSmsNotifications': $('#sendSmsNotifications').prop('checked')
   });
 
-  putJson(restUrl, json, function() {
-    history.back();
-  })
+  if ($('#id').val() == 'new') {
+    postJson(restUrl, json, function() {
+      history.back();
+    });
+  } else {
+    restUrl += '/' + $('#id').val();
+    putJson(restUrl, json, function() {
+      history.back();
+    });
+  }
   return false;
 }
 
