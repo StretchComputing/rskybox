@@ -9,15 +9,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
   </filter>
   <filter-mapping>
     <filter-name>UserAuthenticationFilter</filter-name>
-    <url-pattern>/rest/*</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>UserAuthenticationFilter</filter-name>
-    <url-pattern>*.html</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>UserAuthenticationFilter</filter-name>
-    <url-pattern>/</url-pattern>
+    <url-pattern>/*</url-pattern>
   </filter-mapping>
 
   <servlet>
@@ -30,7 +22,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
   </servlet>
   <servlet-mapping>
     <servlet-name>MobilePulse</servlet-name>
-    <url-pattern>/rest/*</url-pattern>
+    <url-pattern>/rest/v1/*</url-pattern>
   </servlet-mapping>
   <servlet>
     <servlet-name>Audio</servlet-name>

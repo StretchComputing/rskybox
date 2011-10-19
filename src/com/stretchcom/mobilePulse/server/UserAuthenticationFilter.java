@@ -94,7 +94,8 @@ public class UserAuthenticationFilter implements Filter {
         	log.info("***** request is NOT an instance of HttpServletRequest *******");
         }
         
-		chain.doFilter(request, response);
+        log.info("calling chain.doFilter() in doFilter() ...");
+        chain.doFilter(request, response);
     }
     
     private Boolean isMobilePulseClientWithValidToken(HttpServletRequest httpRequest) {
@@ -153,20 +154,21 @@ public class UserAuthenticationFilter implements Filter {
 	    		
 	    		// If we made it this far, user is authorized for request made, so continue on ....
 	    		
-	            // HTML files are stored in WEB-INF/html allowing HTML requests to be handled by app engine and thus this filter invoked for HTML files.
-	    		if(thisURL.contains(".html")) {
+	    		if(thisURL.contains("/rest/")) {
+	    			// REST request
+	    			log.info("calling chain.doFilter() in handleMobilePulseAppRequest() ...");
+	    			chain.doFilter(httpRequest, httpResponse);
+	    		} else {
+		            // any non-REST request needs to be redirected to the WEB-INF/html directory
 		    		String uri = httpRequest.getRequestURI();
 		            uri = HTML_DIR + uri;
-		            log.info("modified URI: " + uri);
+		            log.info("Calling RequestDispatcher modified URI: " + uri);
 		            RequestDispatcher rd = httpRequest.getRequestDispatcher(uri);
 		            try {
 						rd.forward(httpRequest, httpResponse);
 					} catch (ServletException e) {
 						e.printStackTrace();
 					} 
-	    		} else {
-	    			// REST request
-	    			chain.doFilter(httpRequest, httpResponse);
 	    		}
 	    	}
 		} catch (IOException e) {
@@ -183,7 +185,8 @@ public class UserAuthenticationFilter implements Filter {
     private Boolean isAdminRestRequest(String thisURL, HttpServletRequest httpRequest) {
     	// currently, only the Users Create and Delete REST calls are considered 'Admin'
     	log.info("isAdminRestRequest(): method = " + httpRequest.getMethod());
-    	if(thisURL.toLowerCase().contains("/rest/users") &&
+    	if(thisURL.toLowerCase().contains("/rest") &&
+           thisURL.toLowerCase().contains("/users") &&
            (httpRequest.getMethod().equalsIgnoreCase("post") || httpRequest.getMethod().equalsIgnoreCase("delete"))  ) {
     		return true;
     	}

@@ -1,5 +1,5 @@
 // A place to easily update the version of rest we're using.
-var REST_PREFIX = '/rest/';
+var REST_PREFIX = '/rest/v1/';
 
 
 // Each type of item has its own index and archives page.
