@@ -21,8 +21,6 @@ options: Options
 </div>
 
 <script>
-  var NO_CARRIER = '-1';
-
   $('#options').live('pagecreate', function() {
     $(this).find('form').submit(saveOptions);
     $('#sendSmsNotifications').change(function() {
@@ -40,14 +38,6 @@ options: Options
       })
     });
   });
-
-  function carrierOptions(carriers) {
-    var markup = '<option value="' + NO_CARRIER + '">Mobile Carrier</option>';
-    for (i = 0; i < carriers.length; i++) {
-      markup += '<option value="' + carriers[i]['id'] + '">' + carriers[i]['name'] + '</option>';
-    }
-    return markup;
-  }
 
   function setOptionFields(user) {
     $('#options').find('form')[0].reset();
@@ -99,10 +89,6 @@ options: Options
     }
 
     return true;
-  }
-
-  function validPhoneNumber(phoneNumber) {
-    return /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(phoneNumber);
   }
 </script>
 
