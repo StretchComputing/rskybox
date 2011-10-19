@@ -154,8 +154,12 @@ public class UserAuthenticationFilter implements Filter {
 	    		
 	    		// If we made it this far, user is authorized for request made, so continue on ....
 	    		
-	            // HTML files are stored in WEB-INF/html allowing HTML requests to be handled by app engine and thus this filter invoked for HTML files.
-	    		if(thisURL.contains(".html")) {
+	    		if(thisURL.contains("/rest/")) {
+	    			// REST request
+	    			log.info("calling chain.doFilter() in handleMobilePulseAppRequest() ...");
+	    			chain.doFilter(httpRequest, httpResponse);
+	    		} else {
+		            // any non-REST request needs to be redirected to the WEB-INF/html directory
 		    		String uri = httpRequest.getRequestURI();
 		            uri = HTML_DIR + uri;
 		            log.info("Calling RequestDispatcher modified URI: " + uri);
@@ -165,10 +169,6 @@ public class UserAuthenticationFilter implements Filter {
 					} catch (ServletException e) {
 						e.printStackTrace();
 					} 
-	    		} else {
-	    			// REST request
-	    			log.info("calling chain.doFilter() in handleMobilePulseAppRequest() ...");
-	    			chain.doFilter(httpRequest, httpResponse);
 	    		}
 	    	}
 		} catch (IOException e) {
