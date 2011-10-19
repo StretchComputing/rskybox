@@ -181,7 +181,7 @@ public class FeedbackResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getFeedbackJson(feedback, apiStatus));
+        return new JsonRepresentation(getFeedbackJson(feedback, apiStatus, false));
     }
 
     private JsonRepresentation show() {
@@ -214,7 +214,7 @@ public class FeedbackResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getFeedbackJson(feedback, apiStatus));
+        return new JsonRepresentation(getFeedbackJson(feedback, apiStatus, false));
     }
     
     private JsonRepresentation index() {
@@ -246,7 +246,7 @@ public class FeedbackResource extends ServerResource {
 			}
             
             for (Feedback fb : feedbacks) {
-                ja.put(getFeedbackJson(fb));
+                ja.put(getFeedbackJson(fb, true));
             }
             json.put("feedback", ja);
             json.put("apiStatus", apiStatus);
@@ -258,11 +258,11 @@ public class FeedbackResource extends ServerResource {
         return new JsonRepresentation(json);
     }
     
-    private JSONObject getFeedbackJson(Feedback feedback) {
-    	return getFeedbackJson(feedback, null);
+    private JSONObject getFeedbackJson(Feedback feedback, Boolean isList) {
+    	return getFeedbackJson(feedback, null, isList);
     }
 
-    private JSONObject getFeedbackJson(Feedback feedback, String theApiStatus) {
+    private JSONObject getFeedbackJson(Feedback feedback, String theApiStatus, Boolean isList) {
         JSONObject json = new JSONObject();
 
         try {
@@ -276,7 +276,9 @@ public class FeedbackResource extends ServerResource {
             	// TODO support time zones
             	if(recordedDate != null) {
             		TimeZone tz = GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		json.put("date", GMT.convertToLocalDate(recordedDate, tz, MobilePulseApplication.INFO_DATE_FORMAT));
+            		String dateFormat = MobilePulseApplication.INFO_DATE_FORMAT;
+            		if(isList) {dateFormat = MobilePulseApplication.LIST_DATE_FORMAT;}
+            		json.put("date", GMT.convertToLocalDate(recordedDate, tz, dateFormat));
             	}
             	
             	json.put("userName", feedback.getUserName());

@@ -120,7 +120,7 @@ public class ClientLogsResource extends ServerResource {
 			}
             
             for (ClientLog cl : clientLogs) {
-                ja.put(getClientLogJson(cl));
+                ja.put(getClientLogJson(cl, true));
             }
             json.put("clientLogs", ja);
             json.put("apiStatus", apiStatus);
@@ -162,7 +162,7 @@ public class ClientLogsResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getClientLogJson(clientLog, apiStatus));
+        return new JsonRepresentation(getClientLogJson(clientLog, apiStatus, false));
     }
 
     private JsonRepresentation save_client_log(Representation entity) {
@@ -260,14 +260,14 @@ public class ClientLogsResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getClientLogJson(clientLog, apiStatus));
+        return new JsonRepresentation(getClientLogJson(clientLog, apiStatus, false));
     }
     
-    private JSONObject getClientLogJson(ClientLog clientLog) {
-    	return getClientLogJson(clientLog, null);
+    private JSONObject getClientLogJson(ClientLog clientLog, Boolean isList) {
+    	return getClientLogJson(clientLog, null, isList);
     }
 
-    private JSONObject getClientLogJson(ClientLog clientLog, String theApiStatus) {
+    private JSONObject getClientLogJson(ClientLog clientLog, String theApiStatus, Boolean isList) {
         JSONObject json = new JSONObject();
 
         try {
@@ -281,7 +281,9 @@ public class ClientLogsResource extends ServerResource {
             	// TODO support time zones
             	if(createdDate != null) {
             		TimeZone tz = GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		json.put("date", GMT.convertToLocalDate(createdDate, tz, MobilePulseApplication.INFO_DATE_FORMAT));
+            		String dateFormat = MobilePulseApplication.INFO_DATE_FORMAT;
+            		if(isList) {dateFormat = MobilePulseApplication.LIST_DATE_FORMAT;}
+            		json.put("date", GMT.convertToLocalDate(createdDate, tz, dateFormat));
             	}
             	json.put("userName", clientLog.getUserName());
             	json.put("instanceUrl", clientLog.getInstanceUrl());

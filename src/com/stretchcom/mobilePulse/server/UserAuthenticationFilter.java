@@ -67,6 +67,11 @@ public class UserAuthenticationFilter implements Filter {
 
     		String thisURL = getURL(httpRequest);
     		log.info("thisURL = " + thisURL);
+        	
+	       	 if(thisURL.contains("/_ah/")) {
+	       		chain.doFilter(request, response);
+	       		return;
+	       	 }
     		
     		// ::::::::::::::::::::::::::::TESTING ONLY:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     		// uncomment during testing to allow all rest calls
