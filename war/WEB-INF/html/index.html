@@ -40,28 +40,31 @@
 <script>
   $('#options').live('pagecreate', function() {
     $(this).find('form').submit(saveOptions);
+
     $('#sendSmsNotifications').change(function() {
-      enableSmsDetails($('#sendSmsNotifications').prop('checked'));
+      enableSmsDetails($(this).prop('checked'));
     });
   });
 
   $('#options').live('pageshow', function() {
-    $.mobile.showPageLoadingMsg();
-    $.getJSON(REST_PREFIX + '/mobileCarriers', function(carriers) {
-      $('#mobileCarrierId').html(carrierOptions(carriers['mobileCarriers']));
-      $.getJSON(REST_PREFIX + '/users/current', function(user) {
-        setOptionFields(user);
-        $.mobile.hidePageLoadingMsg();
-      })
+    var restUrl;
+
+    restUrl = REST_PREFIX + '/mobileCarriers';
+    jsonPopulate(restUrl, $('#mobileCarrierId'), function(select, carriers) {
+      select.html(carrierOptions(carriers['mobileCarriers']));
+      restUrl = REST_PREFIX + '/users/current';
+      jsonPopulate(restUrl, $('#options'), populateOptions);
     });
   });
 
-  function setOptionFields(user) {
-    $('#options').find('form')[0].reset();
+  function populateOptions(page, user) {
+    var smsEnabled = user['sendSmsNotifications'];
+
+    page.find('form')[0].reset();
     $('#id').val(user['id']);
     $('#sendEmailNotifications').prop('checked', user['sendEmailNotifications']).checkboxradio('refresh');
-    $('#sendSmsNotifications').prop('checked', user['sendSmsNotifications']).checkboxradio('refresh');
-    enableSmsDetails(!user['sendSmsNotifications']);
+    $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
+    enableSmsDetails(smsEnabled);
     $('#phoneNumber').val(user['phoneNumber']);
     $('#mobileCarrierId').val(user['mobileCarrierId']).selectmenu('refresh');
   }
@@ -69,43 +72,18 @@
   function saveOptions() {
     if (!validateSms()) { return false; }
 
+    var restUrl = REST_PREFIX + '/users/' + $('#id').val();
     var json = JSON.stringify({
       'phoneNumber' : $('#phoneNumber').val(),
       'mobileCarrierId' : $('#mobileCarrierId').val(),
       'sendEmailNotifications' : $('#sendEmailNotifications').prop('checked'),
       'sendSmsNotifications' : $('#sendSmsNotifications').prop('checked')
     });
-    $.ajax({
-      type : 'PUT',
-      url : REST_PREFIX + '/users/' + $('#id').val(),
-      contentType : 'application/json',
-      data : json,
-      success : function(data) {
-        history.back();
-      },
-      dataType : 'json'
-    });
+
+    putJson(restUrl, json, function() {
+      history.back();
+    })
     return false;
-  }
-
-  function enableSmsDetails(enabled) {
-    $('#phoneNumber').prop('disabled', !enabled);
-    $('#mobileCarrierId').prop('disabled', !enabled);
-  }
-
-  function validateSms() {
-    if (!$('#sendSmsNotifications').prop('checked')) { return true; }
-
-    if (!validPhoneNumber($('#phoneNumber').val())) {
-      alert('Please enter a valid phone number.');
-      return false;
-    }
-    if ($('#mobileCarrierId').val() == NO_CARRIER) {
-      alert('Please select a mobile carrier.');
-      return false;
-    }
-
-    return true;
   }
 </script>
 
