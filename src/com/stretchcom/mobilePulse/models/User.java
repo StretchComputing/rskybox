@@ -55,7 +55,7 @@ public class User {
 	private String smsEmailAddress;
 	private Boolean sendEmailNotifications;
 	private Boolean sendSmsNotifications;
-	private Boolean isAdmin = false;
+	private Boolean isAdmin = false;  // deprecate?  Not storing this in the user object because it can too easily get out of synch with GAE permissions config
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
