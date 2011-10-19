@@ -21,7 +21,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
   </filter-mapping>
   <filter-mapping>
     <filter-name>UserAuthenticationFilter</filter-name>
-    <url-pattern>/rest/</url-pattern>
+    <url-pattern>/rest/*</url-pattern>
   </filter-mapping>
 
   <servlet>

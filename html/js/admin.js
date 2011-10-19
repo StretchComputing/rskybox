@@ -75,7 +75,7 @@ function buildNewItemPage() {
 }
 
 function saveItem() {
-  if (!validateSms()) { return false; }
+  if (!validateUser()) { return false; }
 
   var restUrl = REST_PREFIX + '/users';
   var json = JSON.stringify({
@@ -99,6 +99,15 @@ function saveItem() {
     });
   }
   return false;
+}
+
+function validateUser() {
+  if ($('#firstName').val() == '' ||
+      $('#lastName').val() == '' ||
+      $('#emailAddress').val() == '') {
+    alert('You must enter a first name, last name, and valid email address.');
+  }
+  if (!validateSms()) { return false; }
 }
 
 $('#delete').live('pagecreate', function() {
