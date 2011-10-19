@@ -113,7 +113,7 @@ public class CrashDetectsResource extends ServerResource {
 			}
             
             for (CrashDetect cd : crashDetects) {
-                ja.put(getCrashDetectJson(cd));
+                ja.put(getCrashDetectJson(cd, true));
             }
             json.put("crashDetects", ja);
             json.put("apiStatus", apiStatus);
@@ -155,7 +155,7 @@ public class CrashDetectsResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus));
+        return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus, false));
     }
 
     private JsonRepresentation save_crash_detect(Representation entity) {
@@ -252,14 +252,14 @@ public class CrashDetectsResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus));
+        return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus, false));
     }
     
-    private JSONObject getCrashDetectJson(CrashDetect crashDetect) {
-    	return getCrashDetectJson(crashDetect, null);
+    private JSONObject getCrashDetectJson(CrashDetect crashDetect, Boolean isList) {
+    	return getCrashDetectJson(crashDetect, null, isList);
     }
 
-    private JSONObject getCrashDetectJson(CrashDetect crashDetect, String theApiStatus) {
+    private JSONObject getCrashDetectJson(CrashDetect crashDetect, String theApiStatus, Boolean isList) {
         JSONObject json = new JSONObject();
 
         try {
@@ -274,7 +274,9 @@ public class CrashDetectsResource extends ServerResource {
             	// TODO support time zones
             	if(detectedDate != null) {
             		TimeZone tz = GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		json.put("date", GMT.convertToLocalDate(detectedDate, tz, MobilePulseApplication.INFO_DATE_FORMAT));
+            		String dateFormat = MobilePulseApplication.INFO_DATE_FORMAT;
+            		if(isList) {dateFormat = MobilePulseApplication.LIST_DATE_FORMAT;}
+            		json.put("date", GMT.convertToLocalDate(detectedDate, tz, dateFormat));
             	}
             	
             	json.put("userName", crashDetect.getUserName());
