@@ -1,5 +1,3 @@
-var REST_PREFIX = '/rest/';
-
 // set up the page(s) we need to build dynamically
 dynamicPages([{
   page : 'item',
@@ -21,7 +19,7 @@ function showList(page, list) {
 
 $('#index').live('pageshow', function() {
   $.mobile.showPageLoadingMsg();
-  $.getJSON('/rest/users', function(list) {
+  $.getJSON(REST_PREFIX + '/users', function(list) {
     showList($('#index'), list['users']);
     $.mobile.hidePageLoadingMsg();
   });
@@ -64,7 +62,7 @@ function saveItem() {
   });
   $.ajax({
     type : 'PUT',
-    url : '/rest/users/' + $('#id').val(),
+    url : REST_PREFIX + '/users/' + $('#id').val(),
     contentType : 'application/json',
     data : json,
     success : function(data) {
@@ -80,12 +78,12 @@ function itemPage(url, options) {
   $.mobile.showPageLoadingMsg();
   $('#item').find('form')[0].reset();
   var id = url.hash.replace(/.*id=/, '');
-  $.getJSON('/rest/mobileCarriers', function(carriers) {
+  $.getJSON(REST_PREFIX + '/mobileCarriers', function(carriers) {
     $('#mobileCarrierId').html(carrierOptions(carriers['mobileCarriers']));
     if (id == 'new') {
       switchPage(url, options);
     } else {
-      $.getJSON('/rest/users/' + id, function(item) {
+      $.getJSON(REST_PREFIX + '/users/' + id, function(item) {
         setupItem(item, url, options);
         switchPage(url, options);
       });
@@ -150,7 +148,7 @@ $('#delete').live('pagecreate', function() {
   $('#delete_item').click(function() {
     $.ajax({
       type : 'DELETE',
-      url : '/rest/users/' + $('#id').val(),
+      url : REST_PREFIX + '/users/' + $('#id').val(),
       contentType : 'application/json',
       success : function(data) {
         $.mobile.changePage('#index');

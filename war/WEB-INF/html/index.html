@@ -14,6 +14,9 @@
 <script>
   window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0rc1.min.js"><\/script>')
 </script>
+<script>
+  var REST_PREFIX = '/rest/v1';
+</script>
 <script src="/js/utils.js"></script>
 <script src="/js/jqm-utils.js"></script>
 </head>
@@ -44,9 +47,9 @@
 
   $('#options').live('pageshow', function() {
     $.mobile.showPageLoadingMsg();
-    $.getJSON('/rest/mobileCarriers', function(carriers) {
+    $.getJSON(REST_PREFIX + '/mobileCarriers', function(carriers) {
       $('#mobileCarrierId').html(carrierOptions(carriers['mobileCarriers']));
-      $.getJSON('/rest/users/current', function(user) {
+      $.getJSON(REST_PREFIX + '/users/current', function(user) {
         setOptionFields(user);
         $.mobile.hidePageLoadingMsg();
       })
@@ -74,7 +77,7 @@
     });
     $.ajax({
       type : 'PUT',
-      url : '/rest/users/' + $('#id').val(),
+      url : REST_PREFIX + '/users/' + $('#id').val(),
       contentType : 'application/json',
       data : json,
       success : function(data) {

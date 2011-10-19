@@ -30,9 +30,9 @@ options: Options
 
   $('#options').live('pageshow', function() {
     $.mobile.showPageLoadingMsg();
-    $.getJSON('/rest/mobileCarriers', function(carriers) {
+    $.getJSON(REST_PREFIX + '/mobileCarriers', function(carriers) {
       $('#mobileCarrierId').html(carrierOptions(carriers['mobileCarriers']));
-      $.getJSON('/rest/users/current', function(user) {
+      $.getJSON(REST_PREFIX + '/users/current', function(user) {
         setOptionFields(user);
         $.mobile.hidePageLoadingMsg();
       })
@@ -60,7 +60,7 @@ options: Options
     });
     $.ajax({
       type : 'PUT',
-      url : '/rest/users/' + $('#id').val(),
+      url : REST_PREFIX + '/users/' + $('#id').val(),
       contentType : 'application/json',
       data : json,
       success : function(data) {

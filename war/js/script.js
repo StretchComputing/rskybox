@@ -1,7 +1,3 @@
-// A place to easily update the version of rest we're using.
-var REST_PREFIX = '/rest/v1/';
-
-
 // Each type of item has its own index and archives page.
 // The following blocks set up event handlers for these internal pages.
 $('#index').live('pageshow', function() {
@@ -17,7 +13,7 @@ $('#archives').live('pageshow', function() {
 // page: the page we are setting up
 // status (optional): default is 'new', but this parameter can override the default
 function listPage(page, status) {
-  var restUrl = REST_PREFIX + itemName() + (status ? '?status='+ status : '');
+  var restUrl = REST_PREFIX + '/' + itemName() + (status ? '?status='+ status : '');
 
   jsonPage(restUrl, page, buildListPage)
 }
@@ -51,7 +47,7 @@ dynamicPages([{
 // options: JQM options for the current page (is this a correct statement?)
 function itemPage(url, options) {
   var changeStatus = getParameterByName(url, 'changeStatus');
-  var restUrl = REST_PREFIX + itemName() + '/' + getParameterByName(url, 'id');
+  var restUrl = REST_PREFIX + '/' +arguments itemName() + '/' + getParameterByName(url, 'id');
   // Get the page hash portion of the URL, make a jQuery element out of it.
   var page = $(getPageName(url));
 
