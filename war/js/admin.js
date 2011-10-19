@@ -41,11 +41,7 @@ function itemPage(page, url) {
   jsonPopulate(restUrl, $('#mobileCarrierId'), function(select, carriers) {
     select.html(carrierOptions(carriers['mobileCarriers']));
     if (id == 'new') {
-      $('#id').val('new');
-      $('#mobileCarrierId').val(NO_CARRIER).selectmenu('refresh');
-      $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
-      $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
-      enableSmsDetails(false);
+      buildNewItemPage();
     } else {
       restUrl = REST_PREFIX + '/users/' + id;
       jsonPopulate(restUrl, page, buildItemPage);
@@ -66,30 +62,17 @@ function buildItemPage(page, item) {
   enableSmsDetails(smsEnabled);
   $('#phoneNumber').val(item['phoneNumber']);
   $('#mobileCarrierId').val(item['mobileCarrierId']).selectmenu('refresh');
+  $('#delete_button').show();
 }
 
-//   function saveOtherItem() {
-//     var method, url;
-//     if ($('#id').val().length > 0) {
-//       method = 'PUT';
-//       url = '/rest/users/' + $('#id').val();
-//     } else {
-//       method = 'POST';
-//       url = '/rest/users';
-//     }
-//     var json = JSON.stringify($(this).serializeJSON());
-//     $.ajax({
-//       type : method,
-//       url : url,
-//       contentType : 'application/json',
-//       data : json,
-//       success : function(data) {
-//         display_user(data);
-//       },
-//       dataType : 'json'
-//     });
-//     return false;
-//   }
+function buildNewItemPage() {
+  $('#id').val('new');
+  $('#mobileCarrierId').val(NO_CARRIER).selectmenu('refresh');
+  $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
+  $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
+  enableSmsDetails(false);
+  $('#delete_button').hide();
+}
 
 function saveItem() {
   if (!validateSms()) { return false; }
@@ -119,15 +102,12 @@ function saveItem() {
 }
 
 $('#delete').live('pagecreate', function() {
-  $('#delete_item').click(function() {
-    $.ajax({
-      type : 'DELETE',
-      url : REST_PREFIX + '/users/' + $('#id').val(),
-      contentType : 'application/json',
-      success : function(data) {
-        $.mobile.changePage('#index');
-      },
-      dataType : 'json'
+  $('#delete_item').click(function(event) {
+    var restUrl = REST_PREFIX + '/users/' + $('#id').val();
+
+    deleteJson(restUrl, null, function() {
+      event.preventDefault();
+      $.mobile.changePage('#index');
     });
   });
 });

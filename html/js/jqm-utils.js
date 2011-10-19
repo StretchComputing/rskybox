@@ -50,15 +50,15 @@ function jsonPopulate(restUrl, element, success) {
 }
 
 
-// Do an Ajax POST call to update some data on the server.
+// Do an Ajax call using the given method.
 //
 // restUrl: URL for the REST call
-// data: the data to be sent with the request
+// data: the data to be sent with the request (null for DELETE)
 // callback: a function to call on success
-function postJson(restUrl, data, success) {
+function genericJson(method, restUrl, data, success) {
   $.ajax({
     url: restUrl,
-    type: 'POST',
+    type: method,
     contentType : 'application/json',
     data: data,
     success: success,
@@ -66,22 +66,21 @@ function postJson(restUrl, data, success) {
   });
 }
 
+// Do an Ajax POST call to create some data on the server.
+function postJson(restUrl, data, success) {
+  genericJson('POST', restUrl, data, success);
+}
 
 // Do an Ajax PUT call to update some data on the server.
-//
-// restUrl: URL for the REST call
-// data: the data to be sent with the request
-// callback: a function to call on success
 function putJson(restUrl, data, success) {
-  $.ajax({
-    url: restUrl,
-    type: 'PUT',
-    contentType : 'application/json',
-    data: data,
-    success: success,
-    dataType: 'json'
-  });
+  genericJson('PUT', restUrl, data, success);
 }
+
+// Do an Ajax DELETE call to delete some data on the server.
+function deleteJson(restUrl, data, success) {
+  genericJson('DELETE', restUrl, data, success);
+}
+
 
 
 // Set/Get the header area of a page.
