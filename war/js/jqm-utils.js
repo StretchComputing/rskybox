@@ -5,21 +5,27 @@
 //
 // (JQM doc page located at <jqm site>/<version>/docs/pages/page-dynamic.html.)
 //
-// pages: a hash of page/function pairs to be watched for and responded to
+// pairs: an array of hashes of page/function pairs to watch and responded to
 //    page: the name of the page without any decoration (such as, '#')
 //    function: function called to build the page
-function dynamicPages(pages) {
+function dynamicPages(pairs) {
   $(document).bind('pagebeforechange', function(event, data) {
     // Only handle pagebeforechange calls when loading a page via a URL.
     if (typeof data.toPage === "string") {
-      // Only handle requests for the item page.
       var url = $.mobile.path.parseUrl(data.toPage);
-      for (i = 0; i < pages.length; i++) {
-        var re = new RegExp('^#' + pages[i]['page']);
+
+      for (i = 0; i < pairs.length; i++) {
+        var pair = pairs[i];
+        var re = new RegExp('^' + pair['page']);
         if (re.test(url.hash)) {
-          // it's a little ugly, but this calls the function that was passed with
-          // two parameters
-          pages[i]['function'](url, data.options);
+          // Get the page hash portion of the URL, make a jQuery element out of it.
+          var page = $(pair['page']);
+
+          // calls the function that was passed in via the array of hashes
+          pair['function'](page, url);
+
+          data.options.dataUrl = url.href;
+          $.mobile.changePage(page, data.options);
           event.preventDefault();
         }
       }
@@ -60,11 +66,6 @@ function putJson(restUrl, data, success) {
   });
 }
 
-
-// Get the name of the page from a JQM URL.
-function getPageName(url) {
-  return url.hash.replace(/\?.*$/, '');
-}
 
 // Set/Get the header area of a page.
 //

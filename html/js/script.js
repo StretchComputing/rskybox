@@ -35,21 +35,21 @@ function buildListPage(page, list) {
 }
 
 
-// set up the page(s) we need to build dynamically
+// The page(s) we need to handle and build dynamically. Let's us get information
+// from the URL and do special handling for these dynamically injected pages.
 dynamicPages([{
-  page : 'item',
+  page : '#item',
   'function' : itemPage
 }]);
 
+
 // Generic function to show the item page.
 //
+// page: the jQuery element for the page
 // url: the URL object of the current page
-// options: JQM options for the current page (is this a correct statement?)
-function itemPage(url, options) {
+function itemPage(page, url) {
   var changeStatus = getParameterByName(url, 'changeStatus');
-  var restUrl = REST_PREFIX + '/' +arguments itemName() + '/' + getParameterByName(url, 'id');
-  // Get the page hash portion of the URL, make a jQuery element out of it.
-  var page = $(getPageName(url));
+  var restUrl = REST_PREFIX + '/' + itemName() + '/' + getParameterByName(url, 'id');
 
   if (changeStatus) {
     putJson(restUrl, '{ status: ' + changeStatus + '}', function(data) {
@@ -58,8 +58,6 @@ function itemPage(url, options) {
   } else {
     jsonPage(restUrl, page, buildItemPage);
   }
-  options.dataUrl = url.href;
-  $.mobile.changePage(page, options);
 }
 
 // Sets up common elements of the item page. Calls itemDetails for item-specific
