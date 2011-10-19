@@ -50,6 +50,7 @@ options: Options
     enableSmsDetails(smsEnabled);
     $('#phoneNumber').val(user['phoneNumber']);
     $('#mobileCarrierId').val(user['mobileCarrierId']).selectmenu('refresh');
+    $('#adminButton').toggle(user['isAdmin']);
   }
 
   function saveOptions() {
@@ -73,6 +74,7 @@ options: Options
 <div data-role="dialog" id="options" data-title="{{ page.title }} {{ page.options }}" data-theme="b">
   <div data-role="header">
     <h1>{{ page.options }}</h1>
+    <a href="/admin" id="adminButton" rel="external" style="display: none;">Admin</a>
   </div>
   <div data-role="content">
     <form>

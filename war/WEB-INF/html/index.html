@@ -67,6 +67,7 @@
     enableSmsDetails(smsEnabled);
     $('#phoneNumber').val(user['phoneNumber']);
     $('#mobileCarrierId').val(user['mobileCarrierId']).selectmenu('refresh');
+    $('#adminButton').toggle(user['isAdmin']);
   }
 
   function saveOptions() {
@@ -90,6 +91,7 @@
 <div data-role="dialog" id="options" data-title="MobilePulse Options" data-theme="b">
   <div data-role="header">
     <h1>Options</h1>
+    <a href="/admin" id="adminButton" rel="external" style="display: none;">Admin</a>
   </div>
   <div data-role="content">
     <form>
