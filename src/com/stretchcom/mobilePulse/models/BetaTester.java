@@ -1,5 +1,6 @@
 package com.stretchcom.mobilePulse.models;
 
+import java.util.Date;
 import java.util.logging.Logger;
 
 import javax.persistence.Entity;
@@ -28,6 +29,8 @@ public class BetaTester {
 	private String application;
 	private String version;
 	private String instanceUrl;
+	private Date createdGmtDate;
+	private Date versionUpdatedGmtDate;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -63,5 +66,21 @@ public class BetaTester {
 	}
 	public void setInstanceUrl(String instanceUrl) {
 		this.instanceUrl = instanceUrl;
+	}
+
+	public Date getCreatedGmtDate() {
+		return createdGmtDate;
+	}
+
+	public void setCreatedGmtDate(Date createdGmtDate) {
+		this.createdGmtDate = createdGmtDate;
+	}
+
+	public Date getVersionUpdatedGmtDate() {
+		return versionUpdatedGmtDate;
+	}
+
+	public void setVersionUpdatedGmtDate(Date versionUpdatedGmtDate) {
+		this.versionUpdatedGmtDate = versionUpdatedGmtDate;
 	}
 }
