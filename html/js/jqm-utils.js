@@ -82,22 +82,7 @@ function deleteJson(restUrl, data, success) {
 }
 
 
-
 // Set/Get the header area of a page.
-//
-// page: the page we're working with
-// markup (optional): if not specified, just return the element
-function pageContent(page, markup) {
-  var content = page.children(':jqmData(role=content)');
-
-  if (markup) {
-    content.html(markup);
-  }
-  return content;
-}
-
-
-// Set/Get the content area of a page.
 //
 // page: the page we're working with
 // markup (optional): if not specified, just return the element
@@ -108,6 +93,20 @@ function pageHeader(page, markup) {
     header.html(markup);
   }
   return header;
+}
+
+
+// Set/Get the content area of a page.
+//
+// page: the page we're working with
+// markup (optional): if not specified, just return the element
+function pageContent(page, markup) {
+  var content = page.children(':jqmData(role=content)');
+
+  if (markup) {
+    content.html(markup);
+  }
+  return content;
 }
 
 

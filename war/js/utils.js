@@ -4,6 +4,9 @@ function validPhoneNumber(phoneNumber) {
   return /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(phoneNumber);
 }
 
+function validEmailAddress(emailAddress) {
+  return /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(emailAddress);
+}
 
 // Build a list of mobile carriers options.
 //

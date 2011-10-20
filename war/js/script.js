@@ -1,3 +1,7 @@
+//
+// List
+//
+
 // Each type of item has its own index and archives page.
 // The following blocks set up event handlers for these internal pages.
 $('#index').live('pageshow', function() {
@@ -34,6 +38,10 @@ function buildListPage(page, list) {
   pageContent(page, markup).find(':jqmData(role=listview)').listview();
 }
 
+
+//
+// Item
+//
 
 // The page(s) we need to handle and build dynamically. Let's us get information
 // from the URL and do special handling for these dynamically injected pages.

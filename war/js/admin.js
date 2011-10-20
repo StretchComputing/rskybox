@@ -1,6 +1,13 @@
+var USERS_PATH = '/users';
+var MOBILE_CARRIERS_PATH = '/mobileCarriers';
+
+//
+// List
+//
+
 // this is currently specific to /users, but that's all we have to admin right now
 $('#index').live('pageshow', function() {
-  var restUrl = REST_PREFIX + '/users';
+  var restUrl = REST_PREFIX + USERS_PATH;
 
   jsonPopulate(restUrl, $('#index'), buildListPage);
 });
@@ -19,13 +26,20 @@ function buildListPage(page, list) {
 }
 
 
+//
+// Item
+//
+
+var ITEM_PAGE = '#item';
+var NEW_ITEM = 'new';
+
 // set up the page(s) we need to build dynamically
 dynamicPages([{
-  page: '#item',
+  page: ITEM_PAGE,
   'function': itemPage
 }]);
 
-$('#item').live('pagecreate', function() {
+$(ITEM_PAGE).live('pagecreate', function() {
   $(this).find('form').submit(saveItem);
 
   $('#sendSmsNotifications').change(function() {
@@ -35,15 +49,15 @@ $('#item').live('pagecreate', function() {
 
 function itemPage(page, url) {
   var id = getParameterByName(url, 'id');
-  var restUrl = REST_PREFIX + '/mobileCarriers';
+  var restUrl = REST_PREFIX + MOBILE_CARRIERS_PATH;
 
   page.find('form')[0].reset();
   jsonPopulate(restUrl, $('#mobileCarrierId'), function(select, carriers) {
     select.html(carrierOptions(carriers['mobileCarriers']));
-    if (id == 'new') {
+    if (id === NEW_ITEM) {
       buildNewItemPage();
     } else {
-      restUrl = REST_PREFIX + '/users/' + id;
+      restUrl = REST_PREFIX + USERS_PATH + '/' + id;
       jsonPopulate(restUrl, page, buildItemPage);
     }
   });
@@ -52,6 +66,7 @@ function itemPage(page, url) {
 function buildItemPage(page, item) {
   var smsEnabled = item['sendSmsNotifications'];
 
+  pageHeader($(ITEM_PAGE)).find('h1').html('Update User');
   $('#id').val(item['id']);
   $('#firstName').val(item['firstName']);
   $('#lastName').val(item['lastName']);
@@ -66,7 +81,8 @@ function buildItemPage(page, item) {
 }
 
 function buildNewItemPage() {
-  $('#id').val('new');
+  pageHeader($(ITEM_PAGE)).find('h1').html('Create User');
+  $('#id').val(NEW_ITEM);
   $('#mobileCarrierId').val(NO_CARRIER).selectmenu('refresh');
   $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
   $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
@@ -77,7 +93,7 @@ function buildNewItemPage() {
 function saveItem() {
   if (!validateUser()) { return false; }
 
-  var restUrl = REST_PREFIX + '/users';
+  var restUrl = REST_PREFIX + USERS_PATH;
   var json = JSON.stringify({
     'firstName': $('#firstName').val(),
     'lastName': $('#lastName').val(),
@@ -88,7 +104,7 @@ function saveItem() {
     'sendSmsNotifications': $('#sendSmsNotifications').prop('checked')
   });
 
-  if ($('#id').val() == 'new') {
+  if ($('#id').val() === NEW_ITEM) {
     postJson(restUrl, json, function() {
       history.back();
     });
@@ -102,17 +118,17 @@ function saveItem() {
 }
 
 function validateUser() {
-  if ($('#firstName').val() == '' ||
-      $('#lastName').val() == '' ||
-      $('#emailAddress').val() == '') {
+  if (!$('#firstName').val() || !$('#lastName').val() || !validEmailAddress($('#emailAddress').val())) {
     alert('You must enter a first name, last name, and valid email address.');
+    return false;
   }
   if (!validateSms()) { return false; }
+  return true;
 }
 
 $('#delete').live('pagecreate', function() {
   $('#delete_item').click(function(event) {
-    var restUrl = REST_PREFIX + '/users/' + $('#id').val();
+    var restUrl = REST_PREFIX + USERS_PATH + '/' + $('#id').val();
 
     deleteJson(restUrl, null, function() {
       event.preventDefault();
