@@ -24,7 +24,7 @@ function carrierOptions(carriers) {
 
 function enableSmsDetails(enabled) {
   $('#phoneNumber').prop('disabled', !enabled);
-  $('#mobileCarrierId').prop('disabled', !enabled);
+  $('#mobileCarrierId').prop('disabled', !enabled).selectmenu('refresh');
 }
 
 function validateSms() {

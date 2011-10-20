@@ -64,8 +64,13 @@ function buildNewItemPage() {
     <form>
       <input type="hidden" name="id" id="id">
 
+      <label for="firstName" class="ui-hidden-accessible">First Name:</label>
       <input type="text" name="firstName" id="firstName" placeholder="First Name" required>
+
+      <label for="lastName" class="ui-hidden-accessible">Last Name:</label>
       <input type="text" name="lastName" id="lastName" placeholder="Last Name" required>
+
+      <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
       <input type="email" name="emailAddress" id="emailAddress" placeholder="Email Address" required>
 
       <input type="checkbox" name="sendEmailNotifications" id="sendEmailNotifications">
@@ -73,8 +78,12 @@ function buildNewItemPage() {
 
       <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications">
       <label for="sendSmsNotifications">SMS Notifications</label>
+
+      <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
       <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" required disabled>
-      <select name="mobileCarrierId" id="mobileCarrierId" disabled>
+
+      <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile Carrier:</label>
+      <select name="mobileCarrierId" id="mobileCarrierId">
       </select>
 
       <input type="submit" value="Save">
