@@ -1,25 +1,23 @@
-var USERS_PATH = '/users';
+var ITEM_PATH = '/' + ITEM_NAME;
 var MOBILE_CARRIERS_PATH = '/mobileCarriers';
 
 //
 // List
 //
 
-// this is currently specific to /users, but that's all we have to admin right now
 $('#index').live('pageshow', function() {
-  var restUrl = REST_PREFIX + USERS_PATH;
+  var restUrl = REST_PREFIX + ITEM_PATH;
 
   jsonPopulate(restUrl, $('#index'), buildListPage);
 });
 
 function buildListPage(page, list) {
   var markup ='<ul data-role="listview">';
-  var users = list['users'];
+  var items = list[ITEM_NAME];
 
-  for (i = 0; i < users.length; i++) {
-    var user = users[i];
-    var display = user['firstName'] + ' ' + user['lastName'] + ': ' + user['emailAddress'];
-    markup += '<li><a href="#item?id=' + user['id'] +'">' + display +'</a></li>';
+  for (i = 0; i < items.length; i++) {
+    var item = items[i];
+    markup += '<li><a href="#item?id=' + item['id'] +'">' + getItemLinkText(item) +'</a></li>';
   }
   markup += '</ul>'
   pageContent(page, markup).find(':jqmData(role=listview)').listview();
@@ -57,43 +55,16 @@ function itemPage(page, url) {
     if (id === NEW_ITEM) {
       buildNewItemPage();
     } else {
-      restUrl = REST_PREFIX + USERS_PATH + '/' + id;
+      restUrl = REST_PREFIX + ITEM_PATH + '/' + id;
       jsonPopulate(restUrl, page, buildItemPage);
     }
   });
 }
 
-function buildItemPage(page, item) {
-  var smsEnabled = item['sendSmsNotifications'];
-
-  pageHeader($(ITEM_PAGE)).find('h1').html('Update User');
-  $('#id').val(item['id']);
-  $('#firstName').val(item['firstName']);
-  $('#lastName').val(item['lastName']);
-  $('#emailAddress').val(item['emailAddress']);
-
-  $('#sendEmailNotifications').prop('checked', item['sendEmailNotifications']).checkboxradio('refresh');
-  $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
-  enableSmsDetails(smsEnabled);
-  $('#phoneNumber').val(item['phoneNumber']);
-  $('#mobileCarrierId').val(item['mobileCarrierId']).selectmenu('refresh');
-  $('#delete_button').show();
-}
-
-function buildNewItemPage() {
-  pageHeader($(ITEM_PAGE)).find('h1').html('Create User');
-  $('#id').val(NEW_ITEM);
-  $('#mobileCarrierId').val(NO_CARRIER).selectmenu('refresh');
-  $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
-  $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
-  enableSmsDetails(false);
-  $('#delete_button').hide();
-}
-
 function saveItem() {
   if (!validateUser()) { return false; }
 
-  var restUrl = REST_PREFIX + USERS_PATH;
+  var restUrl = REST_PREFIX + ITEM_PATH;
   var json = JSON.stringify({
     'firstName': $('#firstName').val(),
     'lastName': $('#lastName').val(),
@@ -104,16 +75,12 @@ function saveItem() {
     'sendSmsNotifications': $('#sendSmsNotifications').prop('checked')
   });
 
-  if ($('#id').val() === NEW_ITEM) {
-    postJson(restUrl, json, function() {
-      history.back();
-    });
-  } else {
+  if ($('#id').val() !== NEW_ITEM) {
     restUrl += '/' + $('#id').val();
-    putJson(restUrl, json, function() {
-      history.back();
-    });
   }
+  putJson(restUrl, json, function() {
+    history.back();
+  });
   return false;
 }
 
@@ -128,7 +95,7 @@ function validateUser() {
 
 $('#delete').live('pagecreate', function() {
   $('#delete_item').click(function(event) {
-    var restUrl = REST_PREFIX + USERS_PATH + '/' + $('#id').val();
+    var restUrl = REST_PREFIX + ITEM_PATH + '/' + $('#id').val();
 
     deleteJson(restUrl, null, function() {
       event.preventDefault();

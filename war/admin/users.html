@@ -20,9 +20,43 @@
 <script src="/js/jqm-utils.js"></script>
 <script src="/js/utils.js"></script>
 </head>
-<body><script src="/js/admin.js"></script>
+<body><script>
+var ITEM_NAME = 'users'
 
-<div data-role="page" id="index">
+function getItemLinkText(item) {
+  return item['firstName'] + ' ' + item['lastName'] + ': ' + item['emailAddress'];
+}
+
+function buildItemPage(page, item) {
+  var smsEnabled = item['sendSmsNotifications'];
+
+  pageHeader($(ITEM_PAGE)).find('h1').html('Update User');
+  $('#id').val(item['id']);
+  $('#firstName').val(item['firstName']);
+  $('#lastName').val(item['lastName']);
+  $('#emailAddress').val(item['emailAddress']);
+
+  $('#sendEmailNotifications').prop('checked', item['sendEmailNotifications']).checkboxradio('refresh');
+  $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
+  enableSmsDetails(smsEnabled);
+  $('#phoneNumber').val(item['phoneNumber']);
+  $('#mobileCarrierId').val(item['mobileCarrierId']).selectmenu('refresh');
+  $('#delete_button').show();
+}
+
+function buildNewItemPage() {
+  pageHeader($(ITEM_PAGE)).find('h1').html('New User');
+  $('#id').val(NEW_ITEM);
+  $('#mobileCarrierId').val(NO_CARRIER).selectmenu('refresh');
+  $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
+  $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
+  enableSmsDetails(false);
+  $('#delete_button').hide();
+}
+</script>
+<script src="/js/admin.js"></script>
+
+<div data-role="page" id="index" data-title="All Users">
   <div data-role="header">
     <a href="index.html" rel="external">Home</a>
     <h1>All Users</h1>
@@ -39,7 +73,7 @@
 </div>
 
 
-<div data-role="page" id="item">
+<div data-role="page" id="item" data-title="User">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
     <h1></h1>

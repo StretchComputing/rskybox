@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>MobilePulse Admin</title>
+<title>MobilePulse Users</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0rc1/jquery.mobile-1.0rc1.min.css" />
 <link rel="stylesheet" href="/css/styles.css">
@@ -20,19 +20,34 @@
 <script src="/js/jqm-utils.js"></script>
 <script src="/js/utils.js"></script>
 </head>
-<body><div data-role="page" id="index" data-title="MobilePulse Admin">
+<body><script>
+var ITEM_NAME = 'betaTesters'
+
+function getItemLinkText(item) {
+  return item['application'] + ', ' + item['version'] + ': ' + item['userName'];
+}
+
+function buildItemPage(page, item) {
+  
+}
+</script>
+<script src="/js/admin.js"></script>
+
+<div data-role="page" id="index" data-title="Beta Testers">
   <div data-role="header">
-    <a href="/" rel="external">To App</a>
-    <h1>MobilePulse Admin</h1>
+    <a href="index.html" rel="external">Home</a>
+    <h1>Beta Testers</h1>
   </div>
-  <div data-role="content">
-    <ul data-role="listview">
-      <li><a href="users.html" rel="external">Users</a>
-      </li>
-      <li><a href="betatesters.html" rel="external">Beta Testers</a>
-      </li>
-    </ul>
+  <div data-role="content"></div>
+</div>
+
+
+<div data-role="page" id="item" data-title="Beta Tester">
+  <div data-role="header">
+    <a href="#" data-rel="back">Back</a>
+    <h1>Beta Tester</h1>
   </div>
+  <div data-role="content"></div>
 </div>
 </body>
 </html>

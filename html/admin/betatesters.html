@@ -1,0 +1,33 @@
+---
+layout: default
+title: MobilePulse Users
+---
+<script>
+var ITEM_NAME = 'betaTesters'
+
+function getItemLinkText(item) {
+  return item['application'] + ', ' + item['version'] + ': ' + item['userName'];
+}
+
+function buildItemPage(page, item) {
+  
+}
+</script>
+<script src="/js/admin.js"></script>
+
+<div data-role="page" id="index" data-title="Beta Testers">
+  <div data-role="header">
+    <a href="index.html" rel="external">Home</a>
+    <h1>Beta Testers</h1>
+  </div>
+  <div data-role="content"></div>
+</div>
+
+
+<div data-role="page" id="item" data-title="Beta Tester">
+  <div data-role="header">
+    <a href="#" data-rel="back">Back</a>
+    <h1>Beta Tester</h1>
+  </div>
+  <div data-role="content"></div>
+</div>
