@@ -1,3 +1,8 @@
+// Clear the cookie and redirect to the home page
+function logout() {
+  document.cookie = document.cookie + ";expires=" + new Date().toGMTString();
+  window.location.reload(true);
+}
 
 // Simple RegEx to ensure a valid phone number format.
 function validPhoneNumber(phoneNumber) {

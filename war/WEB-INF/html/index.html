@@ -21,6 +21,11 @@
 <script src="/js/utils.js"></script>
 </head>
 <body><!-- Home -->
+<script>
+$('#index').live('pagecreate', function() {
+  $('#logout').click(logout);
+});
+</script>
 <div data-role="page" id="index" data-title="MobilePulse">
   <div data-role="header">
     <a href="#options" data-icon="gear">Options</a>
@@ -37,7 +42,7 @@
     </ul>
   </div>
   <div data-role="footer" class="ui-bar" style="text-align: center;">
-    <a href="/logout" rel="external">Logout</a>
+    <a href="#" id="logout">Logout</a>
   </div>
 </div>
 

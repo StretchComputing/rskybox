@@ -4,6 +4,11 @@ title: MobilePulse
 options: Options
 ---
 <!-- Home -->
+<script>
+$('#index').live('pagecreate', function() {
+  $('#logout').click(logout);
+});
+</script>
 <div data-role="page" id="index" data-title="{{ page.title }}">
   <div data-role="header">
     <a href="#options" data-icon="gear">{{ page.options }}</a>
@@ -20,7 +25,7 @@ options: Options
     </ul>
   </div>
   <div data-role="footer" class="ui-bar" style="text-align: center;">
-    <a href="/logout" rel="external">Logout</a>
+    <a href="#" id="logout">Logout</a>
   </div>
 </div>
 
