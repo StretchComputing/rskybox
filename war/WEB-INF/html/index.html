@@ -45,9 +45,9 @@
 
   $('#options').live('pageshow', function() {
     $.mobile.showPageLoadingMsg();
-    $.getJSON('/rest/mobileCarriers', function(carriers) {
+    $.getJSON('/rest/v1/mobileCarriers', function(carriers) {
       $('#mobileCarrierId').html(carrierOptions(carriers['mobileCarriers']));
-      $.getJSON('/rest/users/current', function(user) {
+      $.getJSON('/rest/v1/users/current', function(user) {
         setOptionFields(user);
         $.mobile.hidePageLoadingMsg();
       })
@@ -83,7 +83,7 @@
     });
     $.ajax({
       type : 'PUT',
-      url : '/rest/users/' + $('#id').val(),
+      url : '/rest/v1/users/' + $('#id').val(),
       contentType : 'application/json',
       data : json,
       success : function(data) {
