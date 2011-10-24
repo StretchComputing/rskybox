@@ -189,4 +189,22 @@ public class User {
 		}
 		return isAuthenticated;
 	}
+	
+	// Create a new user.
+	// theEmailAddress: email address of new user.  Not checked for uniqueness. Assumed the caller knows email address is unique.
+	// theNickName: from Google App Engine User object.  Could just be the email address again. Used to set new user's first name.
+	public static User createUser(String theEmailAddress, String theNickName) {
+        EntityManager em = EMF.get().createEntityManager();
+        User user = null;
+		try {
+			user = new User();
+			user.setEmailAddress(theEmailAddress);
+			user.setFirstName(theNickName);
+			log.info("creating new user with email address = " + theEmailAddress);
+			em.persist(user);
+		} catch (Exception e) {
+			log.severe("User::createUser() exception = " + e.getMessage());
+		}
+		return user;
+	}
 }
