@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MobilePulse</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0rc2/jquery.mobile-1.0rc2.min.css" />
+<link rel="stylesheet" href="/css/styles.css">
+<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
+<script>
+  window.jQuery || document.write('<script src="/js/libs/jquery-1.6.4.min.js"><\/script>')
+</script>
+<script src="http://code.jquery.com/mobile/1.0rc2/jquery.mobile-1.0rc2.min.js"></script>
+<script>
+  window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0rc2.min.js"><\/script>')
+</script>
+<script>
+  var REST_PREFIX = '/rest/v1';
+</script>
+<script src="/js/jqm-utils.js"></script>
+<script src="/js/utils.js"></script>
+</head>
+<body><!-- Home -->
+<script>
+$('#index').live('pagecreate', function() {
+  $('#logout').click(logout);
+});
+</script>
+<div data-role="page" id="index" data-title="MobilePulse">
+  <div data-role="header">
+    <a href="#options" data-icon="gear">Options</a>
+    <h1>MobilePulse</h1>
+  </div>
+  <div data-role="content">
+    <ul data-role="listview">
+      <li><a href="feedback.html" rel="external">Feedback</a>
+      </li>
+      <li><a href="crashdetects.html" rel="external">Crash Detects</a>
+      </li>
+      <li><a href="clientlogs.html" rel="external">Client Logs</a>
+      </li>
+    </ul>
+  </div>
+  <div data-role="footer" class="ui-bar" style="text-align: center;">
+    <a href="#" id="logout">Logout</a>
+  </div>
+</div>
+
+<!-- Options -->
+<script>
+$('#options').live('pagecreate', function() {
+  $(this).find('form').submit(saveOptions);
+
+  $('#sendSmsNotifications').change(function() {
+    enableSmsDetails($(this).prop('checked'));
+  });
+});
+
+$('#options').live('pageshow', function() {
+  var restUrl;
+
+  restUrl = REST_PREFIX + '/mobileCarriers';
+  jsonPopulate(restUrl, $('#mobileCarrierId'), function(select, carriers) {
+    select.html(carrierOptions(carriers['mobileCarriers']));
+    restUrl = REST_PREFIX + '/users/current';
+    jsonPopulate(restUrl, $('#options'), populateOptions);
+  });
+});
+
+function populateOptions(page, user) {
+  var smsEnabled = user['sendSmsNotifications'];
+
+  page.find('form')[0].reset();
+  $('#id').val(user['id']);
+  $('#sendEmailNotifications').prop('checked', user['sendEmailNotifications']).checkboxradio('refresh');
+  $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
+  enableSmsDetails(smsEnabled);
+  $('#phoneNumber').val(user['phoneNumber']);
+  $('#mobileCarrierId').val(user['mobileCarrierId']).selectmenu('refresh');
+  $('#adminButton').toggle(user['isAdmin']);
+}
+
+function saveOptions() {
+  if (!validateSms()) { return false; }
+
+  var restUrl = REST_PREFIX + '/users/' + $('#id').val();
+  var json = JSON.stringify({
+    'phoneNumber' : $('#phoneNumber').val(),
+    'mobileCarrierId' : $('#mobileCarrierId').val(),
+    'sendEmailNotifications' : $('#sendEmailNotifications').prop('checked'),
+    'sendSmsNotifications' : $('#sendSmsNotifications').prop('checked')
+  });
+
+  putJson(restUrl, json, function() {
+    history.back();
+  })
+  return false;
+}
+</script>
+
+<div data-role="dialog" id="options" data-title="MobilePulse Options" data-theme="b">
+  <div data-role="header">
+    <h1>Options</h1>
+    <a href="/admin" id="adminButton" rel="external" style="display: none;">Admin</a>
+  </div>
+  <div data-role="content">
+    <form>
+      <input id="id" type="hidden">
+      <input type="checkbox" name="sendEmailNotifications" id="sendEmailNotifications">
+      <label for="sendEmailNotifications">Email Notifications</label>
+      <hr>
+      <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications">
+      <label for="sendSmsNotifications">SMS Notifications</label>
+      <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" required disabled>
+      <select name="mobileCarrierId" id="mobileCarrierId">
+      </select>
+      <hr>
+      <input type="submit" value="Save">
+    </form>
+  </div>
+  <div data-role="footer">
+    <div data-role="navbar">
+      <ul>
+        <li><a href="#index" data-rel="back" data-role="button">Cancel</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+</body>
+</html>
