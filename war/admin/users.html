@@ -24,23 +24,39 @@
 var ITEM_NAME = 'users'
 
 function getItemLinkText(item) {
-  return item['firstName'] + ' ' + item['lastName'] + ': ' + item['emailAddress'];
+  return item.firstName + ' ' + item.lastName + ': ' + item.emailAddress;
+}
+
+function itemPage(page, url) {
+  var id = getParameterByName(url, 'id');
+  var restUrl = REST_PREFIX + MOBILE_CARRIERS_PATH;
+
+  page.find('form')[0].reset();
+  jsonPopulate(restUrl, $('#mobileCarrierId'), function(select, carriers) {
+    select.html(carrierOptions(carriers.mobileCarriers));
+    if (id === NEW_ITEM) {
+      buildNewItemPage();
+    } else {
+      restUrl = REST_PREFIX + ITEM_PATH + '/' + id;
+      jsonPopulate(restUrl, page, buildItemPage);
+    }
+  });
 }
 
 function buildItemPage(page, item) {
-  var smsEnabled = item['sendSmsNotifications'];
+  var smsEnabled = item.sendSmsNotifications;
 
   pageHeader($(ITEM_PAGE)).find('h1').html('Update User');
-  $('#id').val(item['id']);
-  $('#firstName').val(item['firstName']);
-  $('#lastName').val(item['lastName']);
-  $('#emailAddress').val(item['emailAddress']);
+  $('#id').val(item.id);
+  $('#firstName').val(item.firstName);
+  $('#lastName').val(item.lastName);
+  $('#emailAddress').val(item.emailAddress);
 
-  $('#sendEmailNotifications').prop('checked', item['sendEmailNotifications']).checkboxradio('refresh');
+  $('#sendEmailNotifications').prop('checked', item.sendEmailNotifications).checkboxradio('refresh');
   $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
   enableSmsDetails(smsEnabled);
-  $('#phoneNumber').val(item['phoneNumber']);
-  $('#mobileCarrierId').val(item['mobileCarrierId']).selectmenu('refresh');
+  $('#phoneNumber').val(item.phoneNumber);
+  $('#mobileCarrierId').val(item.mobileCarrierId).selectmenu('refresh');
   $('#delete_button').show();
 }
 

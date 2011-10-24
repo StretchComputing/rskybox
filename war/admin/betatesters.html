@@ -24,11 +24,20 @@
 var ITEM_NAME = 'betaTesters'
 
 function getItemLinkText(item) {
-  return item['application'] + ', ' + item['version'] + ': ' + item['userName'];
+  return item.application + ', ' + item.version + ': ' + item.userName;
+}
+
+function itemPage(page, url) {
+  restUrl = REST_PREFIX + ITEM_PATH + '/' + getParameterByName(url, 'id');
+  jsonPopulate(restUrl, page, buildItemPage);
 }
 
 function buildItemPage(page, item) {
-  
+  var markup = '<div>Username: ' + item.userName + '</div>';
+  markup += '<div>Application: ' + item.application + '</div>';
+  markup += '<div>Version: ' + item.version + '</div>';
+  markup += '<div>Instance URL: ' + item.instanceUrl + '</div>';
+  pageContent(page, markup);
 }
 </script>
 <script src="/js/admin.js"></script>
