@@ -163,16 +163,25 @@ public class UsersResource extends ServerResource {
 	        	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
 	        	isAdmin = userService.isUserAdmin();
 	        	if(currentUser == null) {
-	        		// TODO commenteed out next line just for testing
 	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 	        	}
 	        	
-	        	// TODO more test code
 	        	String emailAddress = currentUser.getEmail().toLowerCase();
-	        	//String emailAddress = "joepwro@gmail.com";
-	    		user = (User)em.createNamedQuery("User.getByEmailAddress")
-					.setParameter("emailAddress", emailAddress)
-					.getSingleResult();
+	    		try {
+					user = (User)em.createNamedQuery("User.getByEmailAddress")
+						.setParameter("emailAddress", emailAddress)
+						.getSingleResult();
+				} catch (NoResultException e) {
+					// if user is Admin, create a user object on the fly.  This allows admins of the app to just start using mobile pulse without
+					// any configuration necessary. A slick little feature.
+					if(isAdmin) {
+						user = User.createUser(emailAddress, currentUser.getNickname());
+						log.info("new user created on the fly for the admin. New user email address = " + emailAddress);
+					} else {
+						log.info("User not found");
+						apiStatus = ApiStatusCode.USER_NOT_FOUND;
+					}
+				}
 			} else {
 				// id of user specified
 	            Key key;
