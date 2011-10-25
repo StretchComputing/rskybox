@@ -10,7 +10,6 @@ $('#index').live('pagecreate', function() {
   jsonPopulate(restUrl, $('#logout'), function(link, user) {
     link.attr('href', user.logoutUrl);
   });
-  $('#logout').click(logout);
 });
 </script>
 
