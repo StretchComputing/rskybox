@@ -1,43 +1,26 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>MobilePulse</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0rc2/jquery.mobile-1.0rc2.min.css" />
-<link rel="stylesheet" href="/css/styles.css">
-<script src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
-<script>
-  window.jQuery || document.write('<script src="/js/libs/jquery-1.6.4.min.js"><\/script>')
-</script>
-<script src="http://code.jquery.com/mobile/1.0rc2/jquery.mobile-1.0rc2.min.js"></script>
-<script>
-  window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0rc2.min.js"><\/script>')
-</script>
-<script>
-  var REST_PREFIX = '/rest/v1';
-</script>
-<script src="/js/jqm-utils.js"></script>
-<script src="/js/utils.js"></script>
-</head>
-<body><!-- Home -->
+---
+layout: default
+title: MobilePulse
+options: Options
+---
+<!-- Home -->
 <script>
 $('#index').live('pagecreate', function() {
   $('#logout').click(logout);
 });
 </script>
-<div data-role="page" id="index" data-title="MobilePulse">
+<div data-role="page" id="index" data-title="{{ page.title }}">
   <div data-role="header">
-    <a href="#options" data-icon="gear">Options</a>
-    <h1>MobilePulse</h1>
+    <a href="#options" data-icon="gear">{{ page.options }}</a>
+    <h1>{{ page.title }}</h1>
   </div>
   <div data-role="content">
     <ul data-role="listview">
-      <li><a href="feedback.html" rel="external">Feedback</a>
+      <li><a href="{{ site.html }}/feedback" rel="external">Feedback</a>
       </li>
-      <li><a href="crashdetects.html" rel="external">Crash Detects</a>
+      <li><a href="{{ site.html }}/crashdetects" rel="external">Crash Detects</a>
       </li>
-      <li><a href="clientlogs.html" rel="external">Client Logs</a>
+      <li><a href="{{ site.html }}/clientlogs" rel="external">Client Logs</a>
       </li>
     </ul>
   </div>
@@ -71,13 +54,13 @@ function populateOptions(page, user) {
   var smsEnabled = user['sendSmsNotifications'];
 
   page.find('form')[0].reset();
-  $('#id').val(user['id']);
-  $('#sendEmailNotifications').prop('checked', user['sendEmailNotifications']).checkboxradio('refresh');
+  $('#id').val(user.id);
+  $('#sendEmailNotifications').prop('checked', user.sendEmailNotifications).checkboxradio('refresh');
   $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
   enableSmsDetails(smsEnabled);
   $('#phoneNumber').val(user['phoneNumber']);
-  $('#mobileCarrierId').val(user['mobileCarrierId']).selectmenu('refresh');
-  $('#adminButton').toggle(user['isAdmin']);
+  $('#mobileCarrierId').val(user.mobileCarrierId).selectmenu('refresh');
+  $('#adminButton').toggle(user.isAdmin);
 }
 
 function saveOptions() {
@@ -98,10 +81,10 @@ function saveOptions() {
 }
 </script>
 
-<div data-role="dialog" id="options" data-title="MobilePulse Options" data-theme="b">
+<div data-role="dialog" id="options" data-title="{{ page.title }} {{ page.options }}" data-theme="b">
   <div data-role="header">
-    <h1>Options</h1>
-    <a href="/admin" id="adminButton" rel="external" style="display: none;">Admin</a>
+    <h1>{{ page.options }}</h1>
+    <a href="{{ site.html }}/admin" id="adminButton" rel="external" style="display: none;">Admin</a>
   </div>
   <div data-role="content">
     <form>
@@ -126,5 +109,3 @@ function saveOptions() {
     </div>
   </div>
 </div>
-</body>
-</html>

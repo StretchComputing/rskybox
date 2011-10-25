@@ -21,7 +21,7 @@ import com.google.appengine.repackaged.com.google.common.util.Base64DecoderExcep
 
 public class UserAuthenticationFilter implements Filter {
 
-    private static final String HTML_DIR = "/WEB-INF/html";
+    private static final String HTML_DIR = "/WEB-INF";
     private static final String A_PRIORI_TOKEN = "agxtb2JpbGUtcHVsc2VyDgsSCEZlZWRiYWNrGBEM";
     private static final Logger log = Logger.getLogger(UserAuthenticationFilter.class.getName());
 

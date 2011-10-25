@@ -21,7 +21,7 @@ var NO_CARRIER = '-1';
 function carrierOptions(carriers) {
   var markup = '<option value="' + NO_CARRIER + '">Mobile Carrier</option>';
   for (i = 0; i < carriers.length; i++) {
-    markup += '<option value="' + carriers[i]['id'] + '">' + carriers[i]['name'] + '</option>';
+    markup += '<option value="' + carriers[i].id + '">' + carriers[i].name + '</option>';
   }
   return markup;
 }

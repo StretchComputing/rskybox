@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Mobile Pulse" default="jekyll" basedir=".">
     <target name="jekyll">
-        <exec dir="html" executable="jekyll"/>
+        <exec dir="html5" executable="jekyll"/>
         <copy todir="war">
-            <fileset dir="html/_site" includes="css/,js/"/>
+            <fileset dir="html5/_site" includes="css/,js/"/>
         </copy>
-        <copy todir="war/WEB-INF/html">
-            <fileset dir="html/_site">
+        <copy todir="war/WEB-INF/html5">
+            <fileset dir="html5/_site">
                 <include name="**/*.html"/>
                 <exclude name="css/,js/"/>
             </fileset>

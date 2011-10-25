@@ -31,8 +31,8 @@ function buildListPage(page, list) {
 
   for (i = 0; i < list[itemName()].length; i++) {
     var item = list[itemName()][i];
-    var display = item['date'] + ' - ' + item['userName'] + ' - ' + item['instanceUrl'];
-    markup += '<li><a href="#item?id=' + item['id'] + '">' + display + '</a></li>';
+    var display = item.date + ' - ' + item.userName + ' - ' + item.instanceUrl;
+    markup += '<li><a href="#item?id=' + item.id + '">' + display + '</a></li>';
   }
   markup += '</ul>'
   pageContent(page, markup).find(':jqmData(role=listview)').listview();
@@ -72,11 +72,11 @@ function itemPage(page, url) {
 // elements.
 function buildItemPage(page, item) {
   var h1 = pageHeader(page).find('h1');
-  var status = item['status'] == 'new' ? 'archived' : 'new';
+  var status = item.status == 'new' ? 'archived' : 'new';
   var link;
 
-  link  = '<a href="#item?id=' + item['id'] + '&changeStatus=' + status + '" class="ui-btn-right" data-theme="b">';
-  link +=   item['status'] == 'new' ? 'Archive' : 'Un-archive';
+  link  = '<a href="#item?id=' + item.id + '&changeStatus=' + status + '" class="ui-btn-right" data-theme="b">';
+  link +=   item.status == 'new' ? 'Archive' : 'Un-archive';
   link += '</a>';
 
   h1.next('a').remove();
