@@ -346,7 +346,12 @@ public class UsersResource extends ServerResource {
                 json.put("emailAddress", user.getEmailAddress());
                 json.put("sendEmailNotifications", user.getSendEmailNotifications());
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
-                if(isCurrentUserAdmin != null) json.put("isAdmin", isCurrentUserAdmin);
+                if(isCurrentUserAdmin != null) {
+                	json.put("isAdmin", isCurrentUserAdmin);
+                	
+    	        	UserService userService = UserServiceFactory.getUserService();
+    	        	json.put("logoutUrl", userService.createLogoutURL(MobilePulseApplication.APPLICATION_WELCOME_PAGE));
+                }
                 
                 if(user.getSmsEmailAddress() != null && user.getSmsEmailAddress().length() > 0) {
                 	String emailDomainName = Utility.getEmailDomainNameFromSmsEmailAddress(user.getSmsEmailAddress());
