@@ -6,9 +6,14 @@ options: Options
 <!-- Home -->
 <script>
 $('#index').live('pagecreate', function() {
+  var restUrl = REST_PREFIX + '/users/current';
+  jsonPopulate(restUrl, $('#logout'), function(link, user) {
+    link.attr('href', user.logoutUrl);
+  });
   $('#logout').click(logout);
 });
 </script>
+
 <div data-role="page" id="index" data-title="{{ page.title }}">
   <div data-role="header">
     <a href="#options" data-icon="gear">{{ page.options }}</a>

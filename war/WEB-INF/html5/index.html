@@ -23,9 +23,14 @@
 <body><!-- Home -->
 <script>
 $('#index').live('pagecreate', function() {
+  var restUrl = REST_PREFIX + '/users/current';
+  jsonPopulate(restUrl, $('#logout'), function(link, user) {
+    link.attr('href', user.logoutUrl);
+  });
   $('#logout').click(logout);
 });
 </script>
+
 <div data-role="page" id="index" data-title="MobilePulse">
   <div data-role="header">
     <a href="#options" data-icon="gear">Options</a>
