@@ -17,7 +17,7 @@ function buildListPage(page, list) {
 
   for (i = 0; i < items.length; i++) {
     var item = items[i];
-    markup += '<li><a href="#item?id=' + item['id'] +'">' + getItemLinkText(item) +'</a></li>';
+    markup += '<li><a href="#item?id=' + item.id +'">' + getItemLinkText(item) +'</a></li>';
   }
   markup += '</ul>'
   pageContent(page, markup).find(':jqmData(role=listview)').listview();
@@ -44,22 +44,6 @@ $(ITEM_PAGE).live('pagecreate', function() {
     enableSmsDetails($('#sendSmsNotifications').prop('checked'));
   });
 });
-
-function itemPage(page, url) {
-  var id = getParameterByName(url, 'id');
-  var restUrl = REST_PREFIX + MOBILE_CARRIERS_PATH;
-
-  page.find('form')[0].reset();
-  jsonPopulate(restUrl, $('#mobileCarrierId'), function(select, carriers) {
-    select.html(carrierOptions(carriers['mobileCarriers']));
-    if (id === NEW_ITEM) {
-      buildNewItemPage();
-    } else {
-      restUrl = REST_PREFIX + ITEM_PATH + '/' + id;
-      jsonPopulate(restUrl, page, buildItemPage);
-    }
-  });
-}
 
 function saveItem() {
   if (!validateUser()) { return false; }
