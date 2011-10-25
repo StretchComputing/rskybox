@@ -23,46 +23,46 @@
 <body><script src="/js/script.js"></script>
 <script>
   function itemName() {
-    return 'clientLogs';
+    return 'feedback';
   }
 
   function itemDetails(item) {
-    var html = '<div>Created Date: ' + item['date'] + '</div>';
-    html += '<div>User: ' + item['userName'] + '</div>';
-    html += '<div>For: ' + item['instanceUrl'] + '</div>';
-    html += '<div>Log Level: ' + item['logLevel'] + '</div>';
-    html += '<div>Message: ' + item['message'] + '</div>';
-    html += '<div>Status: ' + item['status'] + '</div>';
+    var html = '<div>Recorded: ' + item.date + '</div>';
+    html += '<div>By: ' + item.userName + '</div>';
+    html += '<div>For: ' + item.instanceUrl + '</div>';
+    html += '<div>Status: ' + item.status + '</div>';
     html += '<div>';
-    html += '  Stack Back Trace:<br>';
-    html += '  ' + item['stackBackTrace'];
-    html += '</div>'
+    html += '  Feedback: ';
+    html += '  <audio controls>';
+    html += '    <source src="/audio/' + item.id + '.mp4" type="audio/mp4">'
+    html += '  </audio>';
+    html += '</div>';
     return html;
   }
 </script>
 
-<div data-role="page" id="index" data-title="Client Logs">
+<div data-role="page" id="index" data-title="Feedback">
   <div data-role="header">
-    <a href="index.html" rel="external">Home</a>
-    <h1>Client Logs</h1>
+    <a href="/html5" rel="external">Home</a>
+    <h1>Feedback</h1>
     <a href="#archives" class="ui-btn-right" data-theme="b">Archives</a>
   </div>
   <div data-role="content"></div>
 </div>
 
-<div data-role="page" id="archives" data-title="Client Logs Archives">
+<div data-role="page" id="archives" data-title="Feedback Archives">
   <div data-role="header">
-    <a href="index.html" rel="external">Home</a>
-    <h1>Client Logs Archives</h1>
+    <a href="/html5" rel="external">Home</a>
+    <h1>Feedback Archives</h1>
     <a href="#index" class="ui-btn-right" data-theme="b">Active</a>
   </div>
   <div data-role="content"></div>
 </div>
 
-<div id="item" data-role="page" data-title="Client Log">
+<div id="item" data-role="page" data-title="Feedback">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
-    <h1>Client Log</h1>
+    <h1>Feedback</h1>
   </div>
   <div data-role="content"></div>
 </div>

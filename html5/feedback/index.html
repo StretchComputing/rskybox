@@ -9,14 +9,14 @@ title: MobilePulse
   }
 
   function itemDetails(item) {
-    var html = '<div>Recorded: ' + item['date'] + '</div>';
-    html += '<div>By: ' + item['userName'] + '</div>';
-    html += '<div>For: ' + item['instanceUrl'] + '</div>';
-    html += '<div>Status: ' + item['status'] + '</div>';
+    var html = '<div>Recorded: ' + item.date + '</div>';
+    html += '<div>By: ' + item.userName + '</div>';
+    html += '<div>For: ' + item.instanceUrl + '</div>';
+    html += '<div>Status: ' + item.status + '</div>';
     html += '<div>';
     html += '  Feedback: ';
     html += '  <audio controls>';
-    html += '    <source src="/audio/' + item['id'] + '.mp4" type="audio/mp4">'
+    html += '    <source src="/audio/' + item.id + '.mp4" type="audio/mp4">'
     html += '  </audio>';
     html += '</div>';
     return html;
@@ -25,7 +25,7 @@ title: MobilePulse
 
 <div data-role="page" id="index" data-title="Feedback">
   <div data-role="header">
-    <a href="index.html" rel="external">Home</a>
+    <a href="{{ site.html }}" rel="external">Home</a>
     <h1>Feedback</h1>
     <a href="#archives" class="ui-btn-right" data-theme="b">Archives</a>
   </div>
@@ -34,7 +34,7 @@ title: MobilePulse
 
 <div data-role="page" id="archives" data-title="Feedback Archives">
   <div data-role="header">
-    <a href="index.html" rel="external">Home</a>
+    <a href="{{ site.html }}" rel="external">Home</a>
     <h1>Feedback Archives</h1>
     <a href="#index" class="ui-btn-right" data-theme="b">Active</a>
   </div>

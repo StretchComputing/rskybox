@@ -27,14 +27,14 @@
   }
 
   function itemDetails(item) {
-    var html = '<div>Detected Date: ' + item['date'] + '</div>';
-    html += '<div>User: ' + item['userName'] + '</div>';
-    html += '<div>For: ' + item['instanceUrl'] + '</div>';
-    html += '<div>Status: ' + item['status'] + '</div>';
-    html += '<div>Summary: ' + item['summary'] + '</div>';
+    var html = '<div>Detected Date: ' + item.date + '</div>';
+    html += '<div>User: ' + item.userName + '</div>';
+    html += '<div>For: ' + item.instanceUrl + '</div>';
+    html += '<div>Status: ' + item.status + '</div>';
+    html += '<div>Summary: ' + item.summary + '</div>';
     html += '<div>';
     html += '  Crash Stack Data: ';
-    html += '  <a href="/crashStackData/' + item['id'] + '.plcrash" data-ajax="false">plcrash file</a>';
+    html += '  <a href="/crashStackData/' + item.id + '.plcrash" data-ajax="false">plcrash file</a>';
     html += '</div>'
     return html;
   }
@@ -42,7 +42,7 @@
 
 <div data-role="page" id="index" data-title="Crash Detects">
   <div data-role="header">
-    <a href="index.html" rel="external">Home</a>
+    <a href="/html5" rel="external">Home</a>
     <h1>Crash Detects</h1>
     <a href="#archives" data-theme="b">Archives</a>
   </div>
@@ -51,7 +51,7 @@
 
 <div data-role="page" id="archives" data-title="Crash Detect Archives">
   <div data-role="header">
-    <a href="index.html" rel="external">Home</a>
+    <a href="/html5" rel="external">Home</a>
     <h1>Crash Detect Archives</h1>
     <a href="#index" class="ui-btn-right" data-theme="b">Active</a>
   </div>
