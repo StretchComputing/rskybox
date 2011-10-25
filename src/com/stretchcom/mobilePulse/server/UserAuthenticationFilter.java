@@ -161,6 +161,9 @@ public class UserAuthenticationFilter implements Filter {
 	    		} else {
 		            // any non-REST request needs to be redirected to the WEB-INF/html directory
 		    		String uri = httpRequest.getRequestURI();
+		    		if(!uri.toLowerCase().contains(".html") && !uri.endsWith("/")) {
+		    			uri = uri + "/";
+		    		}
 		            uri = HTML_DIR + uri;
 		            log.info("Calling RequestDispatcher modified URI: " + uri);
 		            RequestDispatcher rd = httpRequest.getRequestDispatcher(uri);
