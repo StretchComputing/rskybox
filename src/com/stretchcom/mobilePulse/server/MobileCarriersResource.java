@@ -80,7 +80,6 @@ public class MobileCarriersResource extends ServerResource {
                 json.put("id", mobileCarrier.getCode());
                 json.put("name", mobileCarrier.getName());
         	}
-        	log.info("User JSON object = " + mobileCarrier.toString());
         } catch (JSONException e) {
         	log.severe("MobileCarrierResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);

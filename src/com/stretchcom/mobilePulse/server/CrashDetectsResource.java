@@ -286,8 +286,6 @@ public class CrashDetectsResource extends ServerResource {
             	String status = crashDetect.getStatus();
             	if(status == null || status.length() == 0) {status = "new";}
             	json.put("status", status);
-            	
-            	log.info("Crash Detect JSON object = " + crashDetect.toString());
         	}
         } catch (JSONException e) {
         	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());

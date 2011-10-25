@@ -196,15 +196,23 @@ public class User {
 	public static User createUser(String theEmailAddress, String theNickName) {
         EntityManager em = EMF.get().createEntityManager();
         User user = null;
+        
+        em.getTransaction().begin();
 		try {
 			user = new User();
 			user.setEmailAddress(theEmailAddress);
 			user.setFirstName(theNickName);
 			log.info("creating new user with email address = " + theEmailAddress);
 			em.persist(user);
+			em.getTransaction().commit();
 		} catch (Exception e) {
 			log.severe("User::createUser() exception = " + e.getMessage());
-		}
+		} finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
 		return user;
 	}
 }

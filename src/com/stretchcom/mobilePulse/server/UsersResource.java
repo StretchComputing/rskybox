@@ -176,7 +176,12 @@ public class UsersResource extends ServerResource {
 					// any configuration necessary. A slick little feature.
 					if(isAdmin) {
 						user = User.createUser(emailAddress, currentUser.getNickname());
-						log.info("new user created on the fly for the admin. New user email address = " + emailAddress);
+						if(user != null) {
+							log.info("new user created on the fly for the admin. New user email address = " + emailAddress);
+						} else {
+							log.info("create new user failed");
+							apiStatus = ApiStatusCode.USER_NOT_FOUND;
+						}
 					} else {
 						log.info("User not found");
 						apiStatus = ApiStatusCode.USER_NOT_FOUND;
@@ -361,8 +366,6 @@ public class UsersResource extends ServerResource {
                         json.put("mobileCarrierId", mobileCarrier.getCode());
                 	}
                 }
-                
-                log.info("User JSON object = " + user.toString());
         	}
         } catch (JSONException e) {
         	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
