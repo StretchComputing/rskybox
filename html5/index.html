@@ -5,7 +5,7 @@ options: Options
 ---
 <!-- Home -->
 <script>
-$('#index').live('pagecreate', function() {
+$('#index').live('pagebeforecreate', function() {
   var restUrl = REST_PREFIX + '/users/current';
   jsonPopulate(restUrl, $('#logout'), function(link, user) {
     link.attr('href', decodeURIComponent(user.logoutUrl));
