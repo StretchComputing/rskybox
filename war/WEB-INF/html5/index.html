@@ -25,7 +25,7 @@
 $('#index').live('pagecreate', function() {
   var restUrl = REST_PREFIX + '/users/current';
   jsonPopulate(restUrl, $('#logout'), function(link, user) {
-    link.attr('href', user.logoutUrl);
+    link.attr('href', decodeURIComponent(user.logoutUrl));
   });
 });
 </script>
@@ -46,7 +46,7 @@ $('#index').live('pagecreate', function() {
     </ul>
   </div>
   <div data-role="footer" class="ui-bar" style="text-align: center;">
-    <a href="#" id="logout">Logout</a>
+    <a href="#" id="logout" rel="external">Logout</a>
   </div>
 </div>
 
