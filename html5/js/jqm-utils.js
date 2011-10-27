@@ -1,3 +1,41 @@
+// Revealing Module Pattern
+// http://www.klauskomenda.com/code/javascript-programming-patterns/#revealing
+var rMobile = (function() {
+    var pageLoadCount = 0;
+
+    // Manage pageLoadCount
+    var pageLoad = function(operator) {
+        switch (operator) {
+        case 'decrement':
+            pageLoadCount -= pageLoadCount === 0 ? 0 : 1;
+            break;
+        case 'increment':
+            pageLoadCount += 1;
+            break;
+        default:
+            console.log('pageLoadingCount called with inappropriate operator.');
+        }
+        return pageLoadCount;
+    }
+
+    // Manage showing/hiding the page loading message based on the number of times it's been called.
+    var hidePageLoadingMessage = function() {
+        if (pageLoad('decrement') <= 0) {
+            $.mobile.hidePageLoadingMsg();
+        }
+    }
+    var showPageLoadingMessage = function() {
+        pageLoad('increment');
+        $.mobile.showPageLoadingMsg();
+    }
+
+    // Public entities
+    return {
+        hidePageLoadingMessage : hidePageLoadingMessage,
+        showPageLoadingMessage : showPageLoadingMessage
+    }
+}());
+
 // Dynamically inject pages
 //
 // Allows for bookmarking, page refreshing, and other proper URL handling for
@@ -42,10 +80,10 @@ function dynamicPages(pairs) {
 // element: the element to be populated
 // success: the function to call to actually build the page on success
 function jsonPopulate(restUrl, element, success) {
-  $.mobile.showPageLoadingMsg();
+  rMobile.showPageLoadingMessage();
   $.getJSON(restUrl, function(data) {
     success(element, data);
-    $.mobile.hidePageLoadingMsg();
+    rMobile.hidePageLoadingMessage();
   });
 }
 
