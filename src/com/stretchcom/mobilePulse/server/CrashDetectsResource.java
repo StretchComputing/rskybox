@@ -29,18 +29,21 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.stretchcom.mobilePulse.models.Application;
 import com.stretchcom.mobilePulse.models.CrashDetect;
 import com.stretchcom.mobilePulse.models.User;
 
 public class CrashDetectsResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(CrashDetectsResource.class.getName());
 	private String id;
+	private String applicationId;
     private String listStatus;
 
     @Override
     protected void doInit() throws ResourceException {
         log.info("in doInit");
         this.id = (String) getRequest().getAttributes().get("id");
+        this.applicationId = (String) getRequest().getAttributes().get("applicationId");
         
 		Form form = getRequest().getResourceRef().getQueryAsForm();
 		for (Parameter parameter : form) {
@@ -56,6 +59,7 @@ public class CrashDetectsResource extends ServerResource {
     // Handles 'Get List of Crash Detects API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
+    	String appIdError = Application.verifyApplicationId(this.applicationId);
         if (id != null) {
             // Get Crash Detect Info API
         	log.info("in Get User Info API");

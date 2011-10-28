@@ -26,6 +26,10 @@ import com.google.appengine.api.datastore.Text;
     		name="ClientLog.getByKey",
     		query="SELECT cl FROM ClientLog cl WHERE cl.key = :key"
     ),
+    @NamedQuery(
+    		name="ClientLog.getByApplicationId",
+    		query="SELECT cl FROM ClientLog cl WHERE cl.applicationId = :applicationId"
+    ),
 })
 public class ClientLog {
 	public final static String NEW_STATUS = "new";
@@ -45,6 +49,7 @@ public class ClientLog {
 	private Text stackBackTrace;
 	private String instanceUrl;
 	private String status;
+	private String applicationId;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -121,5 +126,13 @@ public class ClientLog {
 			return true;
 		}
 		return false;
+	}
+
+	public String getApplicationId() {
+		return applicationId;
+	}
+
+	public void setApplicationId(String applicationId) {
+		this.applicationId = applicationId;
 	}
 }

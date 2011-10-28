@@ -27,6 +27,10 @@ import com.google.appengine.api.datastore.Text;
     		name="Feedback.getByKey",
     		query="SELECT fb FROM Feedback fb WHERE fb.key = :key"
     ),
+    @NamedQuery(
+    		name="Feedback.getByapplicationId",
+    		query="SELECT fb FROM Feedback fb WHERE fb.applicationId = :applicationId"
+    ),
 })
 public class Feedback {
 	public final static String NEW_STATUS = "new";
@@ -38,6 +42,7 @@ public class Feedback {
 	private String userName;
 	private String instanceUrl;
 	private String status;
+	private String applicationId;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -90,5 +95,13 @@ public class Feedback {
 	public Boolean isStatusValid(String theStatus) {
 		if(theStatus.equals(Feedback.NEW_STATUS) || theStatus.equals(Feedback.ARCHIVED_STATUS)) return true;
 		return false;
+	}
+
+	public String getApplicationId() {
+		return applicationId;
+	}
+
+	public void setApplicationId(String applicationId) {
+		this.applicationId = applicationId;
 	}
 }

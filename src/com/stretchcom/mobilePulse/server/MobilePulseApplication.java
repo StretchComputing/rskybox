@@ -25,8 +25,8 @@ public class MobilePulseApplication extends Application {
         router.attach("/users", UsersResource.class);
         router.attach("/users/{id}", UsersResource.class);
 
-        router.attach("/crashDetects", CrashDetectsResource.class);
-        router.attach("/crashDetects/{id}", CrashDetectsResource.class);
+        router.attach("/applications/{applicationId}/crashDetects", CrashDetectsResource.class);
+        router.attach("/applications/{applicationId}/crashDetects/{id}", CrashDetectsResource.class);
 
         router.attach("/feedback", FeedbackResource.class);
         router.attach("/feedback/{id}", FeedbackResource.class);

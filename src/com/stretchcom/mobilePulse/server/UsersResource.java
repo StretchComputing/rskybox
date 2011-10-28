@@ -29,6 +29,7 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.stretchcom.mobilePulse.models.MobileCarrier;
 import com.stretchcom.mobilePulse.models.User;
+import com.stretchcom.mobilePulse.models.Application;
 
 public class UsersResource extends ServerResource {
     private static final Logger log = Logger.getLogger(UsersResource.class.getName());
@@ -352,10 +353,25 @@ public class UsersResource extends ServerResource {
                 json.put("sendEmailNotifications", user.getSendEmailNotifications());
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
                 if(isCurrentUserAdmin != null) {
+                	///////////////////////////////////////////////////////////////////
+                	// must be Current user; otherwise isCurrentUserAdmin would be null
+                	///////////////////////////////////////////////////////////////////
                 	json.put("isAdmin", isCurrentUserAdmin);
                 	
     	        	UserService userService = UserServiceFactory.getUserService();
     	        	json.put("logoutUrl", userService.createLogoutURL(MobilePulseApplication.APPLICATION_WELCOME_PAGE));
+    	        	
+    	        	List<Application> applications = user.getApplications();
+    	        	if(applications != null && applications.size() > 0) {
+    	                JSONArray ja = new JSONArray();
+    	        		for(Application app : applications) {
+    	        			JSONObject jo = new JSONObject();
+    	        			jo.put("id", KeyFactory.keyToString(app.getKey()));
+    	        			jo.put("name", app.getName());
+    	        			ja.put(jo);
+    	        		}
+    	                json.put("applications", ja);
+    	        	}
                 }
                 
                 if(user.getSmsEmailAddress() != null && user.getSmsEmailAddress().length() > 0) {

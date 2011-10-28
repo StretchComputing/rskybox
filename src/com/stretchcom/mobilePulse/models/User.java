@@ -56,6 +56,7 @@ public class User {
 	private Boolean sendEmailNotifications;
 	private Boolean sendSmsNotifications;
 	private Boolean isAdmin = false;  // deprecate?  Not storing this in the user object because it can too easily get out of synch with GAE permissions config
+	private String organizationId;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -120,6 +121,14 @@ public class User {
 	}
 	public void setSendSmsNotifications(Boolean sendSmsNotifications) {
 		this.sendSmsNotifications = sendSmsNotifications;
+	}
+
+	public String getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(String organizationId) {
+		this.organizationId = organizationId;
 	}
 	
 	public static void sendNotifications(String theMessage) {
@@ -214,5 +223,20 @@ public class User {
             em.close();
         }
 		return user;
+	}
+
+	public List<Application> getApplications() {
+        EntityManager em = EMF.get().createEntityManager();
+        User user = null;
+        
+		List<Application> applications = null;
+        try {
+        	applications = (List<Application>)em.createNamedQuery("Application.getByOrganizationId")
+				.setParameter("organizationId", this.getOrganizationId())
+				.getResultList();
+		} catch (Exception e) {
+			log.severe("exception = " + e.getMessage());
+		} 
+		return applications;
 	}
 }

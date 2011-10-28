@@ -26,6 +26,10 @@ import com.google.appengine.api.datastore.Text;
     		name="CrashDetect.getByKey",
     		query="SELECT cd FROM CrashDetect cd WHERE cd.key = :key"
     ),
+    @NamedQuery(
+    		name="CrashDetect.getByApplicationId",
+    		query="SELECT cd FROM CrashDetect cd WHERE cd.applicationId = :applicationId"
+    ),
 })
 public class CrashDetect {
 	public final static String NEW_STATUS = "new";
@@ -39,6 +43,7 @@ public class CrashDetect {
 	private Text stackDataBase64;
 	private String instanceUrl;
 	private String status;
+	private String applicationId;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,6 +104,14 @@ public class CrashDetect {
 	public Boolean isStatusValid(String theStatus) {
 		if(theStatus.equals(CrashDetect.NEW_STATUS) || theStatus.equals(CrashDetect.ARCHIVED_STATUS)) return true;
 		return false;
+	}
+
+	public String getApplicationId() {
+		return applicationId;
+	}
+
+	public void setApplicationId(String applicationId) {
+		this.applicationId = applicationId;
 	}
 	
 }

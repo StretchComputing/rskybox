@@ -21,6 +21,10 @@ import com.google.appengine.api.datastore.Key;
     		name="BetaTester.getByKey",
     		query="SELECT bt FROM BetaTester bt WHERE bt.key = :key"
     ),
+    @NamedQuery(
+    		name="BetaTester.getByApplicationId",
+    		query="SELECT bt FROM BetaTester bt WHERE bt.applicationId = :applicationId"
+    ),
 })
 public class BetaTester {
     private static final Logger log = Logger.getLogger(BetaTester.class.getName());
@@ -31,6 +35,7 @@ public class BetaTester {
 	private String instanceUrl;
 	private Date createdGmtDate;
 	private Date versionUpdatedGmtDate;
+	private String applicationId;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,5 +87,13 @@ public class BetaTester {
 
 	public void setVersionUpdatedGmtDate(Date versionUpdatedGmtDate) {
 		this.versionUpdatedGmtDate = versionUpdatedGmtDate;
+	}
+
+	public String getApplicationId() {
+		return applicationId;
+	}
+
+	public void setApplicationId(String applicationId) {
+		this.applicationId = applicationId;
 	}
 }
