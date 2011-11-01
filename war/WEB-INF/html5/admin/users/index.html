@@ -14,63 +14,76 @@
 <script>
   window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0rc2.min.js"><\/script>')
 </script>
-<script>
-  var REST_PREFIX = '/rest/v1';
-</script>
 <script src="/js/jqm-utils.js"></script>
 <script src="/js/utils.js"></script>
 </head>
-<body><script>
-var ITEM_NAME = 'users'
+<body><script src="/js/admin.js"></script>
+<script>
+var RMODULE = (function (my, $) {
+  'use strict';
 
-function getItemLinkText(item) {
-  return item.firstName + ' ' + item.lastName + ': ' + item.emailAddress;
-}
+  var
+    buildItemPage,
+    buildNewItemPage;
 
-function itemPage(page, url) {
-  var id = getParameterByName(url, 'id');
-  var restUrl = REST_PREFIX + MOBILE_CARRIERS_PATH;
+  my.getItemName = function () {
+    return 'users';
+  };
 
-  page.find('form')[0].reset();
-  jsonPopulate(restUrl, $('#mobileCarrierId'), function(select, carriers) {
-    select.html(carrierOptions(carriers.mobileCarriers));
-    if (id === NEW_ITEM) {
-      buildNewItemPage();
-    } else {
-      restUrl = REST_PREFIX + ITEM_PATH + '/' + id;
-      jsonPopulate(restUrl, page, buildItemPage);
-    }
-  });
-}
+  my.getItemLinkText = function (item) {
+    return item.firstName + ' ' + item.lastName + ': ' + item.emailAddress;
+  };
 
-function buildItemPage(page, item) {
-  var smsEnabled = item.sendSmsNotifications;
+  my.itemPage = function (page, url) {
+    var id, restUrl;
 
-  pageHeader($(ITEM_PAGE)).find('h1').html('Update User');
-  $('#id').val(item.id);
-  $('#firstName').val(item.firstName);
-  $('#lastName').val(item.lastName);
-  $('#emailAddress').val(item.emailAddress);
+    page.find('form')[0].reset();
+    id = my.getParameterByName(url, 'id');
+    restUrl = my.getRestPrefix() + my.getMobileCarriersPath();
+    my.jsonPopulate(restUrl, $('#mobileCarrierId'), function (select, carriers) {
+      select.html(my.carrierOptions(carriers.mobileCarriers));
+      if (id === my.getNewItemName()) {
+        buildNewItemPage(page);
+      } else {
+        restUrl = my.getRestPrefix() + my.getItemPath() + '/' + id;
+        my.jsonPopulate(restUrl, page, buildItemPage);
+      }
+    });
+  };
 
-  $('#sendEmailNotifications').prop('checked', item.sendEmailNotifications).checkboxradio('refresh');
-  $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
-  enableSmsDetails(smsEnabled);
-  $('#phoneNumber').val(item.phoneNumber);
-  $('#mobileCarrierId').val(item.mobileCarrierId).selectmenu('refresh');
-  $('#delete_button').show();
-}
+  buildItemPage = function (page, item) {
+    var smsEnabled;
 
-function buildNewItemPage() {
-  pageHeader($(ITEM_PAGE)).find('h1').html('New User');
-  $('#id').val(NEW_ITEM);
-  $('#mobileCarrierId').val(NO_CARRIER).selectmenu('refresh');
-  $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
-  $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
-  enableSmsDetails(false);
-  $('#delete_button').hide();
-}
+    smsEnabled = item.sendSmsNotifications;
+    my.pageHeader(page).find('h1').html('Update User');
+    $('#id').val(item.id);
+    $('#firstName').val(item.firstName);
+    $('#lastName').val(item.lastName);
+    $('#emailAddress').val(item.emailAddress);
+
+    $('#sendEmailNotifications').prop('checked', item.sendEmailNotifications).checkboxradio('refresh');
+    $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
+    my.enableSmsDetails(smsEnabled);
+    $('#phoneNumber').val(item.phoneNumber);
+    $('#mobileCarrierId').val(item.mobileCarrierId).selectmenu('refresh');
+    $('#delete_button').show();
+  };
+
+  buildNewItemPage = function (page) {
+    my.pageHeader(page).find('h1').html('New User');
+    $('#id').val(my.getNewItemName());
+    $('#mobileCarrierId').val(my.getNoCarrierIndicator()).selectmenu('refresh');
+    $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
+    $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
+    my.enableSmsDetails(false);
+    $('#delete_button').hide();
+  };
+
+  return my;
+}(RMODULE, jQuery));
+
+RMODULE.init();
 </script>
-<script src="/js/admin.js"></script>
 
 <div data-role="page" id="index" data-title="All Users">
   <div data-role="header">

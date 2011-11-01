@@ -4,12 +4,17 @@ title: MobilePulse
 ---
 <script src="/js/script.js"></script>
 <script>
-  function itemName() {
-    return 'clientLogs';
-  }
+var RMODULE = (function (my) {
+  'use strict';
 
-  function itemDetails(item) {
-    var html = '<div>Created Date: ' + item.date + '</div>';
+  my.itemName = function () {
+    return 'clientLogs';
+  };
+
+  my.itemDetails = function (item) {
+    var html;
+
+    html  = '<div>Created Date: ' + item.date + '</div>';
     html += '<div>User: ' + item.userName + '</div>';
     html += '<div>For: ' + item.instanceUrl + '</div>';
     html += '<div>Log Level: ' + item.logLevel + '</div>';
@@ -18,9 +23,12 @@ title: MobilePulse
     html += '<div>';
     html += '  Stack Back Trace:<br>';
     html += '  ' + item.stackBackTrace;
-    html += '</div>'
+    html += '</div>';
     return html;
-  }
+  };
+
+  return my;
+}(RMODULE || {}));
 </script>
 
 <div data-role="page" id="index" data-title="Client Logs">

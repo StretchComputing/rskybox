@@ -14,31 +14,36 @@
 <script>
   window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0rc2.min.js"><\/script>')
 </script>
-<script>
-  var REST_PREFIX = '/rest/v1';
-</script>
 <script src="/js/jqm-utils.js"></script>
 <script src="/js/utils.js"></script>
 </head>
 <body><script src="/js/script.js"></script>
 <script>
-  function itemName() {
-    return 'feedback';
-  }
+var RMODULE = (function (my) {
+  'use strict';
 
-  function itemDetails(item) {
-    var html = '<div>Recorded: ' + item.date + '</div>';
+  my.itemName = function () {
+    return 'feedback';
+  };
+
+  my.itemDetails = function (item) {
+    var html;
+
+    html  = '<div>Recorded: ' + item.date + '</div>';
     html += '<div>By: ' + item.userName + '</div>';
     html += '<div>For: ' + item.instanceUrl + '</div>';
     html += '<div>Status: ' + item.status + '</div>';
     html += '<div>';
     html += '  Feedback: ';
     html += '  <audio controls>';
-    html += '    <source src="/audio/' + item.id + '.mp4" type="audio/mp4">'
+    html += '    <source src="/audio/' + item.id + '.mp4" type="audio/mp4">';
     html += '  </audio>';
     html += '</div>';
     return html;
-  }
+  };
+
+  return my;
+}(RMODULE || {}));
 </script>
 
 <div data-role="page" id="index" data-title="Feedback">

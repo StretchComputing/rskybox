@@ -4,12 +4,17 @@ title: MobilePulse
 ---
 <script src="/js/script.js"></script>
 <script>
-  function itemName() {
-    return 'crashDetects';
-  }
+var RMODULE = (function (my) {
+  'use strict';
 
-  function itemDetails(item) {
-    var html = '<div>Detected Date: ' + item.date + '</div>';
+  my.itemName = function () {
+    return 'crashDetects';
+  };
+
+  my.itemDetails = function (item) {
+    var html;
+
+    html  = '<div>Detected Date: ' + item.date + '</div>';
     html += '<div>User: ' + item.userName + '</div>';
     html += '<div>For: ' + item.instanceUrl + '</div>';
     html += '<div>Status: ' + item.status + '</div>';
@@ -17,9 +22,12 @@ title: MobilePulse
     html += '<div>';
     html += '  Crash Stack Data: ';
     html += '  <a href="/crashStackData/' + item.id + '.plcrash" data-ajax="false">plcrash file</a>';
-    html += '</div>'
+    html += '</div>';
     return html;
-  }
+  };
+
+  return my;
+}(RMODULE || {}));
 </script>
 
 <div data-role="page" id="index" data-title="Crash Detects">

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>MobilePulse Users</title>
+<title>MobilePulse Beta Testers</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0rc2/jquery.mobile-1.0rc2.min.css" />
 <link rel="stylesheet" href="/css/styles.css">
@@ -14,33 +14,46 @@
 <script>
   window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0rc2.min.js"><\/script>')
 </script>
-<script>
-  var REST_PREFIX = '/rest/v1';
-</script>
 <script src="/js/jqm-utils.js"></script>
 <script src="/js/utils.js"></script>
 </head>
-<body><script>
-var ITEM_NAME = 'betaTesters'
+<body><script src="/js/admin.js"></script>
+<script>
+var RMODULE = (function (my) {
+  'use strict';
 
-function getItemLinkText(item) {
-  return item.application + ', ' + item.version + ': ' + item.userName;
-}
+  var buildItemPage;
 
-function itemPage(page, url) {
-  restUrl = REST_PREFIX + ITEM_PATH + '/' + getParameterByName(url, 'id');
-  jsonPopulate(restUrl, page, buildItemPage);
-}
+  my.getItemName = function () {
+    return 'betaTesters';
+  };
 
-function buildItemPage(page, item) {
-  var markup = '<div>Username: ' + item.userName + '</div>';
-  markup += '<div>Application: ' + item.application + '</div>';
-  markup += '<div>Version: ' + item.version + '</div>';
-  markup += '<div>Instance URL: ' + item.instanceUrl + '</div>';
-  pageContent(page, markup);
-}
+  my.getItemLinkText = function (item) {
+    return item.application + ', ' + item.version + ': ' + item.userName;
+  };
+
+  my.itemPage = function (page, url) {
+    var restUrl;
+
+    restUrl = my.getRestPrefix() + my.getItemPath() + '/' + my.getParameterByName(url, 'id');
+    my.jsonPopulate(restUrl, page, buildItemPage);
+  };
+
+  buildItemPage = function (page, item) {
+    var markup;
+
+    markup  = '<div>Username: ' + item.userName + '</div>';
+    markup += '<div>Application: ' + item.application + '</div>';
+    markup += '<div>Version: ' + item.version + '</div>';
+    markup += '<div>Instance URL: ' + item.instanceUrl + '</div>';
+    my.pageContent(page, markup);
+  };
+
+  return my;
+}(RMODULE));
+
+RMODULE.init();
 </script>
-<script src="/js/admin.js"></script>
 
 <div data-role="page" id="index" data-title="Beta Testers">
   <div data-role="header">
