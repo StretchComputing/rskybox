@@ -7,6 +7,10 @@ options: Options
 var RMODULE = (function (my, $) {
   'use strict';
 
+  my.itemName = function () {
+    return 'applications';
+  };
+
   my.populateOptions = function (page, user) {
     var smsEnabled = user.sendSmsNotifications;
 
@@ -122,7 +126,7 @@ RMODULE.init();
 
 
 <!-- Application -->
-<div data-role="page" id="application" data-title="{{ page.title }}">
+<div data-role="page" id="item" data-title="{{ page.title }}">
   <div data-role="header">
     <a href="#options" data-icon="gear">{{ page.options }}</a>
     <h1>{{ page.title }}</h1>

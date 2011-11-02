@@ -14,12 +14,15 @@
 <script>
   window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0rc2.min.js"><\/script>')
 </script>
-<script src="/js/jqm-utils.js"></script>
-<script src="/js/utils.js"></script>
+<script src="/js/rmodule.js"></script>
 </head>
 <body><script>
 var RMODULE = (function (my, $) {
   'use strict';
+
+  my.itemName = function () {
+    return 'applications';
+  };
 
   my.populateOptions = function (page, user) {
     var smsEnabled = user.sendSmsNotifications;
@@ -136,7 +139,7 @@ RMODULE.init();
 
 
 <!-- Application -->
-<div data-role="page" id="application" data-title="MobilePulse">
+<div data-role="page" id="item" data-title="MobilePulse">
   <div data-role="header">
     <a href="#options" data-icon="gear">Options</a>
     <h1>MobilePulse</h1>
