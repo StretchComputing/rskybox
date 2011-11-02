@@ -4,7 +4,15 @@ import java.util.logging.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.restlet.Request;
 import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.ext.servlet.internal.ServletCall;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+
+import com.stretchcom.mobilePulse.models.Application;
+import com.stretchcom.mobilePulse.models.User;
 
 public class Utility {
     private static final Logger log = Logger.getLogger(Utility.class.getName());
@@ -58,5 +66,19 @@ public class Utility {
 			return emailDomainName;
 		}
 		return null;
+	}
+	
+	public static String verifyUserAuthorizedForApplication(Request theRequest, String theApplicationId) {
+		log.info("entered verifyUserAuthorizedForApplication()");
+    	String appIdStatus = Application.verifyApplicationId(theApplicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return appIdStatus;
+    	}
+    	
+    	// TODO - get this working later
+//    	HttpServletRequest httpRequest = ServletCall.getRequest(theRequest);
+//    	com.google.appengine.api.users.User currentUser = (com.google.appengine.api.users.User)httpRequest.getAttribute(MobilePulseApplication.CURRENT_USER);
+//    	appIdStatus = User.verifyUserMemberOfApplication(currentUser.getEmail(), theApplicationId);
+    	return appIdStatus;
 	}
 }

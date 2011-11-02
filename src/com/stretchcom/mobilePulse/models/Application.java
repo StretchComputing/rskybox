@@ -29,6 +29,10 @@ import com.stretchcom.mobilePulse.server.EMF;
     		query="SELECT a FROM Application a WHERE a.key = :key"
     ),
     @NamedQuery(
+    		name="Application.getByKeyAndOrganizationId",
+    		query="SELECT a FROM Application a WHERE a.key = :key and a.organizationId = :organizationId"
+    ),
+    @NamedQuery(
     		name="Application.getByOrganizationId",
     		query="SELECT a FROM Application a WHERE a.organizationId = :organizationId"
     ),

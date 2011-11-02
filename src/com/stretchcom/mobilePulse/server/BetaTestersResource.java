@@ -257,10 +257,9 @@ public class BetaTestersResource extends ServerResource {
                 json.put("application", betaTester.getApplication());
                 json.put("version", betaTester.getVersion());
                 json.put("instanceUrl", betaTester.getInstanceUrl());
-                log.info("User JSON object = " + betaTester.toString());
         	}
         } catch (JSONException e) {
-        	log.severe("UsersResrouce::getBetaTesterJson() error creating JSON return object. Exception = " + e.getMessage());
+        	log.severe("getBetaTesterJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;

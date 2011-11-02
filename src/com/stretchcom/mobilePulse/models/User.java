@@ -229,14 +229,72 @@ public class User {
         EntityManager em = EMF.get().createEntityManager();
         User user = null;
         
-		List<Application> applications = null;
+		List<AppMember> appMembers = null;
+    	List<Application> applications = new ArrayList<Application>();
         try {
-        	applications = (List<Application>)em.createNamedQuery("Application.getByOrganizationId")
-				.setParameter("organizationId", this.getOrganizationId())
+        	appMembers = (List<AppMember>)em.createNamedQuery("AppMember.getByUserId")
+				.setParameter("userId", KeyFactory.keyToString(this.key))
 				.getResultList();
+        	
+        	for(AppMember au : appMembers) {
+                try {
+					try {
+						Key appKey = KeyFactory.stringToKey(au.getApplicationId());
+	            		Application application = (Application)em.createNamedQuery("Application.getByKey")
+	            				.setParameter("key", appKey)
+	            				.getSingleResult();
+	            		applications.add(application);
+					} catch (IllegalArgumentException e) {
+						log.severe("User.getApplications(): could not convert ApplicationsUsers ApplicationId to an Application key");
+					}
+        		} catch (NoResultException e) {
+        			log.info("Application referred to in ApplicationsUsers no longer exists");
+        		} catch (NonUniqueResultException e) {
+        			log.severe("should never happen - two or more applications have same key and application ID");
+        		}
+        	}
 		} catch (Exception e) {
-			log.severe("exception = " + e.getMessage());
-		} 
+			log.severe("Error reading ApplicatinsUsers entity. exception = " + e.getMessage());
+		}
+        
 		return applications;
 	}
+	
+	
+	public static String verifyUserMemberOfApplication(String theEmailAddress, String theApplicationId) {
+        EntityManager em = EMF.get().createEntityManager();
+        String apiStatus = ApiStatusCode.SUCCESS;
+
+        User user = null;
+        try {
+    		user = (User)em.createNamedQuery("User.getByEmailAddress")
+				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+				.getSingleResult();
+		} catch (NoResultException e) {
+			log.info("Google account user not found");
+			apiStatus = ApiStatusCode.USER_NOT_FOUND;
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more google account users have same key");
+			apiStatus = ApiStatusCode.SERVER_ERROR;
+		}
+        
+        if(user != null) {
+        	String userId = KeyFactory.keyToString(user.getKey());
+            try {
+        		AppMember appsUsers = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndUserId")
+        				.setParameter("applicationId", theApplicationId)
+        				.setParameter("userId", userId)
+        				.getSingleResult();
+    		} catch (NoResultException e) {
+    			log.info("User is not authorized to use this application");
+    			apiStatus = ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION;
+    		} catch (NonUniqueResultException e) {
+    			log.severe("should never happen - two or more userId/applicationId combinations in ApplicationsUsers");
+    			apiStatus = ApiStatusCode.SERVER_ERROR;
+    		}
+        }
+        
+		return apiStatus;
+	}
+
 }

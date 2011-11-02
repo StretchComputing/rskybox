@@ -384,7 +384,7 @@ public class UsersResource extends ServerResource {
                 }
         	}
         } catch (JSONException e) {
-        	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
+        	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;

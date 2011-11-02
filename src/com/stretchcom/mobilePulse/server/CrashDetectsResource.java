@@ -59,7 +59,11 @@ public class CrashDetectsResource extends ServerResource {
     // Handles 'Get List of Crash Detects API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
-    	String appIdError = Application.verifyApplicationId(this.applicationId);
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         if (id != null) {
             // Get Crash Detect Info API
         	log.info("in Get User Info API");
@@ -75,6 +79,12 @@ public class CrashDetectsResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
+        
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         return save_crash_detect(entity);
     }
 
@@ -82,6 +92,12 @@ public class CrashDetectsResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
+        
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(ApiStatusCode.CRASH_DETECT_ID_REQUIRED);
 		}
@@ -229,6 +245,7 @@ public class CrashDetectsResource extends ServerResource {
 			} else {
 				// Default status to 'new'
 				crashDetect.setStatus(CrashDetect.NEW_STATUS);
+				crashDetect.setApplicationId(this.applicationId);
 			}
             
             em.persist(crashDetect);
@@ -292,7 +309,7 @@ public class CrashDetectsResource extends ServerResource {
             	json.put("status", status);
         	}
         } catch (JSONException e) {
-        	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
+        	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;

@@ -71,14 +71,14 @@ public class FeedbackResource extends ServerResource {
     // Handles 'Create a new feedback' API
     @Post("json")
     public JsonRepresentation post(Representation entity) {
-        log.info("UserResource in post");
+        log.info("in post");
         return save_feedback(entity);
     }
 
     // Handles 'Update Feedback API'
     @Put("json")
     public JsonRepresentation put(Representation entity) {
-        log.info("UserResource in put");
+        log.info("in put");
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(ApiStatusCode.FEEDBACK_ID_REQUIRED);
 		}
@@ -172,7 +172,7 @@ public class FeedbackResource extends ServerResource {
 			log.info("Feedback not found");
 			apiStatus = ApiStatusCode.FEEDBACK_NOT_FOUND;
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more users have same key");
+			log.severe("should never happen - two or more feedbacks have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} finally {
             if (em.getTransaction().isActive()) {
@@ -185,7 +185,7 @@ public class FeedbackResource extends ServerResource {
     }
 
     private JsonRepresentation show() {
-        log.info("UserResource in show()");
+        log.info("in show()");
         EntityManager em = EMF.get().createEntityManager();
 
 		String apiStatus = ApiStatusCode.SUCCESS;
@@ -210,7 +210,7 @@ public class FeedbackResource extends ServerResource {
 			log.info("Feedback not found");
 			apiStatus = ApiStatusCode.FEEDBACK_NOT_FOUND;
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more users have same key");
+			log.severe("should never happen - two or more feedback have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
@@ -218,7 +218,7 @@ public class FeedbackResource extends ServerResource {
     }
     
     private JsonRepresentation index() {
-        log.info("UserResource in index");
+        log.info("in index");
         JSONObject json = new JSONObject();
         EntityManager em = EMF.get().createEntityManager();
         
@@ -284,11 +284,9 @@ public class FeedbackResource extends ServerResource {
             	json.put("userName", feedback.getUserName());
             	json.put("instanceUrl", feedback.getInstanceUrl());
             	json.put("status", feedback.getStatus());
-            	
-            	log.info("Feedback JSON object = " + feedback.toString());
         	}
         } catch (JSONException e) {
-        	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
+        	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;

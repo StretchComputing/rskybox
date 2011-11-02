@@ -68,6 +68,12 @@ public class UserAuthenticationFilter implements Filter {
     		String thisURL = getURL(httpRequest);
     		log.info("thisURL = " + thisURL);
     		
+    		// get the currentUser and store in the request for easy access by down stream REST Resource handlers
+	    	UserService userService = UserServiceFactory.getUserService();
+	    	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
+	    	httpRequest.setAttribute(MobilePulseApplication.CURRENT_USER, currentUser);
+    		
+    		
     		// ::::::::::::::::::::::::::::TESTING ONLY:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     		// uncomment during testing to allow all rest calls
 //    		if(thisURL.contains("/rest/")) {
