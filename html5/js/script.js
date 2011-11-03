@@ -3,7 +3,6 @@ var RMODULE = (function (my, $) {
 
   var
     buildListPage,
-    buildItemPage,
     itemPage,
     listPage;
 
@@ -24,21 +23,27 @@ var RMODULE = (function (my, $) {
 
   // Generic function to build the list of items.
   //
-  // Calls listItem which is defined per type of item in its HTML file.
+  // page: the page we are working with
   // list: JSON object containing the list elements
   buildListPage = function (page, list) {
-    var display, i, item, markup;
+    var i, item, markup;
 
     markup = '<ul data-role="listview">';
     for (i = 0; i < list[my.itemName()].length; i += 1) {
       item = list[my.itemName()][i];
-      display = item.date + ' - ' + item.userName + ' - ' + item.instanceUrl;
-      markup += '<li><a href="#item?id=' + item.id + '">' + display + '</a></li>';
+      markup += my.buildListItemContent(item);
     }
     markup += '</ul>';
     my.pageContent(page, markup).find(':jqmData(role=listview)').listview();
   };
 
+  // Allow outsiders to provide their own list content
+  my.buildListItemContent = function (item) {
+    var display;
+
+    display = item.date + ' - ' + item.userName + ' - ' + item.instanceUrl;
+    return '<li><a href="#item?id=' + item.id + '">' + display + '</a></li>';
+  };
 
   //
   // Generic Item Functions
@@ -55,16 +60,18 @@ var RMODULE = (function (my, $) {
     restUrl = my.getRestPrefix() + '/' + my.itemName() + '/' + my.getParameterByName(url, 'id');
     if (changeStatus) {
       my.putJson(restUrl, '{ status: ' + changeStatus + ' }', function () {
-        my.jsonPopulate(restUrl, page, buildItemPage);
+        my.jsonPopulate(restUrl, page, my.buildItemPage);
       });
     } else {
-      my.jsonPopulate(restUrl, page, buildItemPage);
+      my.jsonPopulate(restUrl, page, my.buildItemPage);
     }
   };
 
   // Sets up common elements of the item page. Calls itemDetails for item-specific
   // elements.
-  buildItemPage = function (page, item) {
+  //
+  // Public so it can be overridden.
+  my.buildItemPage = function (page, item) {
     var h1, link, status;
 
     status = item.status === 'new' ? 'archived' : 'new';
