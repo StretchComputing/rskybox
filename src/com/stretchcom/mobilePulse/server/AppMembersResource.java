@@ -36,17 +36,24 @@ import com.stretchcom.mobilePulse.models.User;
 public class AppMembersResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(AppMembersResource.class.getName());
     private String id;
+	private String applicationId;
 
     @Override
     protected void doInit() throws ResourceException {
         log.info("in doInit");
         id = (String) getRequest().getAttributes().get("id");
+        this.applicationId = (String) getRequest().getAttributes().get("applicationId");
     }
 
     // Handles 'Get AppMember Info API'
     // Handles 'Get List of AppMembers API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         if (id != null) {
             // Get AppMember Info API
         	log.info("in Get AppMember Info API");
@@ -62,6 +69,11 @@ public class AppMembersResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         return save_appMember(entity);
     }
 
@@ -69,6 +81,11 @@ public class AppMembersResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(ApiStatusCode.APP_MEMBER_ID_REQUIRED);
 		}
@@ -134,6 +151,8 @@ public class AppMembersResource extends ServerResource {
 	            	}
 	            }
 			} else {
+				appMember.setApplicationId(this.applicationId);
+				
 				// creating an appMember so default status to 'pending'
 				appMember.setStatus(AppMember.PENDING_STATUS);
 				
@@ -211,7 +230,9 @@ public class AppMembersResource extends ServerResource {
 			List<AppMember> appMembers = null;
             JSONArray ja = new JSONArray();
             
-			appMembers= (List<AppMember>)em.createNamedQuery("AppMember.getAll").getResultList();
+			appMembers= (List<AppMember>)em.createNamedQuery("AppMember.getAllWithApplicationId")
+					.setParameter("applicationId", this.applicationId)
+					.getResultList();
             for (AppMember am : appMembers) {
                 ja.put(getAppMemberJson(am, true));
             }

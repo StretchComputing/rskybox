@@ -18,6 +18,10 @@ import com.google.appengine.api.datastore.Key;
     		query="SELECT bt FROM BetaTester bt"
     ),
     @NamedQuery(
+    		name="BetaTester.getAllWithApplicationId",
+    		query="SELECT bt FROM BetaTester bt and bt.applicationId = :applicationId"
+    ),
+    @NamedQuery(
     		name="BetaTester.getByKey",
     		query="SELECT bt FROM BetaTester bt WHERE bt.key = :key"
     ),

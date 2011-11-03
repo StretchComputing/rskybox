@@ -37,6 +37,10 @@ import com.stretchcom.mobilePulse.server.Utility;
     		query="SELECT am FROM AppMember am"
     ),
     @NamedQuery(
+    		name="AppMember.getAllWithApplicationId",
+    		query="SELECT am FROM AppMember am and am.applictionId = :applicationId"
+    ),
+    @NamedQuery(
     		name="AppMember.getByUserId",
     		query="SELECT am FROM AppMember am WHERE am.userId = :userId"
     ),

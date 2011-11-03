@@ -20,8 +20,16 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT fb FROM Feedback fb ORDER BY fb.recordedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="Feedback.getAllWithApplicationId",
+    		query="SELECT fb FROM Feedback fb and fb.applictionId = :applicationId ORDER BY fb.recordedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="Feedback.getByStatus",
     		query="SELECT fb FROM Feedback fb WHERE fb.status = :status ORDER BY fb.recordedGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="Feedback.getByStatusAndApplicationId",
+    		query="SELECT fb FROM Feedback fb WHERE fb.status = :status and fb.applicationId = :applicationId ORDER BY fb.recordedGmtDate DESC"
     ),
     @NamedQuery(
     		name="Feedback.getByKey",

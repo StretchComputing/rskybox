@@ -34,17 +34,24 @@ import com.stretchcom.mobilePulse.models.User;
 public class BetaTestersResource extends ServerResource {
     private static final Logger log = Logger.getLogger(BetaTestersResource.class.getName());
     private String id;
+	private String applicationId;
 
     @Override
     protected void doInit() throws ResourceException {
         log.info("in doInit");
         id = (String) getRequest().getAttributes().get("id");
+        this.applicationId = (String) getRequest().getAttributes().get("applicationId");
     }
 
     // Handles 'Get Beta Tester API'
     // Handles 'Get List of Beta Testers API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         if (id != null) {
             // Get User Info API
         	log.info("in Get Beta Tester Info API");
@@ -60,6 +67,11 @@ public class BetaTestersResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         return save_beta_tester(entity);
     }
 
@@ -67,6 +79,11 @@ public class BetaTestersResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(ApiStatusCode.BETA_TESTER_ID_REQUIRED);
 		}
@@ -131,7 +148,9 @@ public class BetaTestersResource extends ServerResource {
         try {
             List<BetaTester> betaTesters = new ArrayList<BetaTester>();
             JSONArray ja = new JSONArray();
-            betaTesters = (List<BetaTester>) em.createNamedQuery("BetaTester.getAll").getResultList();
+            betaTesters = (List<BetaTester>) em.createNamedQuery("BetaTester.getAllWithApplicationId")
+            		.setParameter("applicationId", this.applicationId)
+            		.getResultList();
             for (BetaTester betaTester : betaTesters) {
                 ja.put(getBetaTesterJson(betaTester));
             }
@@ -212,6 +231,10 @@ public class BetaTestersResource extends ServerResource {
             
             if (!isUpdate && json.has("instanceUrl")) {
             	betaTester.setInstanceUrl(json.getString("instanceUrl"));
+            }
+            
+            if(!isUpdate) {
+            	betaTester.setApplicationId(this.applicationId);
             }
             
             em.persist(betaTester);
