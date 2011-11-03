@@ -37,12 +37,14 @@ import com.stretchcom.mobilePulse.models.User;
 public class ClientLogsResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(ClientLogsResource.class.getName());
 	private String id;
+	private String applicationId;
     private String listStatus;
 
     @Override
     protected void doInit() throws ResourceException {
         log.info("in doInit");
         this.id = (String) getRequest().getAttributes().get("id");
+        this.applicationId = (String) getRequest().getAttributes().get("applicationId");
         
 		Form form = getRequest().getResourceRef().getQueryAsForm();
 		for (Parameter parameter : form) {
@@ -59,6 +61,11 @@ public class ClientLogsResource extends ServerResource {
     // Handles 'Get Client Log of Users API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
          JSONObject jsonReturn;
 
         log.info("in get for Crash Detect resource");
@@ -76,6 +83,11 @@ public class ClientLogsResource extends ServerResource {
     // Handles 'Create Client Log API'
     @Post("json")
     public JsonRepresentation post(Representation entity) {
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         log.info("in post");
         return save_client_log(entity);
     }
@@ -84,6 +96,11 @@ public class ClientLogsResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
 		}
@@ -104,18 +121,22 @@ public class ClientLogsResource extends ServerResource {
             
 			if(this.listStatus != null) {
 			    if(this.listStatus.equalsIgnoreCase(ClientLog.NEW_STATUS) || this.listStatus.equalsIgnoreCase(ClientLog.ARCHIVED_STATUS)){
-			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatus")
+			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
+							.setParameter("applicationId", this.applicationId)
 							.getResultList();
 			    } else if(this.listStatus.equalsIgnoreCase(ClientLog.ALL_STATUS)) {
-			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAll").getResultList();
+			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.getResultList();
 			    } else {
 			    	return Utility.apiError(ApiStatusCode.INVALID_STATUS_PARAMETER);
 			    }
 			} else {
 				// by default, only get 'new' feedback
-				clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatus")
+				clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
 						.setParameter("status", ClientLog.NEW_STATUS)
+						.setParameter("applicationId", this.applicationId)
 						.getResultList();
 			}
             
@@ -228,6 +249,8 @@ public class ClientLogsResource extends ServerResource {
 	            	}
 	            }
 			} else {
+				clientLog.setApplicationId(this.applicationId);
+            	
 				// Default status to 'new'
 				clientLog.setStatus(CrashDetect.NEW_STATUS);
 			}

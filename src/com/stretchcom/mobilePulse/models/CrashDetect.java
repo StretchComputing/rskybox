@@ -19,8 +19,16 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT cd FROM CrashDetect cd ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="CrashDetect.getAllWithApplicationId",
+    		query="SELECT cd FROM CrashDetect cd and cd.applicationId = :applicationId ORDER BY cd.detectedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="CrashDetect.getByStatus",
     		query="SELECT cd FROM CrashDetect cd WHERE cd.status = :status ORDER BY cd.detectedGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="CrashDetect.getByStatusAndApplicationId",
+    		query="SELECT cd FROM CrashDetect cd WHERE cd.status = :status and cd.applicationId = :applicationId ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
     		name="CrashDetect.getByKey",

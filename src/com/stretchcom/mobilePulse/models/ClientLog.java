@@ -19,8 +19,16 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT cl FROM ClientLog cl ORDER BY cl.createdGmtDate DESC"
     ),
     @NamedQuery(
+    		name="ClientLog.getAllWithApplicationId",
+    		query="SELECT cl FROM ClientLog cl and cl.applicationId = :applicationId ORDER BY cl.createdGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="ClientLog.getByStatus",
     		query="SELECT cl FROM ClientLog cl WHERE cl.status = :status  ORDER BY cl.createdGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="ClientLog.getByStatusAndApplicationId",
+    		query="SELECT cl FROM ClientLog cl WHERE cl.status = :status and cl.applicationId = :applicationId ORDER BY cl.createdGmtDate DESC"
     ),
     @NamedQuery(
     		name="ClientLog.getByKey",

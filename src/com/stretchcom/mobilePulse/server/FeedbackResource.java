@@ -35,12 +35,14 @@ import com.stretchcom.mobilePulse.models.User;
 public class FeedbackResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(FeedbackResource.class.getName());
     private String id;
+	private String applicationId;
     private String listStatus;
 
     @Override
     protected void doInit() throws ResourceException {
         log.info("in doInit");
         id = (String) getRequest().getAttributes().get("id");
+        this.applicationId = (String) getRequest().getAttributes().get("applicationId");
         
 		Form form = getRequest().getResourceRef().getQueryAsForm();
 		for (Parameter parameter : form) {
@@ -57,6 +59,11 @@ public class FeedbackResource extends ServerResource {
     // Handles 'Get List of Feedback API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         if (id != null) {
             // Get Feedback Info API
         	log.info("in Get Feedback Info API");
@@ -72,6 +79,11 @@ public class FeedbackResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         return save_feedback(entity);
     }
 
@@ -79,6 +91,11 @@ public class FeedbackResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
+    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(ApiStatusCode.FEEDBACK_ID_REQUIRED);
 		}
@@ -152,6 +169,8 @@ public class FeedbackResource extends ServerResource {
 	            	}
 	            }
 			} else {
+				feedback.setApplicationId(this.applicationId);
+
 				// creating a feedback so default status to 'new'
 				feedback.setStatus(Feedback.NEW_STATUS);
 			}
@@ -230,18 +249,22 @@ public class FeedbackResource extends ServerResource {
             
 			if(this.listStatus != null) {
 			    if(this.listStatus.equalsIgnoreCase(Feedback.NEW_STATUS) || this.listStatus.equalsIgnoreCase(Feedback.ARCHIVED_STATUS)){
-					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatus")
+					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
+							.setParameter("applicationId", this.applicationId)
 							.getResultList();
 			    } else if(this.listStatus.equalsIgnoreCase(Feedback.ALL_STATUS)) {
-					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAll").getResultList();
+					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationId")
+							.setParameter("applicationId", this.applicationId)
+							.getResultList();
 			    } else {
 			    	return Utility.apiError(ApiStatusCode.INVALID_STATUS_PARAMETER);
 			    }
 			} else {
 				// by default, only get 'new' feedback
-				feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatus")
+				feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationId")
 						.setParameter("status", Feedback.NEW_STATUS)
+						.setParameter("applicationId", this.applicationId)
 						.getResultList();
 			}
             

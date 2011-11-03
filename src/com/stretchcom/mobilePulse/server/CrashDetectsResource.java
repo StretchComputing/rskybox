@@ -117,18 +117,22 @@ public class CrashDetectsResource extends ServerResource {
             
 			if(this.listStatus != null) {
 			    if(this.listStatus.equalsIgnoreCase(CrashDetect.NEW_STATUS) || this.listStatus.equalsIgnoreCase(CrashDetect.ARCHIVED_STATUS)){
-			    	crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatus")
+			    	crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
+							.setParameter("applicationId", this.applicationId)
 							.getResultList();
 			    } else if(this.listStatus.equalsIgnoreCase(CrashDetect.ALL_STATUS)) {
-			    	crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getAll").getResultList();
+			    	crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getAllWithApplicationId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.getResultList();
 			    } else {
 			    	return Utility.apiError(ApiStatusCode.INVALID_STATUS_PARAMETER);
 			    }
 			} else {
 				// by default, only get 'new' feedback
-				crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatus")
+				crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationId")
 						.setParameter("status", CrashDetect.NEW_STATUS)
+						.setParameter("applicationId", this.applicationId)
 						.getResultList();
 			}
             
@@ -243,6 +247,8 @@ public class CrashDetectsResource extends ServerResource {
 	            	}
 	            }
 			} else {
+				crashDetect.setApplicationId(this.applicationId);
+
 				// Default status to 'new'
 				crashDetect.setStatus(CrashDetect.NEW_STATUS);
 				crashDetect.setApplicationId(this.applicationId);
