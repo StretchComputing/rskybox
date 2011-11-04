@@ -1,8 +1,10 @@
+'use strict';
+
 var RMODULE = (function (my, $) {
-  'use strict';
 
   var
     buildListPage,
+    itemPage,
     itemPage,
     listPage;
 
@@ -17,7 +19,8 @@ var RMODULE = (function (my, $) {
   listPage = function (page, status) {
     var restUrl;
 
-    restUrl = my.getRestPrefix() + '/' + my.itemName() + (status ? '?status=' + status : '');
+    restUrl = my.getRestPrefix() + '/' + my.itemName();
+    restUrl += (status ? '?status=' + status : '');
     my.jsonPopulate(restUrl, page, buildListPage);
   };
 
@@ -56,8 +59,8 @@ var RMODULE = (function (my, $) {
   itemPage = function (page, url) {
     var changeStatus, restUrl;
 
-    changeStatus = my.getParameterByName(url, 'changeStatus');
-    restUrl = my.getRestPrefix() + '/' + my.itemName() + '/' + my.getParameterByName(url, 'id');
+    changeStatus = my.getParameterByName(url.hash, 'changeStatus');
+    restUrl = my.getRestPrefix() + '/' + my.itemName() + '/' + my.getParameterByName(url.hash, 'id');
     if (changeStatus) {
       my.putJson(restUrl, '{ status: ' + changeStatus + ' }', function () {
         my.jsonPopulate(restUrl, page, my.buildItemPage);
@@ -78,7 +81,7 @@ var RMODULE = (function (my, $) {
 
     link  = '<a href="#item?id=' + item.id + '&changeStatus=' + status + '" class="ui-btn-right" data-theme="b">';
     link +=   item.status === 'new' ? 'Archive' : 'Un-archive';
-    link += '</a>';
+    link += '<\/a>';
 
     h1 = my.pageHeader(page).find('h1');
     h1.next('a').remove();
@@ -111,5 +114,3 @@ var RMODULE = (function (my, $) {
 
   return my;
 }(RMODULE || {}, jQuery));
-
-RMODULE.init();

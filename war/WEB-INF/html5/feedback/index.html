@@ -28,21 +28,23 @@ var RMODULE = (function (my) {
   my.itemDetails = function (item) {
     var html;
 
-    html  = '<div>Recorded: ' + item.date + '</div>';
-    html += '<div>By: ' + item.userName + '</div>';
-    html += '<div>For: ' + item.instanceUrl + '</div>';
-    html += '<div>Status: ' + item.status + '</div>';
+    html  = '<div>Recorded: ' + item.date + '<\/div>';
+    html += '<div>By: ' + item.userName + '<\/div>';
+    html += '<div>For: ' + item.instanceUrl + '<\/div>';
+    html += '<div>Status: ' + item.status + '<\/div>';
     html += '<div>';
     html += '  Feedback: ';
     html += '  <audio controls>';
     html += '    <source src="/audio/' + item.id + '.mp4" type="audio/mp4">';
-    html += '  </audio>';
-    html += '</div>';
+    html += '  <\/audio>';
+    html += '<\/div>';
     return html;
   };
 
   return my;
 }(RMODULE || {}));
+
+RMODULE.init();
 </script>
 
 <div data-role="page" id="index" data-title="Feedback">
@@ -70,5 +72,6 @@ var RMODULE = (function (my) {
   </div>
   <div data-role="content"></div>
 </div>
+
 </body>
 </html>

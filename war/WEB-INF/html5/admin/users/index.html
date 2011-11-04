@@ -37,7 +37,7 @@ var RMODULE = (function (my, $) {
     var id, restUrl;
 
     page.find('form')[0].reset();
-    id = my.getParameterByName(url, 'id');
+    id = my.getParameterByName(url.hash, 'id');
     restUrl = my.getRestPrefix() + my.getMobileCarriersPath();
     my.jsonPopulate(restUrl, $('#mobileCarrierId'), function (select, carriers) {
       select.html(my.carrierOptions(carriers.mobileCarriers));
@@ -165,5 +165,6 @@ RMODULE.init();
     </p>
   </div>
 </div>
+
 </body>
 </html>

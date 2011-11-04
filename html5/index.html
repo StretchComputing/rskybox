@@ -8,6 +8,8 @@ options: Options
 var RMODULE = (function (my, $) {
   'use strict';
 
+  var old_init;
+
   my.itemName = function () {
     return 'applications';
   };
@@ -16,17 +18,17 @@ var RMODULE = (function (my, $) {
     var display;
 
     display = item.name + ' ' + item.version + ', ' + item.date;
-    return '<li><a href="#item?id=' + item.id + '">' + display + '</a></li>';
+    return '<li><a href="#item?id=' + item.id + '">' + display + '<\/a><\/li>';
   };
 
   my.buildItemPage = function (page, item) {
     var markup;
 
     markup = '<ul data-role="listview">';
-    markup += '<li><a href="{{ site.html }}/feedback?id=' + item.id +'" rel="external">Feedback</a></li>';
-    markup += '<li><a href="{{ site.html }}/crashdetects?id=' + item.id +'" rel="external">Crash Detects</a></li>';
-    markup += '<li><a href="{{ site.html }}/clientlogs?id=' + item.id +'" rel="external">Client Logs</a></li>';
-    markup += '</ul>';
+    markup += '<li><a href="{{ site.html }}\/feedback?id=' + item.id +'" rel="external">Feedback<\/a><\/li>';
+    markup += '<li><a href="{{ site.html }}\/crashdetects?id=' + item.id +'" rel="external">Crash Detects<\/a><\/li>';
+    markup += '<li><a href="{{ site.html }}\/clientlogs?id=' + item.id +'" rel="external">Client Logs<\/a><\/li>';
+    markup += '<\/ul>';
     my.pageContent(page, markup).find(':jqmData(role=listview)').listview();
   };
 
@@ -63,7 +65,10 @@ var RMODULE = (function (my, $) {
     return false;
   };
 
+  old_init = my.init;
   my.init = function () {
+    old_init();
+
     $('#index').live('pagebeforecreate', function () {
       var restUrl = my.getRestPrefix() + '/users/current';
       my.jsonPopulate(restUrl, $('#index'), function (page, user) {

@@ -34,7 +34,7 @@ var RMODULE = (function (my) {
   my.itemPage = function (page, url) {
     var restUrl;
 
-    restUrl = my.getRestPrefix() + my.getItemPath() + '/' + my.getParameterByName(url, 'id');
+    restUrl = my.getRestPrefix() + my.getItemPath() + '/' + my.getParameterByName(url.hash, 'id');
     my.jsonPopulate(restUrl, page, buildItemPage);
   };
 
@@ -70,5 +70,6 @@ RMODULE.init();
   </div>
   <div data-role="content"></div>
 </div>
+
 </body>
 </html>

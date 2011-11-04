@@ -14,20 +14,22 @@ var RMODULE = (function (my) {
   my.itemDetails = function (item) {
     var html;
 
-    html  = '<div>Detected Date: ' + item.date + '</div>';
-    html += '<div>User: ' + item.userName + '</div>';
-    html += '<div>For: ' + item.instanceUrl + '</div>';
-    html += '<div>Status: ' + item.status + '</div>';
-    html += '<div>Summary: ' + item.summary + '</div>';
+    html  = '<div>Detected Date: ' + item.date + '<\/div>';
+    html += '<div>User: ' + item.userName + '<\/div>';
+    html += '<div>For: ' + item.instanceUrl + '<\/div>';
+    html += '<div>Status: ' + item.status + '<\/div>';
+    html += '<div>Summary: ' + item.summary + '<\/div>';
     html += '<div>';
     html += '  Crash Stack Data: ';
-    html += '  <a href="/crashStackData/' + item.id + '.plcrash" data-ajax="false">plcrash file</a>';
-    html += '</div>';
+    html += '  <a href="/crashStackData/' + item.id + '.plcrash" data-ajax="false">plcrash file<\/a>';
+    html += '<\/div>';
     return html;
   };
 
   return my;
 }(RMODULE || {}));
+
+RMODULE.init();
 </script>
 
 <div data-role="page" id="index" data-title="Crash Detects">

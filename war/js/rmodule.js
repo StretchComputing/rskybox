@@ -1,6 +1,7 @@
+'use strict';
+
 // Module Pattern
 var RMODULE = (function (my, $) {
-  'use strict';
 
   var
     genericJson,
@@ -10,7 +11,13 @@ var RMODULE = (function (my, $) {
     showPageLoadingMessage;
 
   my.getRestPrefix = function () {
-    return '/rest/v1';
+    var restUrl;
+
+    restUrl = '/rest/v1'
+    if (window.location.search) {
+      restUrl += '/applications/' + my.getParameterByName(window.location.search, 'id');
+    }
+    return restUrl;
   };
 
   // Dynamically inject pages
@@ -147,7 +154,7 @@ var RMODULE = (function (my, $) {
 
   // Returns the value of a named parameter from a given JQM URL.
   my.getParameterByName = function (url, name) {
-    var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url.hash);
+    var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
   };
 
@@ -187,7 +194,9 @@ var RMODULE = (function (my, $) {
   };
 
   my.validateSms = function () {
-    if (!$('#sendSmsNotifications').prop('checked')) { return true; }
+    if (!$('#sendSmsNotifications').prop('checked')) {
+      return true;
+    }
 
     if (!my.validPhoneNumber($('#phoneNumber').val())) {
       window.alert('Please enter a valid phone number.');

@@ -1,5 +1,6 @@
+'use strict';
+
 var RMODULE = (function (my, $) {
-  'use strict';
 
   var
     buildListPage,
@@ -41,7 +42,9 @@ var RMODULE = (function (my, $) {
   saveItem = function () {
     var restUrl, json;
 
-    if (!validateUser()) { return false; }
+    if (!validateUser()) {
+      return false;
+    }
 
     restUrl = my.getRestPrefix() + my.getItemPath;
     json = JSON.stringify({
