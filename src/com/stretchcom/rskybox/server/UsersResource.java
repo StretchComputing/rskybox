@@ -173,7 +173,7 @@ public class UsersResource extends ServerResource {
 						.setParameter("emailAddress", emailAddress)
 						.getSingleResult();
 				} catch (NoResultException e) {
-					// if user is Admin, create a user object on the fly.  This allows admins of the app to just start using mobile pulse without
+					// if user is Admin, create a user object on the fly.  This allows admins of the app to just start using rskybox without
 					// any configuration necessary. A slick little feature.
 					if(isAdmin) {
 						user = User.createUser(emailAddress, currentUser.getNickname());
