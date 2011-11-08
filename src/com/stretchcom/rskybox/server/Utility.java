@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.util.logging.Logger;
 
@@ -11,8 +11,8 @@ import org.restlet.ext.servlet.internal.ServletCall;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
-import com.stretchcom.mobilePulse.models.Application;
-import com.stretchcom.mobilePulse.models.User;
+import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.User;
 
 public class Utility {
     private static final Logger log = Logger.getLogger(Utility.class.getName());
@@ -77,7 +77,7 @@ public class Utility {
     	
     	// TODO - get this working later
 //    	HttpServletRequest httpRequest = ServletCall.getRequest(theRequest);
-//    	com.google.appengine.api.users.User currentUser = (com.google.appengine.api.users.User)httpRequest.getAttribute(MobilePulseApplication.CURRENT_USER);
+//    	com.google.appengine.api.users.User currentUser = (com.google.appengine.api.users.User)httpRequest.getAttribute(RskyboxApplication.CURRENT_USER);
 //    	appIdStatus = User.verifyUserMemberOfApplication(currentUser.getEmail(), theApplicationId);
     	return appIdStatus;
 	}

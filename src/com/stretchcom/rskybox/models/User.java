@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.models;
+package com.stretchcom.rskybox.models;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,12 +22,12 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.stretchcom.mobilePulse.server.ApiStatusCode;
-import com.stretchcom.mobilePulse.server.EMF;
-import com.stretchcom.mobilePulse.server.MobilePulseApplication;
-import com.stretchcom.mobilePulse.server.UsersResource;
-import com.stretchcom.mobilePulse.server.Emailer;
-import com.stretchcom.mobilePulse.server.Utility;
+import com.stretchcom.rskybox.server.ApiStatusCode;
+import com.stretchcom.rskybox.server.EMF;
+import com.stretchcom.rskybox.server.Emailer;
+import com.stretchcom.rskybox.server.RskyboxApplication;
+import com.stretchcom.rskybox.server.UsersResource;
+import com.stretchcom.rskybox.server.Utility;
 
 @Entity
 @NamedQueries({
@@ -144,17 +144,17 @@ public class User {
             }
             
             String subject = "notification";
-            String enhancedEmailMessage = theMessage + "<br><br>" + MobilePulseApplication.APPLICATION_BASE_URL;
-            String enhancedSmsMessage = theMessage + "  " + MobilePulseApplication.APPLICATION_BASE_URL;
+            String enhancedEmailMessage = theMessage + "<br><br>" + RskyboxApplication.APPLICATION_BASE_URL;
+            String enhancedSmsMessage = theMessage + "  " + RskyboxApplication.APPLICATION_BASE_URL;
             for (User user : users) {
                 if(user.getSendEmailNotifications()) {
                 	log.info("sending email to " + user.getEmailAddress());
-                    // Add embedded URL to MobilePulse application
+                    // Add embedded URL to rSkybox application
                 	Emailer.send(user.getEmailAddress(), subject, enhancedEmailMessage, Emailer.NO_REPLY);
                 }
                 if(user.getSendSmsNotifications()) {
                 	log.info("sending SMS to " + user.getSmsEmailAddress());
-                    // Add embedded URL to MobilePulse application
+                    // Add embedded URL to rSkybox application
                 	Emailer.send(user.getSmsEmailAddress(), subject, enhancedSmsMessage, Emailer.NO_REPLY);
                 }
             }

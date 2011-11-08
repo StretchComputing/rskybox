@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.util.logging.Logger;
 
@@ -6,14 +6,14 @@ import org.restlet.Application;
 import org.restlet.Restlet;
 import org.restlet.routing.Router;
 
-public class MobilePulseApplication extends Application {
-    private static final Logger log = Logger.getLogger(MobilePulseApplication.class.getName());
-    public static final String APPLICATION_BASE_URL = "https://1-3.mobile-pulse.appspot.com/";
+public class RskyboxApplication extends Application {
+    private static final Logger log = Logger.getLogger(RskyboxApplication.class.getName());
+    public static final String APPLICATION_BASE_URL = "https://rskybox-stretchcom.appspot.com/";
     public static final String APPLICATION_WELCOME_PAGE = APPLICATION_BASE_URL + "index.html";
     public static final String LIST_DATE_FORMAT = "MM/dd/yy kk:mm";
     public static final String INFO_DATE_FORMAT = "MM/dd/yyyy 'at' hh:mm a";
     public static final String DEFAULT_LOCAL_TIME_ZONE = "America/Chicago";
-	public static final String CURRENT_USER = "mobilePulse.currentUser";
+	public static final String CURRENT_USER = "rSkybox.currentUser";
 
     /**
      * Creates a root Restlet that will receive all incoming calls.

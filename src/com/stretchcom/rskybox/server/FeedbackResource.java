@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,8 +29,8 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.stretchcom.mobilePulse.models.Feedback;
-import com.stretchcom.mobilePulse.models.User;
+import com.stretchcom.rskybox.models.Feedback;
+import com.stretchcom.rskybox.models.User;
 
 public class FeedbackResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(FeedbackResource.class.getName());
@@ -144,7 +144,7 @@ public class FeedbackResource extends ServerResource {
 				String recordedDateStr = json.getString("date");
 				
 				if(recordedDateStr != null || recordedDateStr.trim().length() != 0) {
-					TimeZone tz = GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
+					TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
 					Date gmtRecordedDate = GMT.convertToGmtDate(recordedDateStr, true, tz);
 					if(gmtRecordedDate == null) {
 						log.info("invalid recorded date format passed in");
@@ -298,9 +298,9 @@ public class FeedbackResource extends ServerResource {
             	Date recordedDate = feedback.getRecordedGmtDate();
             	// TODO support time zones
             	if(recordedDate != null) {
-            		TimeZone tz = GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		String dateFormat = MobilePulseApplication.INFO_DATE_FORMAT;
-            		if(isList) {dateFormat = MobilePulseApplication.LIST_DATE_FORMAT;}
+            		TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+            		String dateFormat = RskyboxApplication.INFO_DATE_FORMAT;
+            		if(isList) {dateFormat = RskyboxApplication.LIST_DATE_FORMAT;}
             		json.put("date", GMT.convertToLocalDate(recordedDate, tz, dateFormat));
             	}
             	

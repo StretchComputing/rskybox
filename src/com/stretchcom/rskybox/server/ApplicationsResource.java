@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.stretchcom.mobilePulse.models.Application;
+import com.stretchcom.rskybox.models.Application;
 
 public class ApplicationsResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(ApplicationsResource.class.getName());
@@ -218,9 +218,9 @@ public class ApplicationsResource extends ServerResource {
             	Date createdDate = application.getCreatedGmtDate();
             	// TODO support time zones
             	if(createdDate != null) {
-            		TimeZone tz = GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		String dateFormat = MobilePulseApplication.INFO_DATE_FORMAT;
-            		if(isList) {dateFormat = MobilePulseApplication.LIST_DATE_FORMAT;}
+            		TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+            		String dateFormat = RskyboxApplication.INFO_DATE_FORMAT;
+            		if(isList) {dateFormat = RskyboxApplication.LIST_DATE_FORMAT;}
             		json.put("date", GMT.convertToLocalDate(createdDate, tz, dateFormat));
             	}
             	

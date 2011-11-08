@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;

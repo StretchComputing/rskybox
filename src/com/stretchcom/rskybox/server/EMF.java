@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;

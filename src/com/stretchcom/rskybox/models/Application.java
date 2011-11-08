@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.models;
+package com.stretchcom.rskybox.models;
 
 import java.util.Date;
 import java.util.logging.Logger;
@@ -15,8 +15,8 @@ import javax.persistence.NonUniqueResultException;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.stretchcom.mobilePulse.server.ApiStatusCode;
-import com.stretchcom.mobilePulse.server.EMF;
+import com.stretchcom.rskybox.server.ApiStatusCode;
+import com.stretchcom.rskybox.server.EMF;
 
 @Entity
 @NamedQueries({

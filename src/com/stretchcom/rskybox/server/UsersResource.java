@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,9 +27,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.stretchcom.mobilePulse.models.MobileCarrier;
-import com.stretchcom.mobilePulse.models.User;
-import com.stretchcom.mobilePulse.models.Application;
+import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.MobileCarrier;
+import com.stretchcom.rskybox.models.User;
 
 public class UsersResource extends ServerResource {
     private static final Logger log = Logger.getLogger(UsersResource.class.getName());
@@ -359,7 +359,7 @@ public class UsersResource extends ServerResource {
                 	json.put("isAdmin", isCurrentUserAdmin);
                 	
     	        	UserService userService = UserServiceFactory.getUserService();
-    	        	json.put("logoutUrl", userService.createLogoutURL(MobilePulseApplication.APPLICATION_WELCOME_PAGE));
+    	        	json.put("logoutUrl", userService.createLogoutURL(RskyboxApplication.APPLICATION_WELCOME_PAGE));
     	        	
     	        	List<Application> applications = user.getApplications();
     	        	if(applications != null && applications.size() > 0) {

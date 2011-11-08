@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.stretchcom.mobilePulse.models.User;
+import com.stretchcom.rskybox.models.User;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
 
@@ -36,18 +36,18 @@ public class UserAuthenticationFilter implements Filter {
     	// ------------------------------------------------------------------
     	// Filter requires authentication for the following type of requests:
     	// ------------------------------------------------------------------
-    	// * MobilePulse Client application REST calls with a priori token
-    	// * MobilePulse welcome-file with Google account token
-    	// * MobilePulse HTML requests with Google account token
-    	// * MobilePulse REST calls with Google account token
-    	// * MobilePulse Admin REST calls with Google account token
+    	// * rSkybox Client application REST calls with a priori token
+    	// * rSkybox welcome-file with Google account token
+    	// * rSkybox HTML requests with Google account token
+    	// * rSkybox REST calls with Google account token
+    	// * rSkybox Admin REST calls with Google account token
     	//
     	// -------------------------------------------
     	// Authentication (for above type of requests)
     	// -------------------------------------------
-    	// * MobilePulse Client application REST calls with valid a priori token are given full access to the app (for now, including admin REST calls)
-    	// * All mobilePulse users must be currently logged into a Google account.
-    	// * If user is an admin of this mobilePulse app engine application, they are given full access to the app.
+    	// * rSkybox Client application REST calls with valid a priori token are given full access to the app (for now, including admin REST calls)
+    	// * All rSkybox users must be currently logged into a Google account.
+    	// * If user is an admin of this rSkybox app engine application, they are given full access to the app.
     	// * If user is not and admin, they must be in the User table. Lookup is via Google account email address.
     	// * Only an admin can access Admin related REST calls.
     	//
@@ -71,7 +71,7 @@ public class UserAuthenticationFilter implements Filter {
     		// get the currentUser and store in the request for easy access by down stream REST Resource handlers
 	    	UserService userService = UserServiceFactory.getUserService();
 	    	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
-	    	httpRequest.setAttribute(MobilePulseApplication.CURRENT_USER, currentUser);
+	    	httpRequest.setAttribute(RskyboxApplication.CURRENT_USER, currentUser);
     		
     		
     		// ::::::::::::::::::::::::::::TESTING ONLY:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -84,16 +84,16 @@ public class UserAuthenticationFilter implements Filter {
     		//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
     		
     		
-    		// MobilePulse Client application REST calls with valid a priori token are given full access to the app (for now, including admin REST calls)
-    		// So if this is a mobilePulse client, just flow thru to chain.doFilter() below.  If there is no a priori token, this codes assumes it was NOT
+    		// rSkybox Client application REST calls with valid a priori token are given full access to the app (for now, including admin REST calls)
+    		// So if this is a rSkybox client, just flow thru to chain.doFilter() below.  If there is no a priori token, this codes assumes it was NOT
     		// a client request - even though it may be a client request with a bad token. But the right thing will happen because without the a priori
     		// token, the code will determine the request is NOT authenticated.
-    		if(!isMobilePulseClientWithValidToken(httpRequest)) {
-    			handleMobilePulseAppRequest(httpRequest, httpResponse, chain, thisURL);
+    		if(!isRskyboxClientWithValidToken(httpRequest)) {
+    			handleRskyboxAppRequest(httpRequest, httpResponse, chain, thisURL);
     			
     	        // ::PUNT:: Tried allowing this to fall thru so chain.doFilter() is called below, but could not get RequestDispatcher.forward()
     			//          to play nice with chain.doFilter(). If an answer is found, this code would have to be restructured because not all
-    			//          code paths in handleMobilePulseAppRequestAuthorized() should flow thru to chain.doFilter().
+    			//          code paths in handleRskyboxAppRequestAuthorized() should flow thru to chain.doFilter().
     			return;
     		}
         } else {
@@ -104,7 +104,7 @@ public class UserAuthenticationFilter implements Filter {
         chain.doFilter(request, response);
     }
     
-    private Boolean isMobilePulseClientWithValidToken(HttpServletRequest httpRequest) {
+    private Boolean isRskyboxClientWithValidToken(HttpServletRequest httpRequest) {
     	String token = getToken(httpRequest);
     	log.info("a priori token = " + token);
     	if(token != null && token.equals(A_PRIORI_TOKEN)) {
@@ -115,8 +115,8 @@ public class UserAuthenticationFilter implements Filter {
     	return false;
     }
     
-    private void handleMobilePulseAppRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain chain, String thisURL) {
-    	// All mobilePulse users must be currently logged into a Google account.
+    private void handleRskyboxAppRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain chain, String thisURL) {
+    	// All rSkybox users must be currently logged into a Google account.
 		try {
 	    	UserService userService = UserServiceFactory.getUserService();
 	    	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
@@ -137,7 +137,7 @@ public class UserAuthenticationFilter implements Filter {
 	    		log.info("current user email address = " + currentUser.getEmail());
 	    		log.info("current user nick name = " + currentUser.getNickname());
 	    		if(userService.isUserAdmin()) {
-	    			// If user is an admin of this mobilePulse app engine application, they are given full access to the app.
+	    			// If user is an admin of this rSkybox app engine application, they are given full access to the app.
 	    			log.info("User is logged into Google account and is an admin on app engine");
 	    		} else {
 	    			log.info("User is logged into Google account and is NOT an admin on app engine");
@@ -162,7 +162,7 @@ public class UserAuthenticationFilter implements Filter {
 	    		
 	    		if(thisURL.contains("/rest/")) {
 	    			// REST request
-	    			log.info("calling chain.doFilter() in handleMobilePulseAppRequest() ...");
+	    			log.info("calling chain.doFilter() in handleRskyboxAppRequest() ...");
 	    			chain.doFilter(httpRequest, httpResponse);
 	    		} else {
 		            // any non-REST request needs to be redirected to the WEB-INF/html directory
@@ -181,10 +181,10 @@ public class UserAuthenticationFilter implements Filter {
 	    		}
 	    	}
 		} catch (IOException e) {
-			log.severe("handleMobilePulseAppRequest() IOException. Exception = " + e.getMessage());
+			log.severe("handleRskyboxAppRequest() IOException. Exception = " + e.getMessage());
 			e.printStackTrace();
 		} catch (ServletException e) {
-			log.severe("handleMobilePulseAppRequest() ServletException. Exception = " + e.getMessage());
+			log.severe("handleRskyboxAppRequest() ServletException. Exception = " + e.getMessage());
 			e.printStackTrace();
 		}
 		

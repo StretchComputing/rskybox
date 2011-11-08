@@ -5,7 +5,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
   version="2.5">
   <filter>
     <filter-name>UserAuthenticationFilter</filter-name>
-    <filter-class>com.stretchcom.mobilePulse.server.UserAuthenticationFilter</filter-class>
+    <filter-class>com.stretchcom.rskybox.server.UserAuthenticationFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>UserAuthenticationFilter</filter-name>
@@ -21,20 +21,20 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
   </filter-mapping>
 
   <servlet>
-    <servlet-name>MobilePulse</servlet-name>
+    <servlet-name>Rskybox</servlet-name>
     <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
     <init-param>
       <param-name>org.restlet.application</param-name>
-      <param-value>com.stretchcom.mobilePulse.server.MobilePulseApplication</param-value>
+      <param-value>com.stretchcom.rskybox.server.RskyboxApplication</param-value>
     </init-param>
   </servlet>
   <servlet-mapping>
-    <servlet-name>MobilePulse</servlet-name>
+    <servlet-name>Rskybox</servlet-name>
     <url-pattern>/rest/v1/*</url-pattern>
   </servlet-mapping>
   <servlet>
     <servlet-name>Audio</servlet-name>
-    <servlet-class>com.stretchcom.mobilePulse.server.AudioServlet</servlet-class>
+    <servlet-class>com.stretchcom.rskybox.server.AudioServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>Audio</servlet-name>
@@ -42,7 +42,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
   </servlet-mapping>
   <servlet>
     <servlet-name>CrashStackData</servlet-name>
-    <servlet-class>com.stretchcom.mobilePulse.server.CrashStackDataServlet</servlet-class>
+    <servlet-class>com.stretchcom.rskybox.server.CrashStackDataServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>CrashStackData</servlet-name>
@@ -54,7 +54,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 
   <servlet>
     <servlet-name>EmailTaskServlet</servlet-name>
-    <servlet-class>com.stretchcom.mobilePulse.server.EmailTaskServlet</servlet-class>
+    <servlet-class>com.stretchcom.rskybox.server.EmailTaskServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>EmailTaskServlet</servlet-name>

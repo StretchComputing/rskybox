@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.stretchcom.mobilePulse.models.MobileCarrier;
+import com.stretchcom.rskybox.models.MobileCarrier;
 
 public class EmailTaskServlet extends HttpServlet {
 	private static final Logger log = Logger.getLogger(EmailTaskServlet.class.getName());

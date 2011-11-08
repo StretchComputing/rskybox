@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -30,7 +30,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
-import com.stretchcom.mobilePulse.models.CrashDetect;
+import com.stretchcom.rskybox.models.CrashDetect;
 
 public class CrashStackDataServlet extends HttpServlet {
 	private static final Logger log = Logger.getLogger(CrashStackDataServlet.class.getName());

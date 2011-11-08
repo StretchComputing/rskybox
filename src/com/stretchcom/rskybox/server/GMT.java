@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -95,6 +95,6 @@ public class GMT {
 	}
 	
 	public static TimeZone getDefaultTimeZone() {
-    	return GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
+    	return GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
 	}
 }

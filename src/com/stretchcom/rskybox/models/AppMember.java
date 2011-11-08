@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.models;
+package com.stretchcom.rskybox.models;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,12 +23,12 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.stretchcom.mobilePulse.server.ApiStatusCode;
-import com.stretchcom.mobilePulse.server.EMF;
-import com.stretchcom.mobilePulse.server.MobilePulseApplication;
-import com.stretchcom.mobilePulse.server.UsersResource;
-import com.stretchcom.mobilePulse.server.Emailer;
-import com.stretchcom.mobilePulse.server.Utility;
+import com.stretchcom.rskybox.server.ApiStatusCode;
+import com.stretchcom.rskybox.server.EMF;
+import com.stretchcom.rskybox.server.Emailer;
+import com.stretchcom.rskybox.server.RskyboxApplication;
+import com.stretchcom.rskybox.server.UsersResource;
+import com.stretchcom.rskybox.server.Utility;
 
 @Entity
 @NamedQueries({

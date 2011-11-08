@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.models;
+package com.stretchcom.rskybox.models;
 
 import java.util.ArrayList;
 import java.util.List;

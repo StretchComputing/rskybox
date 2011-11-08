@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,13 +29,12 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Text;
-import com.stretchcom.mobilePulse.models.ClientLog;
-import com.stretchcom.mobilePulse.models.CrashDetect;
-import com.stretchcom.mobilePulse.models.User;
+import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.User;
 
-public class ClientLogsResource extends ServerResource {
-	private static final Logger log = Logger.getLogger(ClientLogsResource.class.getName());
+public class CrashDetectsResource extends ServerResource {
+	private static final Logger log = Logger.getLogger(CrashDetectsResource.class.getName());
 	private String id;
 	private String applicationId;
     private String listStatus;
@@ -52,13 +51,12 @@ public class ClientLogsResource extends ServerResource {
 			if(parameter.getName().equals("status"))  {
 				this.listStatus = (String)parameter.getValue().toLowerCase();
 				this.listStatus = Reference.decode(this.listStatus);
-				log.info("ClientLogResource() - decoded status = " + this.listStatus);
+				log.info("CrashDetectResource() - decoded status = " + this.listStatus);
 			} 
 		}
     }
-
-    // Handles 'Get Client Log Info API'
-    // Handles 'Get Client Log of Users API
+    // Handles 'Get Crash Detect Info API'
+    // Handles 'Get List of Crash Detects API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
     	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
@@ -66,45 +64,44 @@ public class ClientLogsResource extends ServerResource {
     		return Utility.apiError(appIdStatus);
     	}
     	
-         JSONObject jsonReturn;
-
-        log.info("in get for Crash Detect resource");
-        if (this.id != null) {
-            // Get Client Log Info API
-        	log.info("in Get Feedback Info API");
+        if (id != null) {
+            // Get Crash Detect Info API
+        	log.info("in Get User Info API");
         	return show();
         } else {
-            // Get List of Client Logs API
-        	log.info("Get List of Feedbacks API");
+            // Get List of Crash Detects API
+        	log.info("Get List of Users API");
         	return index();
         }
     }
 
-    // Handles 'Create Client Log API'
+    // Handles 'Create Crash Detect API'
     @Post("json")
     public JsonRepresentation post(Representation entity) {
+        log.info("in post");
+        
     	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
     		return Utility.apiError(appIdStatus);
     	}
     	
-        log.info("in post");
-        return save_client_log(entity);
+        return save_crash_detect(entity);
     }
 
-    // Handles 'Update Client Log API'
+    // Handles 'Update Crash Detect API'
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
+        
     	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
     		return Utility.apiError(appIdStatus);
     	}
     	
 		if (this.id == null || this.id.length() == 0) {
-			return Utility.apiError(ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
+			return Utility.apiError(ApiStatusCode.CRASH_DETECT_ID_REQUIRED);
 		}
-        return save_client_log(entity);
+        return save_crash_detect(entity);
     }
     
     private JsonRepresentation index() {
@@ -114,19 +111,18 @@ public class ClientLogsResource extends ServerResource {
         
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
-		List<ClientLog> clientLogs = null;
         try {
-            List<User> users = new ArrayList<User>();
+            List<CrashDetect> crashDetects = new ArrayList<CrashDetect>();
             JSONArray ja = new JSONArray();
             
 			if(this.listStatus != null) {
-			    if(this.listStatus.equalsIgnoreCase(ClientLog.NEW_STATUS) || this.listStatus.equalsIgnoreCase(ClientLog.ARCHIVED_STATUS)){
-			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
+			    if(this.listStatus.equalsIgnoreCase(CrashDetect.NEW_STATUS) || this.listStatus.equalsIgnoreCase(CrashDetect.ARCHIVED_STATUS)){
+			    	crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 							.getResultList();
-			    } else if(this.listStatus.equalsIgnoreCase(ClientLog.ALL_STATUS)) {
-			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationId")
+			    } else if(this.listStatus.equalsIgnoreCase(CrashDetect.ALL_STATUS)) {
+			    	crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getAllWithApplicationId")
 			    			.setParameter("applicationId", this.applicationId)
 			    			.getResultList();
 			    } else {
@@ -134,16 +130,16 @@ public class ClientLogsResource extends ServerResource {
 			    }
 			} else {
 				// by default, only get 'new' feedback
-				clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
-						.setParameter("status", ClientLog.NEW_STATUS)
+				crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationId")
+						.setParameter("status", CrashDetect.NEW_STATUS)
 						.setParameter("applicationId", this.applicationId)
 						.getResultList();
 			}
             
-            for (ClientLog cl : clientLogs) {
-                ja.put(getClientLogJson(cl, true));
+            for (CrashDetect cd : crashDetects) {
+                ja.put(getCrashDetectJson(cd, true));
             }
-            json.put("clientLogs", ja);
+            json.put("crashDetects", ja);
             json.put("apiStatus", apiStatus);
         } catch (JSONException e) {
             log.severe("exception = " + e.getMessage());
@@ -154,15 +150,15 @@ public class ClientLogsResource extends ServerResource {
     }
 
     private JsonRepresentation show() {
-        log.info("UserResource in show()");
+        log.info("in show()");
         EntityManager em = EMF.get().createEntityManager();
 
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
-		ClientLog clientLog = null;
+		CrashDetect crashDetect = null;
 		try {
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
+				return Utility.apiError(ApiStatusCode.CRASH_DETECT_ID_REQUIRED);
 			}
 			
             Key key;
@@ -170,31 +166,31 @@ public class ClientLogsResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.CLIENT_LOG_NOT_FOUND);
+				return Utility.apiError(ApiStatusCode.CRASH_DETECT_NOT_FOUND);
 			}
-    		clientLog = (ClientLog)em.createNamedQuery("ClientLog.getByKey")
+    		crashDetect = (CrashDetect)em.createNamedQuery("CrashDetect.getByKey")
 				.setParameter("key", key)
 				.getSingleResult();
 		} catch (NoResultException e) {
-			log.info("Client Log not found");
-			apiStatus = ApiStatusCode.CLIENT_LOG_NOT_FOUND;
+			log.info("Crash Detect not found");
+			apiStatus = ApiStatusCode.CRASH_DETECT_NOT_FOUND;
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more client logs have same key");
+			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getClientLogJson(clientLog, apiStatus, false));
+        return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus, false));
     }
 
-    private JsonRepresentation save_client_log(Representation entity) {
+    private JsonRepresentation save_crash_detect(Representation entity) {
         EntityManager em = EMF.get().createEntityManager();
 
-        ClientLog clientLog = null;
+        CrashDetect crashDetect = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
         em.getTransaction().begin();
         try {
-            clientLog = new ClientLog();
+            crashDetect = new CrashDetect();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
             if (id != null) {
@@ -203,65 +199,65 @@ public class ClientLogsResource extends ServerResource {
     				key = KeyFactory.stringToKey(this.id);
     			} catch (Exception e) {
     				log.info("ID provided cannot be converted to a Key");
-    				return Utility.apiError(ApiStatusCode.CLIENT_LOG_NOT_FOUND);
+    				return Utility.apiError(ApiStatusCode.CRASH_DETECT_NOT_FOUND);
     			}
-                clientLog = (ClientLog) em.createNamedQuery("ClientLog.getByKey").setParameter("key", key).getSingleResult();
+                crashDetect = (CrashDetect) em.createNamedQuery("CrashDetect.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
             }
-
-			if(!isUpdate) {
-	            if(json.has("logLevel")) {
-					String logLevel = json.getString("logLevel").toLowerCase();
-					clientLog.setLogLevel(logLevel);
-					if(!clientLog.isLogLevelValid(logLevel)) {
-						return Utility.apiError(ApiStatusCode.INVALID_LOG_LEVEL);
-					}
-				} else {
-					// default to error
-					clientLog.setLogLevel(ClientLog.ERROR_LOG_LEVEL);
-				}
-			}
 			
-			if(!isUpdate && json.has("message")) {
-				clientLog.setMessage(json.getString("message"));
-			}
-			
-			if(!isUpdate && json.has("stackBackTrace")) {
-				clientLog.setStackBackTrace(json.getString("stackBackTrace"));
+			if(!isUpdate && json.has("summary")) {
+				crashDetect.setSummary(json.getString("summary"));
 			}
 			
 			if(!isUpdate && json.has("userName")) {
-				clientLog.setUserName(json.getString("userName"));
+				crashDetect.setUserName(json.getString("userName"));
+			}
+			
+			if(json.has("stackData")) {
+				crashDetect.setStackDataBase64(json.getString("stackData"));
+			}
+			
+			// TODO support a time zone passed in
+			if(!isUpdate && json.has("date")) {
+				String detectedDateStr = json.getString("date");
+				
+				if(detectedDateStr != null || detectedDateStr.trim().length() != 0) {
+					TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+					Date gmtDetectedDate = GMT.convertToGmtDate(detectedDateStr, true, tz);
+					if(gmtDetectedDate == null) {
+						log.info("invalid detected date format passed in");
+						return Utility.apiError(ApiStatusCode.INVALID_DETECTED_DATE_PARAMETER);
+					}
+					crashDetect.setDetectedGmtDate(gmtDetectedDate);
+				}
 			}
 			
 			if(!isUpdate && json.has("instanceUrl")) {
-				clientLog.setInstanceUrl(json.getString("instanceUrl"));
+				crashDetect.setInstanceUrl(json.getString("instanceUrl"));
 			}
 			
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
-	            	if(clientLog.isStatusValid(status)) {
-	            		clientLog.setStatus(status);
+	            	if(crashDetect.isStatusValid(status)) {
+	            		crashDetect.setStatus(status);
 	            	} else {
 	            		apiStatus = ApiStatusCode.INVALID_STATUS;
 	            	}
 	            }
 			} else {
-				clientLog.setApplicationId(this.applicationId);
-            	
+				crashDetect.setApplicationId(this.applicationId);
+
 				// Default status to 'new'
-				clientLog.setStatus(CrashDetect.NEW_STATUS);
+				crashDetect.setStatus(CrashDetect.NEW_STATUS);
+				crashDetect.setApplicationId(this.applicationId);
 			}
-			
-			// Default created date is today
-			clientLog.setCreatedGmtDate(new Date());
             
-            em.persist(clientLog);
+            em.persist(crashDetect);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications("new client log");
+            if(!isUpdate) User.sendNotifications("new crash detected");
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -271,10 +267,10 @@ public class ClientLogsResource extends ServerResource {
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         } catch (NoResultException e) {
-			log.info("Client Log not found");
-			apiStatus = ApiStatusCode.CLIENT_LOG_NOT_FOUND;
+			log.info("Crash Detect not found");
+			apiStatus = ApiStatusCode.CRASH_DETECT_NOT_FOUND;
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more client logs have same key");
+			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} finally {
             if (em.getTransaction().isActive()) {
@@ -283,44 +279,43 @@ public class ClientLogsResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getClientLogJson(clientLog, apiStatus, false));
+        return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus, false));
     }
     
-    private JSONObject getClientLogJson(ClientLog clientLog, Boolean isList) {
-    	return getClientLogJson(clientLog, null, isList);
+    private JSONObject getCrashDetectJson(CrashDetect crashDetect, Boolean isList) {
+    	return getCrashDetectJson(crashDetect, null, isList);
     }
 
-    private JSONObject getClientLogJson(ClientLog clientLog, String theApiStatus, Boolean isList) {
+    private JSONObject getCrashDetectJson(CrashDetect crashDetect, String theApiStatus, Boolean isList) {
         JSONObject json = new JSONObject();
 
         try {
         	if(theApiStatus != null) {
         		json.put("apiStatus", theApiStatus);
         	}
-        	if(clientLog != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
-        		json.put("id", KeyFactory.keyToString(clientLog.getKey()));
+        	if(crashDetect != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
+        		json.put("id", KeyFactory.keyToString(crashDetect.getKey()));
+        		json.put("summary", crashDetect.getSummary());
     			
-            	Date createdDate = clientLog.getCreatedGmtDate();
+            	Date detectedDate = crashDetect.getDetectedGmtDate();
             	// TODO support time zones
-            	if(createdDate != null) {
-            		TimeZone tz = GMT.getTimeZone(MobilePulseApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		String dateFormat = MobilePulseApplication.INFO_DATE_FORMAT;
-            		if(isList) {dateFormat = MobilePulseApplication.LIST_DATE_FORMAT;}
-            		json.put("date", GMT.convertToLocalDate(createdDate, tz, dateFormat));
+            	if(detectedDate != null) {
+            		TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+            		String dateFormat = RskyboxApplication.INFO_DATE_FORMAT;
+            		if(isList) {dateFormat = RskyboxApplication.LIST_DATE_FORMAT;}
+            		json.put("date", GMT.convertToLocalDate(detectedDate, tz, dateFormat));
             	}
-            	json.put("userName", clientLog.getUserName());
-            	json.put("instanceUrl", clientLog.getInstanceUrl());
-            	json.put("logLevel", clientLog.getLogLevel());
-            	json.put("message", clientLog.getMessage());
-            	json.put("stackBackTrace", clientLog.getStackBackTrace());
+            	
+            	json.put("userName", crashDetect.getUserName());
+            	json.put("instanceUrl", crashDetect.getInstanceUrl());
             	
             	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
-            	String status = clientLog.getStatus();
+            	String status = crashDetect.getStatus();
             	if(status == null || status.length() == 0) {status = "new";}
             	json.put("status", status);
         	}
         } catch (JSONException e) {
-        	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
+        	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;

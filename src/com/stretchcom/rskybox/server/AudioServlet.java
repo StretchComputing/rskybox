@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -17,7 +17,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
-import com.stretchcom.mobilePulse.models.Feedback;
+import com.stretchcom.rskybox.models.Feedback;
 
 @SuppressWarnings("serial")
 public class AudioServlet extends HttpServlet {

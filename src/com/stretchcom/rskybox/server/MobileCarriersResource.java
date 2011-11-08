@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.stretchcom.mobilePulse.models.MobileCarrier;
+import com.stretchcom.rskybox.models.MobileCarrier;
 
 public class MobileCarriersResource extends ServerResource {
     private static final Logger log = Logger.getLogger(MobileCarriersResource.class.getName());

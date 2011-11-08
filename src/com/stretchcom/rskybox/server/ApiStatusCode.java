@@ -1,4 +1,4 @@
-package com.stretchcom.mobilePulse.server;
+package com.stretchcom.rskybox.server;
 
 public class ApiStatusCode {
 	public static final String SERVER_ERROR = "0";
