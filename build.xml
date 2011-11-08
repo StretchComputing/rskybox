@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Mobile Pulse" default="jekyll" basedir=".">
+<project name="rskybox" default="jekyll" basedir=".">
     <target name="jekyll">
         <exec dir="html5" executable="jekyll"/>
         <copy todir="war">
