@@ -15,10 +15,14 @@ var RMODULE = (function (my, $) {
   };
 
   my.buildListItemContent = function (item) {
-    var display;
+    var display, markup;
 
     display = item.name + ' ' + item.version + ', ' + item.date;
-    return '<li><a href="#item?id=' + item.id + '">' + display + '<\/a><\/li>';
+    markup =  '<li>';
+    markup += '<a href="#item?id=' + item.id + '">' + display + '<\/a>';
+    markup += '<a href="{{ site.admin }}" rel="external" data-icon="gear" title="admin">Admin<\/a>';
+    markup += '<\/li>';
+    return markup;
   };
 
   my.buildItemPage = function (page, item) {
@@ -122,7 +126,6 @@ RMODULE.init();
 <div data-role="dialog" id="options" data-title="{{ page.title }} {{ page.options }}" data-theme="b">
   <div data-role="header">
     <h1>{{ page.options }}</h1>
-    <a href="{{ site.admin }}" id="adminButton" rel="external" style="display: none;">Admin</a>
   </div>
   <div data-role="content">
     <form>
