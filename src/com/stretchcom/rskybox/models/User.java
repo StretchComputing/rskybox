@@ -199,6 +199,12 @@ public class User {
 		return isAuthenticated;
 	}
 	
+	public static Boolean isAdmin() {
+    	UserService userService = UserServiceFactory.getUserService();
+    	if(userService == null) return false;
+    	return (userService.isUserLoggedIn() && userService.isUserAdmin());
+	}
+	
 	// Create a new user.
 	// theEmailAddress: email address of new user.  Not checked for uniqueness. Assumed the caller knows email address is unique.
 	// theNickName: from Google App Engine User object.  Could just be the email address again. Used to set new user's first name.

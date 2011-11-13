@@ -30,6 +30,7 @@ import org.restlet.resource.ServerResource;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.User;
 
 public class ApplicationsResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(ApplicationsResource.class.getName());
@@ -173,7 +174,13 @@ public class ApplicationsResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getApplicationJson(application, apiStatus, false));
+		JSONObject jsonReturn = getApplicationJson(application, apiStatus, false);
+		try {
+			jsonReturn.put("isAdmin", User.isAdmin());
+		} catch (JSONException e) {
+			log.severe("JSONException = " + e.getMessage());
+		}
+		return new JsonRepresentation(jsonReturn);
     }
     
     private JsonRepresentation index() {
@@ -193,6 +200,7 @@ public class ApplicationsResource extends ServerResource {
             }
             json.put("applications", ja);
             json.put("apiStatus", apiStatus);
+            json.put("isAdmin", User.isAdmin());
         } catch (Exception e) {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();

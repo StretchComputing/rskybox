@@ -83,11 +83,6 @@ public class ClientLogsResource extends ServerResource {
     // Handles 'Create Client Log API'
     @Post("json")
     public JsonRepresentation post(Representation entity) {
-    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
-    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
-    	}
-    	
         log.info("in post");
         return save_client_log(entity);
     }

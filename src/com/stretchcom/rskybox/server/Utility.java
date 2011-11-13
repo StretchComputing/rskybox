@@ -11,6 +11,8 @@ import org.restlet.ext.servlet.internal.ServletCall;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;
 
@@ -75,10 +77,9 @@ public class Utility {
     		return appIdStatus;
     	}
     	
-    	// TODO - get this working later
-//    	HttpServletRequest httpRequest = ServletCall.getRequest(theRequest);
-//    	com.google.appengine.api.users.User currentUser = (com.google.appengine.api.users.User)httpRequest.getAttribute(RskyboxApplication.CURRENT_USER);
-//    	appIdStatus = User.verifyUserMemberOfApplication(currentUser.getEmail(), theApplicationId);
+    	UserService userService = UserServiceFactory.getUserService();
+    	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
+    	appIdStatus = User.verifyUserMemberOfApplication(currentUser.getEmail(), theApplicationId);
     	return appIdStatus;
 	}
 }

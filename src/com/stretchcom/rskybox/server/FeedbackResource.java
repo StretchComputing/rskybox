@@ -79,11 +79,6 @@ public class FeedbackResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
-    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
-    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
-    	}
-    	
         return save_feedback(entity);
     }
 
