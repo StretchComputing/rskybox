@@ -77,9 +77,9 @@ public class Utility {
     		return appIdStatus;
     	}
     	
-    	UserService userService = UserServiceFactory.getUserService();
-    	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
-    	appIdStatus = User.verifyUserMemberOfApplication(currentUser.getEmail(), theApplicationId);
+    	// TODO access the currentUser which is created by authenticationFilter
+    	//appIdStatus = User.verifyUserMemberOfApplication(currentUser.getEmail(), theApplicationId);
+    	
     	return appIdStatus;
 	}
 }
