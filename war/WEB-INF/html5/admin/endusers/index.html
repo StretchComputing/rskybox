@@ -1,8 +1,22 @@
----
-layout: default
-title: rSkybox Beta Testers
----
-<script src="/js/admin.js"></script>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Beta Testers</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0rc2/jquery.mobile-1.0rc2.min.css"/>
+<link rel="stylesheet" href="/css/styles.css">
+<script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+<script>
+  window.jQuery || document.write('<script src="/js/libs/jquery-1.7.min.js"><\/script>')
+</script>
+<script src="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0rc2/jquery.mobile-1.0rc2.min.js"></script>
+<script>
+  window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0rc2.min.js"><\/script>')
+</script>
+<script src="/js/rmodule.js"></script>
+</head>
+<body><script src="/js/admin.js"></script>
 <script>
 var RMODULE = (function (my) {
   'use strict';
@@ -42,7 +56,7 @@ RMODULE.init();
 
 <div data-role="page" id="index" data-title="Beta Testers">
   <div data-role="header">
-    <a href="{{ site.admin }}" rel="external">Home</a>
+    <a href="#" data-rel="back">Back</a>
     <h1>Beta Testers</h1>
   </div>
   <div data-role="content"></div>
@@ -56,3 +70,6 @@ RMODULE.init();
   </div>
   <div data-role="content"></div>
 </div>
+
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>rSkybox Admin</title>
+<title>Admin</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0rc2/jquery.mobile-1.0rc2.min.css"/>
 <link rel="stylesheet" href="/css/styles.css">
@@ -16,19 +16,45 @@
 </script>
 <script src="/js/rmodule.js"></script>
 </head>
-<body><div data-role="page" id="index" data-title="rSkybox Admin">
+<body><script>
+var RMODULE = (function (my, $) {
+  'use strict';
+
+  var buildAdminPage;
+
+  buildAdminPage = function (page, application) {
+    var id, markup, title;
+
+    id = application.id;
+
+    title = application.name + ' - Admin';
+    document.title = title;
+    my.pageHeader(page).find('h1').html(title);
+    markup =  '<ul data-role="listview">';
+    markup +=   '<li><a href="/html5/admin\/appowners?id=' + id + '" rel="external">App Owners<\/a><\/li>';
+    markup +=   '<li><a href="/html5/admin\/endusers?id=' + id + '" rel="external">End Users<\/a><\/li>';
+    markup += '<\/ul>';
+    my.pageContent(page, markup).find(':jqmData(role=listview)').listview();
+  };
+
+  my.init = function () {
+    $('#index').live('pageshow', function () {
+      my.jsonPopulate(my.getRestPrefix(), $('#index'), buildAdminPage);
+    });
+  }
+
+  return my;
+}(RMODULE, jQuery));
+
+RMODULE.init();
+</script>
+
+<div data-role="page" id="index">
   <div data-role="header">
-    <a href="/html5" rel="external">To App</a>
-    <h1>rSkybox Admin</h1>
+    <a href="/html5" rel="external">Home</a>
+    <h1></h1>
   </div>
-  <div data-role="content">
-    <ul data-role="listview">
-      <li><a href="/html5/admin/users" rel="external">Users</a>
-      </li>
-      <li><a href="/html5/admin/betatesters" rel="external">Beta Testers</a>
-      </li>
-    </ul>
-  </div>
+  <div data-role="content"></div>
 </div>
 
 </body>

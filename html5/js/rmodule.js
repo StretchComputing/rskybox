@@ -171,19 +171,19 @@ var RMODULE = (function (my, $) {
     return (/^[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/).test(emailAddress);
   };
 
-  // Build a list of mobile carriers options.
+  // Build an option list for a select control.
   //
-  // carriers: array of id/name pairs
+  // options: array of id/name pairs
   // returns: the generate markup
-  my.getNoCarrierIndicator = function () {
+  my.getNoOptionSelected = function () {
     return '-1';
   };
-  my.carrierOptions = function (carriers) {
+  my.getOptionsForSelect = function (options, title) {
     var i, markup;
 
-    markup = '<option value="' + my.getNoCarrierIndicator() + '">Mobile Carrier</option>';
-    for (i = 0; i < carriers.length; i += 1) {
-      markup += '<option value="' + carriers[i].id + '">' + carriers[i].name + '</option>';
+    markup = '<option value="' + my.getNoOptionSelected() + '">' + title + '</option>';
+    for (i = 0; i < options.length; i += 1) {
+      markup += '<option value="' + options[i].id + '">' + options[i].name + '</option>';
     }
     return markup;
   };
@@ -202,7 +202,7 @@ var RMODULE = (function (my, $) {
       window.alert('Please enter a valid phone number.');
       return false;
     }
-    if ($('#mobileCarrierId').val() === my.getNoCarrierIndicator()) {
+    if ($('#mobileCarrierId').val() === my.getNoOptionSelected()) {
       window.alert('Please select a mobile carrier.');
       return false;
     }

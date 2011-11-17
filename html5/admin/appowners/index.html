@@ -1,0 +1,180 @@
+---
+layout: default
+entity: App Owner
+title: App Owner Admin
+---
+<script src="/js/admin.js"></script>
+<script>
+var RMODULE = (function (my, $) {
+  'use strict';
+
+  var
+    buildItemPage,
+    buildNewItemPage,
+    roleOptions,
+    validateOwner;
+
+  my.getItemName = function () {
+    return 'appMembers';
+  };
+
+  my.getItemLinkText = function (owner) {
+    var role;
+
+    switch (owner.role) {
+    case 'billingOwner':
+      role = ' $$';
+    case 'appAdmin':
+      role = ' <img src="\/images\/gear.jpg" alt="admin icon">';
+    default:
+      role = '';
+    }
+    return owner.emailAddress + role;
+  };
+
+  roleOptions = function() {
+    var i, markup, roles;
+
+    roles = [{
+      id : 'billingAdmin',
+      name : 'Billing Admin'
+    }, {
+      id : 'appAdmin',
+      name : 'App Admin'
+    }, {
+      id : 'appOwner',
+      name : 'App Owner'
+    }];
+    return my.getOptionsForSelect(roles, 'Roles');
+  }
+
+  my.itemPage = function (page, url) {
+    var id, restUrl;
+
+    page.find('form')[0].reset();
+    id = my.getParameterByName(url.hash, 'item_id');
+    $('#role').html(roleOptions());
+    if (id === my.getNewItemName()) {
+      buildNewItemPage(page);
+    } else {
+      restUrl = my.getRestPrefix() + my.getItemPath() + '\/' + id;
+      my.jsonPopulate(restUrl, page, buildItemPage);
+    }
+  };
+
+  buildItemPage = function (page, item) {
+    var smsEnabled;
+
+    smsEnabled = item.sendSmsNotifications;
+    my.pageHeader(page).find('h1').html('Update {{ page.entity }}');
+    $('#id').val(item.id);
+    $('#emailAddress').val(item.emailAddress);
+
+    $('#delete_item_button').show();
+  };
+
+  buildNewItemPage = function (page) {
+    my.pageHeader(page).find('h1').html('New {{ page.entity }}');
+    $('#id').val(my.getNewItemName());
+    $('#delete_item_button').hide();
+  };
+
+  // This form handling function is set up in the admin.js#my.init function
+  my.saveItem = function () {
+    var restUrl, json;
+
+    if (!validateOwner()) {
+      return false;
+    }
+
+    restUrl = my.getRestPrefix() + my.getItemPath;
+    json = JSON.stringify({
+      emailAddress: $('#emailAddress').val(),
+      role: $('#role').val(),
+    });
+
+    if ($('#item_id').val() !== my.getNewItemName()) {
+      restUrl += '\/' + $('#id').val();
+    }
+    my.putJson(restUrl, json, function () {
+      history.back();
+    });
+    return false;
+  };
+
+  validateOwner = function () {
+    if ($('#role').val() === my.getNoOptionSelected()) {
+      window.alert('Please select a role.');
+      return false;
+    }
+  }
+
+  return my;
+}(RMODULE, jQuery));
+
+RMODULE.init();
+</script>
+
+<div data-role="page" id="index" data-title="{{ page.title }}">
+  <div data-role="header">
+    <a href="#" data-rel="back">Back</a>
+    <h1>All {{ page.entity }}s</h1>
+  </div>
+  <div data-role="content"></div>
+  <div data-role="footer">
+    <div data-role="navbar">
+      <ul>
+        <li><a href="" id="new_item_button">Create New {{ page.entity }}</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<div data-role="page" id="item" data-title="{{ page.entity }}">
+  <div data-role="header">
+    <a href="#" data-rel="back">Back</a>
+    <h1></h1>
+  </div>
+  <div data-role="content">
+    <form>
+      <input type="hidden" name="item_id" id="item_id">
+
+      <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
+      <input type="email" name="emailAddress" id="emailAddress" placeholder="Email Address" required>
+
+      <label for="role" class="ui-hidden-accessible">Role:</label>
+      <select name="role" id="role"></select>
+
+      <input type="submit" value="Save">
+      <p>
+        <a id="delete_item_button" href="#delete" data-role="button" data-theme="e">Delete {{ page.entity }}</a>
+      </p>
+    </form>
+  </div>
+  <div data-role="footer">
+    <div data-role="navbar">
+      <ul>
+        <li><a href="#index">Cancel</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div data-role="dialog" id="delete">
+  <div data-role="header">
+    <h1>Delete</h1>
+  </div>
+  <div data-role="content">
+    <div style="text-align: center;">
+      <h1>Delete {{ page.entity }}</h1>
+      <p>Are you sure?</p>
+    </div>
+    <p>
+      <a id="delete_item" data-role="button">Delete {{ page.entity }}</a>
+    </p>
+    <p>
+      <a href="" data-role="button" data-rel="back">Cancel</a>
+    </p>
+  </div>
+</div>

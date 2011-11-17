@@ -1,18 +1,44 @@
 ---
 layout: default
-title: rSkybox Admin
+title: Admin
 ---
-<div data-role="page" id="index" data-title="{{ page.title }}">
+<script>
+var RMODULE = (function (my, $) {
+  'use strict';
+
+  var buildAdminPage;
+
+  buildAdminPage = function (page, application) {
+    var id, markup, title;
+
+    id = application.id;
+
+    title = application.name + ' - {{ page.title }}';
+    document.title = title;
+    my.pageHeader(page).find('h1').html(title);
+    markup =  '<ul data-role="listview">';
+    markup +=   '<li><a href="{{ site.admin }}\/appowners?id=' + id + '" rel="external">App Owners<\/a><\/li>';
+    markup +=   '<li><a href="{{ site.admin }}\/endusers?id=' + id + '" rel="external">End Users<\/a><\/li>';
+    markup += '<\/ul>';
+    my.pageContent(page, markup).find(':jqmData(role=listview)').listview();
+  };
+
+  my.init = function () {
+    $('#index').live('pageshow', function () {
+      my.jsonPopulate(my.getRestPrefix(), $('#index'), buildAdminPage);
+    });
+  }
+
+  return my;
+}(RMODULE, jQuery));
+
+RMODULE.init();
+</script>
+
+<div data-role="page" id="index">
   <div data-role="header">
-    <a href="{{ site.html }}" rel="external">To App</a>
-    <h1>{{ page.title }}</h1>
+    <a href="{{ site.html }}" rel="external">Home</a>
+    <h1></h1>
   </div>
-  <div data-role="content">
-    <ul data-role="listview">
-      <li><a href="{{ site.admin }}/users" rel="external">Users</a>
-      </li>
-      <li><a href="{{ site.admin }}/betatesters" rel="external">Beta Testers</a>
-      </li>
-    </ul>
-  </div>
+  <div data-role="content"></div>
 </div>

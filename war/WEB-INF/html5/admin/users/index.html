@@ -23,7 +23,9 @@ var RMODULE = (function (my, $) {
 
   var
     buildItemPage,
-    buildNewItemPage;
+    buildNewItemPage,
+    old_init,
+    validateUser;
 
   my.getItemName = function () {
     return 'users';
@@ -40,7 +42,7 @@ var RMODULE = (function (my, $) {
     id = my.getParameterByName(url.hash, 'id');
     restUrl = my.getRestPrefix() + my.getMobileCarriersPath();
     my.jsonPopulate(restUrl, $('#mobileCarrierId'), function (select, carriers) {
-      select.html(my.carrierOptions(carriers.mobileCarriers));
+      select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers'));
       if (id === my.getNewItemName()) {
         buildNewItemPage(page);
       } else {
@@ -71,12 +73,60 @@ var RMODULE = (function (my, $) {
   buildNewItemPage = function (page) {
     my.pageHeader(page).find('h1').html('New User');
     $('#id').val(my.getNewItemName());
-    $('#mobileCarrierId').val(my.getNoCarrierIndicator()).selectmenu('refresh');
+    $('#mobileCarrierId').val(my.getNoOptionSelected()).selectmenu('refresh');
     $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
     $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
     my.enableSmsDetails(false);
     $('#delete_button').hide();
   };
+
+
+  // This form handling function is set up in the admin.js#my.init function
+  my.saveItem = function () {
+    var restUrl, json;
+
+    if (!validateUser()) {
+      return false;
+    }
+
+    restUrl = my.getRestPrefix() + my.getItemPath;
+    json = JSON.stringify({
+      firstName: $('#firstName').val(),
+      lastName: $('#lastName').val(),
+      emailAddress: $('#emailAddress').val(),
+      phoneNumber: $('#phoneNumber').val(),
+      mobileCarrierId: $('#mobileCarrierId').val(),
+      sendEmailNotifications: $('#sendEmailNotifications').prop('checked'),
+      sendSmsNotifications: $('#sendSmsNotifications').prop('checked')
+    });
+
+    if ($('#id').val() !== my.getNewItemName()) {
+      restUrl += '\/' + $('#id').val();
+    }
+    my.putJson(restUrl, json, function () {
+      history.back();
+    });
+    return false;
+  };
+
+  validateUser = function () {
+    if (!$('#firstName').val() || !$('#lastName').val() || !my.validEmailAddress($('#emailAddress').val())) {
+      window.alert('You must enter a first name, last name, and valid email address.');
+      return false;
+    }
+    return my.validateSms();
+  };
+
+  old_init = my.init;
+  my.init = function () {
+    old_init();
+
+    $('#item').live('pagecreate', function () {
+      $('#sendSmsNotifications').change(function () {
+        my.enableSmsDetails($('#sendSmsNotifications').prop('checked'));
+      });
+    }
+  }
 
   return my;
 }(RMODULE, jQuery));
@@ -94,7 +144,7 @@ RMODULE.init();
   <div data-role="footer">
     <div data-role="navbar">
       <ul>
-        <li><a href="#item?id=new" id="create_user_button">Create a New User</a></li>
+        <li><a href="#item?item_id=new" id="create_user_button">Create a New User</a></li>
       </ul>
     </div>
   </div>
@@ -129,8 +179,7 @@ RMODULE.init();
       <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" required disabled>
 
       <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile Carrier:</label>
-      <select name="mobileCarrierId" id="mobileCarrierId">
-      </select>
+      <select name="mobileCarrierId" id="mobileCarrierId"></select>
 
       <input type="submit" value="Save">
       <p>

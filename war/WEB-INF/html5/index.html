@@ -33,7 +33,7 @@ var RMODULE = (function (my, $) {
     display = item.name + ' ' + item.version + ', ' + item.date;
     markup =  '<li>';
     markup += '<a href="#item?id=' + item.id + '">' + display + '<\/a>';
-    markup += '<a href="/html5/admin" rel="external" data-icon="gear" title="admin">Admin<\/a>';
+    markup += '<a href="/html5/admin?id=' + item.id + '" rel="external" data-icon="gear" title="admin">Admin<\/a>';
     markup += '<\/li>';
     return markup;
   };
@@ -67,7 +67,7 @@ var RMODULE = (function (my, $) {
 
     if (!my.validateSms()) { return false; }
 
-    restUrl = my.getRestPrefix() + '/users/' + $('#id').val();
+    restUrl = my.getRestPrefix() + '\/users\/' + $('#id').val();
     json = JSON.stringify({
       phoneNumber : $('#phoneNumber').val(),
       mobileCarrierId : $('#mobileCarrierId').val(),
@@ -87,7 +87,7 @@ var RMODULE = (function (my, $) {
     old_init();
 
     $('#index').live('pagebeforecreate', function () {
-      var restUrl = my.getRestPrefix() + '/users/current';
+      var restUrl = my.getRestPrefix() + '\/users\/current';
       my.jsonPopulate(restUrl, $('#index'), function (page, user) {
         $('#logout').attr('href', decodeURIComponent(user.logoutUrl));
       });
@@ -106,8 +106,8 @@ var RMODULE = (function (my, $) {
 
       restUrl = my.getRestPrefix() + my.getMobileCarriersPath();
       my.jsonPopulate(restUrl, $('#mobileCarrierId'), function (select, carriers) {
-        select.html(my.carrierOptions(carriers.mobileCarriers));
-        restUrl = my.getRestPrefix() + '/users/current';
+        select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers'));
+        restUrl = my.getRestPrefix() + '\/users\/current';
         my.jsonPopulate(restUrl, $('#options'), my.populateOptions);
       });
     });
@@ -125,10 +125,7 @@ RMODULE.init();
     <a href="#options" data-icon="gear">Options</a>
     <h1>rSkybox</h1>
   </div>
-  <div data-role="content">
-    <ul data-role="listview">
-    </ul>
-  </div>
+  <div data-role="content"></div>
   <div data-role="footer" class="ui-bar" style="text-align: center;">
     <a href="#" id="logout" rel="external">Logout</a>
   </div>
