@@ -1,6 +1,7 @@
 ---
 layout: default
-title: Beta Testers
+entity: End User
+title: End User Admin
 ---
 <script src="/js/admin.js"></script>
 <script>
@@ -14,13 +15,13 @@ var RMODULE = (function (my) {
   };
 
   my.getItemLinkText = function (item) {
-    return item.application + ', ' + item.version + ': ' + item.userName;
+    return item.userName + ': ' + item.version;
   };
 
   my.itemPage = function (page, url) {
     var restUrl;
 
-    restUrl = my.getRestPrefix() + my.getItemPath() + '/' + my.getParameterByName(url.hash, 'id');
+    restUrl = my.getRestPrefix() + my.getItemPath() + '/' + my.getParameterByName(url.hash, 'item_id');
     my.jsonPopulate(restUrl, page, buildItemPage);
   };
 
@@ -40,19 +41,19 @@ var RMODULE = (function (my) {
 RMODULE.init();
 </script>
 
-<div data-role="page" id="index" data-title="Beta Testers">
+<div data-role="page" id="index" data-title="{{ page.title }}">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
-    <h1>Beta Testers</h1>
+    <h1>All {{ page.entity }}s</h1>
   </div>
   <div data-role="content"></div>
 </div>
 
 
-<div data-role="page" id="item" data-title="Beta Tester">
+<div data-role="page" id="item" data-title="{{ page.entity }}">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
-    <h1>Beta Tester</h1>
+    <h1>{{ page.entity }}</h1>
   </div>
   <div data-role="content"></div>
 </div>

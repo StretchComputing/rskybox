@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Beta Testers</title>
+    <title>End User Admin</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <!-- TODO change this to 1.0 when CDN is ready -->
     <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0rc2/jquery.mobile-1.0rc2.min.css"/>
@@ -31,13 +31,13 @@ var RMODULE = (function (my) {
   };
 
   my.getItemLinkText = function (item) {
-    return item.application + ', ' + item.version + ': ' + item.userName;
+    return item.userName + ': ' + item.version;
   };
 
   my.itemPage = function (page, url) {
     var restUrl;
 
-    restUrl = my.getRestPrefix() + my.getItemPath() + '/' + my.getParameterByName(url.hash, 'id');
+    restUrl = my.getRestPrefix() + my.getItemPath() + '/' + my.getParameterByName(url.hash, 'item_id');
     my.jsonPopulate(restUrl, page, buildItemPage);
   };
 
@@ -57,19 +57,19 @@ var RMODULE = (function (my) {
 RMODULE.init();
 </script>
 
-<div data-role="page" id="index" data-title="Beta Testers">
+<div data-role="page" id="index" data-title="End User Admin">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
-    <h1>Beta Testers</h1>
+    <h1>All End Users</h1>
   </div>
   <div data-role="content"></div>
 </div>
 
 
-<div data-role="page" id="item" data-title="Beta Tester">
+<div data-role="page" id="item" data-title="End User">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
-    <h1>Beta Tester</h1>
+    <h1>End User</h1>
   </div>
   <div data-role="content"></div>
 </div>
