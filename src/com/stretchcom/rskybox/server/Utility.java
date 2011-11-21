@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.Request;
 import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.ext.servlet.ServletUtils;
 import org.restlet.ext.servlet.internal.ServletCall;
 
 import javax.servlet.ServletRequest;
@@ -78,6 +79,8 @@ public class Utility {
     	}
     	
     	// TODO access the currentUser which is created by authenticationFilter
+//    	HttpServletRequest servletRequest = ServletUtils.getRequest(getRequest());
+//    	String joeTest = (String)servletRequest.getAttribute(RskyboxApplication.CURRENT_USER);
     	//appIdStatus = User.verifyUserMemberOfApplication(currentUser.getEmail(), theApplicationId);
     	
     	return appIdStatus;

@@ -29,7 +29,6 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Text;
 import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.User;
