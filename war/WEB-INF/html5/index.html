@@ -63,7 +63,7 @@ var RMODULE = (function (my, $) {
     my.enableSmsDetails(smsEnabled);
     $('#phoneNumber').val(user.phoneNumber);
     $('#mobileCarrierId').val(user.mobileCarrierId).selectmenu('refresh');
-    $('#adminButton').toggle(user.isAdmin);
+    $('#adminButton').toggle(user.isSuperAdmin);
   };
 
   my.saveOptions = function () {
@@ -140,6 +140,7 @@ RMODULE.init();
 <div data-role="dialog" id="options" data-title="rSkybox Options" data-theme="b">
   <div data-role="header">
     <h1>Options</h1>
+    <a href="/html5/admin/users" id="adminButton" rel="external" style="display: none;">Users Admin</a>
   </div>
   <div data-role="content">
     <form>

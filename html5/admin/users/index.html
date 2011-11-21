@@ -25,7 +25,7 @@ var RMODULE = (function (my, $) {
     var id, restUrl;
 
     page.find('form')[0].reset();
-    id = my.getParameterByName(url.hash, 'id');
+    id = my.getParameterByName(url.hash, 'item_id');
     restUrl = my.getRestPrefix() + my.getMobileCarriersPath();
     my.jsonPopulate(restUrl, $('#mobileCarrierId'), function (select, carriers) {
       select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers'));
@@ -111,8 +111,8 @@ var RMODULE = (function (my, $) {
       $('#sendSmsNotifications').change(function () {
         my.enableSmsDetails($('#sendSmsNotifications').prop('checked'));
       });
-    }
-  }
+    });
+  };
 
   return my;
 }(RMODULE, jQuery));
