@@ -25,13 +25,16 @@ var RMODULE = (function (my, $) {
     return markup;
   };
 
-  my.buildItemPage = function (page, item) {
-    var markup;
+  my.buildItemPage = function (page, application) {
+    var markup, title;
 
+    title = application.name;
+    document.title = title;
+    my.pageHeader(page).find('h1').html(title);
     markup = '<ul data-role="listview">';
-    markup += '<li><a href="{{ site.html }}\/feedback?id=' + item.id +'" rel="external">Feedback<\/a><\/li>';
-    markup += '<li><a href="{{ site.html }}\/crashdetects?id=' + item.id +'" rel="external">Crash Detects<\/a><\/li>';
-    markup += '<li><a href="{{ site.html }}\/clientlogs?id=' + item.id +'" rel="external">Client Logs<\/a><\/li>';
+    markup += '<li><a href="{{ site.html }}\/feedback?id=' + application.id +'" rel="external">Feedback<\/a><\/li>';
+    markup += '<li><a href="{{ site.html }}\/crashdetects?id=' + application.id +'" rel="external">Crash Detects<\/a><\/li>';
+    markup += '<li><a href="{{ site.html }}\/clientlogs?id=' + application.id +'" rel="external">Client Logs<\/a><\/li>';
     markup += '<\/ul>';
     my.pageContent(page, markup).find(':jqmData(role=listview)').listview();
   };
@@ -150,10 +153,10 @@ RMODULE.init();
 
 
 <!-- Application -->
-<div data-role="page" id="item" data-title="{{ page.title }}">
+<div data-role="page" id="item">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
-    <h1>{{ page.title }}</h1>
+    <h1></h1>
   </div>
   <div data-role="content"></div>
 </div>
