@@ -12,25 +12,9 @@ var RMODULE = (function (my, $) {
     buildItemPage,
     buildNewItemPage,
     roleOptions,
-    ROLES,
     STATUSES,
     validateManager;
 
-
-  ROLES = {
-    owner : {
-      id : 'owner',
-      name : 'Owner'
-    },
-    manager : {
-      id : 'manager',
-      name : 'Manager'
-    },
-    member : {
-      id : 'member',
-      name : 'Member'
-    }
-  };
 
   STATUSES = {
     active : {
@@ -52,10 +36,10 @@ var RMODULE = (function (my, $) {
 
     display = member.emailAddress;
     switch (member.role) {
-    case ROLES.owner.id:
+    case my.ROLES.owner.id:
       display += ' $$';
       break;
-    case ROLES.manager.id:
+    case my.ROLES.manager.id:
       display += ' *';
       break;
     }
@@ -71,14 +55,14 @@ var RMODULE = (function (my, $) {
     var i, markup, roles;
 
     roles = [{
-      id : ROLES.owner.id,
-      name : ROLES.owner.name
+      id : my.ROLES.owner.id,
+      name : my.ROLES.owner.name
     }, {
-      id : ROLES.manager.id,
-      name : ROLES.manager.name
+      id : my.ROLES.manager.id,
+      name : my.ROLES.manager.name
     }, {
-      id : ROLES.member.id,
-      name : ROLES.member.name
+      id : my.ROLES.member.id,
+      name : my.ROLES.member.name
     }];
     return my.getOptionsForSelect(roles, 'Roles');
   }
