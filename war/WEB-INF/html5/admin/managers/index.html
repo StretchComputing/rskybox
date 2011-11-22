@@ -109,7 +109,6 @@ var RMODULE = (function (my, $) {
     });
 
     id = $('#item_id').val();
-    console.log('id=' + id);
     if (id === my.getNewItemName()) {
       my.postJson(restUrl, json, function () {
         history.back();
