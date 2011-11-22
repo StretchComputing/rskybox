@@ -60,7 +60,8 @@ import com.stretchcom.rskybox.server.Utility;
 public class AppMember {
     private static final Logger log = Logger.getLogger(AppMember.class.getName());
     public static final String OWNER_ROLE = "owner";
-    public static final String DEVELOPER_ROLE = "developer";
+    public static final String MANAGER_ROLE = "manager";
+    public static final String MEMBER_ROLE = "fan";
     public static final String PENDING_STATUS = "pending";
     public static final String ACTIVE_STATUS = "active";
 	
@@ -130,7 +131,7 @@ public class AppMember {
 	}
 	
 	public Boolean isRoleValid(String theRole) {
-		if(theRole.equals(AppMember.DEVELOPER_ROLE) || theRole.equals(AppMember.OWNER_ROLE)) return true;
+		if(theRole.equals(AppMember.MEMBER_ROLE) || theRole.equals(AppMember.MANAGER_ROLE) || theRole.equals(AppMember.OWNER_ROLE)) return true;
 		return false;
 	}
 	
@@ -151,6 +152,22 @@ public class AppMember {
 		}
         
 		return;
+	}
+	
+	public static AppMember getAppMember(String theApplicationId, String theUserId) {
+        EntityManager em = EMF.get().createEntityManager();
+        AppMember appMember = null;
+        try {
+    			appMember = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndUserId")
+    				.setParameter("applicationId", theApplicationId)
+    				.setParameter("userId", theUserId)
+    				.getSingleResult();
+		} catch (NoResultException e) {
+			log.info("appMember not found for applicationId = " + theApplicationId + " and userId = " + theUserId);
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more userId/applicationId combinations in AppMember");
+		}
+        return appMember;
 	}
 	
 }
