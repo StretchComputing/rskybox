@@ -32,18 +32,21 @@ var RMODULE = (function (my, $) {
     return 'appMembers';
   };
 
-  my.getItemLinkText = function (owner) {
+  my.getItemLinkText = function (member) {
     var role;
 
-    switch (owner.role) {
+    switch (member.role) {
     case my.ROLES.owner.id:
-      role = ' $$';
+      role = '$$';
+      break;
     case my.ROLES.manager.id:
-      role = ' <img src="\/images\/gear.jpg" alt="admin icon">';
+      role = '*';
+      break;
     default:
       role = '';
+      break;
     }
-    return owner.emailAddress + role;
+    return member.emailAddress + ' ' + role;
   };
 
   roleOptions = function() {
@@ -76,26 +79,24 @@ var RMODULE = (function (my, $) {
     }
   };
 
-  buildItemPage = function (page, item) {
-    var smsEnabled;
-
-    smsEnabled = item.sendSmsNotifications;
+  buildItemPage = function (page, member) {
     my.pageHeader(page).find('h1').html('Update Manager');
-    $('#id').val(item.id);
-    $('#emailAddress').val(item.emailAddress);
-
+    $('#item_id').val(member.id);
+    $('#emailAddress').val(member.emailAddress);
+    $('#role').val(member.role).selectmenu('refresh');
     $('#delete_item_button').show();
   };
 
   buildNewItemPage = function (page) {
     my.pageHeader(page).find('h1').html('New Manager');
-    $('#id').val(my.getNewItemName());
+    $('#item_id').val(my.getNewItemName());
+    $('#role').val(my.getNoOptionSelected()).selectmenu('refresh');
     $('#delete_item_button').hide();
   };
 
   // This form handling function is set up in the admin.js#my.init function
   my.saveItem = function () {
-    var restUrl, json;
+    var id, json, restUrl;
 
     if (!validateManager()) {
       return false;
@@ -107,16 +108,26 @@ var RMODULE = (function (my, $) {
       role: $('#role').val(),
     });
 
-    if ($('#item_id').val() !== my.getNewItemName()) {
-      restUrl += '\/' + $('#id').val();
-    }
-    my.putJson(restUrl, json, function () {
-      history.back();
-    });
+    id = $('#item_id').val();
+    console.log('id=' + id);
+    if (id === my.getNewItemName()) {
+      my.postJson(restUrl, json, function () {
+        history.back();
+      });
+    } else {
+      restUrl += '\/' + id;
+      my.putJson(restUrl, json, function () {
+        history.back();
+      });
+    } 
     return false;
   };
 
   validateManager = function () {
+    if (!my.validEmailAddress($('#emailAddress').val())) {
+      window.alert('Please enter a valid email address.');
+      return false;
+    }
     if ($('#role').val() === my.getNoOptionSelected()) {
       window.alert('Please select a role.');
       return false;
