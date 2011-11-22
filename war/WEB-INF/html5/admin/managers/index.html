@@ -70,7 +70,7 @@ var RMODULE = (function (my, $) {
 
     page.find('form')[0].reset();
     id = my.getParameterByName(url.hash, 'item_id');
-    $('#role').html(roleOptions());
+    $('#role').html(roleOptions()).selectmenu();
     if (id === my.getNewItemName()) {
       buildNewItemPage(page);
     } else {
