@@ -10,12 +10,28 @@ var RMODULE = (function (my, $) {
     pageLoadCount,
     showPageLoadingMessage;
 
+
+  my.ROLES = {
+    owner : {
+      id : 'owner',
+      name : 'Owner'
+    },
+    manager : {
+      id : 'manager',
+      name : 'Manager'
+    },
+    member : {
+      id : 'member',
+      name : 'Member'
+    }
+  };
+
   my.getRestPrefix = function () {
     var restUrl;
 
-    restUrl = '/rest/v1'
+    restUrl = '\/rest\/v1'
     if (window.location.search) {
-      restUrl += '/applications/' + my.getParameterByName(window.location.search, 'id');
+      restUrl += '\/applications\/' + my.getParameterByName(window.location.search, 'id');
     }
     return restUrl;
   };
@@ -108,7 +124,7 @@ var RMODULE = (function (my, $) {
     $.ajax({
       url : restUrl,
       type : method,
-      contentType : 'application/json',
+      contentType : 'application\/json',
       data : data,
       success : success,
       dataType : 'json'

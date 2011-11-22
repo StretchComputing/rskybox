@@ -1,9 +1,23 @@
----
-layout: default
-entity: App Owner
-title: App Owner Admin
----
-<script src="/js/admin.js"></script>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Manager Admin</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0/jquery.mobile-1.0.min.css" />
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.4.min.js"></script>
+    <script>
+      window.jQuery || document.write('<script src="/js/libs/jquery-1.6.4.min.js"><\/script>')
+    </script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0/jquery.mobile-1.0.min.js"></script>
+    <script>
+      window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0.min.js"><\/script>')
+    </script>
+    <script src="/js/rmodule.js"></script>
+  </head>
+  <body>
+    <script src="/js/admin.js"></script>
 <script>
 var RMODULE = (function (my, $) {
   'use strict';
@@ -12,7 +26,7 @@ var RMODULE = (function (my, $) {
     buildItemPage,
     buildNewItemPage,
     roleOptions,
-    validateOwner;
+    validateManager;
 
   my.getItemName = function () {
     return 'appMembers';
@@ -22,9 +36,9 @@ var RMODULE = (function (my, $) {
     var role;
 
     switch (owner.role) {
-    case 'billingOwner':
+    case my.ROLES.owner.id:
       role = ' $$';
-    case 'appAdmin':
+    case my.ROLES.manager.id:
       role = ' <img src="\/images\/gear.jpg" alt="admin icon">';
     default:
       role = '';
@@ -36,14 +50,14 @@ var RMODULE = (function (my, $) {
     var i, markup, roles;
 
     roles = [{
-      id : 'billingAdmin',
-      name : 'Billing Admin'
+      id : my.ROLES.owner.id,
+      name : my.ROLES.owner.name
     }, {
-      id : 'appAdmin',
-      name : 'App Admin'
+      id : my.ROLES.manager.id,
+      name : my.ROLES.manager.name
     }, {
-      id : 'appOwner',
-      name : 'App Owner'
+      id : my.ROLES.member.id,
+      name : my.ROLES.member.name
     }];
     return my.getOptionsForSelect(roles, 'Roles');
   }
@@ -66,7 +80,7 @@ var RMODULE = (function (my, $) {
     var smsEnabled;
 
     smsEnabled = item.sendSmsNotifications;
-    my.pageHeader(page).find('h1').html('Update {{ page.entity }}');
+    my.pageHeader(page).find('h1').html('Update Manager');
     $('#id').val(item.id);
     $('#emailAddress').val(item.emailAddress);
 
@@ -74,7 +88,7 @@ var RMODULE = (function (my, $) {
   };
 
   buildNewItemPage = function (page) {
-    my.pageHeader(page).find('h1').html('New {{ page.entity }}');
+    my.pageHeader(page).find('h1').html('New Manager');
     $('#id').val(my.getNewItemName());
     $('#delete_item_button').hide();
   };
@@ -83,11 +97,11 @@ var RMODULE = (function (my, $) {
   my.saveItem = function () {
     var restUrl, json;
 
-    if (!validateOwner()) {
+    if (!validateManager()) {
       return false;
     }
 
-    restUrl = my.getRestPrefix() + my.getItemPath;
+    restUrl = my.getRestPrefix() + my.getItemPath();
     json = JSON.stringify({
       emailAddress: $('#emailAddress').val(),
       role: $('#role').val(),
@@ -102,11 +116,12 @@ var RMODULE = (function (my, $) {
     return false;
   };
 
-  validateOwner = function () {
+  validateManager = function () {
     if ($('#role').val() === my.getNoOptionSelected()) {
       window.alert('Please select a role.');
       return false;
     }
+    return true;
   }
 
   return my;
@@ -115,23 +130,23 @@ var RMODULE = (function (my, $) {
 RMODULE.init();
 </script>
 
-<div data-role="page" id="index" data-title="{{ page.title }}">
+<div data-role="page" id="index" data-title="Manager Admin">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
-    <h1>All {{ page.entity }}s</h1>
+    <h1>All Managers</h1>
   </div>
   <div data-role="content"></div>
   <div data-role="footer">
     <div data-role="navbar">
       <ul>
-        <li><a href="" id="new_item_button">Create New {{ page.entity }}</a></li>
+        <li><a href="" id="new_item_button">Create New Manager</a></li>
       </ul>
     </div>
   </div>
 </div>
 
 
-<div data-role="page" id="item" data-title="{{ page.entity }}">
+<div data-role="page" id="item" data-title="Manager">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
     <h1></h1>
@@ -148,7 +163,7 @@ RMODULE.init();
 
       <input type="submit" value="Save">
       <p>
-        <a id="delete_item_button" href="#delete" data-role="button" data-theme="e">Delete {{ page.entity }}</a>
+        <a id="delete_item_button" href="#delete" data-role="button" data-theme="e">Delete Manager</a>
       </p>
     </form>
   </div>
@@ -167,14 +182,17 @@ RMODULE.init();
   </div>
   <div data-role="content">
     <div style="text-align: center;">
-      <h1>Delete {{ page.entity }}</h1>
+      <h1>Delete Manager</h1>
       <p>Are you sure?</p>
     </div>
     <p>
-      <a id="delete_item" data-role="button">Delete {{ page.entity }}</a>
+      <a id="delete_item" data-role="button">Delete Manager</a>
     </p>
     <p>
       <a href="" data-role="button" data-rel="back">Cancel</a>
     </p>
   </div>
 </div>
+
+  </body>
+</html>

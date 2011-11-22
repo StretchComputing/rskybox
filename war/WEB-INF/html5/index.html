@@ -28,13 +28,17 @@ var RMODULE = (function (my, $) {
     return 'applications';
   };
 
-  my.buildListItemContent = function (item) {
+  my.buildListItemContent = function (application) {
     var display, markup;
 
-    display = item.name + ' ' + item.version + ', ' + item.date;
+    // TODO Remove following line that sets the role.
+    application.role = 'manager';
+    display = application.name + ' ' + application.version + ', ' + application.date;
     markup =  '<li>';
-    markup += '<a href="#item?id=' + item.id + '">' + display + '<\/a>';
-    markup += '<a href="/html5/admin?id=' + item.id + '" rel="external" data-icon="gear" title="admin">Admin<\/a>';
+    markup += '<a href="#application?id=' + application.id + '">' + display + '<\/a>';
+    if (application.role === my.ROLES.owner.id || application.role === my.ROLES.manager.id) {
+      markup += '<a href="/html5/admin?id=' + application.id + '" rel="external" data-icon="gear" title="admin">Admin<\/a>';
+    }
     markup += '<\/li>';
     return markup;
   };
