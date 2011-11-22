@@ -21,7 +21,7 @@ var RMODULE = (function (my, $) {
     application.role = 'manager';
     display = application.name + ' ' + application.version + ', ' + application.date;
     markup =  '<li>';
-    markup += '<a href="#application?id=' + application.id + '">' + display + '<\/a>';
+    markup += '<a href="#item?id=' + application.id + '">' + display + '<\/a>';
     if (application.role === my.ROLES.owner.id || application.role === my.ROLES.manager.id) {
       markup += '<a href="{{ site.admin }}?id=' + application.id + '" rel="external" data-icon="gear" title="admin">Admin<\/a>';
     }
