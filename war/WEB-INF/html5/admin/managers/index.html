@@ -26,41 +26,73 @@ var RMODULE = (function (my, $) {
     buildItemPage,
     buildNewItemPage,
     roleOptions,
+    ROLES,
+    STATUSES,
     validateManager;
+
+
+  ROLES = {
+    owner : {
+      id : 'owner',
+      name : 'Owner'
+    },
+    manager : {
+      id : 'manager',
+      name : 'Manager'
+    },
+    member : {
+      id : 'member',
+      name : 'Member'
+    }
+  };
+
+  STATUSES = {
+    active : {
+      id : 'active',
+      name : 'Active'
+    },
+    pending : {
+      id : 'pending',
+      name : 'Pending',
+    }
+  };
 
   my.getItemName = function () {
     return 'appMembers';
   };
 
   my.getItemLinkText = function (member) {
-    var role;
+    var display, role;
 
+    display = member.emailAddress;
     switch (member.role) {
-    case my.ROLES.owner.id:
-      role = '$$';
+    case ROLES.owner.id:
+      display += ' $$';
       break;
-    case my.ROLES.manager.id:
-      role = '*';
-      break;
-    default:
-      role = '';
+    case ROLES.manager.id:
+      display += ' *';
       break;
     }
-    return member.emailAddress + ' ' + role;
+    switch (member.status) {
+    case STATUSES.pending.id:
+      display += ' (' + STATUSES.pending.name + ')';
+      break;
+    }
+    return display;
   };
 
   roleOptions = function() {
     var i, markup, roles;
 
     roles = [{
-      id : my.ROLES.owner.id,
-      name : my.ROLES.owner.name
+      id : ROLES.owner.id,
+      name : ROLES.owner.name
     }, {
-      id : my.ROLES.manager.id,
-      name : my.ROLES.manager.name
+      id : ROLES.manager.id,
+      name : ROLES.manager.name
     }, {
-      id : my.ROLES.member.id,
-      name : my.ROLES.member.name
+      id : ROLES.member.id,
+      name : ROLES.member.name
     }];
     return my.getOptionsForSelect(roles, 'Roles');
   }

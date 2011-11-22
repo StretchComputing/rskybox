@@ -11,21 +11,6 @@ var RMODULE = (function (my, $) {
     showPageLoadingMessage;
 
 
-  my.ROLES = {
-    owner : {
-      id : 'owner',
-      name : 'Owner'
-    },
-    manager : {
-      id : 'manager',
-      name : 'Manager'
-    },
-    member : {
-      id : 'member',
-      name : 'Member'
-    }
-  };
-
   my.getRestPrefix = function () {
     var restUrl;
 
