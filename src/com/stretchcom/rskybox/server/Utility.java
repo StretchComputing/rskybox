@@ -85,4 +85,9 @@ public class Utility {
     	
     	return appIdStatus;
 	}
+	
+	public static User getCurrentUser(Request theRequest) {
+    	HttpServletRequest servletRequest = ServletUtils.getRequest(theRequest);
+    	return (User)servletRequest.getAttribute(RskyboxApplication.CURRENT_USER);
+	}
 }

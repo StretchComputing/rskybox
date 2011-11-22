@@ -12,6 +12,7 @@ import javax.persistence.NonUniqueResultException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.restlet.Request;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
@@ -148,7 +149,7 @@ public class UsersResource extends ServerResource {
     private JsonRepresentation show() {
         log.info("in show()");
         EntityManager em = EMF.get().createEntityManager();
-        Boolean isAdmin = null;
+        Boolean isSuperAdmin = null;
 
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
@@ -159,34 +160,35 @@ public class UsersResource extends ServerResource {
 			}
 			
 			if(this.id.equalsIgnoreCase(User.CURRENT)) {
-				// special case: id = "current" so return info on currently logged in Google Account user
-	        	UserService userService = UserServiceFactory.getUserService();
-	        	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
-	        	isAdmin = userService.isUserAdmin();
+				// special case: id = "current" so return info on currently logged in user
+				User currentUser = Utility.getCurrentUser(getRequest());
 	        	if(currentUser == null) {
 	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 	        	}
+	        	isSuperAdmin = currentUser.getIsSuperAdmin();
 	        	
-	        	String emailAddress = currentUser.getEmail().toLowerCase();
+	        	String emailAddress = currentUser.getEmailAddress().toLowerCase();
 	    		try {
+	    			// TODO - once authentication Filter sets currentUser from User entity, this user lookup won't be needed
 					user = (User)em.createNamedQuery("User.getByEmailAddress")
 						.setParameter("emailAddress", emailAddress)
 						.getSingleResult();
 				} catch (NoResultException e) {
-					// if user is Admin, create a user object on the fly.  This allows admins of the app to just start using rskybox without
-					// any configuration necessary. A slick little feature.
-					if(isAdmin) {
-						user = User.createUser(emailAddress, currentUser.getNickname());
-						if(user != null) {
-							log.info("new user created on the fly for the admin. New user email address = " + emailAddress);
-						} else {
-							log.info("create new user failed");
-							apiStatus = ApiStatusCode.USER_NOT_FOUND;
-						}
-					} else {
-						log.info("User not found");
-						apiStatus = ApiStatusCode.USER_NOT_FOUND;
-					}
+					// TODO this user auto create needs to be moved elsewhere
+//					// if user is Admin, create a user object on the fly.  This allows admins of the app to just start using rskybox without
+//					// any configuration necessary. A slick little feature.
+//					if(isSuperAdmin) {
+//						user = User.createUser(emailAddress, currentUser.getNickname());
+//						if(user != null) {
+//							log.info("new user created on the fly for the admin. New user email address = " + emailAddress);
+//						} else {
+//							log.info("create new user failed");
+//							apiStatus = ApiStatusCode.USER_NOT_FOUND;
+//						}
+//					} else {
+//						log.info("User not found");
+//						apiStatus = ApiStatusCode.USER_NOT_FOUND;
+//					}
 				}
 			} else {
 				// id of user specified
@@ -210,7 +212,7 @@ public class UsersResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getUserJson(user, apiStatus, isAdmin));
+        return new JsonRepresentation(getUserJson(user, apiStatus, isSuperAdmin));
     }
 
     private JsonRepresentation save_user(Representation entity) {
@@ -356,7 +358,7 @@ public class UsersResource extends ServerResource {
                 	///////////////////////////////////////////////////////////////////
                 	// must be Current user; otherwise isCurrentUserAdmin would be null
                 	///////////////////////////////////////////////////////////////////
-                	json.put("isAdmin", isCurrentUserAdmin);
+                	json.put("isSuperAdmin", isCurrentUserAdmin);
                 	
     	        	UserService userService = UserServiceFactory.getUserService();
     	        	json.put("logoutUrl", userService.createLogoutURL(RskyboxApplication.APPLICATION_WELCOME_PAGE));

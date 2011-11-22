@@ -34,6 +34,17 @@ public class UserAuthenticationFilter implements Filter {
         ServletException {
     	
     	// ------------------------------------------------------------------
+    	// Authentication Algorithm:
+    	// ------------------------------------------------------------------
+    	// 1. For select user management APIs, bypass any authentication check and return (e.g. create user, get token, password reset, ...)
+    	// 2. Extract token for HTTP authorization header
+    	// 3. If token not present, return HTTP authentication error
+    	// 4. Attempt User match via token and set currentUser for downstream use
+    	// 5. If no User match, attempt application match via token and set currentUser as appropriate (not sure what this looks like yet ...)
+    	// 6. If no token match, return HTTP authentication error
+    	
+    	// TODO remove the following comment block
+    	// ------------------------------------------------------------------
     	// Filter requires authentication for the following type of requests:
     	// ------------------------------------------------------------------
     	// * rSkybox Client application REST calls with a priori token
@@ -70,7 +81,21 @@ public class UserAuthenticationFilter implements Filter {
     		
     		// get the currentUser and store in the request for easy access by down stream REST Resource handlers
 	    	UserService userService = UserServiceFactory.getUserService();
-	    	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
+	    	com.google.appengine.api.users.User currentGoogleUser = userService.getCurrentUser();
+	    	User currentUser = null;
+	    	String emailAddress = null;
+	    	if(currentGoogleUser != null) {
+	    		emailAddress = currentGoogleUser.getEmail();
+	    		currentUser = User.getUser(emailAddress);
+	    		if(currentUser != null && userService.isUserAdmin()) {
+	    			currentUser.setIsSuperAdmin(true);
+	    		}
+	    	} else {
+		    	// *****************  TODO temp code  ********************
+	    		emailAddress = "joe@test.com";
+	    		currentUser = User.getUser(emailAddress);
+	    	}
+	    	
 	    	httpRequest.setAttribute(RskyboxApplication.CURRENT_USER, currentUser);
     		
     		

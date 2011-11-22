@@ -29,6 +29,7 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;
 
@@ -194,13 +195,19 @@ public class ApplicationsResource extends ServerResource {
 			List<Application> applications = null;
             JSONArray ja = new JSONArray();
             
-			applications= (List<Application>)em.createNamedQuery("Application.getAll").getResultList();
-            for (Application app : applications) {
-                ja.put(getApplicationJson(app, true));
-            }
-            json.put("applications", ja);
-            json.put("apiStatus", apiStatus);
-            json.put("isAdmin", User.isAdmin());
+        	User user = Utility.getCurrentUser(getRequest());
+        	log.info("application list is being retrieved for currentUser email address = " + user.getEmailAddress());
+        	if(user != null) {
+        		String userId = KeyFactory.keyToString(user.getKey());
+    			applications = user.getApplications();
+                for (Application app : applications) {
+                    ja.put(getApplicationJson(app, true));
+                }
+                json.put("applications", ja);
+                json.put("apiStatus", apiStatus);
+        	} else {
+        		this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        	}
         } catch (Exception e) {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
@@ -234,6 +241,16 @@ public class ApplicationsResource extends ServerResource {
             	
             	json.put("name", application.getName());
             	json.put("version", application.getVersion());
+            	
+            	User user = Utility.getCurrentUser(getRequest());
+            	if(user != null) {
+            		String userId = KeyFactory.keyToString(user.getKey());
+            		String applicationId = KeyFactory.keyToString(application.getKey());
+            		AppMember am = AppMember.getAppMember(applicationId, userId);
+            		if(am != null) {
+                    	json.put("role", am.getRole());
+            		}
+            	}
         	}
         } catch (JSONException e) {
         	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());

@@ -13,6 +13,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.Transient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,8 +56,10 @@ public class User {
 	private String smsEmailAddress;
 	private Boolean sendEmailNotifications = false;
 	private Boolean sendSmsNotifications = false;
-	private Boolean isAdmin = false;  // deprecate?  Not storing this in the user object because it can too easily get out of synch with GAE permissions config
 	private String organizationId;
+	
+	@Transient
+	private Boolean isSuperAdmin = false;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -102,11 +105,11 @@ public class User {
 		this.smsEmailAddress = smsEmailAddress;
 	}
 	
-	public Boolean getIsAdmin() {
-		return isAdmin;
+	public Boolean getIsSuperAdmin() {
+		return isSuperAdmin;
 	}
-	public void setIsAdmin(Boolean isAdmin) {
-		this.isAdmin = isAdmin;
+	public void setIsSuperAdmin(Boolean isSuperAdmin) {
+		this.isSuperAdmin = isSuperAdmin;
 	}
 
 	public Boolean getSendEmailNotifications() {
@@ -241,6 +244,7 @@ public class User {
         	appMembers = (List<AppMember>)em.createNamedQuery("AppMember.getByUserId")
 				.setParameter("userId", KeyFactory.keyToString(this.key))
 				.getResultList();
+        	log.info("number of applications found for currentUser = " + appMembers.size());
         	
         	for(AppMember au : appMembers) {
                 try {
@@ -251,7 +255,7 @@ public class User {
 	            				.getSingleResult();
 	            		applications.add(application);
 					} catch (IllegalArgumentException e) {
-						log.severe("User.getApplications(): could not convert ApplicationsUsers ApplicationId to an Application key");
+						log.severe("User.getApplications(): could not convert AppMember ApplicationId to an Application key");
 					}
         		} catch (NoResultException e) {
         			log.info("Application referred to in ApplicationsUsers no longer exists");
@@ -301,6 +305,25 @@ public class User {
         }
         
 		return apiStatus;
+	}
+	
+	
+	public static User getUser(String theEmailAddress) {
+        EntityManager em = EMF.get().createEntityManager();
+
+        User user = null;
+        try {
+    		user = (User)em.createNamedQuery("User.getByEmailAddress")
+				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+				.getSingleResult();
+    		log.info("user with email address = " + theEmailAddress + " found");
+		} catch (NoResultException e) {
+			// not an error is user not found
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more google account users have same key");
+		}
+        
+        return user;
 	}
 
 }
