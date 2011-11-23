@@ -15,6 +15,13 @@
       window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0.min.js"><\/script>')
     </script>
     <script src="/js/rmodule.js"></script>
+    <script>
+      $(function () {
+        if (location.hostname === "www.rskybox.com") {
+          $('#rskybox_link').attr('href', 'https://rskybox-stretchcom.appspot.com/html5');
+        }
+      });
+    </script>
   </head>
   <body>
     <div data-role="page" id="index" data-title="rSkybox">
@@ -23,7 +30,7 @@
       </div>
       <div data-role="content">
         <p>Monitor your application from the best seat in the house.</p>
-        <p><a href="html5" rel="external">Start Using rSkybox</a></p>
+        <p><a href="html5" rel="external" id="rskybox_link">Start Using rSkybox</a></p>
       </div>
     </div>
   </body>
