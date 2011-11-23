@@ -5,38 +5,139 @@ title: Member Admin
 ---
 <script src="/js/admin.js"></script>
 <script>
-var RMODULE = (function (my) {
+var RMODULE = (function (my, $) {
   'use strict';
 
-  var buildItemPage;
+  var
+    buildItemPage,
+    buildNewItemPage,
+    roleOptions,
+    STATUSES,
+    validateMember;
+
+
+  STATUSES = {
+    active : {
+      id : 'active',
+      name : 'Active'
+    },
+    pending : {
+      id : 'pending',
+      name : 'Pending',
+    }
+  };
 
   my.getItemName = function () {
-    return 'betaTesters';
+    return 'appMembers';
   };
 
-  my.getItemLinkText = function (item) {
-    return item.userName + ': ' + item.version;
+  my.getItemLinkText = function (member) {
+    var display, role;
+
+    display = member.emailAddress;
+    switch (member.role) {
+    case my.ROLES.owner.id:
+      display += ' $$';
+      break;
+    case my.ROLES.manager.id:
+      display += ' *';
+      break;
+    }
+    switch (member.status) {
+    case STATUSES.pending.id:
+      display += ' (' + STATUSES.pending.name + ')';
+      break;
+    }
+    return display;
   };
+
+  roleOptions = function() {
+    var i, markup, roles;
+
+    roles = [{
+      id : my.ROLES.owner.id,
+      name : my.ROLES.owner.name
+    }, {
+      id : my.ROLES.manager.id,
+      name : my.ROLES.manager.name
+    }, {
+      id : my.ROLES.member.id,
+      name : my.ROLES.member.name
+    }];
+    return my.getOptionsForSelect(roles, 'Roles');
+  }
 
   my.itemPage = function (page, url) {
-    var restUrl;
+    var id, restUrl;
 
-    restUrl = my.getRestPrefix() + my.getItemPath() + '/' + my.getParameterByName(url.hash, 'item_id');
-    my.jsonPopulate(restUrl, page, buildItemPage);
+    page.find('form')[0].reset();
+    id = my.getParameterByName(url.hash, 'item_id');
+    $('#role').html(roleOptions()).selectmenu();
+    if (id === my.getNewItemName()) {
+      buildNewItemPage(page);
+    } else {
+      restUrl = my.getRestPrefix() + my.getItemPath() + '\/' + id;
+      my.jsonPopulate(restUrl, page, buildItemPage);
+    }
   };
 
-  buildItemPage = function (page, item) {
-    var markup;
-
-    markup  = '<div>Username: ' + item.userName + '</div>';
-    markup += '<div>Application: ' + item.application + '</div>';
-    markup += '<div>Version: ' + item.version + '</div>';
-    markup += '<div>Instance URL: ' + item.instanceUrl + '</div>';
-    my.pageContent(page, markup);
+  buildItemPage = function (page, member) {
+    my.pageHeader(page).find('h1').html('Update {{ page.entity }}');
+    $('#item_id').val(member.id);
+    $('#emailAddress').val(member.emailAddress);
+    $('#role').val(member.role).selectmenu('refresh');
+    $('#delete_item_button').show();
   };
+
+  buildNewItemPage = function (page) {
+    my.pageHeader(page).find('h1').html('New {{ page.entity }}');
+    $('#item_id').val(my.getNewItemName());
+    $('#role').val(my.getNoOptionSelected()).selectmenu('refresh');
+    $('#delete_item_button').hide();
+  };
+
+  // This form handling function is set up in the admin.js#my.init function
+  my.saveItem = function () {
+    var id, json, restUrl;
+
+    if (!validateMember()) {
+      return false;
+    }
+
+    restUrl = my.getRestPrefix() + my.getItemPath();
+    json = JSON.stringify({
+      emailAddress: $('#emailAddress').val(),
+      role: $('#role').val(),
+    });
+
+    id = $('#item_id').val();
+    if (id === my.getNewItemName()) {
+      my.postJson(restUrl, json, function () {
+        history.back();
+      });
+    } else {
+      restUrl += '\/' + id;
+      my.putJson(restUrl, json, function () {
+        history.back();
+      });
+    } 
+    return false;
+  };
+
+  validateMember = function () {
+    if (!my.validEmailAddress($('#emailAddress').val())) {
+      window.alert('Please enter a valid email address.');
+      return false;
+    }
+    if ($('#role').val() === my.getNoOptionSelected()) {
+      window.alert('Please select a role.');
+      return false;
+    }
+    return true;
+  }
 
   return my;
-}(RMODULE));
+}(RMODULE, jQuery));
 
 RMODULE.init();
 </script>
@@ -47,13 +148,60 @@ RMODULE.init();
     <h1>All {{ page.entity }}s</h1>
   </div>
   <div data-role="content"></div>
+  <div data-role="footer">
+    <div data-role="navbar">
+      <ul>
+        <li><a href="" id="new_item_button">Create New {{ page.entity }}</a></li>
+      </ul>
+    </div>
+  </div>
 </div>
 
 
 <div data-role="page" id="item" data-title="{{ page.entity }}">
   <div data-role="header">
     <a href="#" data-rel="back">Back</a>
-    <h1>{{ page.entity }}</h1>
+    <h1></h1>
   </div>
-  <div data-role="content"></div>
+  <div data-role="content">
+    <form>
+      <input type="hidden" name="item_id" id="item_id">
+
+      <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
+      <input type="email" name="emailAddress" id="emailAddress" placeholder="Email Address" required>
+
+      <label for="role" class="ui-hidden-accessible">Role:</label>
+      <select name="role" id="role"></select>
+
+      <input type="submit" value="Save">
+      <p>
+        <a id="delete_item_button" href="#delete" data-role="button" data-theme="e">Delete {{ page.entity }}</a>
+      </p>
+    </form>
+  </div>
+  <div data-role="footer">
+    <div data-role="navbar">
+      <ul>
+        <li><a href="#index">Cancel</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div data-role="dialog" id="delete">
+  <div data-role="header">
+    <h1>Delete</h1>
+  </div>
+  <div data-role="content">
+    <div style="text-align: center;">
+      <h1>Delete {{ page.entity }}</h1>
+      <p>Are you sure?</p>
+    </div>
+    <p>
+      <a id="delete_item" data-role="button">Delete {{ page.entity }}</a>
+    </p>
+    <p>
+      <a href="" data-role="button" data-rel="back">Cancel</a>
+    </p>
+  </div>
 </div>

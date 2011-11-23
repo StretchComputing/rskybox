@@ -32,8 +32,8 @@ var RMODULE = (function (my, $) {
     document.title = title;
     my.pageHeader(page).find('h1').html(title);
     markup =  '<ul data-role="listview">';
-    markup +=   '<li><a href="/html5/admin\/managers?id=' + id + '" rel="external">Managers<\/a><\/li>';
     markup +=   '<li><a href="/html5/admin\/members?id=' + id + '" rel="external">Members<\/a><\/li>';
+    markup +=   '<li><a href="/html5/admin\/endusers?id=' + id + '" rel="external">End Users<\/a><\/li>';
     markup += '<\/ul>';
     my.pageContent(page, markup).find(':jqmData(role=listview)').listview();
   };
