@@ -28,9 +28,11 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.MobileCarrier;
 import com.stretchcom.rskybox.models.User;
+import com.stretchcom.rskybox.server.TF;
 
 public class UsersResource extends ServerResource {
     private static final Logger log = Logger.getLogger(UsersResource.class.getName());
@@ -226,11 +228,24 @@ public class UsersResource extends ServerResource {
             user = new User();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
+            String token = null;
+            String authHeader = null;
             if (id != null) {
+            	// this is an Update User API call
                 Key key = KeyFactory.stringToKey(this.id);
                 user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
+            } else {
+            	// this is a Create User API call
+            	token = TF.get();
+            	user.setToken(token);
+            	
+            	// format: Basic rSkyboxLogin:<token_value> where rSkyboxLogin:<token_value> portion is base64 encoded
+            	String phrase = "rSkyboxLogin:" + token;
+            	String phraseBase64 = Base64.encode(phrase.getBytes("ISO-8859-1"));
+            	authHeader = "Basic " + phraseBase64;
+            	user.setAuthHeader(authHeader);
             }
             
             if (json.has("firstName")) {
@@ -354,6 +369,9 @@ public class UsersResource extends ServerResource {
                 json.put("emailAddress", user.getEmailAddress());
                 json.put("sendEmailNotifications", user.getSendEmailNotifications());
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
+                json.put("token", user.getToken());
+                json.put("authHeader", user.getAuthHeader());
+
                 if(isCurrentUserAdmin != null) {
                 	///////////////////////////////////////////////////////////////////
                 	// must be Current user; otherwise isCurrentUserAdmin would be null

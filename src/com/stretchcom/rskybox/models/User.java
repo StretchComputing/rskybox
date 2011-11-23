@@ -21,6 +21,7 @@ import org.restlet.data.Status;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.stretchcom.rskybox.server.ApiStatusCode;
@@ -57,7 +58,20 @@ public class User {
 	private Boolean sendEmailNotifications = false;
 	private Boolean sendSmsNotifications = false;
 	private String organizationId;
+	private String token;
+	private String authHeader;
 	
+	// *** TODO create accessors ***
+	private String password;
+	private String passwordResetQuestion;
+	private String passwordResetAnswer;
+	private String phoneNumberConfirmationCode;
+	private Text photoBase64;
+	private Text thumbNailBase64;
+	private Boolean isSmsConfirmed = false;
+	private Boolean isEmailConfirmed = false;
+	
+
 	@Transient
 	private Boolean isSuperAdmin = false;
 
@@ -132,6 +146,22 @@ public class User {
 
 	public void setOrganizationId(String organizationId) {
 		this.organizationId = organizationId;
+	}
+	
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public String getAuthHeader() {
+		return authHeader;
+	}
+
+	public void setAuthHeader(String authHeader) {
+		this.authHeader = authHeader;
 	}
 	
 	public static void sendNotifications(String theMessage) {
