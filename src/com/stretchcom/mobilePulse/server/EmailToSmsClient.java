@@ -34,7 +34,7 @@ public class EmailToSmsClient {
 	private static final String IS_ALIVE_RESOURCE_URI = "vitals";
 	
 	private static final String BASIC_AUTH_USER_NAME = "rTeamLogin";
-	private static final String BASIC_AUTH_PASSWORD = "test123";
+	private static final String BASIC_AUTH_PASSWORD = "fruproducts";
 	
 	private static final int TEN_SECONDS_IN_MILLIS = 10000;
 	

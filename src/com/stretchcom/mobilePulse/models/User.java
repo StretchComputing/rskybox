@@ -138,12 +138,14 @@ public class User {
             String enhancedEmailMessage = theMessage + "<br><br>" + MobilePulseApplication.APPLICATION_BASE_URL;
             String enhancedSmsMessage = theMessage + "  " + MobilePulseApplication.APPLICATION_BASE_URL;
             for (User user : users) {
-                if(user.getSendEmailNotifications()) {
+            	Boolean sendEmailNotifications = user.getSendEmailNotifications();
+            	Boolean sendSmsNotifications = user.getSendSmsNotifications();
+                if(sendEmailNotifications != null && sendEmailNotifications) {
                 	log.info("sending email to " + user.getEmailAddress());
                     // Add embedded URL to MobilePulse application
                 	Emailer.send(user.getEmailAddress(), subject, enhancedEmailMessage, Emailer.NO_REPLY);
                 }
-                if(user.getSendSmsNotifications()) {
+                if(sendSmsNotifications != null && sendSmsNotifications) {
                 	log.info("sending SMS to " + user.getSmsEmailAddress());
                     // Add embedded URL to MobilePulse application
                 	Emailer.send(user.getSmsEmailAddress(), subject, enhancedSmsMessage, Emailer.NO_REPLY);
