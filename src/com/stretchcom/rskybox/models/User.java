@@ -180,12 +180,12 @@ public class User {
             String enhancedEmailMessage = theMessage + "<br><br>" + RskyboxApplication.APPLICATION_BASE_URL;
             String enhancedSmsMessage = theMessage + "  " + RskyboxApplication.APPLICATION_BASE_URL;
             for (User user : users) {
-                if(user.getSendEmailNotifications()) {
+                if(user.getSendEmailNotifications() != null && user.getSendEmailNotifications()) {
                 	log.info("sending email to " + user.getEmailAddress());
                     // Add embedded URL to rSkybox application
                 	Emailer.send(user.getEmailAddress(), subject, enhancedEmailMessage, Emailer.NO_REPLY);
                 }
-                if(user.getSendSmsNotifications()) {
+                if(user.getSendSmsNotifications() != null && user.getSendSmsNotifications()) {
                 	log.info("sending SMS to " + user.getSmsEmailAddress());
                     // Add embedded URL to rSkybox application
                 	Emailer.send(user.getSmsEmailAddress(), subject, enhancedSmsMessage, Emailer.NO_REPLY);
