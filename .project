@@ -6,27 +6,6 @@
 	</projects>
 	<buildSpec>
 		<buildCommand>
-			<name>com.rockstarapps.jslint.JsLintBuilder</name>
-			<arguments>
-				<dictionary>
-					<key>buildAll</key>
-					<value>false</value>
-				</dictionary>
-				<dictionary>
-					<key>external_defines</key>
-					<value>jQuery</value>
-				</dictionary>
-				<dictionary>
-					<key>properties</key>
-					<value>params = {passfail: false,debug: false,undef: true,white: true,evil: false,nomen: true,browser: true,cap: false,eqeqeq: true,widget: false,on: false,plusplus: true,sidebar: false,fragment: false,bitwise: true,rhino: false,laxbreak: false,regexp: true,safe: false,forin: false,onevar: true,adsafe: false,sub: false,strict: true,css: false,newcap: true,maxerrors:50,indent:2};</value>
-				</dictionary>
-				<dictionary>
-					<key>selection</key>
-					<value></value>
-				</dictionary>
-			</arguments>
-		</buildCommand>
-		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
 			<arguments>
 			</arguments>
