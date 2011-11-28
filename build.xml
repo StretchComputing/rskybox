@@ -4,12 +4,10 @@
         <exec dir="html5" executable="jekyll"/>
         <copy todir="war">
             <fileset dir="html5/_site" includes="css/,js/"/>
+            <fileset dir="html5/_site/root" includes="*.html"/>
         </copy>
         <copy todir="war/WEB-INF/html5">
-            <fileset dir="html5/_site">
-                <include name="**/*.html"/>
-                <exclude name="css/,js/"/>
-            </fileset>
+            <fileset dir="html5/_site" includes="**/*.html" excludes="css/,js/,root/"/>
         </copy>
     </target>
 </project>

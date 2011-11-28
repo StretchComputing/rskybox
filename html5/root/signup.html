@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Signup - rSkybox</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0/jquery.mobile-1.0.min.css" />
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.4.min.js"></script>
+    <script>
+      window.jQuery || document.write('<script src="/js/libs/jquery-1.6.4.min.js"><\/script>')
+    </script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0/jquery.mobile-1.0.min.js"></script>
+    <script>
+      window.jQuery.mobile || document.write('<script src="/js/libs/jquery.mobile-1.0.min.js"><\/script>')
+    </script>
+    <script src="/js/rmodule.js"></script>
+    <script>
+      $(function () {
+        if (location.hostname === "www.rskybox.com") {
+          $('#rskybox_link').attr('href', 'https://rskybox-stretchcom.appspot.com/html5');
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div data-role="page" id="index" data-title="Signup - rSkybox">
+      <div data-role="header">
+        <h1>Signup - rSkybox</h1>
+      </div>
+      <div data-role="content">
+        <p>Monitor your application from the best seat in the house.</p>
+        <p><a href="html5" rel="external" id="rskybox_link">Start Using rSkybox</a></p>
+      </div>
+    </div>
+  </body>
+</html>
