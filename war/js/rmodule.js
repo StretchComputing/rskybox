@@ -88,6 +88,10 @@ var RMODULE = (function (my, $) {
     }, extra);
   };
 
+  my.redirect = function (url) {
+    window.location = url;
+  };
+
   pageLoadCount = 0;
   pageLoad = function (operator) {
     switch (operator) {
@@ -136,7 +140,7 @@ var RMODULE = (function (my, $) {
   // restUrl: URL for the REST call
   // data: the data to be sent with the request (null for DELETE)
   // success: a function to call on success
-  // extra: extra properties passed in an object
+  // extra: extra Ajax properties passed in an object
   genericJson = function (method, restUrl, data, success, extra) {
     var ajax, x;
 
@@ -158,14 +162,14 @@ var RMODULE = (function (my, $) {
   //
   // For 'GET' use $.getJSON() is provided directly by jQuery.
   //
-  my.postJson = function (restUrl, data, success) {
-    genericJson('POST', restUrl, data, success);
+  my.postJson = function (restUrl, data, success, extra) {
+    genericJson('POST', restUrl, data, success, extra);
   };
-  my.putJson = function (restUrl, data, success) {
-    genericJson('PUT', restUrl, data, success);
+  my.putJson = function (restUrl, data, success, extra) {
+    genericJson('PUT', restUrl, data, success, extra);
   };
-  my.deleteJson = function (restUrl, data, success) {
-    genericJson('DELETE', restUrl, data, success);
+  my.deleteJson = function (restUrl, data, success, extra) {
+    genericJson('DELETE', restUrl, data, success, extra);
   };
 
   // Set/Get the header area of a page.

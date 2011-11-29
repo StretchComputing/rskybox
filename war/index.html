@@ -18,12 +18,30 @@
   </head>
   <body>
     <script>
+'use strict';
+
 var RMODULE = (function (my) {
+  var
+    saveItem;
+
+  saveItem = function () {
+    alert('capturing the submit');
+    return false;
+  }
+
   my.init = function () {
-    my.getCurrentUser(function (user) {
-      console.log(user.apiStatus);
-    }, function () {
-      console.log('no user logged in');
+    $('#index').live('pagebeforecreate', function () {
+      my.getCurrentUser(function () {
+        if (location.hostname === "www.rskybox.com") {
+          my.redirect('https://rskybox-stretchcom.appspot.com/html5');
+        } else {
+          my.redirect('/html5');
+        }
+      });
+    });
+
+    $('#index').live('pagecreate', function () {
+      $(this).find('form').submit(saveItem);
     });
   };
 
@@ -32,20 +50,17 @@ var RMODULE = (function (my) {
 
 RMODULE.init();
 </script>
-<script>
-  $(function () {
-    if (location.hostname === "www.rskybox.com") {
-      $('#rskybox_link').attr('href', 'https://rskybox-stretchcom.appspot.com/html5');
-    }
-  });
-</script>
+
 <div data-role="page" id="index" data-title="rSkybox">
   <div data-role="header">
     <h1>rSkybox</h1>
   </div>
   <div data-role="content">
     <p>Monitor your application from the best seat in the house.</p>
-    <p><a href="html5" rel="external" id="rskybox_link">Start Using rSkybox</a></p>
+    <form>
+      <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
+      <input type="email" name="emailAddress" id="emailAddress" placeholder="Email Address" required>
+    </form>
   </div>
 </div>
 
