@@ -73,6 +73,21 @@ var RMODULE = (function (my, $) {
     });
   };
 
+  // Get the current user and call the success function when done.
+  my.getCurrentUser = function (success, noUser) {
+    var extra;
+
+    extra = {};
+    extra.statusCode = {
+      401: noUser
+    }
+    showPageLoadingMessage();
+    genericJson('GET', my.getRestPrefix() + '\/users\/current', null, function (user) {
+      success(user);
+      hidePageLoadingMessage();
+    }, extra);
+  };
+
   pageLoadCount = 0;
   pageLoad = function (operator) {
     switch (operator) {
@@ -117,21 +132,32 @@ var RMODULE = (function (my, $) {
 
   // Do an Ajax call using the given method.
   //
+  // method: HTTP method.  One of: GET, PUT, POST, DELETE
   // restUrl: URL for the REST call
   // data: the data to be sent with the request (null for DELETE)
-  // callback: a function to call on success
-  genericJson = function (method, restUrl, data, success) {
-    $.ajax({
-      url : restUrl,
-      type : method,
-      contentType : 'application\/json',
-      data : data,
-      success : success,
-      dataType : 'json'
-    });
+  // success: a function to call on success
+  // extra: extra properties passed in an object
+  genericJson = function (method, restUrl, data, success, extra) {
+    var ajax, x;
+
+    ajax = {};
+    ajax.url = restUrl;
+    ajax.type = method;
+    ajax.contentType = "application\/json";
+    ajax.data = data;
+    ajax.success = success;
+
+    for (x in extra) {
+      ajax[x] = extra[x];
+    }
+
+    $.ajax(ajax);
   };
 
   // Wrappers for doing various JSON methods
+  //
+  // For 'GET' use $.getJSON() is provided directly by jQuery.
+  //
   my.postJson = function (restUrl, data, success) {
     genericJson('POST', restUrl, data, success);
   };
