@@ -41,8 +41,7 @@ var RMODULE = (function (my, $) {
 
     page.find('form')[0].reset();
     id = my.getParameterByName(url.hash, 'item_id');
-    restUrl = my.getRestPrefix() + my.getMobileCarriersPath();
-    my.jsonPopulate(restUrl, $('#mobileCarrierId'), function (select, carriers) {
+    my.jsonPopulate(my.getMobileCarriersUrl(), $('#mobileCarrierId'), function (select, carriers) {
       select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers'));
       if (id === my.getNewItemName()) {
         buildNewItemPage(page);

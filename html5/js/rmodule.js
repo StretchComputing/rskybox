@@ -204,8 +204,8 @@ var RMODULE = (function (my, $) {
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
   };
 
-  my.getMobileCarriersPath = function () {
-    return '/mobileCarriers';
+  my.getMobileCarriersUrl = function () {
+    return my.getRestPrefix() + '/mobileCarriers';
   };
 
   // Simple RegEx to ensure a valid phone number format.

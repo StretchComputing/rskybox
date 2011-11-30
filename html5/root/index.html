@@ -10,7 +10,10 @@ var RMODULE = (function (my) {
     saveItem;
 
   saveItem = function () {
-    alert('capturing the submit');
+    if (!my.validEmailAddress && !my.validatePhoneNumber()) {
+      console.log('invalid input');
+    }
+    console.log('saving item');
     return false;
   }
 
@@ -23,6 +26,12 @@ var RMODULE = (function (my) {
           my.redirect('/html5');
         }
       });
+    });
+
+    $('#index').live('pageshow', function () {
+      <!--my.jsonPopulate(my.getMobileCarriersUrl(), $('#mobileCarrierId'), function (select, carriers) {-->
+        <!--select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers'));-->
+      <!--});-->
     });
 
     $('#index').live('pagecreate', function () {
@@ -39,12 +48,23 @@ RMODULE.init();
 <div data-role="page" id="index" data-title="rSkybox">
   <div data-role="header">
     <h1>rSkybox</h1>
+    <a href="#login" class="ui-btn-right">Log In</a>
   </div>
   <div data-role="content">
-    <p>Monitor your application from the best seat in the house.</p>
+    <div style="text-align: center;">
+      <strong>Watch your application from the best seat in the house.</strong>
+    </div>
     <form>
+      <h1>Sign Up Using</h1>
       <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
-      <input type="email" name="emailAddress" id="emailAddress" placeholder="Email Address" required>
+      <input type="email" name="emailAddress" id="emailAddress" placeholder="Email Address">
+      <strong>or</strong>
+      <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
+      <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Phone Number">
+      <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile Carrier:</label>
+      <select name="mobileCarrierId" id="mobileCarrierId"></select>
+
+      <input type="submit" value="Request Confirmation Code">
     </form>
   </div>
 </div>

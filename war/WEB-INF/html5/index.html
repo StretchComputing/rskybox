@@ -111,8 +111,7 @@ var RMODULE = (function (my, $) {
     $('#options').live('pageshow', function () {
       var restUrl;
 
-      restUrl = my.getRestPrefix() + my.getMobileCarriersPath();
-      my.jsonPopulate(restUrl, $('#mobileCarrierId'), function (select, carriers) {
+      my.jsonPopulate(my.getMobileCarriersUrl(), $('#mobileCarrierId'), function (select, carriers) {
         select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers'));
         restUrl = my.getRestPrefix() + '\/users\/current';
         my.jsonPopulate(restUrl, $('#options'), my.populateOptions);
