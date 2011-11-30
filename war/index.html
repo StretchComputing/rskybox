@@ -25,7 +25,7 @@ var RMODULE = (function (my) {
     saveItem;
 
   saveItem = function () {
-    if (!my.validEmailAddress && !my.validatePhoneNumber()) {
+    if (!my.validEmailAddress() && !my.validPhoneNumber()) {
       console.log('invalid input');
     }
     console.log('saving item');
