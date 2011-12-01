@@ -26,6 +26,8 @@ var RMODULE = (function (my, $) {
     }
   };
 
+
+  // Returns the currently valid REST path prefix.
   my.getRestPrefix = function () {
     var restUrl;
 
@@ -35,6 +37,7 @@ var RMODULE = (function (my, $) {
     }
     return restUrl;
   };
+
 
   // Dynamically inject pages
   //
@@ -73,13 +76,17 @@ var RMODULE = (function (my, $) {
     });
   };
 
+
   // Get the current user and call the success function when done.
   my.getCurrentUser = function (success, noUser) {
     var extra;
 
     extra = {};
     extra.statusCode = {
-      401: noUser
+      401: function () {
+        hidePageLoadingMessage();
+        noUser && noUser();
+      }
     }
     showPageLoadingMessage();
     genericJson('GET', my.getRestPrefix() + '\/users\/current', null, function (user) {
@@ -216,6 +223,13 @@ var RMODULE = (function (my, $) {
   my.isValidEmailAddress = function (emailAddress) {
     return (/^[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/).test(emailAddress);
   };
+
+  my.isValidCarrier = function (carrierId) {
+    // null and '' are both considered false
+    if (!carrierId) { return false; }
+
+    return carrierId !== my.getNoOptionSelected();
+  }
 
   // Build an option list for a select control.
   //

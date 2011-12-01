@@ -17,7 +17,8 @@
     <script src="/js/rmodule.js"></script>
   </head>
   <body>
-    <script>
+    <script src="/js/signup.js"></script>
+<script>
 'use strict';
 
 var RMODULE = (function (my) {
@@ -25,39 +26,18 @@ var RMODULE = (function (my) {
   var requestConfirmCode;
 
   requestConfirmCode = function () {
-    var
-      carrier,
-      carrierSelected,
-      email,
-      phone,
-      restUrl,
-      validEmail,
-      validPhone;
+    var signup;
 
-    email = $('#emailAddress').val();
-    validEmail = my.isValidEmailAddress(email);
-    phone = $('#phoneNumber').val();
-    validPhone = my.isValidPhoneNumber(phone);
-    carrier = $('#mobileCarrierId').val()
-    carrierSelected = carrier && carrier !== my.getNoOptionSelected();
-    restUrl = my.getRestPrefix() + '\/users';
+    signup = {
+      email: $('#emailAddress').val(),
+      phone: $('#phoneNumber').val(),
+      carrierId: $('#mobileCarrierId').val()
+    }
 
-    if (!validEmail && !validPhone) {
-      alert('Please enter your email address or phone number.');
+    if (!my.isValidSignup(signup)) {
+      alert('Please enter your email address, or your phone number and mobile carrier.');
       return false;
     }
-
-    if (validEmail) {
-
-      console.log('valid email');
-    } else if (validPhone) {
-      if (!carrierSelected) {
-        alert('Please select your mobile carrier.');
-        return false;
-      }
-      console.log('valid phone number');
-    }
-    console.log('saving item');
     return false;
   }
 
@@ -74,9 +54,9 @@ var RMODULE = (function (my) {
     });
 
     $('#index').live('pageshow', function () {
-      <!--my.jsonPopulate(my.getMobileCarriersUrl(), $('#mobileCarrierId'), function (select, carriers) {-->
-        <!--select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers'));-->
-      <!--});-->
+      my.jsonPopulate(my.getMobileCarriersUrl(), $('#mobileCarrierId'), function (select, carriers) {
+        select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers')).selectmenu('refresh');
+      });
     });
 
     $('#index').live('pagecreate', function () {
