@@ -95,10 +95,14 @@ var RMODULE = (function (my, $) {
     }, extra);
   };
 
+
+  // Browser redirect to another URL.
   my.redirect = function (url) {
     window.location = url;
   };
 
+
+  // Track how many page loading messages are on the stack.
   pageLoadCount = 0;
   pageLoad = function (operator) {
     switch (operator) {
@@ -114,16 +118,19 @@ var RMODULE = (function (my, $) {
     return pageLoadCount;
   };
 
+
   // Manage showing/hiding the page loading message based on the number of times it's been called.
   hidePageLoadingMessage = function () {
     if (pageLoad('decrement') <= 0) {
       $.mobile.hidePageLoadingMsg();
     }
   };
+
   showPageLoadingMessage = function () {
     pageLoad('increment');
     $.mobile.showPageLoadingMsg();
   };
+
 
   // Populate an element with JSON data.
   //
@@ -140,6 +147,7 @@ var RMODULE = (function (my, $) {
       hidePageLoadingMessage();
     });
   };
+
 
   // Do an Ajax call using the given method.
   //
@@ -165,6 +173,7 @@ var RMODULE = (function (my, $) {
     $.ajax(ajax);
   };
 
+
   // Wrappers for doing various JSON methods
   //
   // For 'GET' use $.getJSON() is provided directly by jQuery.
@@ -172,12 +181,15 @@ var RMODULE = (function (my, $) {
   my.postJson = function (restUrl, data, success, extra) {
     genericJson('POST', restUrl, data, success, extra);
   };
+
   my.putJson = function (restUrl, data, success, extra) {
     genericJson('PUT', restUrl, data, success, extra);
   };
+
   my.deleteJson = function (restUrl, data, success, extra) {
     genericJson('DELETE', restUrl, data, success, extra);
   };
+
 
   // Set/Get the header area of a page.
   //
@@ -192,6 +204,7 @@ var RMODULE = (function (my, $) {
     return header;
   };
 
+
   // Set/Get the content area of a page.
   //
   // page: the page we're working with
@@ -205,31 +218,56 @@ var RMODULE = (function (my, $) {
     return content;
   };
 
+
+  // Build and return a query string from an object.
+  //
+  // props: the object containing the name/value pairs for the query string
+  my.getQueryString = function (props) {
+    var prop, query;
+
+    query = "?";
+    for (prop in props) {
+      query += prop + '=' + props[prop] + '&';
+    }
+    query = query.slice(0, query.length - 1);
+
+    return query;
+  };
+
+
   // Returns the value of a named parameter from a given JQM URL.
   my.getParameterByName = function (url, name) {
     var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
     return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
   };
 
+
+  // Builds the URL needed for getting the mobile carriers.
   my.getMobileCarriersUrl = function () {
     return my.getRestPrefix() + '/mobileCarriers';
   };
+
 
   // Simple RegEx to ensure a valid phone number format.
   my.isValidPhoneNumber = function (phoneNumber) {
     return (/^\(?([0-9]{3})\)?[\-. ]?([0-9]{3})[\-. ]?([0-9]{4})$/).test(phoneNumber);
   };
 
+
+  // Simple RegEx to ensure a valid email address format.
   my.isValidEmailAddress = function (emailAddress) {
     return (/^[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/).test(emailAddress);
   };
 
+
+  // Basic determination of something was selected for carrierId.
   my.isValidCarrier = function (carrierId) {
     // null and '' are both considered false
     if (!carrierId) { return false; }
 
     return carrierId !== my.getNoOptionSelected();
   }
+
 
   // Build an option list for a select control.
   //
@@ -248,11 +286,20 @@ var RMODULE = (function (my, $) {
     return markup;
   };
 
+
+  // Toggle SMS controls.
+  //
+  // TODO rename this 'toggleSmsDetails'
   my.enableSmsDetails = function (enabled) {
     $('#phoneNumber').prop('disabled', !enabled);
     $('#mobileCarrierId').prop('disabled', !enabled).selectmenu('refresh');
   };
 
+
+  // Performs business rules validation on SMS details.
+  //
+  // TODO decouple UI elements from validation
+  // TODO rename this 'isValidSmsSettings' (maybe)
   my.validateSms = function () {
     if (!$('#sendSmsNotifications').prop('checked')) {
       return true;
@@ -269,6 +316,7 @@ var RMODULE = (function (my, $) {
 
     return true;
   };
+
 
   return my;
 }(RMODULE || {}, jQuery));

@@ -23,7 +23,15 @@
 
 var RMODULE = (function (my) {
 
-  var requestConfirmCode;
+  var
+    confirmPage,
+    requestConfirmCode;
+
+
+  confirmPage = function (page, url) {
+    console.log('in confirmPage ');
+    console.log(url);
+  };
 
   requestConfirmCode = function () {
     var json, signup;
@@ -40,11 +48,13 @@ var RMODULE = (function (my) {
     }
 
     json = JSON.stringify(signup);
-    my.postJson(my.getRestPrefix() + '\/users\/requestConfirmation', json, function (data) {
-      console.log(data);
+    my.postJson(my.getRestPrefix() + '\/users\/requestConfirmation', json, function (confirmData) {
+      // TODO replace 'signup' in the following call with 'confirmData'
+      $.mobile.changePage('#confirm' + my.getQueryString(signup));
     });
     return false;
   }
+
 
   my.init = function () {
     // If there is a current user, redirect right away.
@@ -67,6 +77,11 @@ var RMODULE = (function (my) {
     $('#index').live('pagecreate', function () {
       $(this).find('form').submit(requestConfirmCode);
     });
+
+    my.dynamicPages([{
+      page: '#confirm',
+      function: confirmPage
+    }]);
   };
 
   return my;
@@ -75,9 +90,9 @@ var RMODULE = (function (my) {
 RMODULE.init();
 </script>
 
-<div data-role="page" id="index" data-title="rSkybox">
+<div data-role="page" id="index" data-title="rSkybox Signup">
   <div data-role="header">
-    <h1>rSkybox</h1>
+    <h1>rSkybox Signup</h1>
     <a href="#login" class="ui-btn-right">Log In</a>
   </div>
   <div data-role="content">
@@ -95,6 +110,16 @@ RMODULE.init();
       <select name="mobileCarrierId" id="mobileCarrierId"></select>
 
       <input type="submit" value="Request Confirmation Code">
+    </form>
+  </div>
+</div>
+
+<div data-role="page" id="confirm" data-title="Confirm Signup">
+  <div data-role="header">
+    <h1>Confirm Signup</h1>
+  </div>
+  <div data-role="content">
+    <form>
     </form>
   </div>
 </div>
