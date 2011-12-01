@@ -11,18 +11,23 @@ var RMODULE = (function (my) {
   var requestConfirmCode;
 
   requestConfirmCode = function () {
-    var signup;
+    var json, signup;
 
     signup = {
-      email: $('#emailAddress').val(),
-      phone: $('#phoneNumber').val(),
-      carrierId: $('#mobileCarrierId').val()
+      emailAddress: $('#emailAddress').val(),
+      phoneNumber: $('#phoneNumber').val(),
+      mobileCarrierId: $('#mobileCarrierId').val()
     }
 
     if (!my.isValidSignup(signup)) {
       alert('Please enter your email address, or your phone number and mobile carrier.');
       return false;
     }
+
+    json = JSON.stringify(signup);
+    my.postJson(my.getRestPrefix() + '\/users\/requestConfirmation', json, function (data) {
+      console.log(data);
+    });
     return false;
   }
 
