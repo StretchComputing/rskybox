@@ -34,6 +34,12 @@ public class Utility {
 		return new JsonRepresentation(json);
 	}
 	
+	public static String extractAllDigits(String theInputString) {
+		// remove all non-digits from the string
+		theInputString = theInputString.replaceAll("\\D", "");
+		return theInputString;
+	}
+	
 	// returns true if all characters are digits
 	public static Boolean isPhoneNumber(String thePotentialNumber) {
 		if(thePotentialNumber == null) {return false;}

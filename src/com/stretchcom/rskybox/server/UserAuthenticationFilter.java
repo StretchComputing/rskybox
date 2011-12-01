@@ -1,6 +1,8 @@
 package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -10,11 +12,13 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
@@ -33,43 +37,19 @@ public class UserAuthenticationFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
         ServletException {
     	
-    	// ------------------------------------------------------------------
+    	// ----------------------------------------------------------------------------------------------------------------------------------------------------
     	// Authentication Algorithm:
-    	// ------------------------------------------------------------------
+    	// ----------------------------------------------------------------------------------------------------------------------------------------------------
     	// 1. For select user management APIs, bypass any authentication check and return (e.g. create user, get token, password reset, ...)
     	// 2. Extract token for HTTP authorization header
-    	// 3. If token not present, return HTTP authentication error
-    	// 4. Attempt User match via token and set currentUser for downstream use
+    	// 3. If token not present, redirect user to login screen for HTML5 calls and return HTTP 401 Unauthorized for REST API calls
+    	// 4. Attempt User match via token and set currentUser (with isSuperAdmin set) for downstream use
     	// 5. If no User match, attempt application match via token and set currentUser as appropriate (not sure what this looks like yet ...)
-    	// 6. If no token match, return HTTP authentication error
-    	
-    	// TODO remove the following comment block
-    	// ------------------------------------------------------------------
-    	// Filter requires authentication for the following type of requests:
-    	// ------------------------------------------------------------------
-    	// * rSkybox Client application REST calls with a priori token
-    	// * rSkybox welcome-file with Google account token
-    	// * rSkybox HTML requests with Google account token
-    	// * rSkybox REST calls with Google account token
-    	// * rSkybox Admin REST calls with Google account token
-    	//
-    	// -------------------------------------------
-    	// Authentication (for above type of requests)
-    	// -------------------------------------------
-    	// * rSkybox Client application REST calls with valid a priori token are given full access to the app (for now, including admin REST calls)
-    	// * All rSkybox users must be currently logged into a Google account.
-    	// * If user is an admin of this rSkybox app engine application, they are given full access to the app.
-    	// * If user is not and admin, they must be in the User table. Lookup is via Google account email address.
-    	// * Only an admin can access Admin related REST calls.
-    	//
-    	// --------------------------------
-    	// Authentication failure responses
-    	// --------------------------------
-    	// * If HTML request and user is not logged into Google account, user is redirected to Google login screen.
-    	// * If REST request and user is not logged into Google account, HTTP 401 Unauthorized status is returned.
-    	// * If HTML/REST request and user is not admin and not in User table, HTTP 401 Unauthorized status is returned.
-    	// * If an Admin REST reqeust and user is not admin, HTTP 401 Unauthorized status is returned.
-    	
+    	// 6. If no token match, redirect user to login screen for HTML5 calls and return HTTP 401 Unauthorized for REST API calls
+    	// 7. At this point, request has been authenticated
+    	// 8. Any non-REST request needs to be "URL adjusted" to the WEB-INF/html5 directory (HTML5 files in WEB-INF to enforce authentication via this filter!)
+    	// ----------------------------------------------------------------------------------------------------------------------------------------------------
+    	// ----------------------------------------------------------------------------------------------------------------------------------------------------
     	log.info("**********  entered doFilter()  **********");
 
         if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
@@ -79,47 +59,26 @@ public class UserAuthenticationFilter implements Filter {
     		String thisURL = getURL(httpRequest);
     		log.info("thisURL = " + thisURL);
     		
-    		// get the currentUser and store in the request for easy access by down stream REST Resource handlers
-	    	UserService userService = UserServiceFactory.getUserService();
-	    	com.google.appengine.api.users.User currentGoogleUser = userService.getCurrentUser();
-	    	User currentUser = null;
-	    	String emailAddress = null;
-	    	if(currentGoogleUser != null) {
-	    		emailAddress = currentGoogleUser.getEmail();
-	    		currentUser = User.getUser(emailAddress);
-	    		if(currentUser != null && userService.isUserAdmin()) {
-	    			currentUser.setIsSuperAdmin(true);
-	    		}
-	    	} else {
-		    	// *****************  TODO temp code  ********************
-	    		emailAddress = "joe@test.com";
-	    		currentUser = User.getUser(emailAddress);
-	    	}
-	    	
-	    	httpRequest.setAttribute(RskyboxApplication.CURRENT_USER, currentUser);
-    		
-    		
-    		// ::::::::::::::::::::::::::::TESTING ONLY:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    		// uncomment during testing to allow all rest calls
-//    		if(thisURL.contains("/rest/")) {
-//    			chain.doFilter(request, response);
-//    			log.info("**********  REST Filter by pass -- SHOULD ONLY BE USED DURING TESTING  **********");
-//    			return;
-//    		}
-    		//::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-    		
-    		
-    		// rSkybox Client application REST calls with valid a priori token are given full access to the app (for now, including admin REST calls)
-    		// So if this is a rSkybox client, just flow thru to chain.doFilter() below.  If there is no a priori token, this codes assumes it was NOT
-    		// a client request - even though it may be a client request with a bad token. But the right thing will happen because without the a priori
-    		// token, the code will determine the request is NOT authenticated.
-    		if(!isRskyboxClientWithValidToken(httpRequest)) {
-    			handleRskyboxAppRequest(httpRequest, httpResponse, chain, thisURL);
+    		List<User> outParameterList = new ArrayList<User>();
+    		Boolean isRequestAuthentic = isRequestAuthentic(thisURL, httpRequest, outParameterList);
+    		if(isRequestAuthentic) {
+    			log.info("request is authentic");
     			
-    	        // ::PUNT:: Tried allowing this to fall thru so chain.doFilter() is called below, but could not get RequestDispatcher.forward()
-    			//          to play nice with chain.doFilter(). If an answer is found, this code would have to be restructured because not all
-    			//          code paths in handleRskyboxAppRequestAuthorized() should flow thru to chain.doFilter().
-    			return;
+    			// if present, store currentUser in HTTP request for use downstream
+    			if(outParameterList.size() > 0) {
+    				User currentUser = (User)outParameterList.get(0);
+    				httpRequest.setAttribute(RskyboxApplication.CURRENT_USER, currentUser);
+    				log.info("setting currentUser for downstream use");
+    			}
+    			
+    			// adjust URL for non-REST calls
+    			if(adjustUrl(thisURL, httpRequest, httpResponse)) {
+    				// URL was adjusted which includes a forward to the dispatcher, so we're done
+    				return;
+    			}
+    		} else {
+    			log.info("request is NOT authentic");
+    			sendErrorResponse(thisURL, httpResponse);
     		}
         } else {
         	log.info("***** request is NOT an instance of HttpServletRequest *******");
@@ -129,14 +88,106 @@ public class UserAuthenticationFilter implements Filter {
         chain.doFilter(request, response);
     }
     
-    private Boolean isRskyboxClientWithValidToken(HttpServletRequest httpRequest) {
-    	String token = getToken(httpRequest);
-    	log.info("a priori token = " + token);
-    	if(token != null && token.equals(A_PRIORI_TOKEN)) {
-    		log.info("a priori token is valid");
+    
+    // theOutParameterList: if authentic and token is associated with a user, that 'current' user is stored in this out parameter list
+    private Boolean isRequestAuthentic(String theUrl, HttpServletRequest theHttpRequest, List<User> theOutParameterList) {
+    	// 1. if bypass API, return TRUE
+    	if(isBypassApi(theUrl, theHttpRequest)) {
     		return true;
     	}
-    	log.info("a priori token is NOT valid or is NOT present");
+    	
+    	// 2. extract token
+    	String token = getToken(theHttpRequest);
+    	if(token == null) {
+    		log.info("token is NULL, authentication failed");
+    		return false;
+    	}
+
+    	// 3. if token matches a user, set CurrentUser in out parameter and return TRUE
+    	User currentUser = User.getUserWithToken(token);
+    	if(currentUser != null) {
+    		theOutParameterList.set(0, currentUser);
+    		return true;
+    	}
+    	
+    	// 4. if token matches an app, return TRUE
+    	Application currentApp = Application.getApplicationWithToken(token);
+    	if(currentApp != null) {
+    		return true;
+    	}
+    	
+    	// 5. else return FALSE since we could not find a valid token
+    	return false;
+    }
+    
+    
+	// 3. If token not present, redirect user to login screen for HTML5 calls and return HTTP 401 Unauthorized for REST API calls
+    private void sendErrorResponse(String theUrl, HttpServletResponse theHttpResponse) {
+		try {
+	    	if(theUrl.contains("/rest/")) {
+	    		theHttpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				log.info("un-authenticated REST request -- returning HTTP 401");
+				return;
+	    	} else {
+	    		String loginUrl = RskyboxApplication.LOGIN_PAGE;
+	    		theHttpResponse.sendRedirect(loginUrl);
+	    		log.info("un-authenticated HTML request -- redirecting to loginUrl = " + loginUrl);
+	    		return;
+	    	}
+		} catch (IOException e) {
+			log.severe("sendErrorResponse() IOException. Exception = " + e.getMessage());
+			e.printStackTrace();
+		} 
+    }
+    
+    // adjust URL for non-REST calls
+    // returns True if URL adjusted by forwarding -- so filter processing is complete
+    private Boolean adjustUrl(String theUrl, HttpServletRequest theHttpRequest, HttpServletResponse theHttpResponse) {
+		if(!theUrl.contains("/rest/")) {
+            // any non-REST request needs to be redirected to the WEB-INF/html directory
+    		String uri = theHttpRequest.getRequestURI();
+    		if(!uri.toLowerCase().contains(".html") && !uri.endsWith("/")) {
+    			uri = uri + "/";
+    		}
+            uri = HTML_DIR + uri;
+            log.info("Calling RequestDispatcher modified URI: " + uri);
+            RequestDispatcher rd = theHttpRequest.getRequestDispatcher(uri);
+            try {
+				rd.forward(theHttpRequest, theHttpResponse);
+			} catch (IOException e) {
+				log.severe("adjustUrl() IOException. Exception = " + e.getMessage());
+				e.printStackTrace();
+				return false;
+			} catch (ServletException e) {
+				log.severe("adjustUrl() ServletException. Exception = " + e.getMessage());
+				e.printStackTrace();
+				return false;
+			} 
+            return true;
+		}
+    	return false;
+    }
+    
+    private Boolean isBypassApi(String theUrl, HttpServletRequest theHttpResponse) {
+    	// TODO verify this matches ALL the bypass APIS
+    	// Create User API is bypassed &&
+    	if(theUrl.toLowerCase().contains("/users") && !theUrl.toLowerCase().contains("/users/") && theHttpResponse.getMethod().equalsIgnoreCase("post")) {
+    		log.info("Create User API is bypassed");
+    		return true;
+    	}
+    	
+    	// Get Confirmation Code API is bypassed
+    	if(theUrl.toLowerCase().contains("/users/requestconfirmation") && theHttpResponse.getMethod().equalsIgnoreCase("post")) {
+    		log.info("Get Confirmation Code API is bypassed");
+    		return true;
+    	}
+
+    	// List Mobile Carriers API is bypassed
+    	if(theUrl.toLowerCase().contains("/mobilecarriers") && theHttpResponse.getMethod().equalsIgnoreCase("get")) {
+    		log.info("List MobileCarriers API is bypassed");
+    		return true;
+    	}    
+    	
     	return false;
     }
     
@@ -227,8 +278,24 @@ public class UserAuthenticationFilter implements Filter {
     	return false;
     }
     
-	private String getToken(HttpServletRequest httpRequest) {
+	
+    // supports extracting the token from either a cookie or the HTTP authorization header with precedence given to the cookie.
+    private String getToken(HttpServletRequest httpRequest) {
 		String token = null;
+		
+		// first attempt to find the token in a cookie of the form "token=<token_value>"
+		Cookie[] cookies = httpRequest.getCookies();
+		if(cookies != null && cookies.length > 0) {
+			for(Cookie c : cookies) {
+				String cookieStr = c.getValue();
+				if(cookieStr.startsWith("token=")) {
+					token = cookieStr.substring(6);
+					return token;
+				}
+			}
+		}
+		
+		// if we get this far, no cookie token was found so extract from HTTP authorization header
 		String authHeader = httpRequest.getHeader("Authorization");
 		if (authHeader != null) {
 			java.util.StringTokenizer st = new java.util.StringTokenizer(authHeader);

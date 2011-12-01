@@ -45,6 +45,14 @@ import com.stretchcom.rskybox.server.Utility;
     		name="User.getByEmailAddress",
     		query="SELECT u FROM User u WHERE u.emailAddress = :emailAddress"
     ),
+    @NamedQuery(
+    		name="User.getByToken",
+    		query="SELECT u FROM User u WHERE u.token = :token"
+    ),
+    @NamedQuery(
+    		name="User.getByPhoneNumber",
+    		query="SELECT u FROM User u WHERE u.phoneNumber = :phoneNumber"
+    ),
 })
 public class User {
     private static final Logger log = Logger.getLogger(User.class.getName());
@@ -60,8 +68,6 @@ public class User {
 	private String organizationId;
 	private String token;
 	private String authHeader;
-	
-	// *** TODO create accessors ***
 	private String password;
 	private String passwordResetQuestion;
 	private String passwordResetAnswer;
@@ -70,7 +76,8 @@ public class User {
 	private Text thumbNailBase64;
 	private Boolean isSmsConfirmed = false;
 	private Boolean isEmailConfirmed = false;
-	
+	private String emailConfirmationCode;
+	private String smsConfirmationCode;
 
 	@Transient
 	private Boolean isSuperAdmin = false;
@@ -164,6 +171,86 @@ public class User {
 		this.authHeader = authHeader;
 	}
 	
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getPasswordResetQuestion() {
+		return passwordResetQuestion;
+	}
+
+	public void setPasswordResetQuestion(String passwordResetQuestion) {
+		this.passwordResetQuestion = passwordResetQuestion;
+	}
+
+	public String getPasswordResetAnswer() {
+		return passwordResetAnswer;
+	}
+
+	public void setPasswordResetAnswer(String passwordResetAnswer) {
+		this.passwordResetAnswer = passwordResetAnswer;
+	}
+
+	public String getPhoneNumberConfirmationCode() {
+		return phoneNumberConfirmationCode;
+	}
+
+	public void setPhoneNumberConfirmationCode(String phoneNumberConfirmationCode) {
+		this.phoneNumberConfirmationCode = phoneNumberConfirmationCode;
+	}
+
+	public Text getPhotoBase64() {
+		return photoBase64;
+	}
+
+	public void setPhotoBase64(Text photoBase64) {
+		this.photoBase64 = photoBase64;
+	}
+
+	public Text getThumbNailBase64() {
+		return thumbNailBase64;
+	}
+
+	public void setThumbNailBase64(Text thumbNailBase64) {
+		this.thumbNailBase64 = thumbNailBase64;
+	}
+
+	public Boolean getIsSmsConfirmed() {
+		return isSmsConfirmed;
+	}
+
+	public void setIsSmsConfirmed(Boolean isSmsConfirmed) {
+		this.isSmsConfirmed = isSmsConfirmed;
+	}
+
+	public Boolean getIsEmailConfirmed() {
+		return isEmailConfirmed;
+	}
+
+	public void setIsEmailConfirmed(Boolean isEmailConfirmed) {
+		this.isEmailConfirmed = isEmailConfirmed;
+	}
+
+	public String getEmailConfirmationCode() {
+		return emailConfirmationCode;
+	}
+
+	public void setEmailConfirmationCode(String emailConfirmationCode) {
+		this.emailConfirmationCode = emailConfirmationCode;
+	}
+	
+	public String getSmsConfirmationCode() {
+		return smsConfirmationCode;
+	}
+
+	public void setSmsConfirmationCode(String smsConfirmationCode) {
+		this.smsConfirmationCode = smsConfirmationCode;
+	}
+
 	public static void sendNotifications(String theMessage) {
         EntityManager em = EMF.get().createEntityManager();
         
@@ -337,10 +424,7 @@ public class User {
 		return apiStatus;
 	}
 	
-	
-	public static User getUser(String theEmailAddress) {
-        EntityManager em = EMF.get().createEntityManager();
-
+	public static User getUser(EntityManager em, String theEmailAddress) {
         User user = null;
         try {
     		user = (User)em.createNamedQuery("User.getByEmailAddress")
@@ -349,8 +433,47 @@ public class User {
     		log.info("user with email address = " + theEmailAddress + " found");
 		} catch (NoResultException e) {
 			// not an error is user not found
+			log.info("user with email address = " + theEmailAddress + " NOT found");
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more google account users have same key");
+			log.severe("should never happen - two or more google account users have same emailAddress");
+		}
+        
+        return user;
+	}
+	
+	// Returns the user with the specified token or null if user not found
+	public static User getUserWithToken(String theToken) {
+        EntityManager em = EMF.get().createEntityManager();
+
+        User user = null;
+        try {
+    		user = (User)em.createNamedQuery("User.getByToken")
+				.setParameter("token", theToken)
+				.getSingleResult();
+    		log.info("user with token = " + theToken + " found");
+		} catch (NoResultException e) {
+			// not an error is user not found
+			log.info("user with token = " + theToken + " NOT found");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more users have same token");
+		}
+        
+        return user;
+	}
+	
+	// Returns the user with the specified phoneNumber or null if user not found
+	public static User getUserWithPhoneNumber(EntityManager em, String thePhoneNumber) {
+        User user = null;
+        try {
+    		user = (User)em.createNamedQuery("User.getByPhoneNumber")
+				.setParameter("phoneNumber", thePhoneNumber)
+				.getSingleResult();
+    		log.info("user with phoneNumber = " + thePhoneNumber + " found");
+		} catch (NoResultException e) {
+			// not an error is user not found
+			log.info("user with phoneNumber = " + thePhoneNumber + " NOT found");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more users have same phoneNumber");
 		}
         
         return user;
