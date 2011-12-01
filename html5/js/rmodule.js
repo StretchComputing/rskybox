@@ -44,8 +44,8 @@ var RMODULE = (function (my, $) {
   // (JQM doc page located at <jqm site>/<version>/docs/pages/page-dynamic.html.)
   //
   // pairs: an array of hashes of page/function pairs to watch and responded to
-  // page: the name of the page without any decoration (such as, '#')
-  // function: function called to build the page
+  // pairs[].page: the name of the page without any decoration (such as, '#')
+  // pairs[].function: function called to build the page
   my.dynamicPages = function (pairs) {
     $(document).bind('pagebeforechange', function (event, data) {
       var i, page, pair, re, url;

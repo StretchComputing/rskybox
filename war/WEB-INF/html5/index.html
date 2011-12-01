@@ -19,8 +19,9 @@
   <body>
     <script src="/js/script.js"></script>
 <script>
+'use strict';
+
 var RMODULE = (function (my, $) {
-  'use strict';
 
   var old_init;
 
@@ -31,7 +32,6 @@ var RMODULE = (function (my, $) {
   my.buildListItemContent = function (application) {
     var display, markup;
 
-    // TODO Remove following line that sets the role.
     display = application.name + ' ' + application.version + ', ' + application.date;
     markup =  '<li>';
     markup += '<a href="#item?id=' + application.id + '">' + display + '<\/a>';

@@ -6,18 +6,48 @@ title: rSkybox
 'use strict';
 
 var RMODULE = (function (my) {
-  var
-    saveItem;
 
-  saveItem = function () {
-    if (!my.validEmailAddress() && !my.validPhoneNumber()) {
-      console.log('invalid input');
+  var requestConfirmCode;
+
+  requestConfirmCode = function () {
+    var
+      carrier,
+      carrierSelected,
+      email,
+      phone,
+      restUrl,
+      validEmail,
+      validPhone;
+
+    email = $('#emailAddress').val();
+    validEmail = my.validEmailAddress(email);
+    phone = $('#phoneNumber').val();
+    validPhone = my.validPhoneNumber(phone);
+    carrier = $('#mobileCarrierId').val()
+    carrierSelected = carrier && carrier !== my.getNoOptionSelected();
+    restUrl = my.getRestPrefix() + '\/users';
+
+    if (!validEmail && !validPhone) {
+      alert('Please enter your email address or phone number.');
+      return false;
+    }
+
+    if (validEmail) {
+
+      console.log('valid email');
+    } else if (validPhone) {
+      if (!carrierSelected) {
+        alert('Please select your mobile carrier.');
+        return false;
+      }
+      console.log('valid phone number');
     }
     console.log('saving item');
     return false;
   }
 
   my.init = function () {
+    // If there is a current user, redirect right away.
     $('#index').live('pagebeforecreate', function () {
       my.getCurrentUser(function () {
         if (location.hostname === "www.rskybox.com") {
@@ -35,7 +65,7 @@ var RMODULE = (function (my) {
     });
 
     $('#index').live('pagecreate', function () {
-      $(this).find('form').submit(saveItem);
+      $(this).find('form').submit(requestConfirmCode);
     });
   };
 
