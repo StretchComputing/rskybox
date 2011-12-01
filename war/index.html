@@ -35,9 +35,9 @@ var RMODULE = (function (my) {
       validPhone;
 
     email = $('#emailAddress').val();
-    validEmail = my.validEmailAddress(email);
+    validEmail = my.isValidEmailAddress(email);
     phone = $('#phoneNumber').val();
-    validPhone = my.validPhoneNumber(phone);
+    validPhone = my.isValidPhoneNumber(phone);
     carrier = $('#mobileCarrierId').val()
     carrierSelected = carrier && carrier !== my.getNoOptionSelected();
     restUrl = my.getRestPrefix() + '\/users';

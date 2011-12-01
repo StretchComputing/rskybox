@@ -139,7 +139,7 @@ var RMODULE = (function (my, $) {
   };
 
   validateMember = function () {
-    if (!my.validEmailAddress($('#emailAddress').val())) {
+    if (!my.isValidEmailAddress($('#emailAddress').val())) {
       window.alert('Please enter a valid email address.');
       return false;
     }

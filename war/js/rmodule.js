@@ -209,11 +209,11 @@ var RMODULE = (function (my, $) {
   };
 
   // Simple RegEx to ensure a valid phone number format.
-  my.validPhoneNumber = function (phoneNumber) {
+  my.isValidPhoneNumber = function (phoneNumber) {
     return (/^\(?([0-9]{3})\)?[\-. ]?([0-9]{3})[\-. ]?([0-9]{4})$/).test(phoneNumber);
   };
 
-  my.validEmailAddress = function (emailAddress) {
+  my.isValidEmailAddress = function (emailAddress) {
     return (/^[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/).test(emailAddress);
   };
 
@@ -244,7 +244,7 @@ var RMODULE = (function (my, $) {
       return true;
     }
 
-    if (!my.validPhoneNumber($('#phoneNumber').val())) {
+    if (!my.isValidPhoneNumber($('#phoneNumber').val())) {
       window.alert('Please enter a valid phone number.');
       return false;
     }

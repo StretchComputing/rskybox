@@ -110,7 +110,7 @@ var RMODULE = (function (my, $) {
   };
 
   validateUser = function () {
-    if (!$('#firstName').val() || !$('#lastName').val() || !my.validEmailAddress($('#emailAddress').val())) {
+    if (!$('#firstName').val() || !$('#lastName').val() || !my.isValidEmailAddress($('#emailAddress').val())) {
       window.alert('You must enter a first name, last name, and valid email address.');
       return false;
     }
