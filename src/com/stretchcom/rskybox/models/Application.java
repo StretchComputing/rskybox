@@ -36,6 +36,10 @@ import com.stretchcom.rskybox.server.EMF;
     		name="Application.getByOrganizationId",
     		query="SELECT a FROM Application a WHERE a.organizationId = :organizationId"
     ),
+    @NamedQuery(
+    		name="Application.getByToken",
+    		query="SELECT a FROM Application a WHERE a.token = :token"
+    ),
 })
 public class Application {
     private static final Logger log = Logger.getLogger(Application.class.getName());
@@ -45,7 +49,7 @@ public class Application {
 	private String version;
 	private Date createdGmtDate;
 	private Date versionUpdatedGmtDate;
-
+	private String token;
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Key key;
@@ -84,6 +88,14 @@ public class Application {
 		this.versionUpdatedGmtDate = versionUpdatedGmtDate;
 	}
 
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
 	public String getOrganizationId() {
 		return organizationId;
 	}
@@ -120,5 +132,25 @@ public class Application {
 		}
 		
 		return apiStatus;
+	}
+	
+	// Returns the application with the specified token or null if application not found
+	public static Application getApplicationWithToken(String theToken) {
+        EntityManager em = EMF.get().createEntityManager();
+
+        Application application = null;
+        try {
+    		application = (Application)em.createNamedQuery("Application.getByToken")
+				.setParameter("token", theToken)
+				.getSingleResult();
+    		log.info("application with token = " + theToken + " found");
+		} catch (NoResultException e) {
+			// not an error is user not found
+			log.info("application with token = " + theToken + " NOT found");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more applications have same key");
+		}
+        
+        return application;
 	}
 }

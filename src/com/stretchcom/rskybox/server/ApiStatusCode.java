@@ -8,6 +8,10 @@ public class ApiStatusCode {
 	public static final String INVALID_STATUS = "201";
 	public static final String INVALID_LOG_LEVEL = "202";
 	public static final String USER_NOT_AUTHORIZED_FOR_APPLICATION = "203";
+	public static final String USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS = "204";
+	public static final String USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER = "205";
+	public static final String USER_NOT_SENT_EMAIL_ADDRESS_CONFIRMATION = "206";
+	public static final String USER_NOT_SENT_PHONE_NUMBER_CONFIRMATION = "207";
 	
 	public static final String FEEDBACK_ID_REQUIRED = "300";
 	public static final String CRASH_DETECT_ID_REQUIRED = "301";
@@ -17,6 +21,9 @@ public class ApiStatusCode {
 	public static final String APPLICATION_ID_REQUIRED = "305";
 	public static final String APPLICATION_NAME_REQUIRED = "306";
 	public static final String APP_MEMBER_ID_REQUIRED = "307";
+	public static final String EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED = "308";
+	public static final String CONFIRMATION_CODE_IS_REQUIRED = "309";
+	public static final String EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED = "310";
 	
 	public static final String INVALID_STATUS_PARAMETER = "400";
 	public static final String INVALID_RECORDED_DATE_PARAMETER = "401";
@@ -28,7 +35,10 @@ public class ApiStatusCode {
 	public static final String USER_ALREADY_MEMBER = "407";
 	public static final String INVALID_ROLE = "408";
 	public static final String APP_MEMBER_ALREADY_ACTIVE = "409";
+	public static final String INVALID_PHONE_NUMBER = "410";
+	public static final String INVALID_CONFIRMATION_CODE = "411";
 	
+	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 
 	public static final String USER_NOT_FOUND = "600";
 	public static final String FEEDBACK_NOT_FOUND = "601";
@@ -37,4 +47,6 @@ public class ApiStatusCode {
 	public static final String BETA_TESTER_NOT_FOUND = "604";
 	public static final String APPLICATION_NOT_FOUND = "605";
 	public static final String APP_MEMBER_NOT_FOUND = "606";
+	
+	public static final String EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE = "700";
 }

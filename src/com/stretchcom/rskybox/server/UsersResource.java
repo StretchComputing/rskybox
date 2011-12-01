@@ -28,9 +28,11 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.MobileCarrier;
 import com.stretchcom.rskybox.models.User;
+import com.stretchcom.rskybox.server.TF;
 
 public class UsersResource extends ServerResource {
     private static final Logger log = Logger.getLogger(UsersResource.class.getName());
@@ -58,10 +60,19 @@ public class UsersResource extends ServerResource {
     }
 
     // Handles 'Create User API'
+    // Handles 'Request Confirmation Code API'
     @Post("json")
     public JsonRepresentation post(Representation entity) {
+//    	UserService userService = UserServiceFactory.getUserService();
+//    	com.google.appengine.api.users.User currentGoogleUser = userService.getCurrentUser();
         log.info("in post");
-        return save_user(entity);
+    	if(this.id != null && this.id.equalsIgnoreCase("requestConfirmation")) {
+    		// Request Confirmation Code API
+    		return send_confirmation_code(entity);
+    	} else {
+    		// Create User API
+            return save_user(entity);
+    	}
     }
 
     // Handles 'Update User API'
@@ -226,11 +237,81 @@ public class UsersResource extends ServerResource {
             user = new User();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
+            String token = null;
+            String authHeader = null;
             if (id != null) {
+            	// this is an Update User API call
                 Key key = KeyFactory.stringToKey(this.id);
                 user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
+            } else {
+            	// this is a Create User API call            	
+                String confirmationCode = null;
+                String emailAddress = null;
+                String phoneNumber = null;
+                
+            	if(json.has("confirmationCode")) {
+                    confirmationCode = json.getString("confirmationCode");
+            	} else {
+            		return Utility.apiError(ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
+            	}
+                
+                // TODO add email validation
+                if (json.has("emailAddress")) {
+                	emailAddress = json.getString("emailAddress").toLowerCase();
+                }
+                
+                if (json.has("phoneNumber")) {
+                	phoneNumber = json.getString("phoneNumber");
+                	phoneNumber = Utility.extractAllDigits(phoneNumber);
+                }
+                
+                if(emailAddress != null && phoneNumber != null) {
+            		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE);
+                }
+                
+                if(emailAddress == null && phoneNumber == null) {
+            		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
+                }
+                
+                String storedConfirmationCode = null;
+                if(emailAddress != null) {
+                	user = User.getUser(em, emailAddress);
+                	if(user == null) {
+                		return Utility.apiError(ApiStatusCode.USER_NOT_SENT_EMAIL_ADDRESS_CONFIRMATION);
+                	}
+                	if(user.getEmailConfirmationCode() == null) {
+                		return Utility.apiError(ApiStatusCode.USER_NOT_SENT_EMAIL_ADDRESS_CONFIRMATION);
+                	} else {
+                		storedConfirmationCode = user.getEmailConfirmationCode();
+                		user.setIsEmailConfirmed(true);
+                	}
+                 } else {
+                	 user = User.getUserWithPhoneNumber(em, phoneNumber);
+                	if(user == null) {
+                		return Utility.apiError(ApiStatusCode.USER_NOT_SENT_PHONE_NUMBER_CONFIRMATION);
+                	}
+                	if(user.getSmsConfirmationCode() == null) {
+                		return Utility.apiError(ApiStatusCode.USER_NOT_SENT_PHONE_NUMBER_CONFIRMATION);
+                	} else {
+                		storedConfirmationCode = user.getSmsConfirmationCode();
+                		user.setIsSmsConfirmed(true);
+                	}
+                }
+                
+                if(!storedConfirmationCode.equals(confirmationCode)) {
+            		return Utility.apiError(ApiStatusCode.INVALID_CONFIRMATION_CODE);
+                }
+
+            	token = TF.get();
+            	user.setToken(token);
+
+                // format: Basic rSkyboxLogin:<token_value> where rSkyboxLogin:<token_value> portion is base64 encoded
+            	String phrase = "rSkyboxLogin:" + token;
+            	String phraseBase64 = Base64.encode(phrase.getBytes("ISO-8859-1"));
+            	authHeader = "Basic " + phraseBase64;
+            	user.setAuthHeader(authHeader);
             }
             
             if (json.has("firstName")) {
@@ -239,20 +320,6 @@ public class UsersResource extends ServerResource {
             
             if (json.has("lastName")) {
                 user.setLastName(json.getString("lastName"));
-            }
-            
-            // TODO add email validation
-            if (json.has("emailAddress")) {
-            	String emailAddress = json.getString("emailAddress").toLowerCase();
-            	if(isEmailAddressAlreadyUsed(user, emailAddress, isUpdate)) {
-            		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_ALREADY_USED);
-            	}
-            	user.setEmailAddress(emailAddress);
-            }
-            
-            // TODO strip special characters out of phone number
-            if (json.has("phoneNumber")) {
-                user.setPhoneNumber(json.getString("phoneNumber"));
             }
             
             // mobileCarrier only relevant if phoneNumber has been provided -- otherwise ignore.
@@ -354,6 +421,9 @@ public class UsersResource extends ServerResource {
                 json.put("emailAddress", user.getEmailAddress());
                 json.put("sendEmailNotifications", user.getSendEmailNotifications());
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
+                json.put("token", user.getToken());
+                json.put("authHeader", user.getAuthHeader());
+
                 if(isCurrentUserAdmin != null) {
                 	///////////////////////////////////////////////////////////////////
                 	// must be Current user; otherwise isCurrentUserAdmin would be null
@@ -390,5 +460,107 @@ public class UsersResource extends ServerResource {
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;
+    }
+    
+    private JsonRepresentation send_confirmation_code(Representation entity) {
+        EntityManager em = EMF.get().createEntityManager();
+    
+        User user = null;
+		String apiStatus = ApiStatusCode.SUCCESS;
+        this.setStatus(Status.SUCCESS_CREATED);
+        em.getTransaction().begin();
+        try {
+            JSONObject json = new JsonRepresentation(entity).getJsonObject();
+            String emailAddress = null;
+            String phoneNumber = null;
+            String mobileCarrierId = null;
+            String carrierDomainName = null;
+            
+            // TODO add email validation
+            if (json.has("emailAddress")) {
+            	emailAddress = json.getString("emailAddress").toLowerCase();
+            }
+            
+            if (json.has("phoneNumber")) {
+            	phoneNumber = json.getString("phoneNumber");
+            	phoneNumber = Utility.extractAllDigits(phoneNumber);
+            }
+            
+            // mobileCarrier only relevant if phoneNumber has been provided -- otherwise ignore.
+            if (json.has("mobileCarrierId")) {
+            	mobileCarrierId = json.getString("mobileCarrierId");
+            	carrierDomainName = MobileCarrier.findEmailDomainName(mobileCarrierId);
+            	if(carrierDomainName == null) {
+            		return Utility.apiError(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
+            	}
+            }
+            
+            if(emailAddress == null && phoneNumber == null) {
+            	return Utility.apiError(ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
+            }
+            
+            if(phoneNumber != null && mobileCarrierId == null) {
+            	return Utility.apiError(ApiStatusCode.PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER);
+            }
+            
+            String confirmationCode = TF.getConfirmationCode();
+            String confirmationMessage = "your confirmation code is " + confirmationCode;
+            String subject = "rSkybox confirmation code";
+            if(emailAddress != null) {
+            	// check if user with this email address already exists
+            	user = User.getUser(em, emailAddress);
+            	if(user != null) {
+            		log.info("user found with emailAddress = " + emailAddress);
+            		if(user.getIsEmailConfirmed()) {
+                    	return Utility.apiError(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS);
+            		}
+            	} else {
+                    // if there is no existing user, create one now
+            		log.info("creating new user");
+                    user = new User();
+                    user.setEmailAddress(emailAddress);
+            	}
+                user.setEmailConfirmationCode(confirmationCode);
+            	log.info("sending email confirmation code = " + confirmationCode + " to " + user.getEmailAddress());
+            	Emailer.send(user.getEmailAddress(), subject, confirmationMessage, Emailer.NO_REPLY);
+            } else {
+            	// check if user with this phone number already exists
+            	user = User.getUserWithPhoneNumber(em, phoneNumber);
+            	if(user != null) {
+            		log.info("user found with phoneNumber = " + phoneNumber);
+            		if(user.getIsSmsConfirmed()) {
+                    	return Utility.apiError(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER);
+            		}
+            	} else {
+                    // if there is no existing user, create one now
+            		log.info("creating new user");
+                    user = new User();
+                    user.setPhoneNumber(phoneNumber);
+                	String smsEmailAddress = user.getPhoneNumber() + carrierDomainName;
+                	user.setSmsEmailAddress(smsEmailAddress);
+            	}
+            	user.setSmsConfirmationCode(confirmationCode);
+            	log.info("sending SMS confirmation code = " + confirmationCode + " to " + user.getSmsEmailAddress());
+                Emailer.send(user.getSmsEmailAddress(), subject, confirmationMessage, Emailer.NO_REPLY);
+            }
+            
+            em.persist(user);
+            em.getTransaction().commit();
+        } catch (IOException e) {
+            log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
+            e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        } catch (JSONException e) {
+            log.severe("exception = " + e.getMessage());
+            e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        } finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
+        
+        return new JsonRepresentation(getUserJson(user, apiStatus));
     }
 }
