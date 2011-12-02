@@ -28,11 +28,6 @@ var RMODULE = (function (my) {
     requestConfirmCode;
 
 
-  confirmPage = function (page, url) {
-    console.log('in confirmPage ');
-    console.log(url);
-  };
-
   requestConfirmCode = function () {
     var json, signup;
 
@@ -54,6 +49,21 @@ var RMODULE = (function (my) {
     });
     return false;
   }
+
+
+  confirmPage = function (page, url) {
+    var email, emailDisplay, phone, phoneDisplay;
+
+    email = my.getParameterByName(url.hash, 'emailAddress');
+    phone = my.getParameterByName(url.hash, 'phoneNumber');
+    emailDisplay = $('#emailDisplay');
+    phoneDisplay = $('#phoneDisplay');
+
+    emailDisplay.toggle(email);
+    phoneDisplay.toggle(email);
+    email && emailDisplay.html('Email Address: ' + email);
+    phone && phoneDisplay.html('Phone Number: ' + phone);
+  };
 
 
   my.init = function () {
@@ -120,6 +130,13 @@ RMODULE.init();
   </div>
   <div data-role="content">
     <form>
+      <p id="emailDisplay" style="display: none;"></p>
+      <p id="phoneDisplay" style="display: none;"></p>
+
+      <label for="confirmationCode" class="ui-hidden-accessible">Confirmation Code:</label>
+      <input type="tel" name="confirmationCode" id="confirmationCode" placeholder="Confirmation Code">
+
+      <input type="submit" value="Submit Confirmation Code">
     </form>
   </div>
 </div>
