@@ -22,3 +22,16 @@ TestCase('SignupTest', {
   },
 });
 
+TestCase('ConfirmTest', {
+  'test confirm is valid with valid properties': function () {
+    assertTrue(RMODULE.isValidConfirmation({ confirmationCode: 'abc', password: 'password' }));
+  },
+
+  'test confirm is invalid with missing password': function () {
+    assertFalse(RMODULE.isValidConfirmation({ confirmationCode: 'abc' }));
+  },
+
+  'test confirm is invalid with missing confirmationCode': function () {
+    assertFalse(RMODULE.isValidConfirmation({ password: 'password' }));
+  },
+});

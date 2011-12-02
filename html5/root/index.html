@@ -11,6 +11,7 @@ var RMODULE = (function (my) {
 
   var
     confirmPage,
+    createUser,
     requestConfirmCode;
 
 
@@ -35,15 +36,14 @@ var RMODULE = (function (my) {
     }
 
     json = JSON.stringify(signup);
-    my.postJson(my.getRestPrefix() + '\/users\/requestConfirmation', json, function (confirmData) {
-      // TODO replace 'signup' in the following call with 'confirmData'
+    my.postJson(my.getRestPrefix() + '\/users\/requestConfirmation', json, function (data) {
       $.mobile.changePage('#confirm' + my.getQueryString(signup));
     });
     return false;
   }
 
 
-  // Called on successful call to requestConfirmationCode.
+  // Called on successful return from requestConfirmation.
   confirmPage = function (page, url) {
     var email, emailDisplay, phone, phoneDisplay;
 
@@ -58,6 +58,21 @@ var RMODULE = (function (my) {
     phone && phoneDisplay.html('<strong>Phone Number:<\/strong>&nbsp; ' + phone);
   };
 
+
+  // Called from confirm page to create the user.
+  createUser = function () {
+    var confirmation;
+
+    confirmation = {};
+    my.addFormProperty(confirmation, 'confirmationCode', $('#confirmationCode').val());
+    my.addFormProperty(confirmation, 'password', $('#password').val());
+
+    if (!my.isValidConfirmation(confirmation)) {
+      alert('Please enter your confirmation code and a valid password.');
+      return false;
+    }
+    return false;
+  };
 
   my.init = function () {
     // If there is a current user, redirect right away.
@@ -79,6 +94,10 @@ var RMODULE = (function (my) {
 
     $('#index').live('pagecreate', function () {
       $(this).find('form').submit(requestConfirmCode);
+    });
+
+    $('#confirm').live('pagecreate', function () {
+      $(this).find('form').submit(createUser);
     });
 
     my.dynamicPages([{
@@ -123,20 +142,18 @@ RMODULE.init();
   </div>
   <div data-role="content">
     <form>
-      <h3>Please enter your confirmation code.</h3>
       <p id="emailDisplay" style="display: none;"></p>
       <p id="phoneDisplay" style="display: none;"></p>
 
+      <strong>Please enter your confirmation code.</strong>
       <label for="confirmationCode" class="ui-hidden-accessible">Confirmation Code:</label>
       <input type="tel" name="confirmationCode" id="confirmationCode" placeholder="Confirmation Code">
 
-      <h3>Password for your new account.</h3>
-      <strong>(Minumim 6 characters.)</strong>
+      <strong>Create a password. (min 6 chars)</strong>
       <label for="password" class="ui-hidden-accessible">Password:</label>
       <input type="password" name="password" id="password" placeholder="Password">
-
-      <label for="passwordConfirm" class="ui-hidden-accessible">Confirm Password:</label>
-      <input type="password" name="passwordConfirm" id="passwordConfirm" placeholder="Confirm Password">
+      <input type="checkbox" name="showPassword" id="showPassword">
+      <label for="showPassword">Show Password (not functional)</label>
 
       <input type="submit" value="Complete Sign Up">
     </form>

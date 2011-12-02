@@ -15,5 +15,17 @@ var RMODULE = (function (my) {
     return false;
   }
 
+  // isValidConfirm - check properties user wants to submit for confirming their account agains business rules
+  my.isValidConfirmation = function (confirmation) {
+    var
+      CONFIRMATION_CODE_LEN = 3,
+      PASSWORD_MIN_LEN = 6;
+
+    if (!confirmation.confirmationCode || confirmation.confirmationCode.length != CONFIRMATION_CODE_LEN) { return false; }
+    if (!confirmation.password || confirmation.password.length < PASSWORD_MIN_LEN) { return false; }
+
+    return true;
+  }
+
   return my;
 }(RMODULE || {}));
