@@ -57,6 +57,7 @@ import com.stretchcom.rskybox.server.Utility;
 public class User {
     private static final Logger log = Logger.getLogger(User.class.getName());
 	public static final String CURRENT = "current";
+	public static final int MINIMUM_PASSWORD_SIZE = 6;
 	
 	private String firstName;
 	private String lastName;

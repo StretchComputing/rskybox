@@ -239,6 +239,7 @@ public class UsersResource extends ServerResource {
             Boolean isUpdate = false;
             String token = null;
             String authHeader = null;
+            String phoneNumber = null;
             if (id != null) {
             	// this is an Update User API call
                 Key key = KeyFactory.stringToKey(this.id);
@@ -249,7 +250,6 @@ public class UsersResource extends ServerResource {
             	// this is a Create User API call            	
                 String confirmationCode = null;
                 String emailAddress = null;
-                String phoneNumber = null;
                 
             	if(json.has("confirmationCode")) {
                     confirmationCode = json.getString("confirmationCode");
@@ -300,7 +300,7 @@ public class UsersResource extends ServerResource {
                 	}
                 }
                 
-                if(!storedConfirmationCode.equals(confirmationCode)) {
+                if(confirmationCode != null && !storedConfirmationCode.equals(confirmationCode)) {
             		return Utility.apiError(ApiStatusCode.INVALID_CONFIRMATION_CODE);
                 }
 
@@ -314,6 +314,24 @@ public class UsersResource extends ServerResource {
             	user.setAuthHeader(authHeader);
             }
             
+			if(json.has("password")) {
+				String plainTextPassword = json.getString("password");
+				if(plainTextPassword.length() < User.MINIMUM_PASSWORD_SIZE) {
+	        		return Utility.apiError(ApiStatusCode.PASSWORD_TOO_SHORT);
+				}
+				String encryptedPassword = Utility.encrypt(plainTextPassword);
+				log.info("encryptedPassword = " + encryptedPassword);
+				if(encryptedPassword == null) {
+					this.setStatus(Status.SERVER_ERROR_INTERNAL);
+				} else {
+					user.setPassword(encryptedPassword);
+				}
+			} else {
+				if(!isUpdate) {
+	        		return Utility.apiError(ApiStatusCode.PASSWORD_IS_REQUIRED);
+				}
+			}
+           
             if (json.has("firstName")) {
                 user.setFirstName(json.getString("firstName"));
             }
@@ -323,7 +341,7 @@ public class UsersResource extends ServerResource {
             }
             
             // mobileCarrier only relevant if phoneNumber has been provided -- otherwise ignore.
-            if (json.has("mobileCarrierId") && user.getPhoneNumber() != null && user.getPhoneNumber().length() > 0) {
+            if (json.has("mobileCarrierId") && phoneNumber != null && phoneNumber.length() > 0) {
             	String carrierDomainName = MobileCarrier.findEmailDomainName(json.getString("mobileCarrierId"));
             	if(carrierDomainName == null) {
             		return Utility.apiError(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
@@ -469,8 +487,9 @@ public class UsersResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
         em.getTransaction().begin();
+        JSONObject jsonReturn = new JSONObject();
         try {
-            JSONObject json = new JsonRepresentation(entity).getJsonObject();
+        	JSONObject json = new JsonRepresentation(entity).getJsonObject();
             String emailAddress = null;
             String phoneNumber = null;
             String mobileCarrierId = null;
@@ -487,7 +506,7 @@ public class UsersResource extends ServerResource {
             }
             
             // mobileCarrier only relevant if phoneNumber has been provided -- otherwise ignore.
-            if (json.has("mobileCarrierId")) {
+            if (json.has("mobileCarrierId") && phoneNumber != null && phoneNumber.length() > 0) {
             	mobileCarrierId = json.getString("mobileCarrierId");
             	carrierDomainName = MobileCarrier.findEmailDomainName(mobileCarrierId);
             	if(carrierDomainName == null) {
@@ -561,6 +580,11 @@ public class UsersResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getUserJson(user, apiStatus));
+        try {
+        	jsonReturn.put("apiStatus", apiStatus);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+        return new JsonRepresentation(jsonReturn);
     }
 }
