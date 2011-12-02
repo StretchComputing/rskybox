@@ -106,7 +106,7 @@ var RMODULE = (function (my, $) {
   buildNewItemPage = function (page) {
     my.pageHeader(page).find('h1').html('New Member');
     $('#item_id').val(my.getNewItemName());
-    $('#role').val(my.getNoOptionSelected()).selectmenu('refresh');
+    $('#role').val('').selectmenu('refresh');
     $('#delete_item_button').hide();
   };
 
@@ -143,7 +143,7 @@ var RMODULE = (function (my, $) {
       window.alert('Please enter a valid email address.');
       return false;
     }
-    if ($('#role').val() === my.getNoOptionSelected()) {
+    if (!$('#role').val()) {
       window.alert('Please select a role.');
       return false;
     }

@@ -73,7 +73,7 @@ var RMODULE = (function (my, $) {
   buildNewItemPage = function (page) {
     my.pageHeader(page).find('h1').html('New User');
     $('#id').val(my.getNewItemName());
-    $('#mobileCarrierId').val(my.getNoOptionSelected()).selectmenu('refresh');
+    $('#mobileCarrierId').val('').selectmenu('refresh');
     $('#sendEmailNotifications').prop('checked', false).checkboxradio('refresh');
     $('#sendSmsNotifications').prop('checked', false).checkboxradio('refresh');
     my.enableSmsDetails(false);

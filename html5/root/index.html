@@ -13,14 +13,24 @@ var RMODULE = (function (my) {
     requestConfirmCode;
 
 
+  // Called when submit is performed on the signup form.
   requestConfirmCode = function () {
-    var json, signup;
 
-    signup = {
-      emailAddress: $('#emailAddress').val(),
-      phoneNumber: $('#phoneNumber').val(),
-      mobileCarrierId: $('#mobileCarrierId').val()
-    }
+    var
+      mobileCarrierId,
+      emailAddress,
+      json,
+      phoneNumber,
+      signup;
+
+    signup = {};
+    emailAddress = $('#emailAddress').val();
+    phoneNumber = $('#phoneNumber').val();
+    mobileCarrierId = $('#mobileCarrierId').val();
+
+    emailAddress && (signup.emailAddress = emailAddress);
+    phoneNumber && (signup.phoneNumber = phoneNumber);
+    mobileCarrierId && (signup.mobileCarrierId = mobileCarrierId);
 
     if (!my.isValidSignup(signup)) {
       alert('Please enter your email address, or your phone number and mobile carrier.');
@@ -36,6 +46,7 @@ var RMODULE = (function (my) {
   }
 
 
+  // Called on successful call to requestConfirmationCode.
   confirmPage = function (page, url) {
     var email, emailDisplay, phone, phoneDisplay;
 
@@ -46,8 +57,8 @@ var RMODULE = (function (my) {
 
     emailDisplay.toggle(email);
     phoneDisplay.toggle(email);
-    email && emailDisplay.html('Email Address: ' + email);
-    phone && phoneDisplay.html('Phone Number: ' + phone);
+    email && emailDisplay.html('<strong>Email Address:<\/strong>&nbsp; ' + email);
+    phone && phoneDisplay.html('<strong>Phone Number:<\/strong>&nbsp; ' + phone);
   };
 
 
@@ -115,13 +126,22 @@ RMODULE.init();
   </div>
   <div data-role="content">
     <form>
+      <h3>Please enter your confirmation code.</h3>
       <p id="emailDisplay" style="display: none;"></p>
       <p id="phoneDisplay" style="display: none;"></p>
 
       <label for="confirmationCode" class="ui-hidden-accessible">Confirmation Code:</label>
       <input type="tel" name="confirmationCode" id="confirmationCode" placeholder="Confirmation Code">
 
-      <input type="submit" value="Submit Confirmation Code">
+      <h3>Password for your new account.</h3>
+      <strong>(Minumim 6 characters.)</strong>
+      <label for="password" class="ui-hidden-accessible">Password:</label>
+      <input type="password" name="password" id="password" placeholder="Password">
+
+      <label for="passwordConfirm" class="ui-hidden-accessible">Confirm Password:</label>
+      <input type="password" name="passwordConfirm" id="passwordConfirm" placeholder="Confirm Password">
+
+      <input type="submit" value="Complete Sign Up">
     </form>
   </div>
 </div>

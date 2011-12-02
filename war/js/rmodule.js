@@ -260,26 +260,14 @@ var RMODULE = (function (my, $) {
   };
 
 
-  // Basic determination of something was selected for carrierId.
-  my.isValidCarrier = function (carrierId) {
-    // null and '' are both considered false
-    if (!carrierId) { return false; }
-
-    return carrierId !== my.getNoOptionSelected();
-  }
-
-
   // Build an option list for a select control.
   //
   // options: array of id/name pairs
   // returns: the generate markup
-  my.getNoOptionSelected = function () {
-    return '-1';
-  };
   my.getOptionsForSelect = function (options, title) {
     var i, markup;
 
-    markup = '<option value="' + my.getNoOptionSelected() + '">' + title + '</option>';
+    markup = '<option value="">' + title + '</option>';
     for (i = 0; i < options.length; i += 1) {
       markup += '<option value="' + options[i].id + '">' + options[i].name + '</option>';
     }
@@ -309,7 +297,7 @@ var RMODULE = (function (my, $) {
       window.alert('Please enter a valid phone number.');
       return false;
     }
-    if ($('#mobileCarrierId').val() === my.getNoOptionSelected()) {
+    if (!$('#mobileCarrierId').val()) {
       window.alert('Please select a mobile carrier.');
       return false;
     }

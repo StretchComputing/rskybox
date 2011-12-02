@@ -9,13 +9,8 @@ var RMODULE = (function (my) {
   // signup.phoneNumber
   // signup.mobileCarrierId
   my.isValidSignup = function (signup) {
-    if (my.isValidEmailAddress(signup.emailAddress)) {
-      return true;
-    }
-
-    if (my.isValidPhoneNumber(signup.phoneNumber) && my.isValidCarrier(signup.mobileCarrierId)) {
-      return true;
-    }
+    if (my.isValidEmailAddress(signup.emailAddress)) { return true; }
+    if (my.isValidPhoneNumber(signup.phoneNumber) && signup.mobileCarrierId) { return true; }
 
     return false;
   }
