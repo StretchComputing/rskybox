@@ -1,5 +1,6 @@
 package com.stretchcom.rskybox.server;
 
+import java.security.MessageDigest;
 import java.util.logging.Logger;
 
 import org.json.JSONException;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;
 
@@ -95,5 +97,26 @@ public class Utility {
 	public static User getCurrentUser(Request theRequest) {
     	HttpServletRequest servletRequest = ServletUtils.getRequest(theRequest);
     	return (User)servletRequest.getAttribute(RskyboxApplication.CURRENT_USER);
+	}
+
+	public static String encrypt(String thePlainText) {
+		String encryptedText = null;
+		MessageDigest md = null;
+		try {
+			// use SHA encryption algorithm
+			md = MessageDigest.getInstance("SHA");
+			
+			// convert input plain text into UTF-8 encoded bytes
+			md.update(thePlainText.getBytes("UTF-8"));
+			
+			// extract the encrypted bytes
+			byte raw[] = md.digest();
+			
+			// convert encrypted bytes to base64 encoded string so data can be stored in the database
+			encryptedText = Base64.encode(raw);
+		} catch (Exception e) {
+			log.severe("Utility::encrypt() exception = " + e.getMessage());
+		}
+		return encryptedText;
 	}
 }

@@ -24,6 +24,7 @@ public class ApiStatusCode {
 	public static final String EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED = "308";
 	public static final String CONFIRMATION_CODE_IS_REQUIRED = "309";
 	public static final String EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED = "310";
+	public static final String PASSWORD_IS_REQUIRED = "311";
 	
 	public static final String INVALID_STATUS_PARAMETER = "400";
 	public static final String INVALID_RECORDED_DATE_PARAMETER = "401";
@@ -37,6 +38,7 @@ public class ApiStatusCode {
 	public static final String APP_MEMBER_ALREADY_ACTIVE = "409";
 	public static final String INVALID_PHONE_NUMBER = "410";
 	public static final String INVALID_CONFIRMATION_CODE = "411";
+	public static final String PASSWORD_TOO_SHORT = "412";
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 
