@@ -17,7 +17,8 @@
     <script src="/js/rmodule.js"></script>
   </head>
   <body>
-    <script src="/js/signup.js"></script>
+    <script src="/js/forms.js"></script>
+<script src="/js/signup.js"></script>
 <script>
 'use strict';
 
@@ -39,13 +40,9 @@ var RMODULE = (function (my) {
       signup;
 
     signup = {};
-    emailAddress = $('#emailAddress').val();
-    phoneNumber = $('#phoneNumber').val();
-    mobileCarrierId = $('#mobileCarrierId').val();
-
-    emailAddress && (signup.emailAddress = emailAddress);
-    phoneNumber && (signup.phoneNumber = phoneNumber);
-    mobileCarrierId && (signup.mobileCarrierId = mobileCarrierId);
+    my.addFormProperty(signup, 'emailAddress', $('#emailAddress').val());
+    my.addFormProperty(signup, 'phoneNumber', $('#phoneNumber').val());
+    my.addFormProperty(signup, 'mobileCarrierId', $('#mobileCarrierId').val());
 
     if (!my.isValidSignup(signup)) {
       alert('Please enter your email address, or your phone number and mobile carrier.');

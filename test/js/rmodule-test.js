@@ -1,3 +1,5 @@
+'use strict';
+
 TestCase('PhoneNumberTest', {
   'test properly formatted phone number is valid': function () {
     assertTrue(RMODULE.isValidPhoneNumber('123-456-7890'));
