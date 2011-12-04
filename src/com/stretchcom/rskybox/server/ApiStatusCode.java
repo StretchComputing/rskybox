@@ -10,8 +10,8 @@ public class ApiStatusCode {
 	public static final String USER_NOT_AUTHORIZED_FOR_APPLICATION = "203";
 	public static final String USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS = "204";
 	public static final String USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER = "205";
-	public static final String USER_NOT_SENT_EMAIL_ADDRESS_CONFIRMATION = "206";
-	public static final String USER_NOT_SENT_PHONE_NUMBER_CONFIRMATION = "207";
+	public static final String USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION = "206";
+	public static final String USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION = "207";
 	
 	public static final String FEEDBACK_ID_REQUIRED = "300";
 	public static final String CRASH_DETECT_ID_REQUIRED = "301";
@@ -23,8 +23,8 @@ public class ApiStatusCode {
 	public static final String APP_MEMBER_ID_REQUIRED = "307";
 	public static final String EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED = "308";
 	public static final String CONFIRMATION_CODE_IS_REQUIRED = "309";
-	public static final String EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED = "310";
 	public static final String PASSWORD_IS_REQUIRED = "311";
+	public static final String USER_NAME_IS_REQUIRED = "312";
 	
 	public static final String INVALID_STATUS_PARAMETER = "400";
 	public static final String INVALID_RECORDED_DATE_PARAMETER = "401";
@@ -49,6 +49,8 @@ public class ApiStatusCode {
 	public static final String BETA_TESTER_NOT_FOUND = "604";
 	public static final String APPLICATION_NOT_FOUND = "605";
 	public static final String APP_MEMBER_NOT_FOUND = "606";
+	public static final String EMAIL_ADDRESS_NOT_FOUND = "607";
+	public static final String PHONE_NUMBER_NOT_FOUND = "608";
 	
 	public static final String EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE = "700";
 }

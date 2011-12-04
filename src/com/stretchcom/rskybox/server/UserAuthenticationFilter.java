@@ -103,10 +103,10 @@ public class UserAuthenticationFilter implements Filter {
     		return false;
     	}
 
-    	// 3. if token matches a user, set CurrentUser in out parameter and return TRUE
+    	// 3. if token matches a user, put CurrentUser in out parameter and return TRUE
     	User currentUser = User.getUserWithToken(token);
     	if(currentUser != null) {
-    		theOutParameterList.set(0, currentUser);
+    		theOutParameterList.add(currentUser);
     		return true;
     	}
     	
@@ -129,7 +129,7 @@ public class UserAuthenticationFilter implements Filter {
 				log.info("un-authenticated REST request -- returning HTTP 401");
 				return;
 	    	} else {
-	    		String loginUrl = RskyboxApplication.LOGIN_PAGE;
+	    		String loginUrl = RskyboxApplication.SIGN_IN_PAGE;
 	    		theHttpResponse.sendRedirect(loginUrl);
 	    		log.info("un-authenticated HTML request -- redirecting to loginUrl = " + loginUrl);
 	    		return;
@@ -176,9 +176,21 @@ public class UserAuthenticationFilter implements Filter {
     		return true;
     	}
     	
-    	// Get Confirmation Code API is bypassed
+    	// User Get Confirmation Code API is bypassed
     	if(theUrl.toLowerCase().contains("/users/requestconfirmation") && theHttpResponse.getMethod().equalsIgnoreCase("post")) {
-    		log.info("Get Confirmation Code API is bypassed");
+    		log.info("User Get Confirmation Code API is bypassed");
+    		return true;
+    	}
+    	
+    	// User Get Token API is bypassed
+    	if(theUrl.toLowerCase().contains("/users/token") && theHttpResponse.getMethod().equalsIgnoreCase("get")) {
+    		log.info("User Get Token API is bypassed");
+    		return true;
+    	}
+    	
+    	// User Confirm API is bypassed
+    	if(theUrl.toLowerCase().contains("/users/confirm") && theHttpResponse.getMethod().equalsIgnoreCase("put")) {
+    		log.info("User Confirm API is bypassed");
     		return true;
     	}
 

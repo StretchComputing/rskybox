@@ -46,12 +46,20 @@ import com.stretchcom.rskybox.server.Utility;
     		query="SELECT u FROM User u WHERE u.emailAddress = :emailAddress"
     ),
     @NamedQuery(
+    		name="User.getByEmailAddressAndPassword",
+    		query="SELECT u FROM User u WHERE u.emailAddress = :emailAddress and u.password = :password"
+    ),
+    @NamedQuery(
     		name="User.getByToken",
     		query="SELECT u FROM User u WHERE u.token = :token"
     ),
     @NamedQuery(
     		name="User.getByPhoneNumber",
     		query="SELECT u FROM User u WHERE u.phoneNumber = :phoneNumber"
+    ),
+    @NamedQuery(
+    		name="User.getByPhoneNumberAndPassword",
+    		query="SELECT u FROM User u WHERE u.phoneNumber = :phoneNumber and u.password = :password"
     ),
 })
 public class User {
@@ -425,12 +433,21 @@ public class User {
 		return apiStatus;
 	}
 	
-	public static User getUser(EntityManager em, String theEmailAddress) {
+	// returns User entity if found; null otherwise
+	public static User getUser(EntityManager em, String theEmailAddress, String theEncryptedPassword) {
         User user = null;
         try {
-    		user = (User)em.createNamedQuery("User.getByEmailAddress")
-				.setParameter("emailAddress", theEmailAddress.toLowerCase())
-				.getSingleResult();
+        	if(theEncryptedPassword != null) {
+        		log.info("query user by email address = " + theEmailAddress + " and encrypted password = " + theEncryptedPassword);
+        		user = (User)em.createNamedQuery("User.getByEmailAddressAndPassword")
+        				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+        				.setParameter("password", theEncryptedPassword)
+        				.getSingleResult();
+        	} else {
+        		user = (User)em.createNamedQuery("User.getByEmailAddress")
+        				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+        				.getSingleResult();
+        	}
     		log.info("user with email address = " + theEmailAddress + " found");
 		} catch (NoResultException e) {
 			// not an error is user not found
@@ -462,19 +479,26 @@ public class User {
         return user;
 	}
 	
-	// Returns the user with the specified phoneNumber or null if user not found
-	public static User getUserWithPhoneNumber(EntityManager em, String thePhoneNumber) {
+	// returns User entity if found; null otherwise
+	public static User getUserWithPhoneNumber(EntityManager em, String thePhoneNumber, String theEncryptedPassword) {
         User user = null;
         try {
-    		user = (User)em.createNamedQuery("User.getByPhoneNumber")
-				.setParameter("phoneNumber", thePhoneNumber)
-				.getSingleResult();
+        	if(theEncryptedPassword != null) {
+        		user = (User)em.createNamedQuery("User.getByPhoneNumberAndPassword")
+        				.setParameter("phoneNumber", thePhoneNumber)
+        				.setParameter("password", theEncryptedPassword)
+        				.getSingleResult();
+        	} else {
+        		user = (User)em.createNamedQuery("User.getByPhoneNumber")
+        				.setParameter("phoneNumber", thePhoneNumber)
+        				.getSingleResult();
+        	}
     		log.info("user with phoneNumber = " + thePhoneNumber + " found");
 		} catch (NoResultException e) {
 			// not an error is user not found
 			log.info("user with phoneNumber = " + thePhoneNumber + " NOT found");
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more users have same phoneNumber");
+			log.severe("should never happen - two or more users have same phoneNumber (and maybe password)");
 		}
         
         return user;

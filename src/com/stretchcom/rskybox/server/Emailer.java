@@ -34,9 +34,9 @@ import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
 
 public class Emailer {
 	private static final Logger log = Logger.getLogger(Emailer.class.getName());
-	private static final String BASE_FROM_EMAIL_ADDRESS = "@stretchcom.com";
-	private static final String FROM_EMAIL_ADDRESS = "reply@stretchcom.com";
-	private static final String FROM_EMAIL_USER = "automated StretchCom email";
+	private static final String BASE_FROM_EMAIL_ADDRESS = "@rskybox.com";
+	private static final String FROM_EMAIL_ADDRESS = "reply@rskybox.com";
+	private static final String FROM_EMAIL_USER = "automated rSkybox email";
 	public static final String MESSAGE_THREAD_BODY = "see recipeint body";
 	public static final String MESSAGE_LINK_REPLY_BODY = "used only for message link reply";
 	public static final String REPLY = "reply";
