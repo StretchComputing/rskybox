@@ -1,5 +1,7 @@
 package com.stretchcom.rskybox.server;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.util.logging.Logger;
 
@@ -118,5 +120,15 @@ public class Utility {
 			log.severe("Utility::encrypt() exception = " + e.getMessage());
 		}
 		return encryptedText;
+	}
+	
+	public static String urlEncode(String theInput) {
+		String output = "";
+		try {
+			output = URLEncoder.encode(theInput, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			System.out.println("urlEncode exception = " + e.getMessage());
+		}
+		return output;
 	}
 }

@@ -11,7 +11,8 @@ public class RskyboxApplication extends Application {
     public static final String APPLICATION_BASE_URL = "https://rskybox-stretchcom.appspot.com/";
     public static final String APPLICATION_WELCOME_PAGE = APPLICATION_BASE_URL + "index.html";
     // TODO what is the real login page
-    public static final String LOGIN_PAGE = "index.html";
+    //public static final String SIGN_IN_PAGE = "https://www.rskybox.com";
+    public static final String SIGN_IN_PAGE = "/html5";
     public static final String LIST_DATE_FORMAT = "MM/dd/yy kk:mm";
     public static final String INFO_DATE_FORMAT = "MM/dd/yyyy 'at' hh:mm a";
     public static final String DEFAULT_LOCAL_TIME_ZONE = "America/Chicago";
