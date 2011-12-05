@@ -646,6 +646,13 @@ public class UsersResource extends ServerResource {
             	log.info("sending email confirmation code = " + confirmationCode + " to " + user.getEmailAddress());
             	Emailer.send(user.getEmailAddress(), subject, buildEmailConfirmationMessage(user), Emailer.NO_REPLY);
             	emailConfirmationSent = true;
+            	
+            	// even though confirmation is through email, phone number field can be set
+            	if(phoneNumber != null && carrierDomainName != null) {
+                    user.setPhoneNumber(phoneNumber);
+                	String smsEmailAddress = user.getPhoneNumber() + carrierDomainName;
+                	user.setSmsEmailAddress(smsEmailAddress);
+            	}
             } else {
             	// check if user with this phone number already exists
             	user = User.getUserWithPhoneNumber(em, phoneNumber, null);
