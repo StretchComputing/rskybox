@@ -17,13 +17,7 @@ var RMODULE = (function (my) {
 
   // Called when submit is performed on the signup form.
   requestConfirmCode = function () {
-
-    var
-      mobileCarrierId,
-      emailAddress,
-      json,
-      phoneNumber,
-      signup;
+    var json, signup;
 
     signup = {};
     my.addFormProperty(signup, 'emailAddress', $('#emailAddress').val());
@@ -45,34 +39,43 @@ var RMODULE = (function (my) {
 
   // Called on successful return from requestConfirmation.
   confirmPage = function (page, url) {
-    var email, emailDisplay, phone, phoneDisplay;
+    var email, phone;
 
     email = my.getParameterByName(url.hash, 'emailAddress');
     phone = my.getParameterByName(url.hash, 'phoneNumber');
-    emailDisplay = $('#emailDisplay');
-    phoneDisplay = $('#phoneDisplay');
 
-    emailDisplay.toggle(email);
-    phoneDisplay.toggle(email);
-    email && emailDisplay.html('<strong>Email Address:<\/strong>&nbsp; ' + email);
-    phone && phoneDisplay.html('<strong>Phone Number:<\/strong>&nbsp; ' + phone);
+    email && $('#emailDisplay').html(email);
+    phone && $('#phoneDisplay').html(phone);
+    $('#confirmEmail').val(email);
+    $('#confirmPhone').val(phone);
+    $('#emailWrapper').toggle(!!email);
+    $('#phoneWrapper').toggle(!!phone);
   };
 
 
   // Called from confirm page to create the user.
   createUser = function () {
-    var confirmation;
+    var confirmation, json;
 
     confirmation = {};
     my.addFormProperty(confirmation, 'confirmationCode', $('#confirmationCode').val());
     my.addFormProperty(confirmation, 'password', $('#password').val());
+    my.addFormProperty(confirmation, 'emailAddress', $('#confirmEmail').val());
+    my.addFormProperty(confirmation, 'phoneNumber', $('#confirmPhone').val());
 
     if (!my.isValidConfirmation(confirmation)) {
       alert('Please enter your confirmation code and a valid password.');
       return false;
     }
+
+    json = JSON.stringify(confirmation);
+    my.postJson(my.getRestPrefix() + '\/users', json, function (data) {
+      console.log(data)
+      <!--$.mobile.changePage('#confirm' + my.getQueryString(signup));-->
+    });
     return false;
   };
+
 
   my.init = function () {
     // If there is a current user, redirect right away.
@@ -142,8 +145,14 @@ RMODULE.init();
   </div>
   <div data-role="content">
     <form>
-      <p id="emailDisplay" style="display: none;"></p>
-      <p id="phoneDisplay" style="display: none;"></p>
+      <p id="emailWrapper" style="display: none;">
+        <strong>Email Address: </strong><span id="emailDisplay"></span>
+        <input type="hidden" id="confirmEmail">
+      </p>
+      <p id="phoneWrapper" style="display: none;">
+        <strong>Phone Number: </strong><span id="phoneDisplay"></span>
+        <input type="hidden" id="confirmPhone">
+      </p>
 
       <strong>Please enter your confirmation code.</strong>
       <label for="confirmationCode" class="ui-hidden-accessible">Confirmation Code:</label>
