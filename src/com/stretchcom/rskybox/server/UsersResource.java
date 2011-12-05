@@ -850,6 +850,11 @@ public class UsersResource extends ServerResource {
         JSONObject jsonReturn = new JSONObject();
         this.setStatus(Status.SUCCESS_OK);
         setTokenCookie(null);
+        try {
+        	jsonReturn.put("apiStatus", apiStatus);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
         return new JsonRepresentation(jsonReturn);
     }
     
