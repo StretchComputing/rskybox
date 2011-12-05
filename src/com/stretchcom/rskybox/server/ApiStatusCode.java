@@ -12,6 +12,8 @@ public class ApiStatusCode {
 	public static final String USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER = "205";
 	public static final String USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION = "206";
 	public static final String USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION = "207";
+	public static final String EMAIL_ADDRESS_CAN_NO_LONGER_BE_MODIFIED = "208";
+	public static final String PHONE_NUMBER_CAN_NO_LONGER_BE_MODIFIED = "209";
 	
 	public static final String FEEDBACK_ID_REQUIRED = "300";
 	public static final String CRASH_DETECT_ID_REQUIRED = "301";
@@ -39,8 +41,10 @@ public class ApiStatusCode {
 	public static final String INVALID_PHONE_NUMBER = "410";
 	public static final String INVALID_CONFIRMATION_CODE = "411";
 	public static final String PASSWORD_TOO_SHORT = "412";
+	public static final String PHONE_NUMBER_ALREADY_USED = "413";
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
+	public static final String NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID = "501";
 
 	public static final String USER_NOT_FOUND = "600";
 	public static final String FEEDBACK_NOT_FOUND = "601";

@@ -79,6 +79,7 @@ public class UserAuthenticationFilter implements Filter {
     		} else {
     			log.info("request is NOT authentic");
     			sendErrorResponse(thisURL, httpResponse);
+    			return;
     		}
         } else {
         	log.info("***** request is NOT an instance of HttpServletRequest *******");
@@ -169,8 +170,19 @@ public class UserAuthenticationFilter implements Filter {
     }
     
     private Boolean isBypassApi(String theUrl, HttpServletRequest theHttpResponse) {
-    	// TODO verify this matches ALL the bypass APIS
-    	// Create User API is bypassed &&
+    	/////////////////
+    	// HTML5 Bypasses
+    	/////////////////
+    	// Homepage bypass
+    	if(theUrl.toLowerCase().endsWith("/html5") || theUrl.toLowerCase().endsWith("/html5/")) {
+    		log.info("HTML5 Homepage bypassed");
+    		return true;
+    	}
+    	
+    	////////////////////
+    	// REST API Bypasses
+    	////////////////////
+    	// Create User API is bypassed
     	if(theUrl.toLowerCase().contains("/users") && !theUrl.toLowerCase().contains("/users/") && theHttpResponse.getMethod().equalsIgnoreCase("post")) {
     		log.info("Create User API is bypassed");
     		return true;
@@ -202,94 +214,6 @@ public class UserAuthenticationFilter implements Filter {
     	
     	return false;
     }
-    
-    private void handleRskyboxAppRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain chain, String thisURL) {
-    	// All rSkybox users must be currently logged into a Google account.
-		try {
-	    	UserService userService = UserServiceFactory.getUserService();
-	    	com.google.appengine.api.users.User currentUser = userService.getCurrentUser();
-			if(currentUser == null) {
-				if(thisURL.contains("/rest/")) {
-					// If REST request and user is not logged into Google account, HTTP 401 Unauthorized status is returned.
-					httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-					log.info("REST request, but user is not logged into Google account -- returning HTTP 401");
-					return;
-				} else {
-					// If HTML request and user is not logged into Google account, user is redirected to Google login screen.
-	        		String loginUrl = userService.createLoginURL(thisURL);
-	        		httpResponse.sendRedirect(loginUrl);
-	        		log.info("HTML request, but user is not logged into Google account -- redirecting to loginUrl = " + loginUrl);
-	        		return;
-				}
-	    	} else {
-	    		log.info("current user email address = " + currentUser.getEmail());
-	    		log.info("current user nick name = " + currentUser.getNickname());
-	    		if(userService.isUserAdmin()) {
-	    			// If user is an admin of this rSkybox app engine application, they are given full access to the app.
-	    			log.info("User is logged into Google account and is an admin on app engine");
-	    		} else {
-	    			log.info("User is logged into Google account and is NOT an admin on app engine");
-	    			
-	    			// If user is not and admin, they must be in the User table. Lookup is via Google account email address.
-	    			if(!User.isAuthenticated(currentUser.getEmail())) {
-	    				// If HTML/REST request and user is not admin and not in User table, HTTP 401 Unauthorized status is returned.
-	    				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-	    				log.info("HTML/REST request, but user is not and admin and is not in User table -- returning HTTP 401");
-	    				return;
-	    			}
-	    			
-	    			// If this is an Admin REST request, then return HTTP 401 Unauthorized status since user is not admin
-	    			if(isAdminRestRequest(thisURL, httpRequest)) {
-	    				httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-	    				log.info("Admin REST request, but user is not and admin -- returning HTTP 401");
-	    				return;
-	    			}
-	    		}
-	    		
-	    		// If we made it this far, user is authorized for request made, so continue on ....
-	    		
-	    		if(thisURL.contains("/rest/")) {
-	    			// REST request
-	    			log.info("calling chain.doFilter() in handleRskyboxAppRequest() ...");
-	    			chain.doFilter(httpRequest, httpResponse);
-	    		} else {
-		            // any non-REST request needs to be redirected to the WEB-INF/html directory
-		    		String uri = httpRequest.getRequestURI();
-		    		if(!uri.toLowerCase().contains(".html") && !uri.endsWith("/")) {
-		    			uri = uri + "/";
-		    		}
-		            uri = HTML_DIR + uri;
-		            log.info("Calling RequestDispatcher modified URI: " + uri);
-		            RequestDispatcher rd = httpRequest.getRequestDispatcher(uri);
-		            try {
-						rd.forward(httpRequest, httpResponse);
-					} catch (ServletException e) {
-						e.printStackTrace();
-					} 
-	    		}
-	    	}
-		} catch (IOException e) {
-			log.severe("handleRskyboxAppRequest() IOException. Exception = " + e.getMessage());
-			e.printStackTrace();
-		} catch (ServletException e) {
-			log.severe("handleRskyboxAppRequest() ServletException. Exception = " + e.getMessage());
-			e.printStackTrace();
-		}
-		
-        return;
-    }
-    
-    private Boolean isAdminRestRequest(String thisURL, HttpServletRequest httpRequest) {
-    	// currently, only the Users Create and Delete REST calls are considered 'Admin'
-    	log.info("isAdminRestRequest(): method = " + httpRequest.getMethod());
-    	if(thisURL.toLowerCase().contains("/rest") &&
-           thisURL.toLowerCase().contains("/users") &&
-           (httpRequest.getMethod().equalsIgnoreCase("post") || httpRequest.getMethod().equalsIgnoreCase("delete"))  ) {
-    		return true;
-    	}
-    	return false;
-    }
-    
 	
     // supports extracting the token from either a cookie or the HTTP authorization header with precedence given to the cookie.
     private String getToken(HttpServletRequest httpRequest) {

@@ -278,14 +278,96 @@ public class UsersResource extends ServerResource {
             String authHeader = null;
             String phoneNumber = null;
             String emailAddress = null;
+            String carrierDomainName = null;
+            
+            // TODO add email validation
+            if (json.has("emailAddress")) {
+            	emailAddress = json.getString("emailAddress").toLowerCase();
+            }
+            
+            if (json.has("phoneNumber")) {
+            	phoneNumber = json.getString("phoneNumber");
+            	phoneNumber = Utility.extractAllDigits(phoneNumber);
+            }
+
             if (id != null) {
             	// this is an Update User API call
                 Key key = KeyFactory.stringToKey(this.id);
                 user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
+                
+                // ***** Maybe all the following code needs to be moved to the Request Authorization API
+                // ***** Not sure if Update should allow these fields to changes.  If so, then a confirmation 
+                
+                ///////////////////////////////////////////////
+                // mobileCarrierId/smsEmailAddress Update Rules
+                ///////////////////////////////////////////////
+                //  1. A phone number must have been passed in or already set in the user entity for the mobileCarrierId/smsEmailAddress to be updated
+                if (json.has("mobileCarrierId")) {
+                	if(phoneNumber != null || user.getPhoneNumber() != null) {
+                    	carrierDomainName = MobileCarrier.findEmailDomainName(json.getString("mobileCarrierId"));
+                    	if(carrierDomainName == null) {
+                    		return Utility.apiError(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
+                    	}
+                    	String phoneNumberComponent = phoneNumber == null ? user.getPhoneNumber() : phoneNumber;
+                    	String smsEmailAddress = phoneNumberComponent + carrierDomainName;
+                    	user.setSmsEmailAddress(smsEmailAddress);
+                	} else {
+                		return Utility.apiError(ApiStatusCode.NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID);
+                	}
+                }
+
+                /////////////////////////////
+                // Email Address Update Rules
+                /////////////////////////////
+                //  1. If the email address has been confirmed, it cannot be updated
+                //  2. If a new email address is specified, it cannot already be used by another user
+                if(emailAddress != null) {
+                    if(user.getIsEmailConfirmed() == null || !user.getIsEmailConfirmed()) {
+                    	// check if the email address is really being modified. If so, it can't be in use and confirmed by any other user
+                    	if( (user.getEmailAddress() == null) || (user.getEmailAddress() != null && !emailAddress.equals(user.getEmailAddress()))  ) {
+                    		User existingUser = User.getUser(em, emailAddress, null);
+                    		if(existingUser == null) {
+                            	user.setEmailAddress(emailAddress);
+                    		} else {
+                        		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_ALREADY_USED);
+                    		}
+                    	}
+                    } else {
+                		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_CAN_NO_LONGER_BE_MODIFIED);
+                    }
+                }
+
+                ////////////////////////////
+                // Phone Number Update Rules
+                ////////////////////////////
+                //  1. If the phone number has been confirmed, it cannot be updated
+                //  2. To update, there has to be a carrier ID - either sent as part of the update or already in the user entity
+                //  3. If a new phone number is specified, it cannot already be used by another user
+                if(phoneNumber != null) {
+                    if( (user.getIsSmsConfirmed() == null || !user.getIsSmsConfirmed()) &&
+                    	(carrierDomainName != null || user.getSmsEmailAddress() != null)    ) {
+                    	// check if the phone number is really being modified. If so, it can't be in use and confirmed by any other user
+                    	if( (user.getPhoneNumber() == null) || (user.getPhoneNumber() != null && !phoneNumber.equals(user.getPhoneNumber()))  ) {
+                    		User existingUser = User.getUserWithPhoneNumber(em, phoneNumber, null);
+                    		if(existingUser == null) {
+                            	user.setPhoneNumber(phoneNumber);
+                    		} else {
+                        		return Utility.apiError(ApiStatusCode.PHONE_NUMBER_ALREADY_USED);
+                    		}
+                    	}
+                    } else {
+                		return Utility.apiError(ApiStatusCode.PHONE_NUMBER_CAN_NO_LONGER_BE_MODIFIED);
+                    }
+                }
             } else {
-            	// this is a Create User API call            	
+            	// this is a Create User API call  
+            	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            	// NOTE: on a create, email address, phone number and SMS email address (derived from the carrier ID cannot be set or modified.
+            	//       Either the (email address) or (phone number and carrier ID) was used to send a confirmation code. The Create User is
+            	//       the following to the confirmation code, so until the registration process completes, these fields cannot be changed.
+            	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 String confirmationCode = null;
                 
             	if(json.has("confirmationCode")) {
@@ -293,16 +375,6 @@ public class UsersResource extends ServerResource {
             	} else {
             		return Utility.apiError(ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
             	}
-                
-                // TODO add email validation
-                if (json.has("emailAddress")) {
-                	emailAddress = json.getString("emailAddress").toLowerCase();
-                }
-                
-                if (json.has("phoneNumber")) {
-                	phoneNumber = json.getString("phoneNumber");
-                	phoneNumber = Utility.extractAllDigits(phoneNumber);
-                }
                 
                 if(emailAddress != null && phoneNumber != null) {
             		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE);
@@ -349,12 +421,6 @@ public class UsersResource extends ServerResource {
             	String phraseBase64 = Base64.encode(phrase.getBytes("ISO-8859-1"));
             	authHeader = "Basic " + phraseBase64;
             	user.setAuthHeader(authHeader);
-            	
-             	if(emailAddress != null && emailAddress.length() > 0) {user.setEmailAddress(emailAddress);}
-             	log.info("phone number = " + phoneNumber);
-             	if(phoneNumber != null && phoneNumber.length() > 0) {
-             		user.setPhoneNumber(phoneNumber);
-             	}
             }
             
 			if(json.has("password")) {
@@ -381,16 +447,6 @@ public class UsersResource extends ServerResource {
             
             if (json.has("lastName")) {
                 user.setLastName(json.getString("lastName"));
-            }
-            
-            // mobileCarrier only relevant if phoneNumber has been provided -- otherwise ignore.
-            if (json.has("mobileCarrierId") && phoneNumber != null && phoneNumber.length() > 0) {
-            	String carrierDomainName = MobileCarrier.findEmailDomainName(json.getString("mobileCarrierId"));
-            	if(carrierDomainName == null) {
-            		return Utility.apiError(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
-            	}
-            	String smsEmailAddress = user.getPhoneNumber() + carrierDomainName;
-            	user.setSmsEmailAddress(smsEmailAddress);
             }
             
             // sendEmailNotifications can be set on create or update
