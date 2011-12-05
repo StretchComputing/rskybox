@@ -218,15 +218,12 @@ public class UserAuthenticationFilter implements Filter {
     // supports extracting the token from either a cookie or the HTTP authorization header with precedence given to the cookie.
     private String getToken(HttpServletRequest httpRequest) {
 		String token = null;
-		
 		// first attempt to find the token in a cookie of the form "token=<token_value>"
 		Cookie[] cookies = httpRequest.getCookies();
 		if(cookies != null && cookies.length > 0) {
 			for(Cookie c : cookies) {
-				String cookieStr = c.getValue();
-				if(cookieStr.startsWith("token=")) {
-					token = cookieStr.substring(6);
-					return token;
+				if (c.getName().equals("token")) {
+					return c.getValue();
 				}
 			}
 		}

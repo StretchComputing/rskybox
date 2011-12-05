@@ -85,8 +85,7 @@ var RMODULE = (function (my) {
 
     json = JSON.stringify(confirmation);
     my.postJson(my.getRestPrefix() + '\/users', json, function (data) {
-      console.log(data)
-      <!--$.mobile.changePage('#confirm' + my.getQueryString(signup));-->
+      $.mobile.changePage('/html5/#options');
     });
     return false;
   };
