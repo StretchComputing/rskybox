@@ -861,7 +861,7 @@ public class UsersResource extends ServerResource {
     // theTokenValue of null means to clear cookie immediately
     public void setTokenCookie(String theTokenValue){
     	String tokenValue = theTokenValue == null ? "" : theTokenValue;
-        CookieSetting cs = new CookieSetting(0, "token", tokenValue);
+        CookieSetting cs = new CookieSetting(1, "token", tokenValue, "/", "");
 
         if(theTokenValue == null) {
             // zero value times the cookie out immediately
@@ -870,6 +870,7 @@ public class UsersResource extends ServerResource {
             // set cookie age to one year specified in seconds
             cs.setMaxAge(31557600);
         }
+
         this.getResponse().getCookieSettings().add(cs);
     }
     

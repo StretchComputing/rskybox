@@ -102,6 +102,15 @@ var RMODULE = (function (my, $) {
   };
 
 
+  // Logout the current user and redirect to the home page.
+  my.logout = function () {
+    my.putJson(my.getRestPrefix() + '\/users\/clearCookie', null, function(data) {
+      document.cookie = '';
+      my.redirect('/');
+    });
+  };
+
+
   // Track how many page loading messages are on the stack.
   pageLoadCount = 0;
   pageLoad = function (operator) {

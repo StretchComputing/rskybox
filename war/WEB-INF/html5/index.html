@@ -93,10 +93,9 @@ var RMODULE = (function (my, $) {
   my.init = function () {
     old_init();
 
-    $('#index').live('pagebeforecreate', function () {
-      var restUrl = my.getRestPrefix() + '\/users\/current';
-      my.jsonPopulate(restUrl, $('#index'), function (page, user) {
-        $('#logout').attr('href', decodeURIComponent(user.logoutUrl));
+    $('#index').live('pagecreate', function () {
+      $('#logout').click(function () {
+        my.logout();
       });
     });
 
