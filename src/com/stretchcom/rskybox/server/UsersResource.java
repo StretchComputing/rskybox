@@ -27,6 +27,7 @@ import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
+import org.restlet.util.Series;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -871,7 +872,14 @@ public class UsersResource extends ServerResource {
             cs.setMaxAge(31557600);
         }
 
-        this.getResponse().getCookieSettings().add(cs);
+        Series<CookieSetting> cookieSettings = this.getResponse().getCookieSettings();
+        cookieSettings.add(cs);
+        
+        // the last thing we do is log out all the current cookies for debugging purposes
+        for(CookieSetting cookSet : cookieSettings) {
+        	log.info("(cookie) name:"+cookSet.getName()+" value:"+cookSet.getValue()+" domain:"+cookSet.getDomain()+" path:"+cookSet.getPath()+
+        			 " version:"+cookSet.getVersion()+" maxAge:"+cookSet.getMaxAge());
+        }
     }
     
     private String buildEmailConfirmationMessage(User theUser) {
