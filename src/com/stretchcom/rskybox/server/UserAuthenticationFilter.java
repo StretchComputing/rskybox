@@ -55,6 +55,14 @@ public class UserAuthenticationFilter implements Filter {
         if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
         	HttpServletRequest httpRequest = (HttpServletRequest)request;
     		HttpServletResponse httpResponse = (HttpServletResponse)response;
+    		
+    		// logout all request cookies
+    		Cookie[] cookies = httpRequest.getCookies();
+    		if(cookies != null) {
+        		for(Cookie c : cookies) {
+        			log.info("cookie name = " + c.getName() + " cookie value = " + c.getValue());
+        		}
+    		}
 
     		String thisURL = getURL(httpRequest);
     		log.info("thisURL = " + thisURL);
