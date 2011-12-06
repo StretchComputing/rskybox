@@ -14,7 +14,7 @@ Cookie = {
 	 */
 	get: function(key) {
 		// Still not sure that "[a-zA-Z0-9.()=|%/]+($|;)" match *all* allowed characters in cookies
-		tmp =  document.cookie.match((new RegExp(key +'=[a-zA-Z0-9.()=|%/]+($|;)','g')));
+		tmp =  document.cookie.match((new RegExp(key +'=[a-zA-Z0-9.()=|%\/]+($|;)','g')));
 		if(!tmp || !tmp[0]) return null;
 		else return unescape(tmp[0].substring(key.length+1,tmp[0].length).replace(';','')) || null;
 		
@@ -32,11 +32,13 @@ Cookie = {
 	 *  @return setted cookie
 	 */
 	set: function(key, value, ttl, path, domain, secure) {
-		cookie = [key+'='+    escape(value),
-		 		  'path='+    ((!path   || path=='')  ? '/' : path),
-		 		  'domain='+  ((!domain || domain=='')?  window.location.hostname : domain)];
-		
-		if (ttl)         cookie.push(Cookie.hoursToExpireDate(ttl));
+		cookie = [key+'=' + escape(value), 'path=' + ((!path   || path=='')  ? "'\/'" : path)];
+        if (window.location.hostname === 'localhost') {
+            cookie.push('domain=');
+        } else {
+            cookie.push((!domain || domain=='') ?  window.location.hostname : domain);
+        }
+		if (ttl)         cookie.push('expires=' + Cookie.hoursToExpireDate(ttl));
 		if (secure)      cookie.push('secure');
 		return document.cookie = cookie.join('; ');
 	},
@@ -51,7 +53,7 @@ Cookie = {
 	unset: function(key, path, domain) {
 		path   = (!path   || typeof path   != 'string') ? '' : path;
         domain = (!domain || typeof domain != 'string') ? '' : domain;
-		if (Cookie.get(key)) Cookie.set(key, '', 'Thu, 01-Jan-70 00:00:01 GMT', path, domain);
+		if (Cookie.get(key)) Cookie.set(key, '', -1, path, domain);
 	},
 
 	/** Return GTM date string of "now" + time to live
@@ -62,9 +64,10 @@ Cookie = {
 	hoursToExpireDate: function(ttl) {
 		if (parseInt(ttl) == 'NaN' ) return '';
 		else {
-			now = new Date();
-			now.setTime(now.getTime() + (parseInt(ttl) * 60 * 60 * 1000));
-			return now.toGMTString();			
+		    return parseInt(ttl) * 60 * 60 * 1000;
+			//now = new Date();
+			//now.setTime(now.getTime() + (parseInt(ttl) * 60 * 60 * 1000));
+			//return now.toGMTString();			
 		}
 	},
 

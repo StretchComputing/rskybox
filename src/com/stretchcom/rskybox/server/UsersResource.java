@@ -483,7 +483,7 @@ public class UsersResource extends ServerResource {
         }
     	
     	// need request to set cookie
-        setTokenCookie(user.getToken());
+        //setTokenCookie(user.getToken());
         
         return new JsonRepresentation(getUserJson(user, apiStatus));
     }
@@ -741,7 +741,7 @@ public class UsersResource extends ServerResource {
         }
     	
     	// need request to set cookie
-        setTokenCookie(user.getToken());
+        //setTokenCookie(user.getToken());
     	
         return new JsonRepresentation(jsonReturn);
     }
@@ -849,7 +849,7 @@ public class UsersResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
         JSONObject jsonReturn = new JSONObject();
         this.setStatus(Status.SUCCESS_OK);
-        setTokenCookie(null);
+        //setTokenCookie(null);
         try {
         	jsonReturn.put("apiStatus", apiStatus);
 		} catch (JSONException e) {
