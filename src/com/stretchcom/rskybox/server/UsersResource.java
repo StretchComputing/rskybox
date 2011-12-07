@@ -210,35 +210,11 @@ public class UsersResource extends ServerResource {
 			
 			if(this.id.equalsIgnoreCase(User.CURRENT)) {
 				// special case: id = "current" so return info on currently logged in user
-				User currentUser = Utility.getCurrentUser(getRequest());
-	        	if(currentUser == null) {
+				user = Utility.getCurrentUser(getRequest());
+	        	if(user == null) {
 	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 	        	}
-	        	isSuperAdmin = currentUser.getIsSuperAdmin();
-	        	
-	        	String emailAddress = currentUser.getEmailAddress().toLowerCase();
-	    		try {
-	    			// TODO - once authentication Filter sets currentUser from User entity, this user lookup won't be needed
-					user = (User)em.createNamedQuery("User.getByEmailAddress")
-						.setParameter("emailAddress", emailAddress)
-						.getSingleResult();
-				} catch (NoResultException e) {
-					// TODO this user auto create needs to be moved elsewhere
-//					// if user is Admin, create a user object on the fly.  This allows admins of the app to just start using rskybox without
-//					// any configuration necessary. A slick little feature.
-//					if(isSuperAdmin) {
-//						user = User.createUser(emailAddress, currentUser.getNickname());
-//						if(user != null) {
-//							log.info("new user created on the fly for the admin. New user email address = " + emailAddress);
-//						} else {
-//							log.info("create new user failed");
-//							apiStatus = ApiStatusCode.USER_NOT_FOUND;
-//						}
-//					} else {
-//						log.info("User not found");
-//						apiStatus = ApiStatusCode.USER_NOT_FOUND;
-//					}
-				}
+	        	isSuperAdmin = user.getIsSuperAdmin();
 			} else {
 				// id of user specified
 	            Key key;
