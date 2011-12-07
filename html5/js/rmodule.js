@@ -267,6 +267,20 @@ var RMODULE = (function (my, $) {
   };
 
 
+  // Password business rules validation.
+  my.isValidPassword = function (password) {
+    var PASSWORD_MIN_LENGTH = 6;
+
+    return !!password && typeof password == 'string' && password.length >= PASSWORD_MIN_LENGTH;
+  };
+
+
+  // Apply business rules to login information to determine if login parameters are valide.
+  my.isValidLogin = function (login) {
+    return ((my.isValidEmailAddress(login.emailAddress) || my.isValidPhoneNumber(login.phoneNumber)) && my.isValidPassword(login.password));
+  };
+
+
   // Build an option list for a select control.
   //
   // options: array of id/name pairs

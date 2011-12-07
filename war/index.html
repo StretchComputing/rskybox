@@ -23,11 +23,14 @@
 <script>
 'use strict';
 
-var RMODULE = (function (my) {
+var RMODULE = (function (my, $) {
 
   var
     confirmPage,
     createUser,
+    login,
+    loginFail,
+    loginSuccess,
     requestConfirmCode;
 
 
@@ -75,7 +78,7 @@ var RMODULE = (function (my) {
 
     confirmation = {};
     my.addFormProperty(confirmation, 'confirmationCode', $('#confirmationCode').val());
-    my.addFormProperty(confirmation, 'password', $('#password').val());
+    my.addFormProperty(confirmation, 'password', $('#confirmPassword').val());
     my.addFormProperty(confirmation, 'emailAddress', $('#confirmEmail').val());
     my.addFormProperty(confirmation, 'phoneNumber', $('#confirmPhone').val());
 
@@ -86,10 +89,49 @@ var RMODULE = (function (my) {
 
     json = JSON.stringify(confirmation);
     my.postJson(my.getRestPrefix() + '\/users', json, function (user) {
-      Cookie.set('token', user.token, 9000, '\/');
-      $.mobile.changePage('\/html5\/#options');
+      loginSucces(user.token);
     });
     return false;
+  };
+
+
+  // Called when the login form is submitted.
+  login = function () {
+    var login, json;
+
+    login = {};
+    my.addFormProperty(login, 'password', $('#loginPassword').val());
+    my.addFormProperty(login, 'emailAddress', $('#loginEmail').val());
+    my.addFormProperty(login, 'phoneNumber', $('#loginPhone').val());
+    if (my.isValidLogin(login)) {
+      login.userName = !!login.emailAddress ? login.emailAddress :loginPhoneNumber;
+      delete login.emailAddress;
+      delete login.phoneNumber;
+      $.getJSON(my.getRestPrefix() + '\/users\/token', login, function (result) {
+        if (result.apiStatus == "100") {
+          loginSuccess(result.token);
+        } else {
+          loginFail(result);
+        }
+      });
+    } else {
+      alert('Please supply valid login information.');
+    }
+
+    return false;
+  };
+
+
+  loginFail = function (result) {
+    // TODO show appropriate status messages on login fail
+    console.log('TODO show appropriate status messages on login fail');
+  };
+
+
+  loginSuccess = function (token) {
+    console.log(token);
+    Cookie.set('token', token, 9000, '\/');
+    $.mobile.changePage('\/html5');
   };
 
 
@@ -119,6 +161,10 @@ var RMODULE = (function (my) {
       $(this).find('form').submit(createUser);
     });
 
+    $('#login').live('pagecreate', function () {
+      $(this).find('form').submit(login);
+    });
+
     my.dynamicPages([{
       page: '#confirm',
       function: confirmPage
@@ -126,7 +172,7 @@ var RMODULE = (function (my) {
   };
 
   return my;
-}(RMODULE || {}));
+}(RMODULE || {}, jQuery));
 
 RMODULE.init();
 </script>
@@ -175,12 +221,35 @@ RMODULE.init();
       <input type="tel" name="confirmationCode" id="confirmationCode" placeholder="Confirmation Code">
 
       <strong>Create a password. (min 6 chars)</strong>
-      <label for="password" class="ui-hidden-accessible">Password:</label>
-      <input type="password" name="password" id="password" placeholder="Password">
-      <input type="checkbox" name="showPassword" id="showPassword">
-      <label for="showPassword">Show Password (not functional)</label>
+      <label for="confirmPassword" class="ui-hidden-accessible">Password:</label>
+      <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Password">
+      <input type="checkbox" name="showConfirmPassword" id="showConfirmPassword">
+      <label for="showConfirmPassword">Show Password (not functional)</label>
 
       <input type="submit" value="Complete Sign Up">
+    </form>
+  </div>
+</div>
+
+<div data-role="page" id="login" data-title="Login">
+  <div data-role="header">
+    <h1>Login</h1>
+  </div>
+  <div data-role="content">
+    <form>
+      <h1>Login Using</h1>
+      <label for="loginEmail" class="ui-hidden-accessible">Login Email Address:</label>
+      <input type="email" name="loginEmail" id="loginEmail" placeholder="Login Email Address">
+      <strong>or</strong>
+      <label for="loginPhone" class="ui-hidden-accessible">Login Phone Number:</label>
+      <input type="tel" name="loginPhone" id="loginPhone" placeholder="Login Phone Number">
+
+      <hr>
+
+      <label for="loginPassword" class="ui-hidden-accessible">Login Password:</label>
+      <input type="password" name="loginPassword" id="loginPassword" placeholder="Login Password">
+
+      <input type="submit" value="Login">
     </form>
   </div>
 </div>

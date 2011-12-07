@@ -1,5 +1,6 @@
 'use strict';
 
+
 TestCase('SignupTest', {
   'test allow signup with proper email address': function () {
     assertTrue(RMODULE.isValidSignup({ emailAddress: 'email@test.com' }));
@@ -19,8 +20,10 @@ TestCase('SignupTest', {
 
   'test disallow signup with no phone number': function () {
     assertFalse(RMODULE.isValidSignup({ mobileCarrierId: '1' }));
-  },
+  }
 });
+
+
 
 TestCase('ConfirmTest', {
   'test confirm is valid with valid properties': function () {
@@ -33,5 +36,5 @@ TestCase('ConfirmTest', {
 
   'test confirm is invalid with missing confirmationCode': function () {
     assertFalse(RMODULE.isValidConfirmation({ password: 'password' }));
-  },
+  }
 });

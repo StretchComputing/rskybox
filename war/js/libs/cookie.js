@@ -64,10 +64,9 @@ Cookie = {
 	hoursToExpireDate: function(ttl) {
 		if (parseInt(ttl) == 'NaN' ) return '';
 		else {
-		    return parseInt(ttl) * 60 * 60 * 1000;
-			//now = new Date();
-			//now.setTime(now.getTime() + (parseInt(ttl) * 60 * 60 * 1000));
-			//return now.toGMTString();			
+            now = new Date();
+            now.setTime(now.getTime() + (parseInt(ttl) * 60 * 60 * 1000));
+            return now.toGMTString();			
 		}
 	},
 
