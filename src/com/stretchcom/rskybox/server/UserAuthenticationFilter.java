@@ -55,6 +55,9 @@ public class UserAuthenticationFilter implements Filter {
         if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
         	HttpServletRequest httpRequest = (HttpServletRequest)request;
     		HttpServletResponse httpResponse = (HttpServletResponse)response;
+
+            httpResponse.addHeader("Access-Control-Allow-Headers", "Content-type");
+            httpResponse.addHeader("Access-Control-Allow-Origin", "*");
     		
     		// logout all request cookies
     		Cookie[] cookies = httpRequest.getCookies();
@@ -92,7 +95,6 @@ public class UserAuthenticationFilter implements Filter {
         } else {
         	log.info("***** request is NOT an instance of HttpServletRequest *******");
         }
-        
         log.info("calling chain.doFilter() in doFilter() ...");
         chain.doFilter(request, response);
     }

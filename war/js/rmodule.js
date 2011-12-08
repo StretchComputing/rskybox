@@ -29,9 +29,12 @@ var RMODULE = (function (my, $) {
 
   // Returns the currently valid REST path prefix.
   my.getRestPrefix = function () {
-    var restUrl;
+    var restUrl = '';
 
-    restUrl = '\/rest\/v1'
+    if (location.hostname === "www.rskybox.com") {
+      restUrl = 'https:\/\/rskybox-stretchcom.appspot.com';
+    }
+    restUrl += '\/rest\/v1'
     if (window.location.search) {
       restUrl += '\/applications\/' + my.getParameterByName(window.location.search, 'id');
     }
@@ -122,6 +125,7 @@ var RMODULE = (function (my, $) {
     default:
       window.console.log('pageLoadingCount called with inappropriate operator.');
     }
+    console.log('pageLoadCount=' + pageLoadCount);
     return pageLoadCount;
   };
 

@@ -113,7 +113,6 @@ var RMODULE = (function (my, $) {
 
 
   loginSuccess = function (token) {
-    console.log(token);
     Cookie.set('token', token, 9000, '\/');
     $.mobile.changePage('\/html5');
   };
