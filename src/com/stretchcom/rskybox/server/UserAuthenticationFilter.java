@@ -56,8 +56,10 @@ public class UserAuthenticationFilter implements Filter {
         	HttpServletRequest httpRequest = (HttpServletRequest)request;
     		HttpServletResponse httpResponse = (HttpServletResponse)response;
 
-            httpResponse.addHeader("Access-Control-Allow-Headers", "Content-type");
-            httpResponse.addHeader("Access-Control-Allow-Origin", "*");
+            if (httpRequest.getMethod().equalsIgnoreCase("OPTIONS")) {
+                httpResponse.addHeader("Access-Control-Allow-Headers", "Content-Type");
+            }
+            httpResponse.addHeader("Access-Control-Allow-Origin", "http://www.rskybox.com");
     		
     		// logout all request cookies
     		Cookie[] cookies = httpRequest.getCookies();
@@ -180,6 +182,10 @@ public class UserAuthenticationFilter implements Filter {
     }
     
     private Boolean isBypassApi(String theUrl, HttpServletRequest theHttpResponse) {
+        if (theHttpResponse.getMethod().equalsIgnoreCase("OPTIONS")) {
+            return true;
+        }
+
     	/////////////////
     	// HTML5 Bypasses
     	/////////////////

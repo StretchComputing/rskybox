@@ -18,6 +18,7 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.Variant;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
+import org.restlet.resource.Options;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
@@ -33,6 +34,12 @@ public class MobileCarriersResource extends ServerResource {
     @Override
     protected void doInit() throws ResourceException {
         log.info("UserResource in doInit");
+    }
+
+    // Handles OPTIONS for Get MobileCarriers API
+    @Options
+    public Representation options() {
+        return null;
     }
 
     // Handles 'Get List of MobileCarrier API'
