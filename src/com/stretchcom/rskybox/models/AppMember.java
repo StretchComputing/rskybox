@@ -56,6 +56,10 @@ import com.stretchcom.rskybox.server.Utility;
     		name="AppMember.getByApplicationIdAndUserId",
     		query="SELECT am FROM AppMember am WHERE am.applicationId = :applicationId and am.userId = :userId"
     ),
+    @NamedQuery(
+    		name="AppMember.getByApplicationIdAndEmailAddress",
+    		query="SELECT am FROM AppMember am WHERE am.applicationId = :applicationId and am.emailAddress = :emailAddress"
+    ),
 })
 public class AppMember {
     private static final Logger log = Logger.getLogger(AppMember.class.getName());
@@ -135,6 +139,24 @@ public class AppMember {
 		return false;
 	}
 	
+	// currently, only owner has owner authority
+	public Boolean hasOwnerAuthority() {
+		if(this.role == null) {return false;}
+		if(this.role.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
+			return true;
+		}
+		return false;
+	}
+	
+	// both an owner and manager have manager authority
+	public Boolean hasManagerAuthority() {
+		if(this.role == null) {return false;}
+		if(this.role.equalsIgnoreCase(AppMember.OWNER_ROLE) || this.role.equalsIgnoreCase(AppMember.MANAGER_ROLE)) {
+			return true;
+		}
+		return false;
+	}
+	
 	// Called when a user verifies membership with an application.  The userId is set in AppMember by finding the User with
 	// the emailAddress stored in AppMember when the AppMember entity was created.  At this point, we know a registered
 	// user is associated with the email address.
@@ -170,4 +192,61 @@ public class AppMember {
         return appMember;
 	}
 	
+	public static AppMember getAppMemberWithEmailAddress(String theApplicationId, String theEmailAddress) {
+        EntityManager em = EMF.get().createEntityManager();
+        AppMember appMember = null;
+        try {
+    			appMember = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndEmailAddress")
+    				.setParameter("applicationId", theApplicationId)
+    				.setParameter("emailAddress", theEmailAddress)
+    				.getSingleResult();
+		} catch (NoResultException e) {
+			log.info("appMember not found for applicationId = " + theApplicationId + " and emailAddress = " + theEmailAddress);
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more emailAddress/applicationId combinations in AppMember");
+		}
+        return appMember;
+	}
+	
+	public static AppMember addAppMember(String theApplicationId, String theUserId, String theRole) {
+        EntityManager em = EMF.get().createEntityManager();
+        AppMember appMember = null;
+        
+        // First verify user is NOT already an member of this application
+        // ::OPTIMIZATION:: remove this check to reduce CPU time
+        try {
+    			appMember = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndUserId")
+    				.setParameter("applicationId", theApplicationId)
+    				.setParameter("userId", theUserId)
+    				.getSingleResult();
+    			
+    			log.severe("ERROR: user with userId = " + theUserId + " is already a member of application with applicationId = " + theApplicationId);
+    			return null;
+		} catch (NoResultException e) {
+			log.info("as expected, user with userId = " + theUserId + " is not already a member of application with applicationId = " + theApplicationId);
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more userId/applicationId combinations in AppMember");
+			return null;
+		}
+        
+    	EntityManager em2 = EMF.get().createEntityManager();
+    	try {
+    		em2.getTransaction().begin();
+    		appMember = new AppMember();
+    		appMember.setApplicationId(theApplicationId);
+    		appMember.setUserId(theUserId);
+    		appMember.setRole(theRole);
+    		em2.persist(appMember);
+			em2.getTransaction().commit();
+    	} catch (Exception e) {
+        	log.severe("exeception = " + e.getMessage());
+        	e.printStackTrace();
+		} finally {
+		    if (em2.getTransaction().isActive()) {
+		    	em2.getTransaction().rollback();
+		    }
+		    em2.close();
+		}
+        return appMember;
+	}
 }

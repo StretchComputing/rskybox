@@ -1,6 +1,7 @@
 package com.stretchcom.rskybox.models;
 
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.persistence.Entity;
@@ -12,6 +13,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.Transient;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
@@ -40,6 +42,10 @@ import com.stretchcom.rskybox.server.EMF;
     		name="Application.getByToken",
     		query="SELECT a FROM Application a WHERE a.token = :token"
     ),
+    @NamedQuery(
+    		name="Application.getByName",
+    		query="SELECT a FROM Application a WHERE a.name = :name"
+    ),
 })
 public class Application {
     private static final Logger log = Logger.getLogger(Application.class.getName());
@@ -50,6 +56,10 @@ public class Application {
 	private Date createdGmtDate;
 	private Date versionUpdatedGmtDate;
 	private String token;
+
+	@Transient
+	private String memberRole; // used internally on the server to return user role with list of user's applications
+
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Key key;
@@ -94,6 +104,14 @@ public class Application {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+	
+	public String getMemberRole() {
+		return memberRole;
+	}
+
+	public void setMemberRole(String memberRole) {
+		this.memberRole = memberRole;
 	}
 
 	public String getOrganizationId() {
@@ -149,6 +167,29 @@ public class Application {
 			log.info("application with token = " + theToken + " NOT found");
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more applications have same key");
+		}
+        
+        return application;
+	}
+	
+	// Returns the application with the specified token or null if application not found.
+	// If multiple applications matching the name are found, the first is returned.
+	public static Application getApplicationWithName(String theApplicationName) {
+        EntityManager em = EMF.get().createEntityManager();
+        Application application = null;
+        List <Application> applications = null;
+        try {
+    		applications = (List <Application>)em.createNamedQuery("Application.getByName")
+				.setParameter("name", theApplicationName)
+				.getResultList();
+    		if(applications.size() > 0) {
+    			application = applications.get(0);
+        		log.info("application with name = " + theApplicationName + " found");
+    		} else {
+    			log.info("no applications with specified name found");
+    		}
+		} catch (Exception e) {
+			log.severe("exception = " + e.getMessage());
 		}
         
         return application;
