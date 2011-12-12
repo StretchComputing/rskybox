@@ -156,7 +156,8 @@ public class UserAuthenticationFilter implements Filter {
     // adjust URL for non-REST calls
     // returns True if URL adjusted by forwarding -- so filter processing is complete
     private Boolean adjustUrl(String theUrl, HttpServletRequest theHttpRequest, HttpServletResponse theHttpResponse) {
-		if(!theUrl.contains("/rest/") && !theUrl.contains("/crashStackData/")) {
+    	// skip over the REST APIs and the crashStackData and Audio Servlets
+		if(!theUrl.contains("/rest/") && !theUrl.contains("/crashStackData/") && !theUrl.contains("/audio/")) {
             // any non-REST request needs to be redirected to the WEB-INF/html directory
     		String uri = theHttpRequest.getRequestURI();
     		if(!uri.toLowerCase().contains(".html") && !uri.endsWith("/")) {

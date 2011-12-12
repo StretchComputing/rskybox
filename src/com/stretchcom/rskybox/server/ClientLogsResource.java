@@ -29,6 +29,8 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.stretchcom.rskybox.models.AppMember;
+import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.User;
@@ -60,7 +62,7 @@ public class ClientLogsResource extends ServerResource {
     // Handles 'Get Client Log of Users API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
-    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
     		return Utility.apiError(appIdStatus);
     	}
@@ -83,6 +85,11 @@ public class ClientLogsResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         return save_client_log(entity);
     }
 
@@ -90,7 +97,7 @@ public class ClientLogsResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
-    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
     		return Utility.apiError(appIdStatus);
     	}
@@ -109,7 +116,16 @@ public class ClientLogsResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
 		List<ClientLog> clientLogs = null;
+    	User currentUser = Utility.getCurrentUser(getRequest());
         try {
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(appMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
             List<User> users = new ArrayList<User>();
             JSONArray ja = new JSONArray();
             
@@ -154,7 +170,16 @@ public class ClientLogsResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
 		ClientLog clientLog = null;
+    	User currentUser = Utility.getCurrentUser(getRequest());
 		try {
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
 			if (this.id == null || this.id.length() == 0) {
 				return Utility.apiError(ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
 			}
@@ -186,12 +211,21 @@ public class ClientLogsResource extends ServerResource {
         ClientLog clientLog = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
+    	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
         try {
             clientLog = new ClientLog();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
             if (id != null) {
+            	//////////////////////
+            	// Authorization Rules
+            	//////////////////////
+            	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+            	if(currentUserMember == null) {
+    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+            	}
+
                 Key key;
     			try {
     				key = KeyFactory.stringToKey(this.id);

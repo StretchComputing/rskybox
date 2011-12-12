@@ -118,8 +118,7 @@ public class CrashStackDataServlet extends HttpServlet {
 		}
 	}
 	
-	// extracts crash detect id from URL
-	// returns crashDetectID or null if error
+	// returns applicationID and crashDetectID in List or null if error
 	private List<String> getPathIds(HttpServletRequest theReq) {
 		// extract the crash detect ID from the URL (for http://hostname.com/mywebapp/servlet/MyServlet/a/b;c=123?d=789, returns /a/b;c=123
 		String pathInfo = theReq.getPathInfo();
