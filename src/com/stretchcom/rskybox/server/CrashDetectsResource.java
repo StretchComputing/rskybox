@@ -29,6 +29,7 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.User;
@@ -59,7 +60,7 @@ public class CrashDetectsResource extends ServerResource {
     // Handles 'Get List of Crash Detects API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
-    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
     		return Utility.apiError(appIdStatus);
     	}
@@ -79,6 +80,11 @@ public class CrashDetectsResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         return save_crash_detect(entity);
     }
 
@@ -86,8 +92,7 @@ public class CrashDetectsResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
-        
-    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
     		return Utility.apiError(appIdStatus);
     	}
@@ -105,8 +110,17 @@ public class CrashDetectsResource extends ServerResource {
         
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
+    	User currentUser = Utility.getCurrentUser(getRequest());
         try {
-            List<CrashDetect> crashDetects = new ArrayList<CrashDetect>();
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(appMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
+        	List<CrashDetect> crashDetects = new ArrayList<CrashDetect>();
             JSONArray ja = new JSONArray();
             
 			if(this.listStatus != null) {
@@ -150,7 +164,16 @@ public class CrashDetectsResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
 		CrashDetect crashDetect = null;
+    	User currentUser = Utility.getCurrentUser(getRequest());
 		try {
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
 			if (this.id == null || this.id.length() == 0) {
 				return Utility.apiError(ApiStatusCode.CRASH_DETECT_ID_REQUIRED);
 			}
@@ -182,13 +205,22 @@ public class CrashDetectsResource extends ServerResource {
         CrashDetect crashDetect = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
+    	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
         try {
             crashDetect = new CrashDetect();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
             if (id != null) {
-                Key key;
+            	//////////////////////
+            	// Authorization Rules
+            	//////////////////////
+            	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+            	if(currentUserMember == null) {
+    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+            	}
+
+            	Key key;
     			try {
     				key = KeyFactory.stringToKey(this.id);
     			} catch (Exception e) {

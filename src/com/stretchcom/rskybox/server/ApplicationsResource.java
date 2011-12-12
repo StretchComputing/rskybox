@@ -139,6 +139,9 @@ public class ApplicationsResource extends ServerResource {
 			if(!isUpdate) {
 				// default the created date to right now
 				application.setCreatedGmtDate(new Date());
+				
+				// create the application token
+				application.setToken(TF.get());
 			}
 
             em.persist(application);
@@ -151,7 +154,8 @@ public class ApplicationsResource extends ServerResource {
             	
             	jsonReturn = new JSONObject();
             	jsonReturn.put("apiStatus", apiStatus); 
-            	jsonReturn.put("applicationId", applicationId); 
+            	jsonReturn.put("applicationId", applicationId);
+            	jsonReturn.put("token", application.getToken());
             	log.info("for Create Application API, jsonReturn has been initialized with applicationId = " + applicationId);
             }
         } catch (IOException e) {
@@ -289,6 +293,7 @@ public class ApplicationsResource extends ServerResource {
             	
             	json.put("name", theApplication.getName());
             	json.put("version", theApplication.getVersion());
+            	json.put("token", theApplication.getToken());
             	
             	User user = Utility.getCurrentUser(getRequest());
             	if(user != null) {

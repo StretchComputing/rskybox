@@ -1,11 +1,16 @@
 package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 import javax.mail.Message;
@@ -24,13 +29,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.restlet.data.Status;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
+import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.User;
 
 public class CrashStackDataServlet extends HttpServlet {
 	private static final Logger log = Logger.getLogger(CrashStackDataServlet.class.getName());
@@ -45,6 +54,43 @@ public class CrashStackDataServlet extends HttpServlet {
 		log.info("CrashStackDataServlet.doGet() entered");
 		ServletOutputStream out = null;
 		resp.setContentType("application/octet-stream");
+		JSONObject json = new JSONObject();
+		
+    	//////////////////////
+    	// Authorization Rules
+    	//////////////////////
+		User currentUser = (User)req.getAttribute(RskyboxApplication.CURRENT_USER);
+		log.info("currentUser from filter = " + currentUser);
+		List<String> pathIds = this.getPathIds(req);
+		if (pathIds == null || pathIds.size() < 2 ) {
+			log.info("could not extract application ID or crashDetectId from URL");
+			return;
+		}
+		String applicationId = pathIds.get(0);
+		log.info("application ID = " + applicationId);
+		String crashDetectId = pathIds.get(1);
+		log.info("crashDetect ID = " + crashDetectId);
+		
+    	AppMember currentUserMember = AppMember.getAppMember(applicationId, KeyFactory.keyToString(currentUser.getKey()));
+    	if(currentUserMember == null) {
+    		log.info("current user is not a member of the application");
+//    		try {
+//				json.put("apiStatus", ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+//				byte[] byteArray = json.toString().getBytes("UTF-8");
+//				out = resp.getOutputStream();
+//				out.write(byteArray);
+//			} catch (JSONException e) {
+//				log.severe("exception = " + e.getMessage());
+//				e.printStackTrace();
+//			} finally {
+//				if (out != null) {
+//					out.flush();
+//					out.close();
+//				}
+//			}
+			return;
+    	}
+		
 		
 		// create a file name based on today's date
 		Format formatter = new SimpleDateFormat("MM_dd_yy");
@@ -55,12 +101,6 @@ public class CrashStackDataServlet extends HttpServlet {
 		resp.addHeader("Content-Disposition", "attachment; filename=" + fileName);
 
 		try {
-			String crashDetectId = this.getCrashDetectId(req);
-			if (crashDetectId == null) {
-				log.info("could not extract crashDetectId from URL");
-				return;
-			}
-
 			byte[] crashStackData = getCrashStackData(crashDetectId);
 			if (crashStackData == null)
 				return;
@@ -80,16 +120,29 @@ public class CrashStackDataServlet extends HttpServlet {
 	
 	// extracts crash detect id from URL
 	// returns crashDetectID or null if error
-	private String getCrashDetectId(HttpServletRequest theReq) {
+	private List<String> getPathIds(HttpServletRequest theReq) {
 		// extract the crash detect ID from the URL (for http://hostname.com/mywebapp/servlet/MyServlet/a/b;c=123?d=789, returns /a/b;c=123
 		String pathInfo = theReq.getPathInfo();
 		log.info("get Crash Stack Data URL pathInfo = " + pathInfo);
 		if(pathInfo == null || pathInfo.length() == 0) {return null;}
-		if(pathInfo.startsWith("/") && pathInfo.endsWith(FILE_EXT)) {
-		    int extIndex = pathInfo.indexOf(FILE_EXT);
-			pathInfo = pathInfo.substring(1, extIndex);
+		
+		// if all is going well, pathInfo should have the following format:  /<applicationId>/<crashDetectId>.plcrash
+		if(pathInfo.startsWith("/")) {
+			pathInfo = pathInfo.substring(1);
 		}
-		return pathInfo;
+		StringTokenizer st = new StringTokenizer(pathInfo, "/");
+		List<String> pathIds = new ArrayList<String>();
+		while (st.hasMoreElements()) {
+			String token = st.nextToken();
+			
+			// strip the file extension if there is one
+			if(token.endsWith(FILE_EXT)) {
+			    int extIndex = token.indexOf(FILE_EXT);
+				token = token.substring(0, extIndex);
+			}
+			pathIds.add(token);
+		}
+		return pathIds;
 	}
 	
 	// returns base64 decoded audio data of the specified feedback record if successful; null otherwise.

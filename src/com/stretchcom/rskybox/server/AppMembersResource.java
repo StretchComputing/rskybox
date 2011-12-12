@@ -133,7 +133,9 @@ public class AppMembersResource extends ServerResource {
 			}
 			
 			String role = null;
+			String originalRole = null;
 			if(json.has("role")) {
+				originalRole = appMember.getRole();
             	role = json.getString("role").toLowerCase();
             	if(appMember.isRoleValid(role)) {
                     appMember.setRole(role);
@@ -175,18 +177,36 @@ public class AppMembersResource extends ServerResource {
         	//////////////////////
         	// Authorization Rules
         	//////////////////////
-        	appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
-        	if(appMember == null) {
+        	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
 				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
-        	if(!appMember.hasManagerAuthority()) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER);
+        	if(!currentUserMember.hasManagerAuthority()) {
+        		if(isUpdate) {
+    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER);
+        		} else {
+    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER);
+        		}
         	}
         	if(role != null) {
-        		if(role.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
-    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
-        		} else if(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) && !appMember.hasOwnerAuthority()) {
-    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
+        		if(isUpdate) {
+        			if(originalRole != null && !originalRole.equalsIgnoreCase(role)) {
+        				if(role.equalsIgnoreCase(AppMember.OWNER_ROLE) || originalRole.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
+            				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
+        				}
+        				if(!currentUserMember.hasOwnerAuthority()   &&
+        					(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) || originalRole.equalsIgnoreCase(AppMember.MANAGER_ROLE)) ) {
+            				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
+        				}
+              		}
+        		} else {
+            		if(role.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
+        				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
+            		}
+            		
+        			if(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) && !currentUserMember.hasOwnerAuthority()) {
+        				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
+        			}
         		}
         	}
 
@@ -229,7 +249,7 @@ public class AppMembersResource extends ServerResource {
         	// Authorization Rules
         	//////////////////////
         	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
-        	if(appMember == null) {
+        	if(currentUserMember == null) {
 				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
