@@ -73,7 +73,7 @@ var RMODULE = (function (my, $) {
 
     json = JSON.stringify(confirmation);
     my.postJson(my.getRestPrefix() + '\/users', json, function (user) {
-      loginSucces(user.token);
+      loginSuccess(user.token);
     });
     return false;
   };
