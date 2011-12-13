@@ -23,7 +23,7 @@ public class ApiStatusCode {
 	public static final String CRASH_DETECT_ID_REQUIRED = "301";
 	public static final String CLIENT_LOG_ID_REQUIRED = "302";
 	public static final String USER_ID_REQUIRED = "303";
-	public static final String BETA_TESTER_ID_REQUIRED = "304";
+	public static final String END_USER_ID_REQUIRED = "304";
 	public static final String APPLICATION_ID_REQUIRED = "305";
 	public static final String APPLICATION_NAME_REQUIRED = "306";
 	public static final String APP_MEMBER_ID_REQUIRED = "307";
@@ -56,7 +56,7 @@ public class ApiStatusCode {
 	public static final String FEEDBACK_NOT_FOUND = "601";
 	public static final String CRASH_DETECT_NOT_FOUND = "602";
 	public static final String CLIENT_LOG_NOT_FOUND = "603";
-	public static final String BETA_TESTER_NOT_FOUND = "604";
+	public static final String END_USER_NOT_FOUND = "604";
 	public static final String APPLICATION_NOT_FOUND = "605";
 	public static final String APP_MEMBER_NOT_FOUND = "606";
 	public static final String EMAIL_ADDRESS_NOT_FOUND = "607";

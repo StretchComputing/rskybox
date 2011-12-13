@@ -44,8 +44,8 @@ public class RskyboxApplication extends Application {
         router.attach("/applications/{applicationId}/clientLogs", ClientLogsResource.class);
         router.attach("/applications/{applicationId}/clientLogs/{id}", ClientLogsResource.class);
 
-        router.attach("/applications/{applicationId}/betaTesters", BetaTestersResource.class);
-        router.attach("/applications/{applicationId}/betaTesters/{id}", BetaTestersResource.class);
+        router.attach("/applications/{applicationId}/endUsers", EndUsersResource.class);
+        router.attach("/applications/{applicationId}/endUsers/{id}", EndUsersResource.class);
 
         router.attach("/mobileCarriers", MobileCarriersResource.class);
         

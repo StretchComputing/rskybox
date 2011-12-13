@@ -29,12 +29,14 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.stretchcom.rskybox.models.BetaTester;
+import com.stretchcom.rskybox.models.AppMember;
+import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.EndUser;
 import com.stretchcom.rskybox.models.MobileCarrier;
 import com.stretchcom.rskybox.models.User;
 
-public class BetaTestersResource extends ServerResource {
-    private static final Logger log = Logger.getLogger(BetaTestersResource.class.getName());
+public class EndUsersResource extends ServerResource {
+    private static final Logger log = Logger.getLogger(EndUsersResource.class.getName());
     private String id;
 	private String applicationId;
 
@@ -45,52 +47,62 @@ public class BetaTestersResource extends ServerResource {
         this.applicationId = (String) getRequest().getAttributes().get("applicationId");
     }
 
-    // Handles 'Get Beta Tester API'
-    // Handles 'Get List of Beta Testers API
+    // Handles 'Get End User API'
+    // Handles 'Get List of End Users API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
-    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
     		return Utility.apiError(appIdStatus);
     	}
     	
         if (id != null) {
             // Get User Info API
-        	log.info("in Get Beta Tester Info API");
+        	log.info("in Get End User Info API");
         	return show();
         } else {
             // Get List of Feedback API
-        	log.info("Get List of Beta Testers API");
+        	log.info("Get List of End Users API");
         	return index();
         }
     }
 
-    // Handles 'Create Beta Tester API'
+    // Handles 'Create End User API'
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
-        return save_beta_tester(entity);
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
+        return save_end_user(entity);
     }
 
-    // Handles 'Update Beta Tester API'
+    // Handles 'Update End User API'
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
-    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
     		return Utility.apiError(appIdStatus);
     	}
     	
 		if (this.id == null || this.id.length() == 0) {
-			return Utility.apiError(ApiStatusCode.BETA_TESTER_ID_REQUIRED);
+			return Utility.apiError(ApiStatusCode.END_USER_ID_REQUIRED);
 		}
-        return save_beta_tester(entity);
+        return save_end_user(entity);
     }
 
-    // Handles 'Delete Beta Tester API'
+    // Handles 'Delete End User API'
     @Delete("json")
     public JsonRepresentation delete() {
         log.info("in delete");
+    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
+    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
+    		return Utility.apiError(appIdStatus);
+    	}
+    	
         JSONObject json = new JSONObject();
         EntityManager em = EMF.get().createEntityManager();
         
@@ -98,7 +110,7 @@ public class BetaTestersResource extends ServerResource {
         this.setStatus(Status.SUCCESS_OK);
         try {
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.BETA_TESTER_ID_REQUIRED);
+				return Utility.apiError(ApiStatusCode.END_USER_ID_REQUIRED);
 			}
 			
             Key key;
@@ -106,17 +118,17 @@ public class BetaTestersResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.BETA_TESTER_NOT_FOUND);
+				return Utility.apiError(ApiStatusCode.END_USER_NOT_FOUND);
 			}
             em.getTransaction().begin();
-            BetaTester betaTester = (BetaTester) em.createNamedQuery("BetaTester.getByKey").setParameter("key", key).getSingleResult();
-            em.remove(betaTester);
+            EndUser endUser = (EndUser) em.createNamedQuery("EndUser.getByKey").setParameter("key", key).getSingleResult();
+            em.remove(endUser);
             em.getTransaction().commit();
         } catch (NoResultException e) {
-			log.info("Beta Tester not found");
-			apiStatus = ApiStatusCode.BETA_TESTER_NOT_FOUND;
+			log.info("End User not found");
+			apiStatus = ApiStatusCode.END_USER_NOT_FOUND;
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more beta testers have same key");
+			log.severe("should never happen - two or more end users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} finally {
             if (em.getTransaction().isActive()) {
@@ -142,16 +154,25 @@ public class BetaTestersResource extends ServerResource {
         
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
+    	User currentUser = Utility.getCurrentUser(getRequest());
         try {
-            List<BetaTester> betaTesters = new ArrayList<BetaTester>();
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(appMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
+            List<EndUser> endUsers = new ArrayList<EndUser>();
             JSONArray ja = new JSONArray();
-            betaTesters = (List<BetaTester>) em.createNamedQuery("BetaTester.getAllWithApplicationId")
+            endUsers = (List<EndUser>) em.createNamedQuery("EndUser.getAllWithApplicationId")
             		.setParameter("applicationId", this.applicationId)
             		.getResultList();
-            for (BetaTester betaTester : betaTesters) {
-                ja.put(getBetaTesterJson(betaTester));
+            for (EndUser endUser : endUsers) {
+                ja.put(getEndUserJson(endUser));
             }
-            json.put("betaTesters", ja);
+            json.put("endUsers", ja);
             json.put("apiStatus", apiStatus);
         } catch (JSONException e) {
             log.severe("exception = " + e.getMessage());
@@ -167,74 +188,92 @@ public class BetaTestersResource extends ServerResource {
 
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
-		BetaTester betaTester = null;
+    	User currentUser = Utility.getCurrentUser(getRequest());
+		EndUser endUser = null;
 		try {
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.BETA_TESTER_ID_REQUIRED);
+				return Utility.apiError(ApiStatusCode.END_USER_ID_REQUIRED);
 			}
 			
-			// id of beta tester specified
+			// id of end user specified
             Key key;
 			try {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.BETA_TESTER_NOT_FOUND);
+				return Utility.apiError(ApiStatusCode.END_USER_NOT_FOUND);
 			}
 			
-    		betaTester = (BetaTester)em.createNamedQuery("BetaTester.getByKey")
+    		endUser = (EndUser)em.createNamedQuery("EndUser.getByKey")
 				.setParameter("key", key)
 				.getSingleResult();
 		} catch (NoResultException e) {
-			log.info("Beta Tester not found");
-			apiStatus = ApiStatusCode.BETA_TESTER_NOT_FOUND;
+			log.info("End User not found");
+			apiStatus = ApiStatusCode.END_USER_NOT_FOUND;
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more beta testers have same key");
+			log.severe("should never happen - two or more end users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getBetaTesterJson(betaTester, apiStatus));
+        return new JsonRepresentation(getEndUserJson(endUser, apiStatus));
     }
 
-    private JsonRepresentation save_beta_tester(Representation entity) {
+    private JsonRepresentation save_end_user(Representation entity) {
         EntityManager em = EMF.get().createEntityManager();
 
-        BetaTester betaTester = null;
+        EndUser endUser = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
+    	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
         try {
-            betaTester = new BetaTester();
+            endUser = new EndUser();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
             if (id != null) {
+            	//////////////////////
+            	// Authorization Rules
+            	//////////////////////
+            	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+            	if(currentUserMember == null) {
+    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+            	}
+
                 Key key = KeyFactory.stringToKey(this.id);
-                betaTester = (BetaTester) em.createNamedQuery("BetaTester.getByKey").setParameter("key", key).getSingleResult();
+                endUser = (EndUser) em.createNamedQuery("EndUser.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
             }
             
             if (!isUpdate && json.has("userName")) {
-            	betaTester.setUserName(json.getString("userName"));
+            	endUser.setUserName(json.getString("userName"));
             }
             
             if (!isUpdate && json.has("application")) {
-            	betaTester.setApplication(json.getString("application"));
+            	endUser.setApplication(json.getString("application"));
             }
             
             if (json.has("version")) {
-            	betaTester.setVersion(json.getString("version"));
+            	endUser.setVersion(json.getString("version"));
             }
             
             if (!isUpdate && json.has("instanceUrl")) {
-            	betaTester.setInstanceUrl(json.getString("instanceUrl"));
+            	endUser.setInstanceUrl(json.getString("instanceUrl"));
             }
             
             if(!isUpdate) {
-            	betaTester.setApplicationId(this.applicationId);
+            	endUser.setApplicationId(this.applicationId);
             }
             
-            em.persist(betaTester);
+            em.persist(endUser);
             em.getTransaction().commit();
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
@@ -245,10 +284,10 @@ public class BetaTestersResource extends ServerResource {
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         } catch (NoResultException e) {
-			log.info("Beta Tester not found");
-			apiStatus = ApiStatusCode.BETA_TESTER_NOT_FOUND;
+			log.info("End User not found");
+			apiStatus = ApiStatusCode.END_USER_NOT_FOUND;
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more beta testers have same key");
+			log.severe("should never happen - two or more end users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} finally {
             if (em.getTransaction().isActive()) {
@@ -257,29 +296,29 @@ public class BetaTestersResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getBetaTesterJson(betaTester, apiStatus));
+        return new JsonRepresentation(getEndUserJson(endUser, apiStatus));
     }
     
-    private JSONObject getBetaTesterJson(BetaTester betaTester) {
-    	return getBetaTesterJson(betaTester, null);
+    private JSONObject getEndUserJson(EndUser endUser) {
+    	return getEndUserJson(endUser, null);
     }
 
-    private JSONObject getBetaTesterJson(BetaTester betaTester, String theApiStatus) {
+    private JSONObject getEndUserJson(EndUser theEndUser, String theApiStatus) {
         JSONObject json = new JSONObject();
 
         try {
         	if(theApiStatus != null) {
         		json.put("apiStatus", theApiStatus);
         	}
-        	if(betaTester != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
-                json.put("id", KeyFactory.keyToString(betaTester.getKey()));
-                json.put("userName", betaTester.getUserName());
-                json.put("application", betaTester.getApplication());
-                json.put("version", betaTester.getVersion());
-                json.put("instanceUrl", betaTester.getInstanceUrl());
+        	if(theEndUser != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
+                json.put("id", KeyFactory.keyToString(theEndUser.getKey()));
+                json.put("userName", theEndUser.getUserName());
+                json.put("application", theEndUser.getApplication());
+                json.put("version", theEndUser.getVersion());
+                json.put("instanceUrl", theEndUser.getInstanceUrl());
         	}
         } catch (JSONException e) {
-        	log.severe("getBetaTesterJson() error creating JSON return object. Exception = " + e.getMessage());
+        	log.severe("getEndUserJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;
