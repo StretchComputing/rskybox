@@ -665,7 +665,9 @@ public class UsersResource extends ServerResource {
             } else {
             	jsonReturn.put("phoneNumber", phoneNumber);
             }
-            
+            if (json.has("testApp") && json.getBoolean("testApp")) {
+                jsonReturn.put("confirmationCode", confirmationCode);
+            }
             em.persist(user);
             em.getTransaction().commit();
         } catch (IOException e) {
