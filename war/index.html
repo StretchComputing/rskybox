@@ -130,7 +130,12 @@ var RMODULE = (function (my, $) {
 
   loginSuccess = function (token) {
     Cookie.set('token', token, 9000, '\/');
-    $.mobile.changePage('\/html5');
+    // May need to set the cookie on the /html5 page because of crossing domains.
+    if (location.hostname === "www.rskybox.com") {
+      my.redirect('https:\/\/rskybox-stretchcom.appspot.com\/html5');
+    } else {
+      my.redirect('\/html5');
+    }
   };
 
 
