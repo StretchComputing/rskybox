@@ -114,12 +114,7 @@ var RMODULE = (function (my, $) {
 
   loginSuccess = function (token) {
     Cookie.set('token', token, 9000, '\/');
-    // May need to set the cookie on the /html5 page because of crossing domains.
-    if (location.hostname === "www.rskybox.com") {
-      my.redirect('https:\/\/rskybox-stretchcom.appspot.com\/html5');
-    } else {
-      my.redirect('\/html5');
-    }
+    my.redirect('\/html5');
   };
 
 
@@ -127,11 +122,7 @@ var RMODULE = (function (my, $) {
     // If there is a current user, redirect right away.
     $('#index').live('pagebeforecreate', function () {
       my.getCurrentUser(function () {
-        if (location.hostname === "www.rskybox.com") {
-          my.redirect('https:\/\/rskybox-stretchcom.appspot.com\/html5');
-        } else {
-          my.redirect('\/html5');
-        }
+        my.redirect('\/html5');
       });
     });
 

@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <script> if (location.hostname === "www.rskybox.com") { location.href = "https://rskybox-stretchcom.appspot.com"; } </script>
     <title>rSkybox</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0/jquery.mobile-1.0.min.css" />
@@ -130,12 +131,7 @@ var RMODULE = (function (my, $) {
 
   loginSuccess = function (token) {
     Cookie.set('token', token, 9000, '\/');
-    // May need to set the cookie on the /html5 page because of crossing domains.
-    if (location.hostname === "www.rskybox.com") {
-      my.redirect('https:\/\/rskybox-stretchcom.appspot.com\/html5');
-    } else {
-      my.redirect('\/html5');
-    }
+    my.redirect('\/html5');
   };
 
 
@@ -143,11 +139,7 @@ var RMODULE = (function (my, $) {
     // If there is a current user, redirect right away.
     $('#index').live('pagebeforecreate', function () {
       my.getCurrentUser(function () {
-        if (location.hostname === "www.rskybox.com") {
-          my.redirect('https:\/\/rskybox-stretchcom.appspot.com\/html5');
-        } else {
-          my.redirect('\/html5');
-        }
+        my.redirect('\/html5');
       });
     });
 

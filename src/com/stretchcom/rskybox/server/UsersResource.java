@@ -23,7 +23,6 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.Variant;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
-import org.restlet.resource.Options;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
@@ -64,12 +63,6 @@ public class UsersResource extends ServerResource {
 				log.info("UsersResource() - decoded password = " + this.password);
 			}
 		}
-    }
-
-    // Handles OPTIONS for Get User Current API
-    @Options
-    public Representation options() {
-        return null;
     }
 
     // Handles 'Get User Info API'
