@@ -121,9 +121,11 @@ var RMODULE = (function (my, $) {
   my.init = function () {
     // If there is a current user, redirect right away.
     $('#index').live('pagebeforecreate', function () {
-      my.getCurrentUser(function () {
-        my.redirect('\/html5');
-      });
+      if (Cookie.get('token')) {
+        my.getCurrentUser(function () {
+          my.redirect('\/html5');
+        });
+      }
     });
 
     $('#index').live('pageshow', function () {
