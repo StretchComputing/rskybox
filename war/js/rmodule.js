@@ -125,7 +125,6 @@ var RMODULE = (function (my, $) {
     default:
       window.console.log('pageLoadingCount called with inappropriate operator.');
     }
-    console.log('pageLoadCount=' + pageLoadCount);
     return pageLoadCount;
   };
 

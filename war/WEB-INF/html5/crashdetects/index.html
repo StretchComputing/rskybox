@@ -37,7 +37,7 @@ var RMODULE = (function (my) {
     html += '<div>Summary: ' + item.summary + '<\/div>';
     html += '<div>';
     html += '  Crash Stack Data: ';
-    html += '  <a href="/crashStackData/' + item.id + '.plcrash" data-ajax="false">plcrash file<\/a>';
+    html += '  <a href="\/crashStackData\/' + my.getParameterByName(window.location.search, 'id') + '\/' + item.id + '.plcrash" data-ajax="false">plcrash file<\/a>';
     html += '<\/div>';
     return html;
   };
