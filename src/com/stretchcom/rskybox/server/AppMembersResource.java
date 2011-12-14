@@ -41,7 +41,7 @@ public class AppMembersResource extends ServerResource {
     @Override
     protected void doInit() throws ResourceException {
         log.info("in doInit");
-        id = (String) getRequest().getAttributes().get("id");
+        this.id = (String) getRequest().getAttributes().get("id");
         this.applicationId = (String) getRequest().getAttributes().get("applicationId");
     }
 
@@ -49,9 +49,8 @@ public class AppMembersResource extends ServerResource {
     // Handles 'Get List of AppMembers API
     @Get("json")
     public JsonRepresentation get(Variant variant) {
-    	String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
-    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    	if(this.applicationId == null) {
+    		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
     	}
     	
         if (id != null) {
@@ -69,6 +68,10 @@ public class AppMembersResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
+    	if(this.applicationId == null) {
+    		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
+    	}
+    	
         return save_appMember(entity);
     }
 
@@ -76,10 +79,9 @@ public class AppMembersResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
-        String appIdStatus = Utility.verifyUserAuthorizedForApplication(getRequest(), this.applicationId);
-        if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-            return Utility.apiError(appIdStatus);
-        }
+    	if(this.applicationId == null) {
+    		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
+    	}
     	
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(ApiStatusCode.APP_MEMBER_ID_REQUIRED);
@@ -93,6 +95,7 @@ public class AppMembersResource extends ServerResource {
         AppMember appMember = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
+    	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
         try {
             appMember = new AppMember();
@@ -113,19 +116,35 @@ public class AppMembersResource extends ServerResource {
                 isUpdate = true;
             }
             
-			if(!isUpdate && json.has("emailAddress")) {
-				appMember.setEmailAddress(json.getString("emailAddress"));
-				log.info("stored email address value = " + appMember.getEmailAddress());
+			if(!isUpdate) {
+				if(json.has("emailAddress")) {
+					String emailAddress = json.getString("emailAddress");
+					// verify that not already a member of this application
+					AppMember appMemberWithEmail = AppMember.getAppMemberWithEmailAddress(this.applicationId, emailAddress);
+					if(appMemberWithEmail != null) {
+						return Utility.apiError(ApiStatusCode.USER_ALREADY_MEMBER);
+					}
+					
+					appMember.setEmailAddress(emailAddress);
+					log.info("stored email address value = " + appMember.getEmailAddress());
+				} else {
+					return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_IS_REQUIRED);
+				}
 			}
 			
+			String role = null;
+			String originalRole = null;
 			if(json.has("role")) {
-            	String role = json.getString("role").toLowerCase();
+				originalRole = appMember.getRole();
+            	role = json.getString("role").toLowerCase();
             	if(appMember.isRoleValid(role)) {
                     appMember.setRole(role);
             	} else {
 					log.info("invalid status = " + role);
 					return Utility.apiError(ApiStatusCode.INVALID_ROLE);
             	}
+			} else if(!isUpdate) {
+				return Utility.apiError(ApiStatusCode.ROLE_IS_REQUIRED);
 			}
 			
 			if(isUpdate) {
@@ -154,6 +173,42 @@ public class AppMembersResource extends ServerResource {
 				// default the created date to right now
 				appMember.setCreatedGmtDate(new Date());
 			}
+			
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+        	if(!currentUserMember.hasManagerAuthority()) {
+        		if(isUpdate) {
+    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER);
+        		} else {
+    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER);
+        		}
+        	}
+        	if(role != null) {
+        		if(isUpdate) {
+        			if(originalRole != null && !originalRole.equalsIgnoreCase(role)) {
+        				if(role.equalsIgnoreCase(AppMember.OWNER_ROLE) || originalRole.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
+            				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
+        				}
+        				if(!currentUserMember.hasOwnerAuthority()   &&
+        					(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) || originalRole.equalsIgnoreCase(AppMember.MANAGER_ROLE)) ) {
+            				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
+        				}
+              		}
+        		} else {
+            		if(role.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
+        				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
+            		}
+            		
+        			if(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) && !currentUserMember.hasOwnerAuthority()) {
+        				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
+        			}
+        		}
+        	}
 
             em.persist(appMember);
             em.getTransaction().commit();
@@ -187,9 +242,18 @@ public class AppMembersResource extends ServerResource {
 
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
-		AppMember appMember = null;
+    	User currentUser = Utility.getCurrentUser(getRequest());
+    	AppMember appMember = null;
 		try {
-			if (this.id == null || this.id.length() == 0) {
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
+        	if (this.id == null || this.id.length() == 0) {
 				return Utility.apiError(ApiStatusCode.APP_MEMBER_ID_REQUIRED);
 			}
 			
@@ -221,8 +285,17 @@ public class AppMembersResource extends ServerResource {
         
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
+    	User currentUser = Utility.getCurrentUser(getRequest());
         try {
-			List<AppMember> appMembers = null;
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(appMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
+        	List<AppMember> appMembers = null;
             JSONArray ja = new JSONArray();
             
 			appMembers= (List<AppMember>)em.createNamedQuery("AppMember.getAllWithApplicationId")

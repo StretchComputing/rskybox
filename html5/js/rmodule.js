@@ -29,9 +29,8 @@ var RMODULE = (function (my, $) {
 
   // Returns the currently valid REST path prefix.
   my.getRestPrefix = function () {
-    var restUrl;
+    var restUrl = '\/rest\/v1'
 
-    restUrl = '\/rest\/v1'
     if (window.location.search) {
       restUrl += '\/applications\/' + my.getParameterByName(window.location.search, 'id');
     }

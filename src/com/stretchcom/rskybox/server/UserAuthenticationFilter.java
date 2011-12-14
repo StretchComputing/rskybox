@@ -55,7 +55,7 @@ public class UserAuthenticationFilter implements Filter {
         if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
         	HttpServletRequest httpRequest = (HttpServletRequest)request;
     		HttpServletResponse httpResponse = (HttpServletResponse)response;
-    		
+
     		// logout all request cookies
     		Cookie[] cookies = httpRequest.getCookies();
     		if(cookies != null) {
@@ -72,11 +72,11 @@ public class UserAuthenticationFilter implements Filter {
     		if(isRequestAuthentic) {
     			log.info("request is authentic");
     			
-    			// if present, store currentUser in HTTP request for use downstream
+    			// if present, store in HTTP request for use downstream
     			if(outParameterList.size() > 0) {
     				User currentUser = (User)outParameterList.get(0);
     				httpRequest.setAttribute(RskyboxApplication.CURRENT_USER, currentUser);
-    				log.info("setting currentUser for downstream use");
+    				log.info("setting currentUser for downstream use. currentUser = " + currentUser);
     			}
     			
     			// adjust URL for non-REST calls
@@ -92,7 +92,6 @@ public class UserAuthenticationFilter implements Filter {
         } else {
         	log.info("***** request is NOT an instance of HttpServletRequest *******");
         }
-        
         log.info("calling chain.doFilter() in doFilter() ...");
         chain.doFilter(request, response);
     }
@@ -152,7 +151,8 @@ public class UserAuthenticationFilter implements Filter {
     // adjust URL for non-REST calls
     // returns True if URL adjusted by forwarding -- so filter processing is complete
     private Boolean adjustUrl(String theUrl, HttpServletRequest theHttpRequest, HttpServletResponse theHttpResponse) {
-		if(!theUrl.contains("/rest/")) {
+    	// skip over the REST APIs and the crashStackData and Audio Servlets
+		if(!theUrl.contains("/rest/") && !theUrl.contains("/crashStackData/") && !theUrl.contains("/audio/")) {
             // any non-REST request needs to be redirected to the WEB-INF/html directory
     		String uri = theHttpRequest.getRequestURI();
     		if(!uri.toLowerCase().contains(".html") && !uri.endsWith("/")) {

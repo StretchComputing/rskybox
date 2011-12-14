@@ -379,6 +379,7 @@ public class User {
 	            		Application application = (Application)em.createNamedQuery("Application.getByKey")
 	            				.setParameter("key", appKey)
 	            				.getSingleResult();
+	            		application.setMemberRole(au.getRole());
 	            		applications.add(application);
 					} catch (IllegalArgumentException e) {
 						log.severe("User.getApplications(): could not convert AppMember ApplicationId to an Application key");

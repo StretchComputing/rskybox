@@ -77,16 +77,29 @@ public class ApplicationsResource extends ServerResource {
 
     private JsonRepresentation save_application(Representation entity) {
         EntityManager em = EMF.get().createEntityManager();
+        JSONObject jsonReturn = null;
 
         Application application = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
+    	User currentUser = Utility.getCurrentUser(getRequest());
+        Boolean isUpdate = false;
+        String memberRole = null;
         em.getTransaction().begin();
         try {
             application = new Application();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
-            Boolean isUpdate = false;
+            
             if (id != null) {
+            	//////////////////////
+            	// Authorization Rules
+            	//////////////////////
+            	AppMember appMember = AppMember.getAppMember(id, KeyFactory.keyToString(currentUser.getKey()));
+            	if(appMember == null) {
+					return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+            	}
+            	memberRole = appMember.getRole();
+            	
                 Key key;
 				try {
 					key = KeyFactory.stringToKey(this.id);
@@ -101,12 +114,21 @@ public class ApplicationsResource extends ServerResource {
                 isUpdate = true;
             }
             
-			if(!isUpdate && json.has("name")) {
-				application.setName(json.getString("name"));
-				log.info("stored name value = " + application.getName());
-			} else {
-				log.info("no JSON name field found");
-			}
+			if(!isUpdate) {
+				if(json.has("name")) {
+					String appName = json.getString("name");
+					application.setName(appName);
+					log.info("stored name value = " + application.getName());
+				
+					Application app = Application.getApplicationWithName(appName);
+					if(app != null) {
+						return Utility.apiError(ApiStatusCode.APPLICATION_NAME_ALREADY_USED);
+					}
+				} else {
+					log.info("no JSON name field found");
+					return Utility.apiError(ApiStatusCode.APPLICATION_NAME_REQUIRED);
+				}
+			} 
 			
 			if(json.has("version")) {
 				application.setVersion(json.getString("version"));
@@ -117,10 +139,25 @@ public class ApplicationsResource extends ServerResource {
 			if(!isUpdate) {
 				// default the created date to right now
 				application.setCreatedGmtDate(new Date());
+				
+				// create the application token
+				application.setToken(TF.get());
 			}
 
             em.persist(application);
             em.getTransaction().commit();
+            
+            if(!isUpdate) {
+            	// Create User API so add currentUser creating this application as owner
+            	String applicationId = KeyFactory.keyToString(application.getKey());
+            	AppMember.addAppMember(applicationId, KeyFactory.keyToString(currentUser.getKey()), AppMember.OWNER_ROLE);
+            	
+            	jsonReturn = new JSONObject();
+            	jsonReturn.put("apiStatus", apiStatus); 
+            	jsonReturn.put("applicationId", applicationId);
+            	jsonReturn.put("token", application.getToken());
+            	log.info("for Create Application API, jsonReturn has been initialized with applicationId = " + applicationId);
+            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -142,7 +179,11 @@ public class ApplicationsResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getApplicationJson(application, apiStatus, false));
+        if(isUpdate) {
+        	jsonReturn = getApplicationJson(application, apiStatus, false, memberRole);
+        }
+        log.info("about to return");
+        return new JsonRepresentation(jsonReturn);
     }
 
     private JsonRepresentation show() {
@@ -152,8 +193,19 @@ public class ApplicationsResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
 		Application application = null;
+    	User currentUser = Utility.getCurrentUser(getRequest());
+		String memberRole = null;
 		try {
-			if (this.id == null || this.id.length() == 0) {
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember appMember = AppMember.getAppMember(id, KeyFactory.keyToString(currentUser.getKey()));
+        	if(appMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+        	memberRole = appMember.getRole();
+
+        	if (this.id == null || this.id.length() == 0) {
 				return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
 			}
 			
@@ -175,7 +227,7 @@ public class ApplicationsResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-		JSONObject jsonReturn = getApplicationJson(application, apiStatus, false);
+		JSONObject jsonReturn = getApplicationJson(application, apiStatus, false, memberRole);
 		try {
 			jsonReturn.put("isAdmin", User.isAdmin());
 		} catch (JSONException e) {
@@ -201,7 +253,7 @@ public class ApplicationsResource extends ServerResource {
         		String userId = KeyFactory.keyToString(user.getKey());
     			applications = user.getApplications();
                 for (Application app : applications) {
-                    ja.put(getApplicationJson(app, true));
+                    ja.put(getApplicationJson(app, true, app.getMemberRole()));
                 }
                 json.put("applications", ja);
                 json.put("apiStatus", apiStatus);
@@ -216,39 +268,40 @@ public class ApplicationsResource extends ServerResource {
         return new JsonRepresentation(json);
     }
     
-    private JSONObject getApplicationJson(Application application, Boolean isList) {
-    	return getApplicationJson(application, null, isList);
+    private JSONObject getApplicationJson(Application application, Boolean isList, String memberRole) {
+    	return getApplicationJson(application, null, isList, memberRole);
     }
 
-    private JSONObject getApplicationJson(Application application, String theApiStatus, Boolean isList) {
+    private JSONObject getApplicationJson(Application theApplication, String theApiStatus, Boolean theIsList, String theMemberRole) {
         JSONObject json = new JSONObject();
 
         try {
         	if(theApiStatus != null) {
         		json.put("apiStatus", theApiStatus);
         	}
-        	if(application != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
-        		json.put("id", KeyFactory.keyToString(application.getKey()));
+        	if(theApplication != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
+        		json.put("id", KeyFactory.keyToString(theApplication.getKey()));
     			
-            	Date createdDate = application.getCreatedGmtDate();
+            	Date createdDate = theApplication.getCreatedGmtDate();
             	// TODO support time zones
             	if(createdDate != null) {
             		TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
             		String dateFormat = RskyboxApplication.INFO_DATE_FORMAT;
-            		if(isList) {dateFormat = RskyboxApplication.LIST_DATE_FORMAT;}
+            		if(theIsList) {dateFormat = RskyboxApplication.LIST_DATE_FORMAT;}
             		json.put("date", GMT.convertToLocalDate(createdDate, tz, dateFormat));
             	}
             	
-            	json.put("name", application.getName());
-            	json.put("version", application.getVersion());
+            	json.put("name", theApplication.getName());
+            	json.put("version", theApplication.getVersion());
+            	json.put("token", theApplication.getToken());
             	
             	User user = Utility.getCurrentUser(getRequest());
             	if(user != null) {
             		String userId = KeyFactory.keyToString(user.getKey());
-            		String applicationId = KeyFactory.keyToString(application.getKey());
+            		String applicationId = KeyFactory.keyToString(theApplication.getKey());
             		AppMember am = AppMember.getAppMember(applicationId, userId);
-            		if(am != null) {
-                    	json.put("role", am.getRole());
+            		if(theMemberRole != null) {
+                    	json.put("role", theMemberRole);
             		}
             	}
         	}

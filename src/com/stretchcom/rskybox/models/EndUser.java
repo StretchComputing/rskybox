@@ -14,24 +14,24 @@ import com.google.appengine.api.datastore.Key;
 @Entity
 @NamedQueries({
     @NamedQuery(
-    		name="BetaTester.getAll",
-    		query="SELECT bt FROM BetaTester bt"
+    		name="EndUser.getAll",
+    		query="SELECT eu FROM EndUser eu"
     ),
     @NamedQuery(
-    		name="BetaTester.getAllWithApplicationId",
-    		query="SELECT bt FROM BetaTester bt and bt.applicationId = :applicationId"
+    		name="EndUser.getAllWithApplicationId",
+    		query="SELECT eu FROM EndUser eu and eu.applicationId = :applicationId"
     ),
     @NamedQuery(
-    		name="BetaTester.getByKey",
-    		query="SELECT bt FROM BetaTester bt WHERE bt.key = :key"
+    		name="EndUser.getByKey",
+    		query="SELECT eu FROM EndUser eu WHERE eu.key = :key"
     ),
     @NamedQuery(
-    		name="BetaTester.getByApplicationId",
-    		query="SELECT bt FROM BetaTester bt WHERE bt.applicationId = :applicationId"
+    		name="EndUser.getByApplicationId",
+    		query="SELECT eu FROM EndUser eu WHERE eu.applicationId = :applicationId"
     ),
 })
-public class BetaTester {
-    private static final Logger log = Logger.getLogger(BetaTester.class.getName());
+public class EndUser {
+    private static final Logger log = Logger.getLogger(EndUser.class.getName());
 	
 	private String userName;
 	private String application;

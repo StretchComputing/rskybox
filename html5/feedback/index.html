@@ -21,7 +21,7 @@ var RMODULE = (function (my) {
     html += '<div>';
     html += '  Feedback: ';
     html += '  <audio controls>';
-    html += '    <source src="/audio/' + item.id + '.mp4" type="audio/mp4">';
+    html += '    <source src="/audio/' + my.getParameterByName(window.location.search, 'id') + '\/' + item.id + '.mp4" type="audio/mp4">';
     html += '  <\/audio>';
     html += '<\/div>';
     return html;

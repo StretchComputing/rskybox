@@ -73,7 +73,7 @@ var RMODULE = (function (my, $) {
 
     json = JSON.stringify(confirmation);
     my.postJson(my.getRestPrefix() + '\/users', json, function (user) {
-      loginSucces(user.token);
+      loginSuccess(user.token);
     });
     return false;
   };
@@ -113,22 +113,19 @@ var RMODULE = (function (my, $) {
 
 
   loginSuccess = function (token) {
-    console.log(token);
     Cookie.set('token', token, 9000, '\/');
-    $.mobile.changePage('\/html5');
+    my.redirect('\/html5');
   };
 
 
   my.init = function () {
     // If there is a current user, redirect right away.
     $('#index').live('pagebeforecreate', function () {
-      my.getCurrentUser(function () {
-        if (location.hostname === "www.rskybox.com") {
-          my.redirect('https:\/\/rskybox-stretchcom.appspot.com\/html5');
-        } else {
+      if (Cookie.get('token')) {
+        my.getCurrentUser(function () {
           my.redirect('\/html5');
-        }
-      });
+        });
+      }
     });
 
     $('#index').live('pageshow', function () {

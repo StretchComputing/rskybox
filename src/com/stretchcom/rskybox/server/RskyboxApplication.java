@@ -10,8 +10,6 @@ public class RskyboxApplication extends Application {
     private static final Logger log = Logger.getLogger(RskyboxApplication.class.getName());
     public static final String APPLICATION_BASE_URL = "https://rskybox-stretchcom.appspot.com/";
     public static final String APPLICATION_WELCOME_PAGE = APPLICATION_BASE_URL + "index.html";
-    // TODO what is the real login page
-    //public static final String SIGN_IN_PAGE = "https://www.rskybox.com";
     public static final String SIGN_IN_PAGE = "/";
     public static final String LIST_DATE_FORMAT = "MM/dd/yy kk:mm";
     public static final String INFO_DATE_FORMAT = "MM/dd/yyyy 'at' hh:mm a";
@@ -44,8 +42,8 @@ public class RskyboxApplication extends Application {
         router.attach("/applications/{applicationId}/clientLogs", ClientLogsResource.class);
         router.attach("/applications/{applicationId}/clientLogs/{id}", ClientLogsResource.class);
 
-        router.attach("/applications/{applicationId}/betaTesters", BetaTestersResource.class);
-        router.attach("/applications/{applicationId}/betaTesters/{id}", BetaTestersResource.class);
+        router.attach("/applications/{applicationId}/endUsers", EndUsersResource.class);
+        router.attach("/applications/{applicationId}/endUsers/{id}", EndUsersResource.class);
 
         router.attach("/mobileCarriers", MobileCarriersResource.class);
         

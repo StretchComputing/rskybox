@@ -1,6 +1,9 @@
 package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
@@ -17,7 +20,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
+import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Feedback;
+import com.stretchcom.rskybox.models.User;
 
 @SuppressWarnings("serial")
 public class AudioServlet extends HttpServlet {
@@ -35,11 +40,28 @@ public class AudioServlet extends HttpServlet {
         resp.setContentType("audio/mp4");
 
         try {
-            String feedbackId = this.getFeedbackId(req);
-            if (feedbackId == null) {
-                log.info("could not extract feedbackID from URL");
-                return;
-            }
+    		
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+    		User currentUser = (User)req.getAttribute(RskyboxApplication.CURRENT_USER);
+    		log.info("currentUser from filter = " + currentUser);
+    		
+    		List<String> pathIds = this.getPathIds(req);
+    		if (pathIds == null || pathIds.size() < 2 ) {
+    			log.info("could not extract application ID or feedbackId from URL");
+    			return;
+    		}
+    		String applicationId = pathIds.get(0);
+    		log.info("application ID = " + applicationId);
+    		String feedbackId = pathIds.get(1);
+    		log.info("feedback ID = " + feedbackId);
+    		
+        	AppMember currentUserMember = AppMember.getAppMember(applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
+        		log.info("current user is not a member of the application");
+    			return;
+        	}
 
             byte[] voice = getFeedbackAudio(feedbackId);
             if (voice == null)
@@ -77,24 +99,32 @@ public class AudioServlet extends HttpServlet {
             }
         }
     }
-
-    // extracts feedback id from URL
-    // returns feedbackID or null if error
-    private String getFeedbackId(HttpServletRequest theReq) {
-        // extract the feedback ID from the URL (for
-        // http://hostname.com/mywebapp/servlet/MyServlet/a/b;c=123?d=789,
-        // returns /a/b;c=123
-        String pathInfo = theReq.getPathInfo();
-        log.info("get Audio URL pathInfo = " + pathInfo);
-        if (pathInfo == null || pathInfo.length() == 0) {
-            return null;
-        }
-        if (pathInfo.startsWith("/") && pathInfo.endsWith(AUDIO_EXT)) {
-            int extIndex = pathInfo.indexOf(AUDIO_EXT);
-            pathInfo = pathInfo.substring(1, extIndex);
-        }
-        return pathInfo;
-    }
+    
+	// returns applicationID and feedbackID in List or null if error
+	private List<String> getPathIds(HttpServletRequest theReq) {
+		// extract the crash detect ID from the URL (for http://hostname.com/mywebapp/servlet/MyServlet/a/b;c=123?d=789, returns /a/b;c=123
+		String pathInfo = theReq.getPathInfo();
+		log.info("get Feedback Audio URL pathInfo = " + pathInfo);
+		if(pathInfo == null || pathInfo.length() == 0) {return null;}
+		
+		// if all is going well, pathInfo should have the following format:  /<applicationId>/<feedbackId>.mp4
+		if(pathInfo.startsWith("/")) {
+			pathInfo = pathInfo.substring(1);
+		}
+		StringTokenizer st = new StringTokenizer(pathInfo, "/");
+		List<String> pathIds = new ArrayList<String>();
+		while (st.hasMoreElements()) {
+			String token = st.nextToken();
+			
+			// strip the file extension if there is one
+			if(token.endsWith(AUDIO_EXT)) {
+			    int extIndex = token.indexOf(AUDIO_EXT);
+				token = token.substring(0, extIndex);
+			}
+			pathIds.add(token);
+		}
+		return pathIds;
+	}
 
     // returns base64 decoded audio data of the specified feedback record if
     // successful; null otherwise.
