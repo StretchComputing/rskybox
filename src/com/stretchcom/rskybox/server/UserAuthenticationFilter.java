@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.appengine.api.utils.SystemProperty;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
@@ -75,6 +76,15 @@ public class UserAuthenticationFilter implements Filter {
     			// if present, store in HTTP request for use downstream
     			if(outParameterList.size() > 0) {
     				User currentUser = (User)outParameterList.get(0);
+    				if(SystemProperty.environment.value() == SystemProperty.Environment.Value.Development) {
+    					// for now, in Dev, all users are super admins
+    					log.info("Dev Environment: making user a Super Admin");
+    					currentUser.setIsSuperAdmin(true);
+    				} else {
+    					currentUser.setIsSuperAdmin(User.isAdmin());
+    				}
+    				log.info("isSuperAdmin = " + currentUser.getIsSuperAdmin());
+    				
     				httpRequest.setAttribute(RskyboxApplication.CURRENT_USER, currentUser);
     				log.info("setting currentUser for downstream use. currentUser = " + currentUser);
     			}
