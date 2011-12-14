@@ -4,13 +4,17 @@ title: rSkybox
 options: Options
 new: New App
 ---
+<script src="/js/forms.js"></script>
 <script src="/js/item.js"></script>
 <script>
 'use strict';
 
 var RMODULE = (function (my, $) {
 
-  var old_init;
+  var
+    old_init,
+    saveItem,
+    saveOptions;
 
   my.itemName = function () {
     return 'applications';
@@ -56,7 +60,7 @@ var RMODULE = (function (my, $) {
     $('#adminButton').toggle(user.isSuperAdmin);
   };
 
-  my.saveOptions = function () {
+  saveOptions = function () {
     var restUrl, json;
 
     if (!my.validateSms()) { return false; }
@@ -76,6 +80,24 @@ var RMODULE = (function (my, $) {
     return false;
   };
 
+  saveItem = function () {
+    var app, json;
+
+    app = {};
+    my.addFormProperty(app, 'name', $('#name').val());
+    my.addFormProperty(app, 'version', $('#version').val());
+    if (!app.name) {
+      alert('Please enter an application name.');
+      return false;
+    }
+
+    json = JSON.stringify(app);
+    my.postJson(my.getRestPrefix() + '\/' + my.itemName(), json, function (data) {
+      $.mobile.changePage('#index');
+    });
+    return false;
+  };
+
   old_init = my.init;
   my.init = function () {
     old_init();
@@ -86,8 +108,12 @@ var RMODULE = (function (my, $) {
       });
     });
 
+    $('#new').live('pagecreate', function () {
+      $(this).find('form').submit(saveItem);
+    });
+
     $('#options').live('pagecreate', function () {
-      $(this).find('form').submit(my.saveOptions);
+      $(this).find('form').submit(saveOptions);
 
       $('#sendSmsNotifications').change(function () {
         my.enableSmsDetails($(this).prop('checked'));
@@ -163,4 +189,30 @@ RMODULE.init();
     <h1></h1>
   </div>
   <div data-role="content"></div>
+</div>
+
+
+<!-- New Application -->
+<div data-role="page" id="new">
+  <div data-role="header">
+    <h1>New Application</h1>
+  </div>
+  <div data-role="content">
+    <form>
+      <label for="name" class="ui-hidden-accessible">Application Name:</label>
+      <input name="name" id="name" placeholder="Application Name" required>
+
+      <label for="version" class="ui-hidden-accessible">Application Version:</label>
+      <input name="version" id="version" placeholder="Application Version">
+
+      <input type="submit" value="Save">
+    </form>
+  </div>
+  <div data-role="footer">
+    <div data-role="navbar">
+      <ul>
+        <li><a href="#index">Cancel</a></li>
+      </ul>
+    </div>
+  </div>
 </div>
