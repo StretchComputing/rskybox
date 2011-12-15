@@ -21,7 +21,7 @@ import com.google.appengine.api.datastore.Text;
     ),
     @NamedQuery(
     		name="Feedback.getAllWithApplicationId",
-    		query="SELECT fb FROM Feedback fb and fb.applictionId = :applicationId ORDER BY fb.recordedGmtDate DESC"
+    		query="SELECT fb FROM Feedback fb WHERE fb.applicationId = :applicationId ORDER BY fb.recordedGmtDate DESC"
     ),
     @NamedQuery(
     		name="Feedback.getByStatus",

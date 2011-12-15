@@ -137,7 +137,7 @@ public class CrashDetectsResource extends ServerResource {
 			    	return Utility.apiError(ApiStatusCode.INVALID_STATUS_PARAMETER);
 			    }
 			} else {
-				// by default, only get 'new' feedback
+				// by default, only get 'new' crashDetects
 				crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationId")
 						.setParameter("status", CrashDetect.NEW_STATUS)
 						.setParameter("applicationId", this.applicationId)

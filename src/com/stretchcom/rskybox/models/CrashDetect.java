@@ -20,7 +20,7 @@ import com.google.appengine.api.datastore.Text;
     ),
     @NamedQuery(
     		name="CrashDetect.getAllWithApplicationId",
-    		query="SELECT cd FROM CrashDetect cd and cd.applicationId = :applicationId ORDER BY cd.detectedGmtDate DESC"
+    		query="SELECT cd FROM CrashDetect cd WHERE cd.applicationId = :applicationId ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
     		name="CrashDetect.getByStatus",

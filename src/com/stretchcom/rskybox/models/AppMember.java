@@ -38,7 +38,7 @@ import com.stretchcom.rskybox.server.Utility;
     ),
     @NamedQuery(
     		name="AppMember.getAllWithApplicationId",
-    		query="SELECT am FROM AppMember am and am.applictionId = :applicationId"
+    		query="SELECT am FROM AppMember am WHERE am.applicationId = :applicationId"
     ),
     @NamedQuery(
     		name="AppMember.getByUserId",

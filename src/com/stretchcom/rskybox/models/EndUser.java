@@ -19,7 +19,7 @@ import com.google.appengine.api.datastore.Key;
     ),
     @NamedQuery(
     		name="EndUser.getAllWithApplicationId",
-    		query="SELECT eu FROM EndUser eu and eu.applicationId = :applicationId"
+    		query="SELECT eu FROM EndUser eu WHERE eu.applicationId = :applicationId"
     ),
     @NamedQuery(
     		name="EndUser.getByKey",

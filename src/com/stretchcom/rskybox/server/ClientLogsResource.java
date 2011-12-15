@@ -72,11 +72,11 @@ public class ClientLogsResource extends ServerResource {
         log.info("in get for Crash Detect resource");
         if (this.id != null) {
             // Get Client Log Info API
-        	log.info("in Get Feedback Info API");
+        	log.info("in Get ClientLog Info API");
         	return show();
         } else {
             // Get List of Client Logs API
-        	log.info("Get List of Feedbacks API");
+        	log.info("Get List of ClientLogs API");
         	return index();
         }
     }
@@ -143,7 +143,7 @@ public class ClientLogsResource extends ServerResource {
 			    	return Utility.apiError(ApiStatusCode.INVALID_STATUS_PARAMETER);
 			    }
 			} else {
-				// by default, only get 'new' feedback
+				// by default, only get 'new' clientLogs
 				clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
 						.setParameter("status", ClientLog.NEW_STATUS)
 						.setParameter("applicationId", this.applicationId)

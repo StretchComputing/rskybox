@@ -20,7 +20,7 @@ import com.google.appengine.api.datastore.Text;
     ),
     @NamedQuery(
     		name="ClientLog.getAllWithApplicationId",
-    		query="SELECT cl FROM ClientLog cl and cl.applicationId = :applicationId ORDER BY cl.createdGmtDate DESC"
+    		query="SELECT cl FROM ClientLog cl WHERE cl.applicationId = :applicationId ORDER BY cl.createdGmtDate DESC"
     ),
     @NamedQuery(
     		name="ClientLog.getByStatus",
