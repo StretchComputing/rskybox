@@ -93,8 +93,7 @@ var RMODULE = (function (my, $) {
       delete login.phoneNumber;
       $.getJSON(my.getRestPrefix() + '\/users\/token', login, function (result) {
         if (result.apiStatus == "100") {
-          loginSuccess(result.token);
-        } else {
+          loginSuccess(result.token); } else {
           loginFail(result);
         }
       });
@@ -203,9 +202,7 @@ RMODULE.init();
 
       <strong>Create a password. (min 6 chars)</strong>
       <label for="confirmPassword" class="ui-hidden-accessible">Password:</label>
-      <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Password">
-      <input type="checkbox" name="showConfirmPassword" id="showConfirmPassword">
-      <label for="showConfirmPassword">Show Password (not functional)</label>
+      <input name="confirmPassword" id="confirmPassword" placeholder="Password">
 
       <input type="submit" value="Complete Sign Up">
     </form>
