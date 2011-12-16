@@ -241,6 +241,7 @@ public class UserAuthenticationFilter implements Filter {
 		if(cookies != null && cookies.length > 0) {
 			for(Cookie c : cookies) {
 				if (c.getName().equals("token")) {
+				    log.info("getToken is returning the Cookie token");
 					return c.getValue();
 				}
 			}
@@ -270,6 +271,7 @@ public class UserAuthenticationFilter implements Filter {
 				}
 			}
 		}
+        log.info("getToken is returning the Authorization Header token");
 		return token;
 	}
 
