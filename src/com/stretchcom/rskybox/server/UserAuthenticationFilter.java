@@ -2,6 +2,7 @@ package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -235,7 +236,15 @@ public class UserAuthenticationFilter implements Filter {
 	
     // supports extracting the token from either a cookie or the HTTP authorization header with precedence given to the cookie.
     private String getToken(HttpServletRequest httpRequest) {
-		String token = null;
+        Enumeration names = httpRequest.getHeaderNames();
+        String name, output = "";
+        while (names.hasMoreElements()) {
+            name = (String) names.nextElement();
+            output += name + ": " + httpRequest.getHeader(name) + "\n";
+        }
+        log.info(output);
+
+        String token = null;
 		// first attempt to find the token in a cookie of the form "token=<token_value>"
 		Cookie[] cookies = httpRequest.getCookies();
 		if(cookies != null && cookies.length > 0) {
@@ -248,7 +257,8 @@ public class UserAuthenticationFilter implements Filter {
 		}
 		
 		// if we get this far, no cookie token was found so extract from HTTP authorization header
-		String authHeader = httpRequest.getHeader("Authorization");
+		String authHeader = httpRequest.getHeader("x-rskybox-authorization");
+		log.info("x-rskybox-authorization header contains '" + authHeader + '"');
 		if (authHeader != null) {
 			java.util.StringTokenizer st = new java.util.StringTokenizer(authHeader);
 			if (st.hasMoreTokens()) {
