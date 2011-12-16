@@ -257,8 +257,8 @@ public class UserAuthenticationFilter implements Filter {
 		}
 		
 		// if we get this far, no cookie token was found so extract from HTTP authorization header
-		String authHeader = httpRequest.getHeader("x-rskybox-authorization");
-		log.info("x-rskybox-authorization header contains '" + authHeader + '"');
+		String authHeader = httpRequest.getHeader("Authorization");
+		log.info("Authorization header contains '" + authHeader + '"');
 		if (authHeader != null) {
 			java.util.StringTokenizer st = new java.util.StringTokenizer(authHeader);
 			if (st.hasMoreTokens()) {
