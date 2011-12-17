@@ -141,7 +141,7 @@ public class FeedbackResource extends ServerResource {
             
 			if(!isUpdate && json.has("voice")) {
 				feedback.setVoiceBase64(json.getString("voice"));
-				log.info("stored voice value = " + feedback.getVoiceBase64());
+				//log.info("stored voice value = " + feedback.getVoiceBase64());
 			} else {
 				log.info("no JSON voice field found");
 			}
@@ -189,7 +189,7 @@ public class FeedbackResource extends ServerResource {
             em.persist(feedback);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications("new feedback received");
+            if(!isUpdate) User.sendNotifications(this.applicationId, "new feedback received");
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

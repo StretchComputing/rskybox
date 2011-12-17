@@ -41,6 +41,10 @@ import com.stretchcom.rskybox.server.Utility;
     		query="SELECT am FROM AppMember am WHERE am.applicationId = :applicationId"
     ),
     @NamedQuery(
+    		name="AppMember.getAllWithApplicationIdAndStatus",
+    		query="SELECT am FROM AppMember am WHERE am.applicationId = :applicationId and am.status = :status"
+    ),
+    @NamedQuery(
     		name="AppMember.getByUserId",
     		query="SELECT am FROM AppMember am WHERE am.userId = :userId"
     ),
@@ -236,6 +240,7 @@ public class AppMember {
     		appMember.setApplicationId(theApplicationId);
     		appMember.setUserId(theUserId);
     		appMember.setRole(theRole);
+    		appMember.setStatus(AppMember.ACTIVE_STATUS);
     		em2.persist(appMember);
 			em2.getTransaction().commit();
     	} catch (Exception e) {

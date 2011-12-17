@@ -283,7 +283,7 @@ public class CrashDetectsResource extends ServerResource {
             em.persist(crashDetect);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications("new crash detected");
+            if(!isUpdate) User.sendNotifications(this.applicationId, "new crash detected");
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

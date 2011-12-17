@@ -289,7 +289,7 @@ public class ClientLogsResource extends ServerResource {
             em.persist(clientLog);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications("new client log");
+            if(!isUpdate) User.sendNotifications(this.applicationId, "new client log");
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

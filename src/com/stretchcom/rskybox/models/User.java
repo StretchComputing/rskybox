@@ -260,37 +260,81 @@ public class User {
 		this.smsConfirmationCode = smsConfirmationCode;
 	}
 
-	public static void sendNotifications(String theMessage) {
+	// Sends a notification (if appropriate) to all active members of the specified application
+	// TODO notifications options should be application specific. When that happens, also put both the email address and phone
+	//      number in AppMember then the notifications can be sent without having to retrieve the User entity for each AppMember
+	public static void sendNotifications(String theApplicationId, String theMessage) {
         EntityManager em = EMF.get().createEntityManager();
         
         try {
-            List<User> users = new ArrayList<User>();
+            List<AppMember> appMembers = new ArrayList<AppMember>();
             JSONArray ja = new JSONArray();
-            users = (List<User>) em.createNamedQuery("User.getAll").getResultList();
+            appMembers = (List<AppMember>) em.createNamedQuery("AppMember.getAllWithApplicationIdAndStatus")
+            		.setParameter("applicationId", theApplicationId)
+            		.setParameter("status", AppMember.ACTIVE_STATUS)
+            		.getResultList();
             
-            if(users.size() > 0) {
-            	log.info("email/SMS message to be sent = " + theMessage);
+            if(appMembers.size() > 0) {
+            	log.info("email/SMS message = '" + theMessage + "' sent to " + appMembers.size() + " members.");
+            } else {
+            	log.info("no active members found for specified application");
             }
             
             String subject = "notification";
             String enhancedEmailMessage = theMessage + "<br><br>" + RskyboxApplication.APPLICATION_BASE_URL;
             String enhancedSmsMessage = theMessage + "  " + RskyboxApplication.APPLICATION_BASE_URL;
-            for (User user : users) {
-                if(user.getSendEmailNotifications() != null && user.getSendEmailNotifications()) {
-                	log.info("sending email to " + user.getEmailAddress());
-                    // Add embedded URL to rSkybox application
-                	Emailer.send(user.getEmailAddress(), subject, enhancedEmailMessage, Emailer.NO_REPLY);
-                }
-                if(user.getSendSmsNotifications() != null && user.getSendSmsNotifications()) {
-                	log.info("sending SMS to " + user.getSmsEmailAddress());
-                    // Add embedded URL to rSkybox application
-                	Emailer.send(user.getSmsEmailAddress(), subject, enhancedSmsMessage, Emailer.NO_REPLY);
-                }
+            for (AppMember am : appMembers) {
+            	String userId = am.getUserId();
+            	if(userId == null) {
+            		log.severe("should never happen -- user ID for an active user is null");
+            	} else {
+                	User user = User.getUserWithId(userId);
+                	if(user == null) {
+                		log.severe("could not get user with user ID");
+                	} else {
+                        if(user.getIsEmailConfirmed() && user.getSendEmailNotifications() != null && user.getSendEmailNotifications()) {
+                        	log.info("sending email to " + user.getEmailAddress());
+                        	Emailer.send(user.getEmailAddress(), subject, enhancedEmailMessage, Emailer.NO_REPLY);
+                        }
+                        if(user.getIsSmsConfirmed() && user.getSendSmsNotifications() != null && user.getSendSmsNotifications()) {
+                        	log.info("sending SMS to " + user.getSmsEmailAddress());
+                        	Emailer.send(user.getSmsEmailAddress(), subject, enhancedSmsMessage, Emailer.NO_REPLY);
+                        }
+                	}
+            	}
             }
         } catch (Exception e) {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
         }
+	}
+	
+	// Returns list of users matching specified email address; null if no matching users found.
+	public static User getUserWithId(String theUserId) {
+        EntityManager em = EMF.get().createEntityManager();
+        User user = null;
+        
+        Key userKey = null;
+        try {
+			userKey = KeyFactory.stringToKey(theUserId);
+		} catch (IllegalArgumentException e1) {
+			log.severe("exception = " + e1.getMessage());
+			e1.printStackTrace();
+			return null;
+		}
+
+		try {
+    		user = (User)em.createNamedQuery("User.getByKey")
+				.setParameter("key", userKey)
+				.getSingleResult();
+		} catch (NoResultException e) {
+			log.severe("user not found");
+			e.printStackTrace();
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more Users have the same key");
+			e.printStackTrace();
+		}
+		return user;
 	}
 	
 	// Returns list of users matching specified email address; null if no matching users found.
