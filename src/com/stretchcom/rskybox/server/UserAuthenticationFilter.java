@@ -229,7 +229,14 @@ public class UserAuthenticationFilter implements Filter {
     	if(theUrl.toLowerCase().contains("/mobilecarriers") && theHttpResponse.getMethod().equalsIgnoreCase("get")) {
     		log.info("List MobileCarriers API is bypassed");
     		return true;
-    	}    
+    	} 
+
+    	// AppMember Confirm Member API is bypassed
+    	if(theUrl.toLowerCase().contains("/appmembers/confirmation") && theHttpResponse.getMethod().equalsIgnoreCase("put")) {
+    		log.info("AppMember Confirm Member API is bypassed");
+    		return true;
+    	} 
+    	
     	
     	return false;
     }

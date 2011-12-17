@@ -34,6 +34,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.repackaged.com.google.common.util.Base64;
+import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.MobileCarrier;
 import com.stretchcom.rskybox.models.User;
@@ -438,6 +439,14 @@ public class UsersResource extends ServerResource {
             
             em.persist(user);
             em.getTransaction().commit();
+            
+            if(!isUpdate) {
+            	// update pending membership if appropriate
+            	Boolean membershipConfirmed = AppMember.confirmMember(user);
+            	
+            	// change being made to user is only for calling getUserJson() below - it's a transient field that never gets persisted anyway
+            	user.setWasMembershipConfirmed(membershipConfirmed);
+            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -520,6 +529,7 @@ public class UsersResource extends ServerResource {
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
                 json.put("token", user.getToken());
                 json.put("authHeader", user.getAuthHeader());
+                json.put("memberConfirmed", user.getWasMembershipConfirmed());
 
                 if(isCurrentUserAdmin != null) {
                 	///////////////////////////////////////////////////////////////////

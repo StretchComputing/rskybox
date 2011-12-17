@@ -17,6 +17,7 @@ import javax.persistence.NonUniqueResultException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.restlet.data.Reference;
 import org.restlet.data.Status;
 
 import com.google.appengine.api.datastore.Key;
@@ -64,6 +65,14 @@ import com.stretchcom.rskybox.server.Utility;
     		name="AppMember.getByApplicationIdAndEmailAddress",
     		query="SELECT am FROM AppMember am WHERE am.applicationId = :applicationId and am.emailAddress = :emailAddress"
     ),
+    @NamedQuery(
+    		name="AppMember.getByEmailAddressAndEmailConfirmationCode",
+    		query="SELECT am FROM AppMember am WHERE am.emailAddress = :emailAddress and am.emailConfirmationCode = :emailConfirmationCode"
+    ),
+    @NamedQuery(
+    		name="AppMember.getByEmailAddressAndConfirmInitiated",
+    		query="SELECT am FROM AppMember am WHERE am.emailAddress = :emailAddress and am.confirmInitiated = :confirmInitiated"
+    ),
 })
 public class AppMember {
     private static final Logger log = Logger.getLogger(AppMember.class.getName());
@@ -79,6 +88,8 @@ public class AppMember {
 	private String role;
 	private String status;
 	private Date createdGmtDate;
+	private String emailConfirmationCode;
+	private Boolean confirmInitiated = false;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -115,6 +126,22 @@ public class AppMember {
 
 	public void setCreatedGmtDate(Date createdGmtDate) {
 		this.createdGmtDate = createdGmtDate;
+	}
+
+	public String getEmailConfirmationCode() {
+		return emailConfirmationCode;
+	}
+
+	public void setEmailConfirmationCode(String emailConfirmationCode) {
+		this.emailConfirmationCode = emailConfirmationCode;
+	}
+
+	public Boolean getConfirmInitiated() {
+		return confirmInitiated;
+	}
+
+	public void setConfirmInitiated(Boolean confirmInitiated) {
+		this.confirmInitiated = confirmInitiated;
 	}
 	
 	public String getEmailAddress() {
@@ -219,13 +246,13 @@ public class AppMember {
         // First verify user is NOT already an member of this application
         // ::OPTIMIZATION:: remove this check to reduce CPU time
         try {
-    			appMember = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndUserId")
-    				.setParameter("applicationId", theApplicationId)
-    				.setParameter("userId", theUserId)
-    				.getSingleResult();
-    			
-    			log.severe("ERROR: user with userId = " + theUserId + " is already a member of application with applicationId = " + theApplicationId);
-    			return null;
+			appMember = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndUserId")
+				.setParameter("applicationId", theApplicationId)
+				.setParameter("userId", theUserId)
+				.getSingleResult();
+			
+			log.severe("ERROR: user with userId = " + theUserId + " is already a member of application with applicationId = " + theApplicationId);
+			return null;
 		} catch (NoResultException e) {
 			log.info("as expected, user with userId = " + theUserId + " is not already a member of application with applicationId = " + theApplicationId);
 		} catch (NonUniqueResultException e) {
@@ -253,5 +280,79 @@ public class AppMember {
 		    em2.close();
 		}
         return appMember;
+	}
+	
+	// Send member verification email
+	// TODO add phone number support
+	public static void sendMemberVerification(AppMember theNewAppMember, String theApplicationId) {
+		try {
+			Application application = Application.getApplicationWithId(theApplicationId);
+			if(application == null) {
+				log.severe("could not send member verification due to bad application ID");
+				return;
+			}
+			
+			String emailAddress = theNewAppMember.getEmailAddress();
+			if(emailAddress == null || emailAddress.trim().length() == 0) {
+				log.severe("could not send member verification due to empty email address");
+				return;
+			}
+			String encodedEmailAddress = Reference.encode(emailAddress);
+			String encodedConfirmationCode = Reference.encode(theNewAppMember.getEmailConfirmationCode());
+			
+            String subject = "rSkybox verification";
+            StringBuffer sb = new StringBuffer();
+            sb.append("You have been added as a member of the rSkybox application ");
+            sb.append(application.getName());
+            sb.append(". Please verify your membership by clicking the link below");
+            sb.append("<br><br>");
+            sb.append(RskyboxApplication.MEMBER_VERIFICATION_PAGE);
+            sb.append("?");
+            sb.append("emailAddress=");
+            sb.append(encodedEmailAddress);
+            sb.append("&");
+            sb.append("confirmationCode=");
+            sb.append(encodedConfirmationCode);
+            
+        	Emailer.send(emailAddress, subject, sb.toString(), Emailer.NO_REPLY);
+		} catch (Exception e) {
+            log.severe("exception = " + e.getMessage());
+        	e.printStackTrace();
+        }
+	}
+	
+	// if the user has a pending membership in any application, that membership is confirmed
+	// returns true if membership confirmed; false otherwise
+	// NOTE: only support finding a user via emailAddress right now
+	public static Boolean confirmMember(User theUser) {
+        EntityManager em = EMF.get().createEntityManager();
+        em.getTransaction().begin();
+        AppMember appMember = null;
+        Boolean wasConfirmed = false;
+        try {
+        	String emailAddress = theUser.getEmailAddress();
+			appMember = (AppMember)em.createNamedQuery("AppMember.getByEmailAddressAndConfirmInitiated")
+				.setParameter("emailAddress", emailAddress)
+				.setParameter("confirmInitiated", true)
+				.getSingleResult();
+			
+			appMember.setUserId(KeyFactory.keyToString(theUser.getKey()));
+			appMember.setStatus(AppMember.ACTIVE_STATUS);
+			appMember.setConfirmInitiated(false);
+			wasConfirmed = true;
+			
+            em.persist(appMember);
+            em.getTransaction().commit();
+		} catch (NoResultException e) {
+			log.info("no appMember pending initiation");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - user has two memberships both with confirmation initiated");
+		} finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
+        return wasConfirmed;
 	}
 }

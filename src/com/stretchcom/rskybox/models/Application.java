@@ -194,4 +194,31 @@ public class Application {
         
         return application;
 	}
+	
+
+	// returns the application entity matching specified application ID or null if it can't be found
+	public static Application getApplicationWithId(String theApplicationId) {
+        EntityManager em = EMF.get().createEntityManager();
+        Application application = null;
+        
+		try {
+			Key appKey = null;
+			try {
+				appKey = KeyFactory.stringToKey(theApplicationId);
+			} catch (Exception e) {
+				log.severe("could not convert application ID into a key");
+				return null;
+			}
+					
+			application = (Application)em.createNamedQuery("Application.getByKey")
+				.setParameter("key", appKey)
+				.getSingleResult();
+		} catch (NoResultException e) {
+			log.info("application ID not found");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more applications have same key");
+		}
+		
+		return application;
+	}
 }

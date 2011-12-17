@@ -76,6 +76,7 @@ public class AppMembersResource extends ServerResource {
     }
 
     // Handles 'Update AppMember API'
+    // Handles 'Confirm Member API'
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
@@ -83,10 +84,16 @@ public class AppMembersResource extends ServerResource {
     		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
     	}
     	
-		if (this.id == null || this.id.length() == 0) {
-			return Utility.apiError(ApiStatusCode.APP_MEMBER_ID_REQUIRED);
-		}
-        return save_appMember(entity);
+    	if(this.id.equalsIgnoreCase("confirmation")) {
+    		// Confirm Member API
+    		return confirmMember(entity);
+    	} else {
+    		// Update AppMember API
+    		if (this.id == null || this.id.length() == 0) {
+    			return Utility.apiError(ApiStatusCode.APP_MEMBER_ID_REQUIRED);
+    		}
+            return save_appMember(entity);
+    	}
     }
 
     private JsonRepresentation save_appMember(Representation entity) {
@@ -172,6 +179,8 @@ public class AppMembersResource extends ServerResource {
 				
 				// default the created date to right now
 				appMember.setCreatedGmtDate(new Date());
+				
+				appMember.setEmailConfirmationCode(TF.getConfirmationCode());
 			}
 			
         	//////////////////////
@@ -212,6 +221,8 @@ public class AppMembersResource extends ServerResource {
 
             em.persist(appMember);
             em.getTransaction().commit();
+            
+            AppMember.sendMemberVerification(appMember, this.applicationId);
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -347,5 +358,97 @@ public class AppMembersResource extends ServerResource {
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;
+    }
+
+    private JsonRepresentation confirmMember(Representation entity) {
+        EntityManager em = EMF.get().createEntityManager();
+
+		String apiStatus = ApiStatusCode.SUCCESS;
+		this.setStatus(Status.SUCCESS_OK);
+		AppMember appMember = null;
+		em.getTransaction().begin();
+        JSONObject jsonReturn = new JSONObject();
+		try {
+			JSONObject json = new JsonRepresentation(entity).getJsonObject();
+			
+			String emailAddress = null;
+			if(json.has("emailAddress")) {
+				emailAddress = json.getString("emailAddress");
+			}
+			
+			String confirmationCode = null;
+			if(json.has("confirmationCode")) {
+				confirmationCode = json.getString("confirmationCode");
+			}
+			
+			if(emailAddress == null || emailAddress.trim().length() == 0) {
+				return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_IS_REQUIRED);
+			}
+				
+			if(confirmationCode == null || confirmationCode.trim().length() == 0) {
+				return Utility.apiError(ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
+			}
+			
+			appMember = (AppMember)em.createNamedQuery("AppMember.getByEmailAddressAndEmailConfirmationCode")
+				.setParameter("emailAddress", emailAddress)
+				.setParameter("emailConfirmationCode", confirmationCode)
+				.getSingleResult();
+			
+			if(!appMember.getStatus().equalsIgnoreCase(AppMember.PENDING_STATUS)) {
+				return Utility.apiError(ApiStatusCode.MEMBER_NOT_PENDING_CONFIRMATION);
+			}
+			
+			List<User> users = User.getUsersWithEmailAddress(emailAddress);
+			if(users != null) {
+				if(users.size() > 1) {
+					log.severe("should never happen - more than one user with the same email address");
+					this.setStatus(Status.SERVER_ERROR_INTERNAL);
+				} else {
+					if(users.size() == 0) {
+						appMember.setConfirmInitiated(true);
+						apiStatus = ApiStatusCode.MEMBER_NOT_A_REGISTERED_USER;
+					} else {
+						// ok, so a single user with the email address has been found ...
+						// So we can confirm the membership right now
+						User user = users.get(0);
+						appMember.setUserId(KeyFactory.keyToString(user.getKey()));
+						appMember.setStatus(AppMember.ACTIVE_STATUS);
+						appMember.setConfirmInitiated(false);
+					}
+		            em.persist(appMember);
+		            em.getTransaction().commit();
+		            
+		            jsonReturn.put("emailAddress", emailAddress);
+		            jsonReturn.put("confirmationCode", confirmationCode);
+				}			
+			}
+		} catch (NoResultException e) {
+			log.info("AppMember not found");
+			apiStatus = ApiStatusCode.APP_MEMBER_NOT_FOUND;
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more AppMembers have same key");
+			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} catch (IOException e) {
+            log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
+            e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        } catch (JSONException e) {
+            log.severe("exception = " + e.getMessage());
+            e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        } finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
+		
+		try {
+			jsonReturn.put("apiStatus", apiStatus);
+		} catch (JSONException e) {
+			log.severe("error creating JSON return object");
+			e.printStackTrace();
+		}
+		return new JsonRepresentation(jsonReturn);
     }
 }

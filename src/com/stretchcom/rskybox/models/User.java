@@ -90,6 +90,9 @@ public class User {
 
 	@Transient
 	private Boolean isSuperAdmin = false;
+	
+	@Transient
+	private Boolean wasMembershipConfirmed = false;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -140,6 +143,14 @@ public class User {
 	}
 	public void setIsSuperAdmin(Boolean isSuperAdmin) {
 		this.isSuperAdmin = isSuperAdmin;
+	}
+
+	public Boolean getWasMembershipConfirmed() {
+		return wasMembershipConfirmed;
+	}
+
+	public void setWasMembershipConfirmed(Boolean wasMembershipConfirmed) {
+		this.wasMembershipConfirmed = wasMembershipConfirmed;
 	}
 
 	public Boolean getSendEmailNotifications() {
@@ -280,7 +291,7 @@ public class User {
             	log.info("no active members found for specified application");
             }
             
-            String subject = "notification";
+            String subject = "rSkybox notification";
             String enhancedEmailMessage = theMessage + "<br><br>" + RskyboxApplication.APPLICATION_BASE_URL;
             String enhancedSmsMessage = theMessage + "  " + RskyboxApplication.APPLICATION_BASE_URL;
             for (AppMember am : appMembers) {
@@ -309,8 +320,10 @@ public class User {
         }
 	}
 	
-	// Returns list of users matching specified email address; null if no matching users found.
+	// Returns user matching specified user ID; null if no matching user found.
 	public static User getUserWithId(String theUserId) {
+		if(theUserId == null) {return null;}
+		
         EntityManager em = EMF.get().createEntityManager();
         User user = null;
         
@@ -337,7 +350,7 @@ public class User {
 		return user;
 	}
 	
-	// Returns list of users matching specified email address; null if no matching users found.
+	// Returns list of users matching specified email address
 	public static List<User> getUsersWithEmailAddress(String theEmailAddress) {
         EntityManager em = EMF.get().createEntityManager();
         Boolean isAuthenticated = false;
@@ -347,10 +360,9 @@ public class User {
     		users = (List<User>)em.createNamedQuery("User.getByEmailAddress")
 				.setParameter("emailAddress", theEmailAddress.toLowerCase())
 				.getResultList();
-		} catch (NoResultException e) {
-			// do nothing - ok if email address specified is not currently in use
-		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more Users have the same email address");
+		} catch (Exception e) {
+			log.severe("exception = " + e.getMessage());
+			e.printStackTrace();
 		}
 		return users;
 	}
