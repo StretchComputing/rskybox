@@ -313,6 +313,9 @@ public class AppMember {
             sb.append("&");
             sb.append("confirmationCode=");
             sb.append(encodedConfirmationCode);
+            sb.append("&");
+            sb.append("memberConfirmation=");
+            sb.append("true");
             
         	Emailer.send(emailAddress, subject, sb.toString(), Emailer.NO_REPLY);
 		} catch (Exception e) {

@@ -392,8 +392,8 @@ public class User {
 	
 	// Create a new user.
 	// theEmailAddress: email address of new user.  Not checked for uniqueness. Assumed the caller knows email address is unique.
-	// theNickName: from Google App Engine User object.  Could just be the email address again. Used to set new user's first name.
-	public static User createUser(String theEmailAddress, String theNickName) {
+	// theConfirmationCode: confirmation code that must be included in the Create User API call that finishes creating this user
+	public static User createUser(String theEmailAddress, String theConfirmationCode) {
         EntityManager em = EMF.get().createEntityManager();
         User user = null;
         
@@ -401,8 +401,8 @@ public class User {
 		try {
 			user = new User();
 			user.setEmailAddress(theEmailAddress);
-			user.setFirstName(theNickName);
-			log.info("creating new user with email address = " + theEmailAddress);
+			user.setEmailConfirmationCode(theConfirmationCode);
+			log.info("creating new user with email address = " + theEmailAddress + " and confirmation code = " + theConfirmationCode);
 			em.persist(user);
 			em.getTransaction().commit();
 		} catch (Exception e) {

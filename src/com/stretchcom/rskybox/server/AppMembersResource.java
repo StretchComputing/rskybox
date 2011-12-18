@@ -399,6 +399,7 @@ public class AppMembersResource extends ServerResource {
 			}
 			
 			List<User> users = User.getUsersWithEmailAddress(emailAddress);
+			Boolean createPendingUser = false;
 			if(users != null) {
 				if(users.size() > 1) {
 					log.severe("should never happen - more than one user with the same email address");
@@ -407,6 +408,7 @@ public class AppMembersResource extends ServerResource {
 					if(users.size() == 0) {
 						appMember.setConfirmInitiated(true);
 						apiStatus = ApiStatusCode.MEMBER_NOT_A_REGISTERED_USER;
+						createPendingUser = true;
 					} else {
 						// ok, so a single user with the email address has been found ...
 						// So we can confirm the membership right now
@@ -417,6 +419,13 @@ public class AppMembersResource extends ServerResource {
 					}
 		            em.persist(appMember);
 		            em.getTransaction().commit();
+		            
+					// we create a 'pending user' here because the user -- as part of responding to this new membership -- has already
+					// confirmed their email address. So the User registration process that is about to be launched by the client does
+					// not need to call Request Confirmation Code API.
+		            if(createPendingUser) {
+						User.createUser(emailAddress, confirmationCode);
+		            }
 		            
 		            jsonReturn.put("emailAddress", emailAddress);
 		            jsonReturn.put("confirmationCode", confirmationCode);
