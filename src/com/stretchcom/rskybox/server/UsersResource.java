@@ -872,8 +872,8 @@ public class UsersResource extends ServerResource {
     
     private String buildEmailConfirmationMessage(User theUser) {
     	StringBuffer sb = new StringBuffer("Your confirmation code is " + theUser.getEmailConfirmationCode());
-    	sb.append("<br><br>");
-        sb.append(RskyboxApplication.APPLICATION_BASE_URL);
+    	sb.append(".<br><br>");
+        sb.append(RskyboxApplication.USER_VERIFICATION_PAGE);
         sb.append("?");
         sb.append("emailAddress=");
         sb.append(Utility.urlEncode(theUser.getEmailAddress()));
@@ -892,8 +892,8 @@ public class UsersResource extends ServerResource {
     
     private String buildSmsConfirmationMessage(User theUser) {
     	StringBuffer sb = new StringBuffer("Your confirmation code is " + theUser.getSmsConfirmationCode());
-    	sb.append(". ");
-        sb.append(RskyboxApplication.APPLICATION_BASE_URL);
+        sb.append(".<br><br>");
+        sb.append(RskyboxApplication.USER_VERIFICATION_PAGE);
         sb.append("?");
         sb.append("phoneNumber=");
         sb.append(Utility.urlEncode(theUser.getPhoneNumber()));

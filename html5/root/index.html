@@ -42,17 +42,22 @@ var RMODULE = (function (my, $) {
 
   // Called on successful return from requestConfirmation.
   confirmPage = function (page, url) {
-    var email, phone;
+    var confirmationCode, email, phone;
 
     email = my.getParameterByName(url.hash, 'emailAddress');
     phone = my.getParameterByName(url.hash, 'phoneNumber');
+    confirmationCode = my.getParameterByName(url.hash, 'confirmationCode');
 
     email && $('#emailDisplay').html(email);
     phone && $('#phoneDisplay').html(phone);
     $('#confirmEmail').val(email);
     $('#confirmPhone').val(phone);
+    $('#confirmationCode').val(confirmationCode);
     $('#emailWrapper').toggle(!!email);
     $('#phoneWrapper').toggle(!!phone);
+    if (my.getParameterByName(url.hash, 'memberConfirmation') || my.getParameterByName(url.hash, 'preregistration') === 'false') {
+      $('#confirmPassword').hide();
+    }
   };
 
 
@@ -118,8 +123,8 @@ var RMODULE = (function (my, $) {
 
 
   my.init = function () {
-    // If there is a current user, redirect right away.
     $('#index').live('pagebeforecreate', function () {
+      // If there is a current user, redirect right away.
       if (Cookie.get('token')) {
         my.getCurrentUser(function () {
           my.redirect('\/html5');
@@ -137,8 +142,23 @@ var RMODULE = (function (my, $) {
       $(this).find('form').submit(requestConfirmCode);
     });
 
+
     $('#confirm').live('pagecreate', function () {
-      $(this).find('form').submit(createUser);
+      var email, phone, prereg, submit;
+
+      if (my.getParameterByName(location.search, 'memberConfirmation')) {
+        submit = confirmMember;
+      } else {
+        prereg = my.getParameterByName(location.search, 'preregistration');
+        if (!prereg || prereg === 'true') {
+          submit = createUser;
+        } else if (prereg === 'false') {
+          submit = confirmUser;
+        }
+      }
+      if (submit) {
+        $(this).find('form').submit(submit);
+      }
     });
 
     $('#login').live('pagecreate', function () {
