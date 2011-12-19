@@ -308,6 +308,9 @@ public class AppMember {
             sb.append("<br><br>");
             sb.append(RskyboxApplication.MEMBER_VERIFICATION_PAGE);
             sb.append("?");
+            sb.append("applicationId=");
+            sb.append(theApplicationId);
+            sb.append("&");
             sb.append("emailAddress=");
             sb.append(encodedEmailAddress);
             sb.append("&");

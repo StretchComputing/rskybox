@@ -27,8 +27,11 @@
 var RMODULE = (function (my, $) {
 
   var
+    confirmMember,
     confirmPage,
+    confirmUser,
     createUser,
+    getConfirmObject,
     login,
     loginFail,
     loginSuccess,
@@ -57,7 +60,7 @@ var RMODULE = (function (my, $) {
   }
 
 
-  // Called on successful return from requestConfirmation.
+  // Called on successful return from requestConfirmation and from email links with confirmation codes.
   confirmPage = function (page, url) {
     var confirmationCode, email, phone;
 
@@ -72,32 +75,88 @@ var RMODULE = (function (my, $) {
     $('#confirmationCode').val(confirmationCode);
     $('#emailWrapper').toggle(!!email);
     $('#phoneWrapper').toggle(!!phone);
-    if (my.getParameterByName(url.hash, 'memberConfirmation') || my.getParameterByName(url.hash, 'preregistration') === 'false') {
+    if (my.getParameterByName(url.hash, 'memberConfirmation') ||
+        my.getParameterByName(url.hash, 'preregistration') === 'false') {
       $('#confirmPassword').hide();
     }
   };
 
 
-  // Called from confirm page to create the user.
-  createUser = function () {
-    var confirmation, json;
+  getConfirmObject = function () {
+    var confirmation = {};
 
-    confirmation = {};
     my.addFormProperty(confirmation, 'confirmationCode', $('#confirmationCode').val());
     my.addFormProperty(confirmation, 'password', $('#confirmPassword').val());
     my.addFormProperty(confirmation, 'emailAddress', $('#confirmEmail').val());
     my.addFormProperty(confirmation, 'phoneNumber', $('#confirmPhone').val());
 
-    if (!my.isValidConfirmation(confirmation)) {
-      alert('Please enter your confirmation code and a valid password.');
-      return false;
-    }
+    return confirmation;
+  };
 
-    json = JSON.stringify(confirmation);
-    my.postJson(my.getRestPrefix() + '\/users', json, function (user) {
-      loginSuccess(user.token);
-    });
+
+  // Called from confirm page to create the user.
+  createUser = function () {
+    var confirmation = getConfirmObject();
+
+    if (!my.isValidConfirmationCode(confirmation.confirmationCode)) {
+      alert('Please enter your confirmation code.');
+    } else if (!my.isValidPassword(confirmation.password)) {
+      alert('Please enter a valid password.');
+    } else {
+      my.postJson(my.getRestPrefix() + '\/users', JSON.stringify(confirmation), function (user) {
+        loginSuccess(user.token);
+      });
+    }
     return false;
+  };
+
+
+  // Called from confirm page to confirm user email address or phone number.
+  confirmUser = function () {
+    var confirmation = getConfirmObject();
+
+    if (!my.isValidConfirmationCode(confirmation.confirmationCode)) {
+      alert('Please enter your confirmation code.')
+    } else {
+      my.putJson(my.getRestPrefix() + '\/users\/confirm', JSON.stringify(confirmation), function (user) {
+        my.redirect('\/');
+      });
+    }
+    return false;
+  };
+
+
+  // Called from confirm page to confirm member email address.
+  confirmMember = function () {
+    var confirmation, restUrl;
+
+    confirmation = getConfirmObject();
+
+    if (!my.isValidConfirmationCode(confirmation.confirmationCode)) {
+      alert('Please enter your confirmation code.')
+    } else {
+      restUrl  = my.getRestPrefix();
+      restUrl += '\/applications\/' + my.getParameterByName(location.hash, 'applicationId');
+      restUrl += '\/appMembers\/confirmation';
+      my.putJson(restUrl, JSON.stringify(confirmation), function (user) {
+        switch (+user.apiStatus) {
+        case 100:  // success
+        case 214:  // member not pending confirmation
+          // same thing should happen for both 100 and 214
+          my.redirect('\/');
+          break;
+        case 215:  // member not a registered user
+          alert('we\'re going to make you register');
+          break;
+        case 606: // app member not found
+          alert('not sure what to do on 606');
+          break
+        default:
+          alert('this shouldn\'t happen');
+          break;
+        }
+      });
+    }
   };
 
 
@@ -163,10 +222,11 @@ var RMODULE = (function (my, $) {
     $('#confirm').live('pagecreate', function () {
       var email, phone, prereg, submit;
 
-      if (my.getParameterByName(location.search, 'memberConfirmation')) {
-        submit = confirmMember;
+      if (my.getParameterByName(location.hash, 'memberConfirmation')) {
+        confirmMember();
       } else {
-        prereg = my.getParameterByName(location.search, 'preregistration');
+        prereg = my.getParameterByName(location.hash, 'preregistration');
+        // If this is a new user...
         if (!prereg || prereg === 'true') {
           submit = createUser;
         } else if (prereg === 'false') {
