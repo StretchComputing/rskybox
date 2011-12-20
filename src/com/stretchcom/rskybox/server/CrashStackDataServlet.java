@@ -1,25 +1,14 @@
 package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -29,14 +18,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONException;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
-import org.restlet.data.Status;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.repackaged.com.google.common.util.Base64;
-import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.User;
@@ -157,15 +143,12 @@ public class CrashStackDataServlet extends HttpServlet {
 				.setParameter("key", feedbackKey)
 				.getSingleResult();
     		
-    		rawCrashStackData = Base64.decode(crashDetect.getStackDataBase64());    		
+    		rawCrashStackData = Base64.decodeBase64(crashDetect.getStackDataBase64());    		
 		} catch (NoResultException e) {
 			// crash detect ID passed in is not valid
 			log.info("Crash Detect ID not found");
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more crash detects have same key");
-		} catch (Base64DecoderException e) {
-			log.severe("base64 decode exception = " + e.getMessage());
-			e.printStackTrace();
 		} 
 		
 		return rawCrashStackData;

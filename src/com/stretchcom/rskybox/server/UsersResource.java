@@ -9,10 +9,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.restlet.Request;
 import org.restlet.data.CookieSetting;
 import org.restlet.data.Form;
 import org.restlet.data.Parameter;
@@ -33,12 +33,10 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.MobileCarrier;
 import com.stretchcom.rskybox.models.User;
-import com.stretchcom.rskybox.server.TF;
 
 public class UsersResource extends ServerResource {
     private static final Logger log = Logger.getLogger(UsersResource.class.getName());
@@ -396,7 +394,7 @@ public class UsersResource extends ServerResource {
 
                 // format: Basic rSkyboxLogin:<token_value> where rSkyboxLogin:<token_value> portion is base64 encoded
             	String phrase = "rSkyboxLogin:" + token;
-            	String phraseBase64 = Base64.encode(phrase.getBytes("ISO-8859-1"));
+            	String phraseBase64 = Base64.encodeBase64String(phrase.getBytes("ISO-8859-1"));
             	authHeader = "Basic " + phraseBase64;
             	user.setAuthHeader(authHeader);
             }

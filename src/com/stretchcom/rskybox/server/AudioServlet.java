@@ -15,11 +15,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.codec.binary.Base64;
+
 import com.google.appengine.api.blobstore.ByteRange;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.repackaged.com.google.common.util.Base64;
-import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Feedback;
 import com.stretchcom.rskybox.models.User;
@@ -147,15 +147,12 @@ public class AudioServlet extends HttpServlet {
             feedback = (Feedback) em.createNamedQuery("Feedback.getByKey").setParameter("key", feedbackKey)
                 .getSingleResult();
 
-            rawAudio = Base64.decode(feedback.getVoiceBase64());
+            rawAudio = Base64.decodeBase64(feedback.getVoiceBase64());
         } catch (NoResultException e) {
             // feedback ID passed in is not valid
             log.info("Feedback ID not found");
         } catch (NonUniqueResultException e) {
             log.severe("should never happen - two or more feedback have same key");
-        } catch (Base64DecoderException e) {
-            log.severe("base64 decode exception = " + e.getMessage());
-            e.printStackTrace();
         }
 
         return rawAudio;

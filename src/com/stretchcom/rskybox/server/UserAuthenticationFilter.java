@@ -2,7 +2,6 @@ package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -17,18 +16,15 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
+import org.apache.commons.codec.binary.Base64;
+
 import com.google.appengine.api.utils.SystemProperty;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;
-import com.google.appengine.repackaged.com.google.common.util.Base64;
-import com.google.appengine.repackaged.com.google.common.util.Base64DecoderException;
 
 public class UserAuthenticationFilter implements Filter {
 
     private static final String HTML_DIR = "/WEB-INF";
-    private static final String A_PRIORI_TOKEN = "agxtb2JpbGUtcHVsc2VyDgsSCEZlZWRiYWNrGBEM";
     private static final Logger log = Logger.getLogger(UserAuthenticationFilter.class.getName());
 
     @Override
@@ -243,13 +239,13 @@ public class UserAuthenticationFilter implements Filter {
 	
     // supports extracting the token from either a cookie or the HTTP authorization header with precedence given to the cookie.
     private String getToken(HttpServletRequest httpRequest) {
-        Enumeration names = httpRequest.getHeaderNames();
-        String name, output = "";
-        while (names.hasMoreElements()) {
-            name = (String) names.nextElement();
-            output += name + ": " + httpRequest.getHeader(name) + "\n";
-        }
-        log.info(output);
+//        Enumeration names = httpRequest.getHeaderNames();
+//        String name, output = "";
+//        while (names.hasMoreElements()) {
+//            name = (String) names.nextElement();
+//            output += name + ": " + httpRequest.getHeader(name) + "\n";
+//        }
+//        log.info(output);
 
         String token = null;
 		// first attempt to find the token in a cookie of the form "token=<token_value>"
@@ -273,18 +269,13 @@ public class UserAuthenticationFilter implements Filter {
 				if (basic.equalsIgnoreCase("Basic")) {
 					String rawCredentials = st.nextToken();
 					
-					try {
-						// 'credentials' is of the form "token:<token_value>"
-				        byte[] credentialsArr = Base64.decode(rawCredentials);
-						String credentials = new String(credentialsArr);
-						int index = credentials.indexOf(":");
-						if(index > -1) {
-							token = credentials.substring(index+1);
-						}
-					} catch (Base64DecoderException e) {
-						log.severe("base64 decode exception = " + e.getMessage());
-						e.printStackTrace();
-					} 
+					// 'credentials' is of the form "token:<token_value>"
+			        byte[] credentialsArr = Base64.decodeBase64(rawCredentials);
+					String credentials = new String(credentialsArr);
+					int index = credentials.indexOf(":");
+					if(index > -1) {
+						token = credentials.substring(index+1);
+					}
 				}
 			}
 		}
