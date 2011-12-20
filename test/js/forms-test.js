@@ -13,5 +13,5 @@ TestCase('FormFieldsTest', {
   'test property not added for blank form': function () {
     RMODULE.addFormProperty(this.myform, 'newfield', '');
     assertUndefined(this.myform.newfield);
-  },
+  }
 });
