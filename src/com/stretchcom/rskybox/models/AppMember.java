@@ -70,6 +70,10 @@ import com.stretchcom.rskybox.server.Utility;
     		query="SELECT am FROM AppMember am WHERE am.emailAddress = :emailAddress and am.emailConfirmationCode = :emailConfirmationCode"
     ),
     @NamedQuery(
+    		name="AppMember.getByApplicationIdAndEmailAddressAndEmailConfirmationCode",
+    		query="SELECT am FROM AppMember am WHERE am.applicationId = :applicationId and am.emailAddress = :emailAddress and am.emailConfirmationCode = :emailConfirmationCode"
+    ),
+    @NamedQuery(
     		name="AppMember.getByEmailAddressAndConfirmInitiated",
     		query="SELECT am FROM AppMember am WHERE am.emailAddress = :emailAddress and am.confirmInitiated = :confirmInitiated"
     ),
@@ -329,27 +333,27 @@ public class AppMember {
 	// NOTE: only support finding a user via emailAddress right now
 	public static Boolean confirmMember(User theUser) {
         EntityManager em = EMF.get().createEntityManager();
-        em.getTransaction().begin();
-        AppMember appMember = null;
+        List<AppMember> appMembers = null;
         Boolean wasConfirmed = false;
         try {
         	String emailAddress = theUser.getEmailAddress();
-			appMember = (AppMember)em.createNamedQuery("AppMember.getByEmailAddressAndConfirmInitiated")
+			appMembers = (List<AppMember>)em.createNamedQuery("AppMember.getByEmailAddressAndConfirmInitiated")
 				.setParameter("emailAddress", emailAddress)
 				.setParameter("confirmInitiated", true)
-				.getSingleResult();
+				.getResultList();
+			log.info("confirming " + appMembers.size() + " memberships");
 			
-			appMember.setUserId(KeyFactory.keyToString(theUser.getKey()));
-			appMember.setStatus(AppMember.ACTIVE_STATUS);
-			appMember.setConfirmInitiated(false);
-			wasConfirmed = true;
-			
-            em.persist(appMember);
-            em.getTransaction().commit();
-		} catch (NoResultException e) {
-			log.info("no appMember pending initiation");
-		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - user has two memberships both with confirmation initiated");
+			for(AppMember am : appMembers) {
+		        em.getTransaction().begin();
+		        am.setUserId(KeyFactory.keyToString(theUser.getKey()));
+		        am.setStatus(AppMember.ACTIVE_STATUS);
+		        am.setConfirmInitiated(false);
+				wasConfirmed = true;
+	            em.persist(am);
+	            em.getTransaction().commit();
+			}
+		} catch (Exception e) {
+			log.severe("exception = " + e.getMessage());
 		} finally {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();

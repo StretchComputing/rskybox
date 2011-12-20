@@ -389,7 +389,8 @@ public class AppMembersResource extends ServerResource {
 				return Utility.apiError(ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
 			}
 			
-			appMember = (AppMember)em.createNamedQuery("AppMember.getByEmailAddressAndEmailConfirmationCode")
+			appMember = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndEmailAddressAndEmailConfirmationCode")
+				.setParameter("applicationId", this.applicationId)
 				.setParameter("emailAddress", emailAddress)
 				.setParameter("emailConfirmationCode", confirmationCode)
 				.getSingleResult();
@@ -411,11 +412,16 @@ public class AppMembersResource extends ServerResource {
 						createPendingUser = true;
 					} else {
 						// ok, so a single user with the email address has been found ...
-						// So we can confirm the membership right now
 						User user = users.get(0);
-						appMember.setUserId(KeyFactory.keyToString(user.getKey()));
-						appMember.setStatus(AppMember.ACTIVE_STATUS);
-						appMember.setConfirmInitiated(false);
+						if(user.getIsEmailConfirmed()) {
+							// confirmed user so we can confirm the membership right now
+							appMember.setUserId(KeyFactory.keyToString(user.getKey()));
+							appMember.setStatus(AppMember.ACTIVE_STATUS);
+							appMember.setConfirmInitiated(false);
+						} else {
+							appMember.setConfirmInitiated(true);
+							apiStatus = ApiStatusCode.MEMBER_NOT_A_REGISTERED_USER;
+						}
 					}
 		            em.persist(appMember);
 		            em.getTransaction().commit();
