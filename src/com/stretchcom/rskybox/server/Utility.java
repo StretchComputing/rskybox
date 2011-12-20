@@ -5,19 +5,15 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.util.logging.Logger;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.Request;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.ext.servlet.ServletUtils;
-import org.restlet.ext.servlet.internal.ServletCall;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
-
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import com.google.appengine.repackaged.com.google.common.util.Base64;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;
 
@@ -115,7 +111,7 @@ public class Utility {
 			byte raw[] = md.digest();
 			
 			// convert encrypted bytes to base64 encoded string so data can be stored in the database
-			encryptedText = Base64.encode(raw);
+			encryptedText = Base64.encodeBase64String(raw);
 		} catch (Exception e) {
 			log.severe("Utility::encrypt() exception = " + e.getMessage());
 		}

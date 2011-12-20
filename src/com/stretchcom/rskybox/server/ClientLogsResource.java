@@ -29,6 +29,7 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.stretchcom.rskybox.models.AppAction;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.ClientLog;
@@ -265,6 +266,43 @@ public class ClientLogsResource extends ServerResource {
 			
 			if(!isUpdate && json.has("instanceUrl")) {
 				clientLog.setInstanceUrl(json.getString("instanceUrl"));
+			}
+			
+			if(!isUpdate && json.has("appActions")) {
+				List<AppAction> appActions = new ArrayList<AppAction>();
+	        	JSONArray appActionsJsonArray = json.getJSONArray("appActions");
+				int arraySize = appActionsJsonArray.length();
+				log.info("appAction json array length = " + arraySize);
+				for(int i=0; i<arraySize; i++) {
+					JSONObject appActionJsonObj = appActionsJsonArray.getJSONObject(i);
+					AppAction aa = new AppAction();
+					if(appActionJsonObj.has("description")) {
+						aa.setDescription(appActionJsonObj.getString("description"));
+					}
+					// TODO support time zone passed in from client
+					if(appActionJsonObj.has("timestamp")) {
+						String timestampStr = appActionJsonObj.getString("timestamp");
+						TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+						Date timestamp = GMT.convertToGmtDate(timestampStr, true, tz);
+						if(timestamp == null) {
+							return Utility.apiError(ApiStatusCode.INVALID_TIMESTAMP_PARAMETER);
+						}
+						aa.setTimestamp(timestamp);
+					}
+					if(appActionJsonObj.has("duration")) {
+						String durationStr = appActionJsonObj.getString("duration");
+						Integer duration = null;
+						try {
+							duration = new Integer(durationStr);
+						} catch(NumberFormatException e) {
+							log.info("non-integer durations = " + durationStr);
+							return Utility.apiError(ApiStatusCode.INVALID_DURATION_PARAMETER);
+						}
+						aa.setDuration(duration);
+					}
+					appActions.add(aa);
+				}
+				clientLog.createAppActions(appActions);
 			}
 			
 			if(isUpdate) {

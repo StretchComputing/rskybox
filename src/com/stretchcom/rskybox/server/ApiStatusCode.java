@@ -50,6 +50,8 @@ public class ApiStatusCode {
 	public static final String INVALID_CONFIRMATION_CODE = "411";
 	public static final String PASSWORD_TOO_SHORT = "412";
 	public static final String PHONE_NUMBER_ALREADY_USED = "413";
+	public static final String INVALID_TIMESTAMP_PARAMETER = "414";
+	public static final String INVALID_DURATION_PARAMETER = "415";
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 	public static final String NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID = "501";
