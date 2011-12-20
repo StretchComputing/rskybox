@@ -75,9 +75,8 @@ var RMODULE = (function (my, $) {
     $('#confirmationCode').val(confirmationCode);
     $('#emailWrapper').toggle(!!email);
     $('#phoneWrapper').toggle(!!phone);
-    if (my.getParameterByName(url.hash, 'memberConfirmation') ||
-        my.getParameterByName(url.hash, 'preregistration') === 'false') {
-      $('#confirmPassword').hide();
+    if (my.getParameterByName(url.hash, 'preregistration') === 'false') {
+      $('#confirmPasswordWrapper').hide();
     }
   };
 
@@ -140,20 +139,22 @@ var RMODULE = (function (my, $) {
       restUrl += '\/appMembers\/confirmation';
       my.putJson(restUrl, JSON.stringify(confirmation), function (user) {
         switch (+user.apiStatus) {
+        // same action for both 100 and 214
         case 100:  // success
         case 214:  // member not pending confirmation
-          // same thing should happen for both 100 and 214
           my.redirect('\/');
           break;
+          // same action for both 100 and 214
         case 215:  // member not a registered user
-          alert('we\'re going to make you register');
+          $('#confirmSignup').show();
           break;
         case 606: // app member not found
-          alert('not sure what to do on 606');
+          // TODO - rskybox logging
+          console.log('Your app membership cannot be confirmed.');
           break
         default:
-          alert('this shouldn\'t happen');
-          break;
+          // TODO - rskybox logging
+          console.log('this shouldn\'t happen');
         }
       });
     }
@@ -278,11 +279,14 @@ RMODULE.init();
   </div>
 </div>
 
-<div data-role="page" id="confirm" data-title="Confirm Signup">
+<div data-role="page" id="confirm" data-title="New User Signup">
   <div data-role="header">
-    <h1>Confirm Signup</h1>
+    <h1>New User Signup</h1>
   </div>
   <div data-role="content">
+    <div id="confirmSignup">
+      <h3>Please create a password to complete your signup.</h3>
+    </div>
     <form>
       <p id="emailWrapper" style="display: none;">
         <strong>Email Address: </strong><span id="emailDisplay"></span>
@@ -297,9 +301,11 @@ RMODULE.init();
       <label for="confirmationCode" class="ui-hidden-accessible">Confirmation Code:</label>
       <input type="tel" name="confirmationCode" id="confirmationCode" placeholder="Confirmation Code">
 
-      <strong>Create a password. (min 6 chars)</strong>
-      <label for="confirmPassword" class="ui-hidden-accessible">Password:</label>
-      <input name="confirmPassword" id="confirmPassword" placeholder="Password">
+      <div id="confirmPasswordWrapper">
+        <strong>Create a password. (min 6 chars)</strong>
+        <label for="confirmPassword" class="ui-hidden-accessible">Password:</label>
+        <input name="confirmPassword" id="confirmPassword" placeholder="Password">
+      </div>
 
       <input type="submit" value="Complete Sign Up">
     </form>
