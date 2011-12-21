@@ -32,6 +32,7 @@ var RMODULE = (function (my, $) {
     confirmUser,
     createUser,
     getConfirmObject,
+    isLoggedIn,
     login,
     loginFail,
     loginSuccess,
@@ -142,7 +143,9 @@ var RMODULE = (function (my, $) {
         // same action for both 100 and 214
         case 100:  // success
         case 214:  // member not pending confirmation
-          my.redirect('\/');
+          if (!isLoggedIn()) {
+            my.redirect('\/#login');
+          }
           break;
         case 215:  // member not a registered user
           $('#confirmSignup').show();
@@ -157,6 +160,18 @@ var RMODULE = (function (my, $) {
         }
       });
     }
+  };
+
+
+  // If the token is already set, direct the user into the app.
+  isLoggedIn = function () {
+    if (Cookie.get('token')) {
+      my.getCurrentUser(function () {
+        my.redirect('\/html5');
+      });
+      return true;
+    }
+    return false;
   };
 
 
@@ -195,19 +210,15 @@ var RMODULE = (function (my, $) {
 
   loginSuccess = function (token) {
     Cookie.set('token', token, 9000, '\/');
-    my.redirect('\/html5');
+    if (!isLoggedIn()) {
+      // TODO - rskybox logging
+      console.log('unable to set token cookie');
+    }
   };
 
 
   my.init = function () {
-    $('#index').live('pagebeforecreate', function () {
-      // If there is a current user, redirect right away.
-      if (Cookie.get('token')) {
-        my.getCurrentUser(function () {
-          my.redirect('\/html5');
-        });
-      }
-    });
+    $('#index').live('pagebeforecreate', isLoggedIn);
 
     $('#index').live('pageshow', function () {
       my.jsonPopulate(my.getMobileCarriersUrl(), $('#mobileCarrierId'), function (select, carriers) {
