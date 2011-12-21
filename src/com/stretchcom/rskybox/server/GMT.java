@@ -9,13 +9,17 @@ import java.util.logging.Logger;
 
 public class GMT {
 	private static final Logger log = Logger.getLogger(GMT.class.getName());
-
+	
 	public static Date convertToGmtDate(String theDate, Boolean theHasTime, TimeZone theTimeZone) {
+		return convertToGmtDate(theDate, theHasTime, theTimeZone, null);
+	}
+
+	public static Date convertToGmtDate(String theDate, Boolean theHasTime, TimeZone theTimeZone, String theDateFormat) {
 		Date date = null;
 		
 		try {
 			if(theHasTime) {
-				date = stringToDate(theDate, theTimeZone);
+				date = stringToDate(theDate, theTimeZone, theDateFormat);
 			} else {
 				date = stringWithoutTimeToDate(theDate, theTimeZone);
 			}
@@ -69,9 +73,13 @@ public class GMT {
 
 	// only supports the format: YYYY-MM-DD kk:mm
 	// parses date using specified time zone -- don't want to use the default which depends on server configuration
-	public static Date stringToDate(String theDateStr, TimeZone theTimeZone) {
+	public static Date stringToDate(String theDateStr, TimeZone theTimeZone, String theDateFormat) {
 		try {
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd kk:mm");
+			if(theDateFormat == null) {
+				// set to the default format
+				theDateFormat = "yyyy-MM-dd kk:mm";
+			}
+			DateFormat df = new SimpleDateFormat();
 			if(theTimeZone != null) df.setTimeZone(theTimeZone);
 			return df.parse(theDateStr);
 		} catch (ParseException e) {

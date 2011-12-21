@@ -15,6 +15,7 @@ public class RskyboxApplication extends Application {
     public static final String SIGN_IN_PAGE = "/";
     public static final String LIST_DATE_FORMAT = "MM/dd/yy kk:mm";
     public static final String INFO_DATE_FORMAT = "MM/dd/yyyy 'at' hh:mm a";
+    public static final String APP_ACTION_DATE_FORMAT = "yyyy-MM-dd kk:mm:ss.SSS";
     public static final String DEFAULT_LOCAL_TIME_ZONE = "America/Chicago";
 	public static final String CURRENT_USER = "rSkybox.currentUser";
 
