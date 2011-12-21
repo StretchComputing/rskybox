@@ -30,6 +30,7 @@ import org.restlet.resource.ServerResource;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppMember;
+import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.Feedback;
 import com.stretchcom.rskybox.models.User;
 
@@ -37,6 +38,7 @@ public class AppMembersResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(AppMembersResource.class.getName());
     private String id;
 	private String applicationId;
+	private Application application;
 
     @Override
     protected void doInit() throws ResourceException {
@@ -52,6 +54,10 @@ public class AppMembersResource extends ServerResource {
     	if(this.applicationId == null) {
     		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
     	}
+		this.application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+    		return Utility.apiError(ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
     	
         if (id != null) {
             // Get AppMember Info API
@@ -71,6 +77,10 @@ public class AppMembersResource extends ServerResource {
     	if(this.applicationId == null) {
     		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
     	}
+		this.application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+    		return Utility.apiError(ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
     	
         return save_appMember(entity);
     }
@@ -80,9 +90,14 @@ public class AppMembersResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
+		// TODO?? verify application ID is valid
     	if(this.applicationId == null) {
     		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
     	}
+		this.application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+    		return Utility.apiError(ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
     	
     	if(this.id.equalsIgnoreCase("confirmation")) {
     		// Confirm Member API
@@ -173,6 +188,7 @@ public class AppMembersResource extends ServerResource {
 	            }
 			} else {
 				appMember.setApplicationId(this.applicationId);
+				appMember.setApplicationName(this.application.getName());
 				
 				// creating an appMember so default status to 'pending'
 				appMember.setStatus(AppMember.PENDING_STATUS);

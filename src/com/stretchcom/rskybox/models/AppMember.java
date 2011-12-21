@@ -89,6 +89,7 @@ public class AppMember {
 	private String userId;
 	private String emailAddress;
 	private String applicationId;
+	private String applicationName;
 	private String role;
 	private String status;
 	private Date createdGmtDate;
@@ -115,6 +116,14 @@ public class AppMember {
 	}
 	public void setApplicationId(String applicationId) {
 		this.applicationId = applicationId;
+	}
+
+	public String getApplicationName() {
+		return applicationName;
+	}
+
+	public void setApplicationName(String applicationName) {
+		this.applicationName = applicationName;
 	}
 
 	public String getRole() {
