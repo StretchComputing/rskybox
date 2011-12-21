@@ -79,7 +79,7 @@ public class GMT {
 				// set to the default format
 				theDateFormat = "yyyy-MM-dd kk:mm";
 			}
-			DateFormat df = new SimpleDateFormat();
+			DateFormat df = new SimpleDateFormat(theDateFormat);
 			if(theTimeZone != null) df.setTimeZone(theTimeZone);
 			return df.parse(theDateStr);
 		} catch (ParseException e) {
