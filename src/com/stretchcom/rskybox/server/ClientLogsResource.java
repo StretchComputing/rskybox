@@ -208,6 +208,7 @@ public class ClientLogsResource extends ServerResource {
 
     private JsonRepresentation save_client_log(Representation entity) {
         EntityManager em = EMF.get().createEntityManager();
+        JSONObject jsonReturn = new JSONObject();
 
         ClientLog clientLog = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
@@ -283,7 +284,8 @@ public class ClientLogsResource extends ServerResource {
 					if(appActionJsonObj.has("timestamp")) {
 						String timestampStr = appActionJsonObj.getString("timestamp");
 						TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
-						Date timestamp = GMT.convertToGmtDate(timestampStr, true, tz);
+						// timestamp format includes seconds and milli-seconds
+						Date timestamp = GMT.convertToGmtDate(timestampStr, true, tz, RskyboxApplication.APP_ACTION_DATE_FORMAT);
 						if(timestamp == null) {
 							return Utility.apiError(ApiStatusCode.INVALID_TIMESTAMP_PARAMETER);
 						}
@@ -349,7 +351,14 @@ public class ClientLogsResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getClientLogJson(clientLog, apiStatus, false));
+	    try {
+	    	jsonReturn.put("apiStatus", apiStatus);
+	    } catch (JSONException e) {
+	        log.severe("exception = " + e.getMessage());
+	    	e.printStackTrace();
+	        this.setStatus(Status.SERVER_ERROR_INTERNAL);
+	    }
+	    return new JsonRepresentation(jsonReturn);
     }
     
     private JSONObject getClientLogJson(ClientLog clientLog, Boolean isList) {
@@ -379,6 +388,20 @@ public class ClientLogsResource extends ServerResource {
             	json.put("logLevel", clientLog.getLogLevel());
             	json.put("message", clientLog.getMessage());
             	json.put("stackBackTrace", clientLog.getStackBackTrace());
+            	
+            	if(!isList) {
+                	JSONArray appActionsJsonArray = new JSONArray();
+                	List<AppAction> appActions = clientLog.getAppActions();
+                	TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+                	for(AppAction aa : appActions) {
+                		JSONObject appActionJsonObj = new JSONObject();
+                		appActionJsonObj.put("description", aa.getDescription());
+                		appActionJsonObj.put("timestamp", GMT.convertToLocalDate(aa.getTimestamp(), tz, RskyboxApplication.APP_ACTION_DATE_FORMAT));
+                		if(aa.getDuration() != null) appActionJsonObj.put("duration", aa.getDuration());
+                		appActionsJsonArray.put(appActionJsonObj);
+                	}
+                	if(appActions.size() > 0) {json.put("appActions", appActionsJsonArray);}
+            	}
             	
             	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
             	String status = clientLog.getStatus();
