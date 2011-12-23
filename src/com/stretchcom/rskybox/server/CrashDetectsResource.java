@@ -29,6 +29,7 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.stretchcom.rskybox.models.AppAction;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.CrashDetect;
@@ -263,6 +264,44 @@ public class CrashDetectsResource extends ServerResource {
 				crashDetect.setInstanceUrl(json.getString("instanceUrl"));
 			}
 			
+			if(!isUpdate && json.has("appActions")) {
+				List<AppAction> appActions = new ArrayList<AppAction>();
+	        	JSONArray appActionsJsonArray = json.getJSONArray("appActions");
+				int arraySize = appActionsJsonArray.length();
+				log.info("appAction json array length = " + arraySize);
+				for(int i=0; i<arraySize; i++) {
+					JSONObject appActionJsonObj = appActionsJsonArray.getJSONObject(i);
+					AppAction aa = new AppAction();
+					if(appActionJsonObj.has("description")) {
+						aa.setDescription(appActionJsonObj.getString("description"));
+					}
+					// TODO support time zone passed in from client
+					if(appActionJsonObj.has("timestamp")) {
+						String timestampStr = appActionJsonObj.getString("timestamp");
+						TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+						// timestamp format includes seconds and milli-seconds
+						Date timestamp = GMT.convertToGmtDate(timestampStr, true, tz, RskyboxApplication.APP_ACTION_DATE_FORMAT);
+						if(timestamp == null) {
+							return Utility.apiError(ApiStatusCode.INVALID_TIMESTAMP_PARAMETER);
+						}
+						aa.setTimestamp(timestamp);
+					}
+					if(appActionJsonObj.has("duration")) {
+						String durationStr = appActionJsonObj.getString("duration");
+						Integer duration = null;
+						try {
+							duration = new Integer(durationStr);
+						} catch(NumberFormatException e) {
+							log.info("non-integer durations = " + durationStr);
+							return Utility.apiError(ApiStatusCode.INVALID_DURATION_PARAMETER);
+						}
+						aa.setDuration(duration);
+					}
+					appActions.add(aa);
+				}
+				crashDetect.createAppActions(appActions);
+			}
+			
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -334,6 +373,20 @@ public class CrashDetectsResource extends ServerResource {
             	
             	json.put("userName", crashDetect.getUserName());
             	json.put("instanceUrl", crashDetect.getInstanceUrl());
+            	
+            	if(!isList) {
+                	JSONArray appActionsJsonArray = new JSONArray();
+                	List<AppAction> appActions = crashDetect.getAppActions();
+                	TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+                	for(AppAction aa : appActions) {
+                		JSONObject appActionJsonObj = new JSONObject();
+                		appActionJsonObj.put("description", aa.getDescription());
+                		appActionJsonObj.put("timestamp", GMT.convertToLocalDate(aa.getTimestamp(), tz, RskyboxApplication.APP_ACTION_DATE_FORMAT));
+                		if(aa.getDuration() != null) appActionJsonObj.put("duration", aa.getDuration());
+                		appActionsJsonArray.put(appActionJsonObj);
+                	}
+                	if(appActions.size() > 0) {json.put("appActions", appActionsJsonArray);}
+            	}
             	
             	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
             	String status = crashDetect.getStatus();

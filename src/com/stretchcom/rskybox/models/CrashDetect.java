@@ -1,7 +1,11 @@
 package com.stretchcom.rskybox.models;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.logging.Logger;
 
+import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -40,6 +44,8 @@ import com.google.appengine.api.datastore.Text;
     ),
 })
 public class CrashDetect {
+	private static final Logger log = Logger.getLogger(CrashDetect.class.getName());
+	
 	public final static String NEW_STATUS = "new";
 	public final static String ARCHIVED_STATUS = "archived";
 	public final static String ALL_STATUS = "all";
@@ -60,6 +66,15 @@ public class CrashDetect {
     public Key getKey() {
         return key;
     }
+	
+	@Basic
+	private List<String> appActionDescriptions;
+	
+	@Basic
+	private List<Date> appActionTimestamps;
+	
+	@Basic
+	private List<Integer> appActionDurations;
 
     public String getSummary() {
 		return summary;
@@ -121,5 +136,78 @@ public class CrashDetect {
 	public void setApplicationId(String applicationId) {
 		this.applicationId = applicationId;
 	}
+
+	public Boolean createAppActions(List<AppAction> theNewAppActionList) {
+		if(theNewAppActionList == null || theNewAppActionList.size() == 0) {
+			return false;
+		}
+		
+		this.appActionDescriptions = new ArrayList<String>();
+		this.appActionTimestamps = new ArrayList<Date>();
+		this.appActionDurations = new ArrayList<Integer>();
+		
+		for(AppAction aa : theNewAppActionList) {
+			////////////////////////////////////////////////////////////////
+			// Convert "normal Java" values to "default" values in Big Table
+			////////////////////////////////////////////////////////////////
+			String description = aa.getDescription() == null ? "" : aa.getDescription();
+			this.appActionDescriptions.add(description);
+			
+			if(aa.getTimestamp() == null) {
+				log.severe("AppAction has a null timestamp -- not allowed");
+				return false;
+			}
+			this.appActionTimestamps.add(aa.getTimestamp());
+			
+			// if empty, replace with -1
+			Integer duration = aa.getDuration() == null ? -1 : aa.getDuration();
+			this.appActionDurations.add(duration);
+		}
+		
+		return true;
+	}
 	
+	public List<AppAction> getAppActions() {
+		List<AppAction> appActions = new ArrayList<AppAction>();
+		
+		if(this.appActionDescriptions == null || this.appActionDescriptions.size() == 0) {
+			// return the empty list
+			return appActions;
+		}
+		// all appAction arrays are same size, so it doesn't matter which one size is taken from
+		int listSize = this.appActionDescriptions.size();
+		for(int i=0; i<listSize; i++) {
+			AppAction aa = new AppAction();
+			
+			///////////////////////////////////////////////////////////////////////
+			// Convert "default" values stored in Big Table to "normal Java" values
+			///////////////////////////////////////////////////////////////////////
+			String description = null;
+			if(appActionDescriptions.size() > i) {
+				description = this.appActionDescriptions.get(i).equals("") ? null : this.appActionDescriptions.get(i);
+			} else {
+				log.severe("appActionDescriptions array size corrupt");
+			}
+			aa.setDescription(description);
+			
+			Date timestamp = null;
+			if(appActionTimestamps.size() > i) {
+				timestamp = this.appActionTimestamps.get(i);
+			} else {
+				log.severe("appActionTimestamps array size corrupt");
+			}
+			aa.setTimestamp(timestamp);
+			
+			Integer duration = null;
+			if(appActionDurations.size() > i) {
+				duration = this.appActionDurations.get(i).equals(-1) ? null : this.appActionDurations.get(i);
+			} else {
+				log.severe("appActionDurations array size corrupt");
+			}
+			aa.setDuration(duration);
+			
+			appActions.add(aa);
+		}
+		return appActions;
+	}
 }
