@@ -87,8 +87,6 @@ public class User {
 	private Boolean isEmailConfirmed = false;
 	private String emailConfirmationCode;
 	private String smsConfirmationCode;
-
-	@Transient
 	private Boolean isSuperAdmin = false;
 	
 	@Transient

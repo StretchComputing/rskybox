@@ -77,8 +77,6 @@ public class UserAuthenticationFilter implements Filter {
     					// for now, in Dev, all users are super admins
     					log.info("Dev Environment: making user a Super Admin");
     					currentUser.setIsSuperAdmin(true);
-    				} else {
-    					currentUser.setIsSuperAdmin(User.isAdmin());
     				}
     				log.info("isSuperAdmin = " + currentUser.getIsSuperAdmin());
     				
