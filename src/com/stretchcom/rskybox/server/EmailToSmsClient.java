@@ -10,14 +10,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Logger;
 
-import org.json.JSONArray;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.restlet.ext.json.JsonRepresentation;
-import org.restlet.resource.ClientResource;
-import org.restlet.resource.ResourceException;
-
-import com.google.appengine.repackaged.com.google.common.util.Base64;
 
 public class EmailToSmsClient {
 	private static final Logger log = Logger.getLogger(EmailToSmsClient.class.getName());
@@ -135,7 +130,7 @@ public class EmailToSmsClient {
 				log.severe("base64 encoding failed: " + uee.getMessage());
 			}
 
-			String header = "Basic " + Base64.encode(bytes);
+			String header = "Basic " + Base64.encodeBase64String(bytes);
 			connection.setRequestProperty("Authorization", header);
 
 			////////////////////

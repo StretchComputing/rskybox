@@ -29,10 +29,14 @@ var RMODULE = (function (my, $) {
 
   // Returns the currently valid REST path prefix.
   my.getRestPrefix = function () {
-    var restUrl = '\/rest\/v1'
+    var appId, restUrl;
 
+    restUrl = '\/rest\/v1';
     if (window.location.search) {
-      restUrl += '\/applications\/' + my.getParameterByName(window.location.search, 'id');
+      appId = my.getParameterByName(window.location.search, 'id');
+      if (appId) {
+        restUrl += '\/applications\/' + appId;
+      }
     }
     return restUrl;
   };
@@ -77,14 +81,17 @@ var RMODULE = (function (my, $) {
 
 
   // Get the current user and call the success function when done.
-  my.getCurrentUser = function (success, noUser) {
+  my.getCurrentUser = function (success) {
     var extra;
 
     extra = {};
     extra.statusCode = {
       401: function () {
         hidePageLoadingMessage();
-        noUser && noUser();
+        // TODO - Do something reasonable when a 401 is returned from /users/current.
+        // For now, we'll just log out.
+        console.log('must be a token for a user than doesn\'t exist');
+        my.logout();
       }
     }
     showPageLoadingMessage();

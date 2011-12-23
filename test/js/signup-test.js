@@ -24,17 +24,28 @@ TestCase('SignupTest', {
 });
 
 
-
-TestCase('ConfirmTest', {
-  'test confirm is valid with valid properties': function () {
-    assertTrue(RMODULE.isValidConfirmation({ confirmationCode: 'abc', password: 'password' }));
+TestCase('CredentialsTest', {
+  'test valid confirmationCode': function () {
+    assertTrue(RMODULE.isValidConfirmationCode('abc'));
   },
 
-  'test confirm is invalid with missing password': function () {
-    assertFalse(RMODULE.isValidConfirmation({ confirmationCode: 'abc' }));
+  'test is invalid with missing confirmationCode': function () {
+    assertFalse(RMODULE.isValidConfirmationCode());
   },
 
-  'test confirm is invalid with missing confirmationCode': function () {
-    assertFalse(RMODULE.isValidConfirmation({ password: 'password' }));
+  'test is invalid when confirmationCode is too short': function () {
+    assertFalse(RMODULE.isValidConfirmationCode('12'));
+  },
+
+  'test valid password': function () {
+    assertTrue(RMODULE.isValidPassword('password'));
+  },
+
+  'test is invalid when password is missing': function () {
+    assertFalse(RMODULE.isValidPassword());
+  },
+
+  'test is invalid when password is too short': function () {
+    assertFalse(RMODULE.isValidPassword('12345'));
   }
 });

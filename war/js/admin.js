@@ -58,7 +58,7 @@ var RMODULE = (function (my, $) {
       $('#delete_item').click(function (event) {
         var restUrl;
 
-        restUrl = my.getRestPrefix() + my.getItemPath() + '/' + $('#id').val();
+        restUrl = my.getRestPrefix() + my.getItemPath() + '/' + $('#item_id').val();
         my.deleteJson(restUrl, null, function () {
           event.preventDefault();
           $.mobile.changePage('#index');

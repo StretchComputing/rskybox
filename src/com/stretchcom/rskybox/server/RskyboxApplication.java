@@ -10,8 +10,8 @@ public class RskyboxApplication extends Application {
     private static final Logger log = Logger.getLogger(RskyboxApplication.class.getName());
     public static final String APPLICATION_BASE_URL = "https://rskybox-stretchcom.appspot.com/";
     public static final String APPLICATION_WELCOME_PAGE = APPLICATION_BASE_URL + "index.html";
-    // TODO what is the real verification page
-    public static final String MEMBER_VERIFICATION_PAGE = APPLICATION_BASE_URL + "index.html";
+    public static final String USER_VERIFICATION_PAGE = APPLICATION_BASE_URL + "index.html#confirm";
+    public static final String MEMBER_VERIFICATION_PAGE = APPLICATION_BASE_URL + "index.html#confirm";
     public static final String SIGN_IN_PAGE = "/";
     public static final String LIST_DATE_FORMAT = "MM/dd/yy kk:mm";
     public static final String INFO_DATE_FORMAT = "MM/dd/yyyy 'at' hh:mm a";

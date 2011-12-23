@@ -27,8 +27,12 @@
 var RMODULE = (function (my, $) {
 
   var
+    confirmMember,
     confirmPage,
+    confirmUser,
     createUser,
+    getConfirmObject,
+    isLoggedIn,
     login,
     loginFail,
     loginSuccess,
@@ -57,41 +61,116 @@ var RMODULE = (function (my, $) {
   }
 
 
-  // Called on successful return from requestConfirmation.
+  // Called on successful return from requestConfirmation and from email links with confirmation codes.
   confirmPage = function (page, url) {
-    var email, phone;
+    var confirmationCode, email, phone;
 
     email = my.getParameterByName(url.hash, 'emailAddress');
     phone = my.getParameterByName(url.hash, 'phoneNumber');
+    confirmationCode = my.getParameterByName(url.hash, 'confirmationCode');
 
     email && $('#emailDisplay').html(email);
     phone && $('#phoneDisplay').html(phone);
     $('#confirmEmail').val(email);
     $('#confirmPhone').val(phone);
+    $('#confirmationCode').val(confirmationCode);
     $('#emailWrapper').toggle(!!email);
     $('#phoneWrapper').toggle(!!phone);
+    if (my.getParameterByName(url.hash, 'preregistration') === 'false') {
+      $('#confirmPasswordWrapper').hide();
+    }
   };
 
 
-  // Called from confirm page to create the user.
-  createUser = function () {
-    var confirmation, json;
+  getConfirmObject = function () {
+    var confirmation = {};
 
-    confirmation = {};
     my.addFormProperty(confirmation, 'confirmationCode', $('#confirmationCode').val());
     my.addFormProperty(confirmation, 'password', $('#confirmPassword').val());
     my.addFormProperty(confirmation, 'emailAddress', $('#confirmEmail').val());
     my.addFormProperty(confirmation, 'phoneNumber', $('#confirmPhone').val());
 
-    if (!my.isValidConfirmation(confirmation)) {
-      alert('Please enter your confirmation code and a valid password.');
-      return false;
-    }
+    return confirmation;
+  };
 
-    json = JSON.stringify(confirmation);
-    my.postJson(my.getRestPrefix() + '\/users', json, function (user) {
-      loginSuccess(user.token);
-    });
+
+  // Called from confirm page to create the user.
+  createUser = function () {
+    var confirmation = getConfirmObject();
+
+    if (!my.isValidConfirmationCode(confirmation.confirmationCode)) {
+      alert('Please enter your confirmation code.');
+    } else if (!my.isValidPassword(confirmation.password)) {
+      alert('Please enter a valid password.');
+    } else {
+      my.postJson(my.getRestPrefix() + '\/users', JSON.stringify(confirmation), function (user) {
+        loginSuccess(user.token);
+      });
+    }
+    return false;
+  };
+
+
+  // Called from confirm page to confirm user email address or phone number.
+  confirmUser = function () {
+    var confirmation = getConfirmObject();
+
+    if (!my.isValidConfirmationCode(confirmation.confirmationCode)) {
+      alert('Please enter your confirmation code.')
+    } else {
+      my.putJson(my.getRestPrefix() + '\/users\/confirm', JSON.stringify(confirmation), function (user) {
+        my.redirect('\/');
+      });
+    }
+    return false;
+  };
+
+
+  // Called from confirm page to confirm member email address.
+  confirmMember = function () {
+    var confirmation, restUrl;
+
+    confirmation = getConfirmObject();
+
+    if (!my.isValidConfirmationCode(confirmation.confirmationCode)) {
+      alert('Please enter your confirmation code.')
+    } else {
+      restUrl  = my.getRestPrefix();
+      restUrl += '\/applications\/' + my.getParameterByName(location.hash, 'applicationId');
+      restUrl += '\/appMembers\/confirmation';
+      my.putJson(restUrl, JSON.stringify(confirmation), function (user) {
+        switch (+user.apiStatus) {
+        // same action for both 100 and 214
+        case 100:  // success
+        case 214:  // member not pending confirmation
+          if (!isLoggedIn()) {
+            my.redirect('\/#login');
+          }
+          break;
+        case 215:  // member not a registered user
+          $('#confirmSignup').show();
+          break;
+        case 606: // app member not found
+          // TODO - rskybox logging
+          console.log('Your app membership cannot be confirmed.');
+          break
+        default:
+          // TODO - rskybox logging
+          console.log("this shouldn't happen");
+        }
+      });
+    }
+  };
+
+
+  // If the token is already set, direct the user into the app.
+  isLoggedIn = function () {
+    if (Cookie.get('token')) {
+      my.getCurrentUser(function () {
+        my.redirect('\/html5');
+      });
+      return true;
+    }
     return false;
   };
 
@@ -105,12 +184,13 @@ var RMODULE = (function (my, $) {
     my.addFormProperty(login, 'emailAddress', $('#loginEmail').val());
     my.addFormProperty(login, 'phoneNumber', $('#loginPhone').val());
     if (my.isValidLogin(login)) {
-      login.userName = !!login.emailAddress ? login.emailAddress :loginPhoneNumber;
+      login.userName = !!login.emailAddress ? login.emailAddress : loginPhoneNumber;
       delete login.emailAddress;
       delete login.phoneNumber;
       $.getJSON(my.getRestPrefix() + '\/users\/token', login, function (result) {
-        if (result.apiStatus == "100") {
-          loginSuccess(result.token); } else {
+        if (+result.apiStatus === 100) {
+          loginSuccess(result.token);
+        } else {
           loginFail(result);
         }
       });
@@ -130,19 +210,15 @@ var RMODULE = (function (my, $) {
 
   loginSuccess = function (token) {
     Cookie.set('token', token, 9000, '\/');
-    my.redirect('\/html5');
+    if (!isLoggedIn()) {
+      // TODO - rskybox logging
+      console.log('unable to set token cookie');
+    }
   };
 
 
   my.init = function () {
-    // If there is a current user, redirect right away.
-    $('#index').live('pagebeforecreate', function () {
-      if (Cookie.get('token')) {
-        my.getCurrentUser(function () {
-          my.redirect('\/html5');
-        });
-      }
-    });
+    $('#index').live('pagebeforecreate', isLoggedIn);
 
     $('#index').live('pageshow', function () {
       my.jsonPopulate(my.getMobileCarriersUrl(), $('#mobileCarrierId'), function (select, carriers) {
@@ -154,8 +230,18 @@ var RMODULE = (function (my, $) {
       $(this).find('form').submit(requestConfirmCode);
     });
 
+
     $('#confirm').live('pagecreate', function () {
-      $(this).find('form').submit(createUser);
+      var email, phone, prereg, submit;
+
+      submit = createUser;
+      prereg = my.getParameterByName(location.hash, 'preregistration');
+      if (my.getParameterByName(location.hash, 'memberConfirmation')) {
+        confirmMember();
+      } else if (prereg === 'false') {
+        submit = confirmUser;
+      }
+      $(this).find('form').submit(submit);
     });
 
     $('#login').live('pagecreate', function () {
@@ -198,11 +284,14 @@ RMODULE.init();
   </div>
 </div>
 
-<div data-role="page" id="confirm" data-title="Confirm Signup">
+<div data-role="page" id="confirm" data-title="New User Signup">
   <div data-role="header">
-    <h1>Confirm Signup</h1>
+    <h1>New User Signup</h1>
   </div>
   <div data-role="content">
+    <div id="confirmSignup">
+      <h3>Please create a password to complete your signup.</h3>
+    </div>
     <form>
       <p id="emailWrapper" style="display: none;">
         <strong>Email Address: </strong><span id="emailDisplay"></span>
@@ -217,9 +306,11 @@ RMODULE.init();
       <label for="confirmationCode" class="ui-hidden-accessible">Confirmation Code:</label>
       <input type="tel" name="confirmationCode" id="confirmationCode" placeholder="Confirmation Code">
 
-      <strong>Create a password. (min 6 chars)</strong>
-      <label for="confirmPassword" class="ui-hidden-accessible">Password:</label>
-      <input name="confirmPassword" id="confirmPassword" placeholder="Password">
+      <div id="confirmPasswordWrapper">
+        <strong>Create a password. (min 6 chars)</strong>
+        <label for="confirmPassword" class="ui-hidden-accessible">Password:</label>
+        <input name="confirmPassword" id="confirmPassword" placeholder="Password">
+      </div>
 
       <input type="submit" value="Complete Sign Up">
     </form>
