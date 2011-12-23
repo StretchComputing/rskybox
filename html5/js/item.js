@@ -1,12 +1,8 @@
 'use strict';
 
-var RMODULE = (function (my, $) {
+var RMODULE = (function(my, $) {
 
-  var
-    buildListPage,
-    itemPage,
-    itemPage,
-    listPage;
+  var buildListPage, itemPage, itemPage, listPage;
 
   //
   // Generic List Functions
@@ -15,8 +11,9 @@ var RMODULE = (function (my, $) {
   // Retrieves and displays the appropriate list for the given page.
   //
   // page: the page we are setting up
-  // status (optional): default is 'new', but this parameter can override the default
-  listPage = function (page, status) {
+  // status (optional): default is 'new', but this parameter can override the
+  // default
+  listPage = function(page, status) {
     var restUrl;
 
     restUrl = my.getRestPrefix() + '/' + my.itemName();
@@ -28,7 +25,7 @@ var RMODULE = (function (my, $) {
   //
   // page: the page we are working with
   // list: JSON object containing the list elements
-  buildListPage = function (page, list) {
+  buildListPage = function(page, list) {
     var i, item, markup;
 
     markup = '<ul data-role="listview">';
@@ -41,7 +38,7 @@ var RMODULE = (function (my, $) {
   };
 
   // Allow outsiders to provide their own list content
-  my.buildListItemContent = function (item) {
+  my.buildListItemContent = function(item) {
     var display;
 
     display = item.date + ' - ' + item.userName + ' - ' + item.instanceUrl;
@@ -56,13 +53,14 @@ var RMODULE = (function (my, $) {
   //
   // page: the jQuery element for the page
   // url: the URL object of the current page
-  itemPage = function (page, url) {
+  itemPage = function(page, url) {
     var changeStatus, restUrl;
 
     changeStatus = my.getParameterByName(url.hash, 'changeStatus');
-    restUrl = my.getRestPrefix() + '/' + my.itemName() + '/' + my.getParameterByName(url.hash, 'id');
+    restUrl = my.getRestPrefix() + '/' + my.itemName() + '/'
+        + my.getParameterByName(url.hash, 'id');
     if (changeStatus) {
-      my.putJson(restUrl, '{ status: ' + changeStatus + ' }', function () {
+      my.putJson(restUrl, '{ status: ' + changeStatus + ' }', function() {
         my.jsonPopulate(restUrl, page, my.buildItemPage);
       });
     } else {
@@ -70,17 +68,19 @@ var RMODULE = (function (my, $) {
     }
   };
 
-  // Sets up common elements of the item page. Calls itemDetails for item-specific
+  // Sets up common elements of the item page. Calls itemDetails for
+  // item-specific
   // elements.
   //
   // Public so it can be overridden.
-  my.buildItemPage = function (page, item) {
+  my.buildItemPage = function(page, item) {
     var h1, link, status;
 
     status = item.status === 'new' ? 'archived' : 'new';
 
-    link  = '<a href="#item?id=' + item.id + '&changeStatus=' + status + '" class="ui-btn-right" data-theme="b">';
-    link +=   item.status === 'new' ? 'Archive' : 'Un-archive';
+    link = '<a href="#item?id=' + item.id + '&changeStatus=' + status
+        + '" class="ui-btn-right" data-theme="b">';
+    link += item.status === 'new' ? 'Archive' : 'Un-archive';
     link += '<\/a>';
 
     h1 = my.pageHeader(page).find('h1');
@@ -94,22 +94,44 @@ var RMODULE = (function (my, $) {
     page.trigger('create');
   };
 
-  my.init = function () {
+
+  // Get the display for AppActions.
+  //
+  // Used by ClientLogs and CrashDetects.
+  my.getAppActions = function(actions) {
+    var action, html, i;
+
+    if (!actions) return '';
+
+    html  = '<div>';
+    html += 'App Actions<br>';
+    for (i = 0; i < actions.length; i++) {
+      action = actions[i];
+      html += action.timestamp + ' - ' + action.duration + "ms: " + action.description + '<br>';
+    }
+    html += '<div>';
+    return html;
+  };
+
+
+  my.init = function() {
     // Each type of item has its own index and archives page.
     // The following blocks set up event handlers for these internal pages.
-    $('#index').live('pageshow', function () {
+    $('#index').live('pageshow', function() {
       listPage($('#index'));
     });
-    $('#archives').live('pageshow', function () {
+    $('#archives').live('pageshow', function() {
       listPage($('#archives'), 'archived');
     });
 
-    // The page(s) we need to handle and build dynamically. Let's us get information
-    // from the URL and do special handling for these dynamically injected pages.
-    my.dynamicPages([{
-      page: '#item',
-      'function': itemPage
-    }]);
+    // The page(s) we need to handle and build dynamically. Let's us get
+    // information
+    // from the URL and do special handling for these dynamically injected
+    // pages.
+    my.dynamicPages([ {
+      page : '#item',
+      'function' : itemPage
+    } ]);
   };
 
   return my;

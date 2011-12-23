@@ -25,16 +25,8 @@ var RMODULE = (function (my) {
     html += '  Stack Back Trace<br>';
     html += '  ' + item.stackBackTrace;
     html += '<\/div>';
-    if (item.appActions && item.appActions.length) {
-      html += '<br>';
-      html += '<div>';
-      html += 'App Actions<br>';
-      for (i = 0; i < item.appActions.length; i++) {
-        action = item.appActions[i];
-        html += action.timestamp + ' - ' + action.duration + "ms: " + action.description + '<br>';
-      }
-      html += '<div>';
-    }
+    html += '<br>';
+    html += my.getAppActions(item.appActions);
     return html;
   };
 
