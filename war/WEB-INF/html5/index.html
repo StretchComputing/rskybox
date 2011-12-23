@@ -54,10 +54,14 @@ var RMODULE = (function (my, $) {
     title = application.name;
     document.title = title;
     my.pageHeader(page).find('h1').html(title);
-    markup = '<ul data-role="listview">';
-    markup += '<li><a href="/html5\/feedback?id=' + application.id +'" rel="external">Feedback<\/a><\/li>';
-    markup += '<li><a href="/html5\/crashdetects?id=' + application.id +'" rel="external">Crash Detects<\/a><\/li>';
-    markup += '<li><a href="/html5\/clientlogs?id=' + application.id +'" rel="external">Client Logs<\/a><\/li>';
+    markup  = '<p>';
+    markup +=   'AppID: ' + application.id + '<br>';
+    markup +=   'Token: ' + application.token;
+    markup += '<\/p><br>';
+    markup += '<ul data-role="listview">';
+    markup +=   '<li><a href="/html5\/feedback?id=' + application.id +'" rel="external">Feedback<\/a><\/li>';
+    markup +=   '<li><a href="/html5\/crashdetects?id=' + application.id +'" rel="external">Crash Detects<\/a><\/li>';
+    markup +=   '<li><a href="/html5\/clientlogs?id=' + application.id +'" rel="external">Client Logs<\/a><\/li>';
     markup += '<\/ul>';
     my.pageContent(page, markup).find(':jqmData(role=listview)').listview();
   };
