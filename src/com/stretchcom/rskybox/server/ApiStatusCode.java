@@ -20,6 +20,9 @@ public class ApiStatusCode {
 	public static final String USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE = "213";
 	public static final String MEMBER_NOT_PENDING_CONFIRMATION = "214";
 	public static final String MEMBER_NOT_A_REGISTERED_USER = "215";
+	public static final String USER_NOT_AUTHORIZED_TO_DELETE_MEMBER = "216";
+	public static final String USER_NOT_AUTHORIZED_TO_DELETE_MEMBER_WITH_SPECIFIED_ROLE = "217";
+	public static final String USER_NOT_AUTHORIZED = "218";
 	
 	public static final String FEEDBACK_ID_REQUIRED = "300";
 	public static final String CRASH_DETECT_ID_REQUIRED = "301";

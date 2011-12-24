@@ -131,20 +131,41 @@ public class UsersResource extends ServerResource {
         
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
+        em.getTransaction().begin();
         try {
 			if (this.id == null || this.id.length() == 0) {
 				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
 			}
 			
+			User user = Utility.getCurrentUser(getRequest());
             Key key;
-			try {
-				key = KeyFactory.stringToKey(this.id);
-			} catch (Exception e) {
-				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+			if(this.id.equalsIgnoreCase(User.CURRENT)) {
+				// special case: id = "current" so return info on currently logged in user
+	        	if(user == null) {
+	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+	        	}
+	        	key = user.getKey();
+			} else {
+	        	//////////////////////
+	        	// Authorization Rules
+	        	//////////////////////
+				// if not the current user, then must be the Super Admin
+	        	if(!user.getIsSuperAdmin()) {
+	            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
+	        	}
+
+	        	// id of user specified
+				try {
+					key = KeyFactory.stringToKey(this.id);
+				} catch (Exception e) {
+					log.info("ID provided cannot be converted to a Key");
+					return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+				}
 			}
-            em.getTransaction().begin();
-            User user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
+    		user = (User)em.createNamedQuery("User.getByKey")
+				.setParameter("key", key)
+				.getSingleResult();
+            
             em.remove(user);
             em.getTransaction().commit();
         } catch (NoResultException e) {
@@ -178,6 +199,14 @@ public class UsersResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
         try {
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	User currentUser = Utility.getCurrentUser(getRequest());
+        	if(!currentUser.getIsSuperAdmin()) {
+            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
+        	}
+        	
             List<User> users = new ArrayList<User>();
             JSONArray ja = new JSONArray();
             users = (List<User>) em.createNamedQuery("User.getAll").getResultList();
@@ -197,7 +226,7 @@ public class UsersResource extends ServerResource {
     private JsonRepresentation show() {
         log.info("in show()");
         EntityManager em = EMF.get().createEntityManager();
-        Boolean isSuperAdmin = null;
+        Boolean isCurrentUser = false;
 
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
@@ -208,14 +237,22 @@ public class UsersResource extends ServerResource {
 			}
 			
 			if(this.id.equalsIgnoreCase(User.CURRENT)) {
+				isCurrentUser = false;
 				// special case: id = "current" so return info on currently logged in user
 				user = Utility.getCurrentUser(getRequest());
 	        	if(user == null) {
 	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 	        	}
-	        	isSuperAdmin = user.getIsSuperAdmin();
 			} else {
-				// id of user specified
+	        	//////////////////////
+	        	// Authorization Rules
+	        	//////////////////////
+	        	User currentUser = Utility.getCurrentUser(getRequest());
+	        	if(!currentUser.getIsSuperAdmin()) {
+	            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
+	        	}
+
+	        	// id of user specified
 	            Key key;
 				try {
 					key = KeyFactory.stringToKey(this.id);
@@ -236,7 +273,7 @@ public class UsersResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getUserJson(user, apiStatus, isSuperAdmin));
+        return new JsonRepresentation(getUserJson(user, apiStatus, isCurrentUser));
     }
 
     private JsonRepresentation save_user(Representation entity) {
@@ -268,10 +305,37 @@ public class UsersResource extends ServerResource {
 
             if (id != null) {
             	// this is an Update User API call
-                Key key = KeyFactory.stringToKey(this.id);
-                user = (User) em.createNamedQuery("User.getByKey").setParameter("key", key).getSingleResult();
-        		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
+        		this.setStatus(Status.SUCCESS_OK);
+            	
+	            Key key;
+    			if(this.id.equalsIgnoreCase(User.CURRENT)) {
+    				// special case: id = "current" so return info on currently logged in user
+    				User currentUser = Utility.getCurrentUser(getRequest());
+    	        	if(currentUser == null) {
+    	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+    	        	}
+    	        	key = currentUser.getKey();
+    			} else {
+    	        	//////////////////////
+    	        	// Authorization Rules
+    	        	//////////////////////
+    				// if not the current user, then must be the Super Admin
+    	        	if(!user.getIsSuperAdmin()) {
+    	            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
+    	        	}
+
+    	        	// id of user specified
+    				try {
+    					key = KeyFactory.stringToKey(this.id);
+    				} catch (Exception e) {
+    					log.info("ID provided cannot be converted to a Key");
+    					return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+    				}
+    			}
+	    		user = (User)em.createNamedQuery("User.getByKey")
+					.setParameter("key", key)
+					.getSingleResult();
                 
                 // ***** Maybe all the following code needs to be moved to the Request Authorization API
                 // ***** Not sure if Update should allow these fields to changes.  If so, then a confirmation 
@@ -510,8 +574,9 @@ public class UsersResource extends ServerResource {
     	return getUserJson(user, theApiStatus, null);
     }
 
-    private JSONObject getUserJson(User user, String theApiStatus, Boolean isCurrentUserAdmin) {
+    private JSONObject getUserJson(User user, String theApiStatus, Boolean isCurrentUser) {
         JSONObject json = new JSONObject();
+        if(isCurrentUser == null) {isCurrentUser= false;}
 
         try {
         	if(theApiStatus != null) {
@@ -528,13 +593,9 @@ public class UsersResource extends ServerResource {
                 json.put("token", user.getToken());
                 json.put("authHeader", user.getAuthHeader());
                 json.put("memberConfirmed", user.getWasMembershipConfirmed());
+            	json.put("isSuperAdmin", user.getIsSuperAdmin());
 
-                if(isCurrentUserAdmin != null) {
-                	///////////////////////////////////////////////////////////////////
-                	// must be Current user; otherwise isCurrentUserAdmin would be null
-                	///////////////////////////////////////////////////////////////////
-                	json.put("isSuperAdmin", isCurrentUserAdmin);
-                	
+                if(isCurrentUser) {
     	        	UserService userService = UserServiceFactory.getUserService();
     	        	json.put("logoutUrl", userService.createLogoutURL(RskyboxApplication.APPLICATION_WELCOME_PAGE));
     	        	
