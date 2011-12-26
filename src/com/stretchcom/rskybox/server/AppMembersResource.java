@@ -444,6 +444,7 @@ public class AppMembersResource extends ServerResource {
         		}
             	
             	json.put("emailAddress", appMember.getEmailAddress());
+            	json.put("phoneNumber", appMember.getPhoneNumber());
             	json.put("role", appMember.getRole());
             	json.put("status", appMember.getStatus());
         	}

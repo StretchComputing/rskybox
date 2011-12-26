@@ -88,6 +88,7 @@ public class AppMember {
 	
 	private String userId;
 	private String emailAddress;
+	private String phoneNumber;
 	private String applicationId;
 	private String applicationName;
 	private String role;
@@ -163,6 +164,14 @@ public class AppMember {
 
 	public void setEmailAddress(String emailAddress) {
 		this.emailAddress = emailAddress;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
 	public String getStatus() {
@@ -252,22 +261,23 @@ public class AppMember {
         return appMember;
 	}
 	
-	public static AppMember addAppMember(String theApplicationId, String theUserId, String theRole) {
+	public static AppMember addAppMember(String theApplicationId, Application theApplication, User theCurrentUser, String theRole) {
         EntityManager em = EMF.get().createEntityManager();
         AppMember appMember = null;
         
         // First verify user is NOT already an member of this application
         // ::OPTIMIZATION:: remove this check to reduce CPU time
+    	String userId = KeyFactory.keyToString(theCurrentUser.getKey());
         try {
 			appMember = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndUserId")
 				.setParameter("applicationId", theApplicationId)
-				.setParameter("userId", theUserId)
+				.setParameter("userId", userId)
 				.getSingleResult();
 			
-			log.severe("ERROR: user with userId = " + theUserId + " is already a member of application with applicationId = " + theApplicationId);
+			log.severe("ERROR: user with userId = " + userId + " is already a member of application with applicationId = " + theApplicationId);
 			return null;
 		} catch (NoResultException e) {
-			log.info("as expected, user with userId = " + theUserId + " is not already a member of application with applicationId = " + theApplicationId);
+			log.info("as expected, user with userId = " + userId + " is not already a member of application with applicationId = " + theApplicationId);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more userId/applicationId combinations in AppMember");
 			return null;
@@ -278,9 +288,13 @@ public class AppMember {
     		em2.getTransaction().begin();
     		appMember = new AppMember();
     		appMember.setApplicationId(theApplicationId);
-    		appMember.setUserId(theUserId);
+    		appMember.setUserId(userId);
     		appMember.setRole(theRole);
     		appMember.setStatus(AppMember.ACTIVE_STATUS);
+    		appMember.setEmailAddress(theCurrentUser.getEmailAddress());
+    		appMember.setPhoneNumber(theCurrentUser.getPhoneNumber());
+    		appMember.setCreatedGmtDate(new Date());
+    		appMember.setApplicationName(theApplication.getName());
     		em2.persist(appMember);
 			em2.getTransaction().commit();
     	} catch (Exception e) {

@@ -150,7 +150,7 @@ public class ApplicationsResource extends ServerResource {
             if(!isUpdate) {
             	// Create User API so add currentUser creating this application as owner
             	String applicationId = KeyFactory.keyToString(application.getKey());
-            	AppMember.addAppMember(applicationId, KeyFactory.keyToString(currentUser.getKey()), AppMember.OWNER_ROLE);
+            	AppMember.addAppMember(applicationId, application, currentUser, AppMember.OWNER_ROLE);
             	
             	jsonReturn = new JSONObject();
             	jsonReturn.put("apiStatus", apiStatus); 
