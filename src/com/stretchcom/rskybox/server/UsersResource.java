@@ -137,20 +137,20 @@ public class UsersResource extends ServerResource {
 				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
 			}
 			
-			User user = Utility.getCurrentUser(getRequest());
+			User currentUser = Utility.getCurrentUser(getRequest());
             Key key;
 			if(this.id.equalsIgnoreCase(User.CURRENT)) {
 				// special case: id = "current" so return info on currently logged in user
-	        	if(user == null) {
+	        	if(currentUser == null) {
 	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 	        	}
-	        	key = user.getKey();
+	        	key = currentUser.getKey();
 			} else {
 	        	//////////////////////
 	        	// Authorization Rules
 	        	//////////////////////
 				// if not the current user, then must be the Super Admin
-	        	if(!user.getIsSuperAdmin()) {
+	        	if(currentUser == null || !currentUser.getIsSuperAdmin()) {
 	            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
 	        	}
 
@@ -162,7 +162,7 @@ public class UsersResource extends ServerResource {
 					return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 				}
 			}
-    		user = (User)em.createNamedQuery("User.getByKey")
+    		User user = (User)em.createNamedQuery("User.getByKey")
 				.setParameter("key", key)
 				.getSingleResult();
             
@@ -203,7 +203,7 @@ public class UsersResource extends ServerResource {
         	// Authorization Rules
         	//////////////////////
         	User currentUser = Utility.getCurrentUser(getRequest());
-        	if(!currentUser.getIsSuperAdmin()) {
+        	if(currentUser == null || !currentUser.getIsSuperAdmin()) {
             	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
         	}
         	
@@ -236,19 +236,19 @@ public class UsersResource extends ServerResource {
 				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
 			}
 			
+        	User currentUser = Utility.getCurrentUser(getRequest());
 			if(this.id.equalsIgnoreCase(User.CURRENT)) {
 				isCurrentUser = false;
 				// special case: id = "current" so return info on currently logged in user
-				user = Utility.getCurrentUser(getRequest());
-	        	if(user == null) {
+	        	if(currentUser == null) {
 	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
 	        	}
+	        	user = currentUser;
 			} else {
 	        	//////////////////////
 	        	// Authorization Rules
 	        	//////////////////////
-	        	User currentUser = Utility.getCurrentUser(getRequest());
-	        	if(!currentUser.getIsSuperAdmin()) {
+	        	if(currentUser == null || !currentUser.getIsSuperAdmin()) {
 	            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
 	        	}
 
@@ -309,9 +309,9 @@ public class UsersResource extends ServerResource {
         		this.setStatus(Status.SUCCESS_OK);
             	
 	            Key key;
+				User currentUser = Utility.getCurrentUser(getRequest());
     			if(this.id.equalsIgnoreCase(User.CURRENT)) {
     				// special case: id = "current" so return info on currently logged in user
-    				User currentUser = Utility.getCurrentUser(getRequest());
     	        	if(currentUser == null) {
     	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
     	        	}
@@ -321,7 +321,7 @@ public class UsersResource extends ServerResource {
     	        	// Authorization Rules
     	        	//////////////////////
     				// if not the current user, then must be the Super Admin
-    	        	if(!user.getIsSuperAdmin()) {
+    	        	if(currentUser == null || !currentUser.getIsSuperAdmin()) {
     	            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
     	        	}
 

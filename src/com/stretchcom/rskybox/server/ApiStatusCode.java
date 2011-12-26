@@ -23,6 +23,7 @@ public class ApiStatusCode {
 	public static final String USER_NOT_AUTHORIZED_TO_DELETE_MEMBER = "216";
 	public static final String USER_NOT_AUTHORIZED_TO_DELETE_MEMBER_WITH_SPECIFIED_ROLE = "217";
 	public static final String USER_NOT_AUTHORIZED = "218";
+	public static final String APP_OWNER_CANNOT_BE_DELETED = "219";
 	
 	public static final String FEEDBACK_ID_REQUIRED = "300";
 	public static final String CRASH_DETECT_ID_REQUIRED = "301";

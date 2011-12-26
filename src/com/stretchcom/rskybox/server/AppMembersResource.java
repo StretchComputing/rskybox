@@ -21,6 +21,7 @@ import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.Variant;
+import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
@@ -109,6 +110,83 @@ public class AppMembersResource extends ServerResource {
     		}
             return save_appMember(entity);
     	}
+    }
+
+    // Handles 'Delete AppMember API'
+    @Delete("json")
+    public JsonRepresentation delete() {
+        log.info("in delete");
+        JSONObject json = new JSONObject();
+        EntityManager em = EMF.get().createEntityManager();
+        
+		String apiStatus = ApiStatusCode.SUCCESS;
+        this.setStatus(Status.SUCCESS_OK);
+    	User currentUser = Utility.getCurrentUser(getRequest());
+        em.getTransaction().begin();
+        try {
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
+        	if (this.id == null || this.id.length() == 0) {
+				return Utility.apiError(ApiStatusCode.APP_MEMBER_ID_REQUIRED);
+			}
+			
+            Key key;
+			try {
+				key = KeyFactory.stringToKey(this.id);
+			} catch (Exception e) {
+				log.info("ID provided cannot be converted to a Key");
+				return Utility.apiError(ApiStatusCode.APP_MEMBER_NOT_FOUND);
+			}
+
+    		AppMember appMember = (AppMember)em.createNamedQuery("AppMember.getByKey")
+				.setParameter("key", key)
+				.getSingleResult();
+    		
+        	///////////////////////////
+        	// More Authorization Rules
+        	///////////////////////////
+    		// app owner can not be deleted
+    		if(appMember.getRole().equalsIgnoreCase(AppMember.OWNER_ROLE)) {
+				return Utility.apiError(ApiStatusCode.APP_OWNER_CANNOT_BE_DELETED);
+    		}
+    		// must be an owner to delete a manager
+    		if(!currentUserMember.hasOwnerAuthority() && appMember.getRole().equalsIgnoreCase(AppMember.MANAGER_ROLE)) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_DELETE_MEMBER_WITH_SPECIFIED_ROLE);
+    		}
+    		// must be a manager to delete a member
+    		if(!currentUserMember.hasManagerAuthority()) {
+				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_DELETE_MEMBER);
+    		}
+            
+            em.remove(appMember);
+            em.getTransaction().commit();
+        } catch (NoResultException e) {
+			log.info("User not found");
+			apiStatus = ApiStatusCode.APP_MEMBER_NOT_FOUND;
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more users have same key");
+			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
+        
+        try {
+			json.put("apiStatus", apiStatus);
+		} catch (JSONException e) {
+            log.severe("exception = " + e.getMessage());
+        	e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		}
+        return new JsonRepresentation(json);
     }
 
     private JsonRepresentation save_appMember(Representation entity) {
