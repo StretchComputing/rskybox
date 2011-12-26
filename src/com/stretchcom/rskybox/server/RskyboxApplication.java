@@ -13,6 +13,10 @@ public class RskyboxApplication extends Application {
     public static final String USER_VERIFICATION_PAGE = APPLICATION_BASE_URL + "index.html#confirm";
     public static final String MEMBER_VERIFICATION_PAGE = APPLICATION_BASE_URL + "index.html#confirm";
     public static final String SIGN_IN_PAGE = "/";
+	public static final String EMAIL_START_TOKEN_MARKER = ":rSkyboxId:";
+	public static final String EMAIL_END_TOKEN_MARKER = "::";
+	public static final String AUTO_SENDER = "rSkybox";
+    
     public static final String LIST_DATE_FORMAT = "MM/dd/yy kk:mm";
     public static final String INFO_DATE_FORMAT = "MM/dd/yyyy 'at' hh:mm a";
     public static final String APP_ACTION_DATE_FORMAT = "yyyy-MM-dd kk:mm:ss.SSS";

@@ -310,44 +310,46 @@ public class AppMember {
 	}
 	
 	// Send member verification email
-	// TODO add phone number support
-	public static void sendMemberVerification(AppMember theNewAppMember, String theApplicationId) {
+	// TODO add SMS capability
+	public static void sendMemberConfirmation(AppMember theNewAppMember, String theApplicationId) {
 		try {
 			Application application = Application.getApplicationWithId(theApplicationId);
 			if(application == null) {
 				log.severe("could not send member verification due to bad application ID");
 				return;
 			}
-			
+            
 			String emailAddress = theNewAppMember.getEmailAddress();
 			if(emailAddress == null || emailAddress.trim().length() == 0) {
 				log.severe("could not send member verification due to empty email address");
 				return;
 			}
+
 			String encodedEmailAddress = Reference.encode(emailAddress);
 			String encodedConfirmationCode = Reference.encode(theNewAppMember.getEmailConfirmationCode());
 			
-            String subject = "rSkybox verification";
-            StringBuffer sb = new StringBuffer();
-            sb.append("You have been added as a member of the rSkybox application ");
-            sb.append(application.getName());
-            sb.append(". Please verify your membership by clicking the link below");
-            sb.append("<br><br>");
-            sb.append(RskyboxApplication.MEMBER_VERIFICATION_PAGE);
-            sb.append("?");
-            sb.append("applicationId=");
-            sb.append(theApplicationId);
-            sb.append("&");
-            sb.append("emailAddress=");
-            sb.append(encodedEmailAddress);
-            sb.append("&");
-            sb.append("confirmationCode=");
-            sb.append(encodedConfirmationCode);
-            sb.append("&");
-            sb.append("memberConfirmation=");
-            sb.append("true");
-            
-        	Emailer.send(emailAddress, subject, sb.toString(), Emailer.NO_REPLY);
+	    	StringBuffer urlBuf = new StringBuffer();
+	    	urlBuf.append(RskyboxApplication.MEMBER_VERIFICATION_PAGE);
+	    	urlBuf.append("?");
+	    	urlBuf.append("applicationId=");
+	    	urlBuf.append(theApplicationId);
+	    	urlBuf.append("&");
+	    	urlBuf.append("emailAddress=");
+	    	urlBuf.append(encodedEmailAddress);
+	    	urlBuf.append("&");
+	    	urlBuf.append("confirmationCode=");
+	    	urlBuf.append(encodedConfirmationCode);
+	    	urlBuf.append("&");
+	    	urlBuf.append("memberConfirmation=");
+	    	urlBuf.append("true");
+
+			String subject = "rSkybox verification";
+            StringBuffer coreMsg = new StringBuffer();
+            coreMsg.append("You have been added as a member of the rSkybox application ");
+            coreMsg.append(application.getName());
+			
+            String body = Emailer.getConfirmedEmailBody(coreMsg.toString(), urlBuf.toString(), theNewAppMember.getEmailConfirmationCode());
+            Emailer.send(emailAddress, subject, body, Emailer.NO_REPLY);
 		} catch (Exception e) {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();

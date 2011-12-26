@@ -690,7 +690,7 @@ public class UsersResource extends ServerResource {
             	}
                 user.setEmailConfirmationCode(confirmationCode);
             	log.info("sending email confirmation code = " + confirmationCode + " to " + user.getEmailAddress());
-            	Emailer.send(user.getEmailAddress(), subject, buildEmailConfirmationMessage(user), Emailer.NO_REPLY);
+            	sendUserConfirmationEmail(user, subject);
             	emailConfirmationSent = true;
             	
             	// even though confirmation is through email, phone number field can be set
@@ -929,24 +929,28 @@ public class UsersResource extends ServerResource {
         }
     }
     
-    private String buildEmailConfirmationMessage(User theUser) {
-    	StringBuffer sb = new StringBuffer("Your confirmation code is " + theUser.getEmailConfirmationCode());
-    	sb.append(".<br><br>");
-        sb.append(RskyboxApplication.USER_VERIFICATION_PAGE);
-        sb.append("?");
-        sb.append("emailAddress=");
-        sb.append(Utility.urlEncode(theUser.getEmailAddress()));
-        sb.append("&");
-        sb.append("confirmationCode=");
-        sb.append(Utility.urlEncode(theUser.getEmailConfirmationCode()));
-        sb.append("&");
-        sb.append("preregistration=");
+    private void sendUserConfirmationEmail(User theUser, String theSubject) {
+        StringBuffer coreMsg = new StringBuffer();
+        coreMsg.append("Your confirmation code is " + theUser.getEmailConfirmationCode());
+    	
+    	StringBuffer urlBuf = new StringBuffer();
+    	urlBuf.append(RskyboxApplication.USER_VERIFICATION_PAGE);
+    	urlBuf.append("?");
+    	urlBuf.append("emailAddress=");
+    	urlBuf.append(Utility.urlEncode(theUser.getEmailAddress()));
+    	urlBuf.append("&");
+    	urlBuf.append("confirmationCode=");
+    	urlBuf.append(Utility.urlEncode(theUser.getEmailConfirmationCode()));
+    	urlBuf.append("&");
+    	urlBuf.append("preregistration=");
         if(theUser.getToken() == null) {
-            sb.append("true");
+        	urlBuf.append("true");
         } else {
-            sb.append("false");
+        	urlBuf.append("false");
         }
-        return sb.toString();
+        
+        String body = Emailer.getConfirmedEmailBody(coreMsg.toString(), urlBuf.toString(), theUser.getEmailConfirmationCode());
+    	Emailer.send(theUser.getEmailAddress(), theSubject, body, Emailer.NO_REPLY);
     }
     
     private String buildSmsConfirmationMessage(User theUser) {

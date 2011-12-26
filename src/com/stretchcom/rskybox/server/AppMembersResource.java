@@ -316,7 +316,7 @@ public class AppMembersResource extends ServerResource {
             em.persist(appMember);
             em.getTransaction().commit();
             
-            AppMember.sendMemberVerification(appMember, this.applicationId);
+            AppMember.sendMemberConfirmation(appMember, this.applicationId);
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

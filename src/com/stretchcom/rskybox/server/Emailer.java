@@ -30,6 +30,8 @@ import com.google.appengine.api.labs.taskqueue.QueueFactory;
 import com.google.appengine.api.labs.taskqueue.Queue;
 import com.google.appengine.api.labs.taskqueue.TaskOptions;
 import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
+import com.stretchcom.rskybox.models.AppMember;
+import com.stretchcom.rskybox.models.Application;
 
 
 public class Emailer {
@@ -71,4 +73,68 @@ public class Emailer {
 		Queue queue = QueueFactory.getQueue("email"); // "email" queue is defined in WEB-INF/queue.xml
 		queue.add(taskOptions);
 	}
+	
+    
+    public static String getConfirmedEmailBody(String theCoreMessage, String theUrl, String theConfirmationCode) {
+    	StringBuffer sb = new StringBuffer();
+    	buildStandardEmailHeader(sb);
+    	
+    	sb.append("<div style='margin-bottom:15px;'>");
+    	sb.append(theCoreMessage);
+    	sb.append("</div>");
+    	
+    	sb.append("<div style='margin-bottom:10px; margin-top:20px; font-weight:bold'>");
+    	sb.append("Please confirm by clicking on the link below.");
+    	sb.append("</div>");
+    	
+    	// end of div with background color. This div starts in the email header
+    	sb.append("</div>");
+    	
+    	sb.append("<div style='height:20px;'></div>");
+    	sb.append("<div>");
+    	sb.append("<span style='margin-left:15px; margin-right:10px;'>");
+    	sb.append("<img style='vertical-align:middle;' src='" + RskyboxApplication.APPLICATION_BASE_URL + "images/arrow_right_green_24.png' width='24' height='24' border='0' alt='*'>");
+    	sb.append("</span>");
+    	sb.append("<a href='" + theUrl + "'>Send confirmation now</a>");
+    	sb.append("</div>");
+    	
+    	buildStandardEmailSignature(sb, RskyboxApplication.AUTO_SENDER, theConfirmationCode);
+    	return sb.toString();
+    }
+    
+    private static void buildStandardEmailHeader(StringBuffer sb) {
+    	sb.append("<html>");
+    	sb.append("<head></head>");
+    	sb.append("<body>");
+    	
+    	sb.append("<div><img src='" + RskyboxApplication.APPLICATION_BASE_URL + "images/rteamEmailLogo.png' width='155' height='46' border='0' alt='rTeam Logo'></div>");
+    	sb.append("<div style='height:5px;'></div>");
+    	
+    	sb.append("<div style='padding:20px; border-radius:10px; -o-border-radius:10px; -icab-border-radius:10px; -khtml-border-radius:10px; ");
+    	sb.append("-moz-border-radius:10px; -webkit-border-radius:10px; background-color: #ccc; border: 1px solid #000; width:85%;'>");
+    }
+    
+    private static void buildStandardEmailSignature(StringBuffer sb) {
+    	buildStandardEmailSignature(sb, null, null);
+    }
+    
+    private static void buildStandardEmailSignature(StringBuffer sb, String theSenderName) {
+    	buildStandardEmailSignature(sb, theSenderName, null);
+    }
+   
+    private static void buildStandardEmailSignature(StringBuffer sb, String theSenderName, String theOneUseToken) {
+    	sb.append("<div style='margin-top:30px; font-size:12px;'>");
+    	sb.append("Regards,");
+    	sb.append("</div>");
+    	sb.append("<div style='margin-top:1px; font-size:12px;'>");
+    	if(theSenderName == null) {
+        	sb.append("(automated message from rTeam)");
+    	} else {
+    		sb.append(theSenderName);
+    	}
+    	sb.append("</div>");
+    	
+    	sb.append("</body>");
+    	sb.append("</html>");
+    }
 }
