@@ -102,6 +102,34 @@ public class Emailer {
     	return sb.toString();
     }
     
+    public static String getUserConfirmationEmailBody(String theCoreMessage, String theUrl, String theConfirmationCode) {
+    	StringBuffer sb = new StringBuffer();
+    	buildStandardEmailHeader(sb);
+    	
+    	sb.append("<div style='margin-bottom:15px;'>");
+    	sb.append(theCoreMessage);
+    	sb.append("</div>");
+    	
+    	sb.append("<div style='margin-bottom:10px; margin-top:20px; font-weight:bold'>");
+    	sb.append("* If you are currently in the process of registering, just enter this confirmation code in the appropriate field.<br>");
+    	sb.append("* To resume registering and re-launch the rSkybox registration page, click on the link below.");
+    	sb.append("</div>");
+    	
+    	// end of div with background color. This div starts in the email header
+    	sb.append("</div>");
+    	
+    	sb.append("<div style='height:20px;'></div>");
+    	sb.append("<div>");
+    	sb.append("<span style='margin-left:15px; margin-right:10px;'>");
+    	sb.append("<img style='vertical-align:middle;' src='" + RskyboxApplication.APPLICATION_BASE_URL + "images/arrow_right_green_24.png' width='24' height='24' border='0' alt='*'>");
+    	sb.append("</span>");
+    	sb.append("<a href='" + theUrl + "'>Launch rSkybox registration</a>");
+    	sb.append("</div>");
+    	
+    	buildStandardEmailSignature(sb, RskyboxApplication.AUTO_SENDER, theConfirmationCode);
+    	return sb.toString();
+    }
+    
     private static void buildStandardEmailHeader(StringBuffer sb) {
     	sb.append("<html>");
     	sb.append("<head></head>");

@@ -949,7 +949,7 @@ public class UsersResource extends ServerResource {
         	urlBuf.append("false");
         }
         
-        String body = Emailer.getConfirmedEmailBody(coreMsg.toString(), urlBuf.toString(), theUser.getEmailConfirmationCode());
+        String body = Emailer.getUserConfirmationEmailBody(coreMsg.toString(), urlBuf.toString(), theUser.getEmailConfirmationCode());
     	Emailer.send(theUser.getEmailAddress(), theSubject, body, Emailer.NO_REPLY);
     }
     
