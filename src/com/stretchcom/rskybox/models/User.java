@@ -272,7 +272,7 @@ public class User {
 	// Sends a notification (if appropriate) to all active members of the specified application
 	// TODO notifications options should be application specific. When that happens, also put both the email address and phone
 	//      number in AppMember then the notifications can be sent without having to retrieve the User entity for each AppMember
-	public static void sendNotifications(String theApplicationId, String theMessage) {
+	public static void sendNotifications(String theApplicationId, String theNotificationType) {
         EntityManager em = EMF.get().createEntityManager();
         
         try {
@@ -284,14 +284,11 @@ public class User {
             		.getResultList();
             
             if(appMembers.size() > 0) {
-            	log.info("email/SMS message = '" + theMessage + "' sent to " + appMembers.size() + " members.");
+            	log.info("email/SMS message type = '" + theNotificationType + "' sent to " + appMembers.size() + " members.");
             } else {
             	log.info("no active members found for specified application");
             }
             
-            String subject = "rSkybox notification";
-            String enhancedEmailMessage = theMessage + "<br><br>" + RskyboxApplication.APPLICATION_BASE_URL;
-            String enhancedSmsMessage = theMessage + "  " + RskyboxApplication.APPLICATION_BASE_URL;
             for (AppMember am : appMembers) {
             	String userId = am.getUserId();
             	if(userId == null) {
@@ -301,14 +298,16 @@ public class User {
                 	if(user == null) {
                 		log.severe("could not get user with user ID");
                 	} else {
+                		Boolean isEmailActive = false;
+                		Boolean isSmsActive = false;
                         if(user.getIsEmailConfirmed() && user.getSendEmailNotifications() != null && user.getSendEmailNotifications()) {
-                        	log.info("sending email to " + user.getEmailAddress());
-                        	Emailer.send(user.getEmailAddress(), subject, enhancedEmailMessage, Emailer.NO_REPLY);
+                        	isEmailActive = true;
                         }
                         if(user.getIsSmsConfirmed() && user.getSendSmsNotifications() != null && user.getSendSmsNotifications()) {
-                        	log.info("sending SMS to " + user.getSmsEmailAddress());
-                        	Emailer.send(user.getSmsEmailAddress(), subject, enhancedSmsMessage, Emailer.NO_REPLY);
+                        	isSmsActive = true;
                         }
+                        
+                        Notification.queueNotification(user, theApplicationId, am, theNotificationType, isEmailActive, isSmsActive);
                 	}
             	}
             }

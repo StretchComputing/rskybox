@@ -33,6 +33,7 @@ import com.stretchcom.rskybox.models.AppAction;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
 public class CrashDetectsResource extends ServerResource {
@@ -322,7 +323,7 @@ public class CrashDetectsResource extends ServerResource {
             em.persist(crashDetect);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications(this.applicationId, "new crash detected");
+            if(!isUpdate) User.sendNotifications(this.applicationId, Notification.CRASH);
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

@@ -34,6 +34,7 @@ import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
 public class ClientLogsResource extends ServerResource {
@@ -329,7 +330,7 @@ public class ClientLogsResource extends ServerResource {
             em.persist(clientLog);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications(this.applicationId, "new client log");
+            if(!isUpdate) User.sendNotifications(this.applicationId, Notification.CLIENT_LOG);
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

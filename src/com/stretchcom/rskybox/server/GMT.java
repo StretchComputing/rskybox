@@ -3,6 +3,7 @@ package com.stretchcom.rskybox.server;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Logger;
@@ -104,5 +105,29 @@ public class GMT {
 	
 	public static TimeZone getDefaultTimeZone() {
     	return GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+	}
+	
+	public static Boolean isDateBeforeNowPlusOffsetMinutes(Date theDate, int theNumberOfOffsetMinutes) {
+		Calendar nowPlusOffset = Calendar.getInstance();
+		nowPlusOffset.setTime(new Date());
+		nowPlusOffset.add(Calendar.MINUTE, theNumberOfOffsetMinutes);
+		
+		// convert nowPlusOffset to a Date
+		Date nowPlusOffsetDate = nowPlusOffset.getTime();
+		
+		if(theDate.before(nowPlusOffsetDate)) {
+			return true;
+		}
+		return false;
+	}
+
+	
+	public static Date addMinutesToDate(Date theDate, int theNumberOfMinutes) {
+		Calendar newCal = Calendar.getInstance();
+		newCal.setTime(theDate);
+		newCal.add(Calendar.MINUTE, theNumberOfMinutes);
+		
+		// convert nowPlusOffset to a Date
+		return newCal.getTime();
 	}
 }

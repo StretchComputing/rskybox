@@ -32,6 +32,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.Feedback;
+import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
 public class FeedbackResource extends ServerResource {
@@ -189,7 +190,7 @@ public class FeedbackResource extends ServerResource {
             em.persist(feedback);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications(this.applicationId, "new feedback received");
+            if(!isUpdate) User.sendNotifications(this.applicationId, Notification.FEEDBACK);
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

@@ -53,6 +53,7 @@ public class RskyboxApplication extends Application {
         router.attach("/applications/{applicationId}/endUsers/{id}", EndUsersResource.class);
 
         router.attach("/mobileCarriers", MobileCarriersResource.class);
+        router.attach("/cron/{job}", CronResource.class);
         
         return router;
     }
