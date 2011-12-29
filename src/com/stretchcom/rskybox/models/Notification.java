@@ -259,11 +259,10 @@ public class Notification {
 	public static void queueNotification(User theUser, String theApplicationId, AppMember theAppMember, String theNotificationType, 
 			                             Boolean theIsEmailActive, Boolean theIsSmsActive) {
         EntityManager em = EMF.get().createEntityManager();
-        User user = null;
         
         String userId = null;
         try {
-        	userId = KeyFactory.keyToString(user.getKey());
+        	userId = KeyFactory.keyToString(theUser.getKey());
 		} catch (IllegalArgumentException e1) {
 			log.severe("exception = " + e1.getMessage());
 			e1.printStackTrace();
@@ -313,12 +312,12 @@ public class Notification {
         	// update emailAddress and smsEmailAddress based on whether email and SMS are now activated
         	///////////////////////////////////////////////////////////////////////////////////////////
         	if(theIsEmailActive) {
-        		notification.setEmailAddress(user.getEmailAddress());
+        		notification.setEmailAddress(theUser.getEmailAddress());
         	} else {
         		notification.setEmailAddress(null);
         	}
         	if(theIsSmsActive) {
-        		notification.setSmsEmailAddress(user.getSmsEmailAddress());
+        		notification.setSmsEmailAddress(theUser.getSmsEmailAddress());
         	} else {
         		notification.setSmsEmailAddress(null);
         	}

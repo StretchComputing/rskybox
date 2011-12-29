@@ -230,6 +230,12 @@ public class UserAuthenticationFilter implements Filter {
     		log.info("AppMember Confirm Member API is bypassed");
     		return true;
     	} 
+
+    	// Cron API is bypassed
+    	if(theUrl.toLowerCase().contains("/cron") && theHttpResponse.getMethod().equalsIgnoreCase("get")) {
+    		log.info("Cron API is bypassed");
+    		return true;
+    	} 
     	
     	
     	return false;

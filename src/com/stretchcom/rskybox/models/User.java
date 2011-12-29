@@ -307,7 +307,10 @@ public class User {
                         	isSmsActive = true;
                         }
                         
-                        Notification.queueNotification(user, theApplicationId, am, theNotificationType, isEmailActive, isSmsActive);
+                        // only queue the notification if either email or SMS is active
+                        if(isEmailActive || isSmsActive) {
+                            Notification.queueNotification(user, theApplicationId, am, theNotificationType, isEmailActive, isSmsActive);
+                        }
                 	}
             	}
             }

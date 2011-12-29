@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cronentries>
   <cron>
-    <url>/cron/notifications</url>
+    <url>/rest/v1/cron/notifications</url>
     <description>Periodically check if any notifications need to be sent</description>
     <schedule>every 5 minutes</schedule>
   </cron>

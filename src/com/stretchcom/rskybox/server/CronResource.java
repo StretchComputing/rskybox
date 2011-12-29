@@ -92,7 +92,7 @@ public class CronResource extends ServerResource {
     	    	aNotification.sendPending();
     			emNotification.getTransaction().commit();
     		}
-    		log.info("all messageThreads archived successfully");
+    		log.info("all notifications sent successfully");
     		numberOfUsersWithPendingNotifications = pendingNotifications.size();
     	} finally {
     		emNotification.close();
