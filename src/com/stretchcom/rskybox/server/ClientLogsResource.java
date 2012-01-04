@@ -33,6 +33,7 @@ import com.stretchcom.rskybox.models.AppAction;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.ClientLog;
+import com.stretchcom.rskybox.models.ClientLogRemoteControl;
 import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
@@ -40,6 +41,7 @@ import com.stretchcom.rskybox.models.User;
 public class ClientLogsResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(ClientLogsResource.class.getName());
 	private String id;
+	private String name;
 	private String applicationId;
     private String listStatus;
 
@@ -47,6 +49,7 @@ public class ClientLogsResource extends ServerResource {
     protected void doInit() throws ResourceException {
         log.info("in doInit");
         this.id = (String) getRequest().getAttributes().get("id");
+        this.name = (String) getRequest().getAttributes().get("name");
         this.applicationId = (String) getRequest().getAttributes().get("applicationId");
         
 		Form form = getRequest().getResourceRef().getQueryAsForm();
@@ -96,6 +99,7 @@ public class ClientLogsResource extends ServerResource {
     }
 
     // Handles 'Update Client Log API'
+    // Handles 'Remote Control Client Log API'
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
@@ -104,10 +108,18 @@ public class ClientLogsResource extends ServerResource {
     		return Utility.apiError(appIdStatus);
     	}
     	
-		if (this.id == null || this.id.length() == 0) {
+		// can't be sure which @put API was called - let's just assume it was Update
+    	if ( (this.name == null || this.name.length() == 0) && (this.id == null || this.id.length() == 0) ) {
 			return Utility.apiError(ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
 		}
-        return save_client_log(entity);
+    	
+    	if(this.id != null) {
+    		// Update Client Log API
+            return save_client_log(entity);
+    	} else {
+    		// Remote Control Client Log API
+    		return remote_control(entity);
+    	}
     }
     
     private JsonRepresentation index() {
@@ -252,6 +264,12 @@ public class ClientLogsResource extends ServerResource {
 					// default to error
 					clientLog.setLogLevel(ClientLog.ERROR_LOG_LEVEL);
 				}
+	            
+	            if(json.has("logName")) {
+	            	clientLog.setLogName(json.getString("logName"));
+	            } else {
+	            	return Utility.apiError(ApiStatusCode.LOG_NAME_IS_REQUIRED);
+	            }
 			}
 			
 			if(!isUpdate && json.has("message")) {
@@ -362,6 +380,45 @@ public class ClientLogsResource extends ServerResource {
 	    return new JsonRepresentation(jsonReturn);
     }
     
+    private JsonRepresentation remote_control(Representation entity) {
+        JSONObject jsonReturn = new JSONObject();
+        
+		String apiStatus = ApiStatusCode.SUCCESS;
+        this.setStatus(Status.SUCCESS_CREATED);
+        try {
+            JSONObject json = new JsonRepresentation(entity).getJsonObject();
+            
+            String mode = null;
+            if(json.has("mode")) {
+            	mode = json.getString("mode");
+            	if(!ClientLogRemoteControl.isModeValid(mode)) {
+            		return Utility.apiError(ApiStatusCode.INVALID_MODE);
+            	}
+            } else {
+            	return Utility.apiError(ApiStatusCode.MODE_IS_REQUIRED);
+            }
+            
+            ClientLogRemoteControl.update(this.applicationId, this.name, mode);
+        } catch (IOException e) {
+            log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
+            e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        } catch (JSONException e) {
+            log.severe("exception = " + e.getMessage());
+            e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        }
+        
+	    try {
+	    	jsonReturn.put("apiStatus", apiStatus);
+	    } catch (JSONException e) {
+	        log.severe("exception = " + e.getMessage());
+	    	e.printStackTrace();
+	        this.setStatus(Status.SERVER_ERROR_INTERNAL);
+	    }
+	    return new JsonRepresentation(jsonReturn);
+    }
+    
     private JSONObject getClientLogJson(ClientLog clientLog, Boolean isList) {
     	return getClientLogJson(clientLog, null, isList);
     }
@@ -387,6 +444,7 @@ public class ClientLogsResource extends ServerResource {
             	json.put("userName", clientLog.getUserName());
             	json.put("instanceUrl", clientLog.getInstanceUrl());
             	json.put("logLevel", clientLog.getLogLevel());
+            	json.put("logName", clientLog.getLogName());
             	json.put("message", clientLog.getMessage());
             	json.put("stackBackTrace", clientLog.getStackBackTrace());
             	

@@ -2,6 +2,7 @@ package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -233,6 +234,7 @@ public class EndUsersResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
+    	String oldVersion = null;
         em.getTransaction().begin();
         try {
             endUser = new EndUser();
@@ -275,6 +277,7 @@ public class EndUsersResource extends ServerResource {
             	} catch (NoResultException e) {
             		// NOT an error - first time create has been called for an endUser with this userName
         			log.info("End User not found -- new end user will be created");
+        			endUser.setCreatedGmtDate(new Date());
         		} catch (NonUniqueResultException e) {
         			log.severe("should never happen - two or more end users have same key");
         			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -285,8 +288,14 @@ public class EndUsersResource extends ServerResource {
             	endUser.setApplication(json.getString("application"));
             }
             
+            oldVersion = endUser.getVersion();
             if (json.has("version")) {
-            	endUser.setVersion(json.getString("version"));
+            	String newVersion = json.getString("version");
+            	endUser.setVersion(newVersion);
+            	if(oldVersion != null && !oldVersion.equalsIgnoreCase(newVersion)) {
+            		// track the date and time when the version number changes
+            		endUser.setVersionUpdatedGmtDate(new Date());
+            	}
             }
             
             if (!isUpdate && json.has("instanceUrl")) {
