@@ -138,24 +138,17 @@ RMODULE.init();
 
 <div data-role="page" id="index" data-title="All Users">
   <div data-role="header">
-    <a href="/html5/admin" rel="external">Home</a>
+    <a href="/html5" rel="external" data-icon="home">Home</a>
     <h1>All Users</h1>
+    <a href="#item?item_id=new" id="create_user_button" data-icon="plus" data-iconpos="right">New User</a>
   </div>
-  <div data-role="content">
-  </div>
-  <div data-role="footer">
-    <div data-role="navbar">
-      <ul>
-        <li><a href="#item?item_id=new" id="create_user_button">Create a New User</a></li>
-      </ul>
-    </div>
-  </div>
+  <div data-role="content"></div>
 </div>
 
 
 <div data-role="page" id="item" data-title="User">
   <div data-role="header">
-    <a href="#" data-rel="back">Back</a>
+    <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
     <h1></h1>
   </div>
   <div data-role="content">
@@ -185,7 +178,7 @@ RMODULE.init();
 
       <input type="submit" value="Save">
       <p>
-        <a id="delete_button" href="#delete" data-role="button" data-theme="e">Delete</a>
+        <a id="delete_button" href="#delete" data-role="button" data-theme="e" data-icon="delete">Delete</a>
       </p>
     </form>
   </div>
@@ -209,7 +202,7 @@ RMODULE.init();
       <p>Are you sure?</p>
     </div>
     <p>
-      <a id="delete_item" data-role="button">Delete</a>
+      <a id="delete_item" data-role="button" data-icon="delete">Delete</a>
     </p>
     <p>
       <a href="" data-role="button" data-rel="back">Cancel</a>

@@ -160,23 +160,17 @@ RMODULE.init();
 
 <div data-role="page" id="index" data-title="Member Admin">
   <div data-role="header">
-    <a href="#" data-rel="back">Back</a>
+    <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
     <h1>All Members</h1>
+    <a href="" id="new_item_button" data-icon="plus" data-iconpos="right">New Member</a>
   </div>
   <div data-role="content"></div>
-  <div data-role="footer">
-    <div data-role="navbar">
-      <ul>
-        <li><a href="" id="new_item_button">Create New Member</a></li>
-      </ul>
-    </div>
-  </div>
 </div>
 
 
 <div data-role="page" id="item" data-title="Member">
   <div data-role="header">
-    <a href="#" data-rel="back">Back</a>
+    <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
     <h1></h1>
   </div>
   <div data-role="content">
@@ -191,7 +185,7 @@ RMODULE.init();
 
       <input type="submit" value="Save">
       <p>
-        <a id="delete_item_button" href="#delete" data-role="button" data-theme="e">Delete Member</a>
+        <a id="delete_item_button" href="#delete" data-role="button" data-theme="e" data-icon="delete">Delete Member</a>
       </p>
     </form>
   </div>
@@ -214,7 +208,7 @@ RMODULE.init();
       <p>Are you sure?</p>
     </div>
     <p>
-      <a id="delete_item" data-role="button">Delete Member</a>
+      <a id="delete_item" data-role="button" data-icon="delete">Delete Member</a>
     </p>
     <p>
       <a href="" data-role="button" data-rel="back">Cancel</a>

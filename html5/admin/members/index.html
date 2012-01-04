@@ -144,23 +144,17 @@ RMODULE.init();
 
 <div data-role="page" id="index" data-title="{{ page.title }}">
   <div data-role="header">
-    <a href="#" data-rel="back">Back</a>
+    <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
     <h1>All {{ page.entity }}s</h1>
+    <a href="" id="new_item_button" data-icon="plus" data-iconpos="right">New {{ page.entity }}</a>
   </div>
   <div data-role="content"></div>
-  <div data-role="footer">
-    <div data-role="navbar">
-      <ul>
-        <li><a href="" id="new_item_button">Create New {{ page.entity }}</a></li>
-      </ul>
-    </div>
-  </div>
 </div>
 
 
 <div data-role="page" id="item" data-title="{{ page.entity }}">
   <div data-role="header">
-    <a href="#" data-rel="back">Back</a>
+    <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
     <h1></h1>
   </div>
   <div data-role="content">
@@ -175,7 +169,7 @@ RMODULE.init();
 
       <input type="submit" value="Save">
       <p>
-        <a id="delete_item_button" href="#delete" data-role="button" data-theme="e">Delete {{ page.entity }}</a>
+        <a id="delete_item_button" href="#delete" data-role="button" data-theme="e" data-icon="delete">Delete {{ page.entity }}</a>
       </p>
     </form>
   </div>
@@ -198,7 +192,7 @@ RMODULE.init();
       <p>Are you sure?</p>
     </div>
     <p>
-      <a id="delete_item" data-role="button">Delete {{ page.entity }}</a>
+      <a id="delete_item" data-role="button" data-icon="delete">Delete {{ page.entity }}</a>
     </p>
     <p>
       <a href="" data-role="button" data-rel="back">Cancel</a>
