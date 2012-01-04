@@ -160,7 +160,7 @@ public class Emailer {
     	sb.append("<head></head>");
     	sb.append("<body>");
     	
-    	sb.append("<div><img src='" + RskyboxApplication.APPLICATION_BASE_URL + "images/rteamEmailLogo.png' width='155' height='46' border='0' alt='rTeam Logo'></div>");
+    	sb.append("<div><img src='" + RskyboxApplication.APPLICATION_BASE_URL + "images/rskyboxEmailLogo.png' width='160' height='106' border='0' alt='rSkybox Logo'></div>");
     	sb.append("<div style='height:5px;'></div>");
     	
     	sb.append("<div style='padding:20px; border-radius:10px; -o-border-radius:10px; -icab-border-radius:10px; -khtml-border-radius:10px; ");
