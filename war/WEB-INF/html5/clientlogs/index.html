@@ -40,12 +40,10 @@ var RMODULE = (function (my) {
       json = JSON.stringify({
         mode : (item.logMode === 'inactive' ? 'active' : 'inactive')
       });
-      console.log(json);
 
       my.putJson(my.getRestPrefix() + '\/clientLogs\/remoteControl\/' + item.logName, json, function () {
         history.back();
       });
-      console.log('logMode = ' + item.logMode);
     };
 
 
