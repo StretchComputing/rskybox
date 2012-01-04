@@ -136,4 +136,27 @@ public class ClientLogRemoteControl {
         }
 		return clientLogRemoteControl;
 	}
+	
+	
+	public static ClientLogRemoteControl getEntity(String theApplicationId, String theClientLogName) {
+		if(theApplicationId == null || theClientLogName == null) {
+			log.severe("ClientLogRemoteControl::get() has a null parameter");
+			return null;
+		}
+		
+        EntityManager em = EMF.get().createEntityManager();
+        ClientLogRemoteControl clientLogRemoteControl = null;
+		try {
+			clientLogRemoteControl = (ClientLogRemoteControl)em.createNamedQuery("ClientLogRemoteControl.getByApplicationIdAndLogName")
+					.setParameter("applicationId", theApplicationId)
+					.setParameter("logName", theClientLogName)
+					.getSingleResult();
+		} catch (NoResultException e) {
+			// NOT an error -- at any given time, clientLogRemoteControl may not have been created yet
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more clientLogRemoteControl entities have same applicationId and logName");
+		}
+		
+		return clientLogRemoteControl;
+	}
 }

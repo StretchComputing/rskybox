@@ -50,6 +50,7 @@ public class ClientLogsResource extends ServerResource {
         log.info("in doInit");
         this.id = (String) getRequest().getAttributes().get("id");
         this.name = (String) getRequest().getAttributes().get("name");
+        this.name = Reference.decode(this.name);
         this.applicationId = (String) getRequest().getAttributes().get("applicationId");
         
 		Form form = getRequest().getResourceRef().getQueryAsForm();
@@ -340,15 +341,25 @@ public class ClientLogsResource extends ServerResource {
             	
 				// Default status to 'new'
 				clientLog.setStatus(CrashDetect.NEW_STATUS);
+				
+				// Default created date is today
+				clientLog.setCreatedGmtDate(new Date());
 			}
 			
-			// Default created date is today
-			clientLog.setCreatedGmtDate(new Date());
-            
             em.persist(clientLog);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications(this.applicationId, Notification.CLIENT_LOG);
+            if(!isUpdate) {
+            	User.sendNotifications(this.applicationId, Notification.CLIENT_LOG);
+            	
+            	ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
+            	// if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
+            	String logStatus = ClientLogRemoteControl.ACITVE_MODE;
+            	if(clrc != null) {
+            		logStatus = clrc.getMode();
+            	}
+				jsonReturn.put("logStatus", logStatus);
+            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
