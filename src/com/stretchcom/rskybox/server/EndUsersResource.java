@@ -2,6 +2,7 @@ package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -233,12 +234,17 @@ public class EndUsersResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
+    	String oldVersion = null;
         em.getTransaction().begin();
         try {
             endUser = new EndUser();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
             if (id != null) {
+            	/////////////////////
+            	// Update EndUser API 
+            	/////////////////////
+            	
             	//////////////////////
             	// Authorization Rules
             	//////////////////////
@@ -251,18 +257,45 @@ public class EndUsersResource extends ServerResource {
                 endUser = (EndUser) em.createNamedQuery("EndUser.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
-            }
-            
-            if (!isUpdate && json.has("userName")) {
-            	endUser.setUserName(json.getString("userName"));
+            } else {
+            	/////////////////////
+            	// Create EndUser API 
+            	/////////////////////
+            	
+                // userName can NOT be changed. If this is a new userName, then the "existing" end user will not be found below
+            	if (json.has("userName")) {
+                	endUser.setUserName(json.getString("userName"));
+                } else {
+                	return Utility.apiError(ApiStatusCode.USER_NAME_IS_REQUIRED);
+                }
+
+                // EndUser create is designed to be called multiple times. So it's ok if the endUser has not been defined yet and it is also
+            	// ok if the endUser has already been defined.
+            	try {
+                    endUser = (EndUser) em.createNamedQuery("EndUser.getByUserName").setParameter("userName", endUser.getUserName()).getSingleResult();
+                    log.info("End User already exists");
+            	} catch (NoResultException e) {
+            		// NOT an error - first time create has been called for an endUser with this userName
+        			log.info("End User not found -- new end user will be created");
+        			endUser.setCreatedGmtDate(new Date());
+        		} catch (NonUniqueResultException e) {
+        			log.severe("should never happen - two or more end users have same key");
+        			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        		}
             }
             
             if (!isUpdate && json.has("application")) {
             	endUser.setApplication(json.getString("application"));
             }
             
+            oldVersion = endUser.getVersion();
             if (json.has("version")) {
-            	endUser.setVersion(json.getString("version"));
+            	String newVersion = json.getString("version");
+            	endUser.setVersion(newVersion);
+            	if(oldVersion != null && !oldVersion.equalsIgnoreCase(newVersion)) {
+            		// track the date and time when the version number changes
+            		endUser.setVersionUpdatedGmtDate(new Date());
+            	}
             }
             
             if (!isUpdate && json.has("instanceUrl")) {

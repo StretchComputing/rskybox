@@ -26,6 +26,10 @@ import com.google.appengine.api.datastore.Key;
     		query="SELECT eu FROM EndUser eu WHERE eu.key = :key"
     ),
     @NamedQuery(
+    		name="EndUser.getByUserName",
+    		query="SELECT eu FROM EndUser eu WHERE eu.userName = :userName"
+    ),
+    @NamedQuery(
     		name="EndUser.getByApplicationId",
     		query="SELECT eu FROM EndUser eu WHERE eu.applicationId = :applicationId"
     ),

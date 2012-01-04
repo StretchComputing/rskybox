@@ -39,6 +39,8 @@ public class ApiStatusCode {
 	public static final String USER_NAME_IS_REQUIRED = "312";
 	public static final String EMAIL_ADDRESS_IS_REQUIRED = "313";
 	public static final String ROLE_IS_REQUIRED = "314";
+	public static final String LOG_NAME_IS_REQUIRED = "315";
+	public static final String MODE_IS_REQUIRED = "316";
 	
 	public static final String INVALID_STATUS_PARAMETER = "400";
 	public static final String INVALID_RECORDED_DATE_PARAMETER = "401";
@@ -56,6 +58,7 @@ public class ApiStatusCode {
 	public static final String PHONE_NUMBER_ALREADY_USED = "413";
 	public static final String INVALID_TIMESTAMP_PARAMETER = "414";
 	public static final String INVALID_DURATION_PARAMETER = "415";
+	public static final String INVALID_MODE = "416";
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 	public static final String NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID = "501";

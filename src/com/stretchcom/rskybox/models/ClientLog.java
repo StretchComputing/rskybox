@@ -56,6 +56,7 @@ public class ClientLog {
 	public final static String EXCEPTION_LOG_LEVEL = "exception";
 
 	private String logLevel;
+	private String logName;
 	private String message;
 	// TODO support time zone and GMT for dates
 	private Date createdGmtDate;
@@ -144,6 +145,14 @@ public class ClientLog {
 		this.logLevel = logLevel;
 	}
 	
+	public String getLogName() {
+		return logName;
+	}
+
+	public void setLogName(String logName) {
+		this.logName = logName;
+	}
+
 	public Boolean isLogLevelValid(String theLogLevel) {
 		if(theLogLevel.equals(ClientLog.DEBUG_LOG_LEVEL) || theLogLevel.equals(ClientLog.INFO_LOG_LEVEL) ||
 		   theLogLevel.equals(ClientLog.ERROR_LOG_LEVEL) || theLogLevel.equals(ClientLog.EXCEPTION_LOG_LEVEL)) {
