@@ -1,7 +1,7 @@
 ---
 layout: default
 title: rSkybox
-options: Options
+settings: Settings
 new: New App
 ---
 <script src="/js/forms.js"></script>
@@ -14,7 +14,7 @@ var RMODULE = (function (my, $) {
   var
     old_init,
     saveItem,
-    saveOptions;
+    saveSettings;
 
   my.itemName = function () {
     return 'applications';
@@ -51,7 +51,7 @@ var RMODULE = (function (my, $) {
     my.pageContent(page, markup).find(':jqmData(role=listview)').listview();
   };
 
-  my.populateOptions = function (page, user) {
+  my.populateSettings = function (page, user) {
     var smsEnabled = user.sendSmsNotifications;
 
     page.find('form')[0].reset();
@@ -64,7 +64,7 @@ var RMODULE = (function (my, $) {
     $('#adminButton').toggle(user.isSuperAdmin);
   };
 
-  saveOptions = function () {
+  saveSettings = function () {
     var restUrl, json;
 
     if (!my.validateSms()) { return false; }
@@ -106,31 +106,29 @@ var RMODULE = (function (my, $) {
   my.init = function () {
     old_init();
 
-    $('#index').live('pagecreate', function () {
-      $('#logout').click(function () {
-        my.logout();
-      });
-    });
-
     $('#new').live('pagecreate', function () {
       $(this).find('form').submit(saveItem);
     });
 
-    $('#options').live('pagecreate', function () {
-      $(this).find('form').submit(saveOptions);
+    $('#settings').live('pagecreate', function () {
+      $(this).find('form').submit(saveSettings);
+
+      $('#logout').click(function () {
+        my.logout();
+      });
 
       $('#sendSmsNotifications').change(function () {
         my.enableSmsDetails($(this).prop('checked'));
       });
     });
 
-    $('#options').live('pageshow', function () {
+    $('#settings').live('pageshow', function () {
       var restUrl;
 
       my.jsonPopulate(my.getMobileCarriersUrl(), $('#mobileCarrierId'), function (select, carriers) {
         select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers'));
         restUrl = my.getRestPrefix() + '\/users\/current';
-        my.jsonPopulate(restUrl, $('#options'), my.populateOptions);
+        my.jsonPopulate(restUrl, $('#settings'), my.populateSettings);
       });
     });
   };
@@ -144,22 +142,20 @@ RMODULE.init();
 <!-- Home -->
 <div data-role="page" id="index" data-title="{{ page.title }}">
   <div data-role="header">
-    <a href="#options" data-icon="gear">{{ page.options }}</a>
+    <a href="#settings" data-icon="arrow-l" data-direction="reverse">{{ page.settings }}</a>
     <h1>{{ page.title }}</h1>
-    <a href="#new" data-icon="plus">{{ page.new }}</a>
+    <a href="#new" data-icon="plus" data-iconpos="right">{{ page.new }}</a>
   </div>
   <div data-role="content"></div>
-  <div data-role="footer" class="ui-bar" style="text-align: center;">
-    <a href="#" id="logout" rel="external">Logout</a>
-  </div>
 </div>
 
 
-<!-- Options -->
-<div data-role="dialog" id="options" data-title="{{ page.title }} {{ page.options }}" data-theme="b">
+<!-- Settings -->
+<div data-role="page" id="settings" data-title="{{ page.title }} {{ page.settings }}">
   <div data-role="header">
-    <h1>{{ page.options }}</h1>
-    <a href="/html5/admin/users" id="adminButton" rel="external" style="display: none;">Users Admin</a>
+    <a href="/html5/admin/users" id="adminButton" rel="external" style="display: none;" data-icon="star">Users Admin</a>
+    <h1>{{ page.settings }}</h1>
+    <a href="#index" data-icon="home" data-iconpos="right">Home</a>
   </div>
   <div data-role="content">
     <form>
@@ -176,12 +172,8 @@ RMODULE.init();
       <input type="submit" value="Save">
     </form>
   </div>
-  <div data-role="footer">
-    <div data-role="navbar">
-      <ul>
-        <li><a href="#index" data-rel="back" data-role="button">Cancel</a></li>
-      </ul>
-    </div>
+  <div data-role="footer" class="ui-bar" style="text-align: center;">
+    <a href="#" id="logout" rel="external">Logout</a>
   </div>
 </div>
 
@@ -189,7 +181,7 @@ RMODULE.init();
 <!-- Application -->
 <div data-role="page" id="item">
   <div data-role="header">
-    <a href="#" data-rel="back">Back</a>
+    <a href="#" data-rel="back" data-icon="home">Home</a>
     <h1></h1>
   </div>
   <div data-role="content"></div>
@@ -215,7 +207,7 @@ RMODULE.init();
   <div data-role="footer">
     <div data-role="navbar">
       <ul>
-        <li><a href="#index">Cancel</a></li>
+        <li><a href="#" data-rel="back">Cancel</a></li>
       </ul>
     </div>
   </div>
