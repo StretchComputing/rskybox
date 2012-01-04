@@ -24,14 +24,38 @@
 var RMODULE = (function (my) {
   'use strict';
 
+
   my.itemName = function () {
     return 'clientLogs';
   };
 
-  my.itemDetails = function (item) {
-    var action, html, i;
 
-    html  = '<div>Created Date: ' + item.date + '<\/div>';
+  my.itemDetails = function (item) {
+    var html, toggleActive;
+
+
+    my.changeLogActiveState = function () {
+      var json;
+
+      json = JSON.stringify({
+        mode : (item.logMode === 'inactive' ? 'active' : 'inactive')
+      });
+      console.log(json);
+
+      my.putJson(my.getRestPrefix() + '\/clientLogs\/remoteControl\/' + item.logName, json, function () {
+        history.back();
+      });
+      console.log('logMode = ' + item.logMode);
+    };
+
+
+    html  = '<div>Log Name: ' + item.logName + '<\/div>';
+    html += '<div>Created: ' + item.date + '<\/div>';
+    html += '<div>Mode: ' + item.logMode + ' &nbsp; ';
+    html += '<a href="#" data-role="button" data-inline="true" onclick="RMODULE.changeLogActiveState();">'
+    html +=   item.logMode === 'inactive' ? 'Activate' : 'Inactivate';
+    html += '</a>';
+    html += '<\/div>';
     html += '<div>User: ' + item.userName + '<\/div>';
     html += '<div>For: ' + item.instanceUrl + '<\/div>';
     html += '<div>Log Level: ' + item.logLevel + '<\/div>';
@@ -46,6 +70,7 @@ var RMODULE = (function (my) {
     html += my.getAppActions(item.appActions);
     return html;
   };
+
 
   return my;
 }(RMODULE || {}));
