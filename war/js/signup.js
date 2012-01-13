@@ -77,21 +77,39 @@ var rskybox = (function(r, $) {
   //}
 
 
-  r.init = function() {
-    $('#signup').live('pageinit', function(event) {
+  r.controller = {
+    signup: function() {
+      console.log('got the router for signup');
       r.carriers = new r.Carriers();
       new r.CarriersView({
         el: $('#mobileCarrierId'),
         collection: r.carriers
       });
       r.carriers.fetch();
-      //r.signup.start();
+    },
+    confirm: function() {
+      console.log('got the router for confirm');
+    },
+    login: function() {
+      console.log('got the router for login');
+    }
+  };
+
+  r.router = new $.mobile.Router({
+    '#signup': 'signup',
+    '#confirm': 'confirm',
+    '#login': 'login'
+  }, r.controller);
+
+  r.init = function() {
+    $('#signup').live('pageinit', function(event) {
+      console.log('signup pageinit');
     });
     $('#confirm').live('pageinit', function(event) {
-      // start the backbone app
+      console.log('confirm pageinit');
     });
     $('#login').live('pageinit', function(event) {
-      // start the backbone app
+      console.log('login pageinit');
     });
   };
 
