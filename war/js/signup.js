@@ -24,14 +24,14 @@ var rskybox = (function(r, $) {
   });
 
   r.CarriersView = Backbone.View.extend({
-    template: _.template($('#carriers-template').html()),
     initialize: function() {
       _.bindAll(this, 'render', 'addCarrier');
       this.collection.bind('reset', this.render);
     },
 
     render: function() {
-      $(this.el).html(this.template());
+      $(this.el).empty();
+      this.addCarrier(new r.Carrier({ id: '', name: 'Select Mobile Carrier'}));
       this.collection.each(this.addCarrier);
       $(this.el).selectmenu('refresh');
       return this;
@@ -101,20 +101,5 @@ var rskybox = (function(r, $) {
     '#login': 'login'
   }, r.controller);
 
-  r.init = function() {
-    $('#signup').live('pageinit', function(event) {
-      console.log('signup pageinit');
-    });
-    $('#confirm').live('pageinit', function(event) {
-      console.log('confirm pageinit');
-    });
-    $('#login').live('pageinit', function(event) {
-      console.log('login pageinit');
-    });
-  };
-
   return r;
 })(rskybox || {}, jQuery);
-
-
-rskybox.init();
