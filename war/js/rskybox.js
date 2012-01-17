@@ -25,9 +25,23 @@ var rskybox = (function(r, $) {
   };
 
 
+  // TODO - placeholder until we can do something consistent/logical with errors/warnings
+  r.displayWarning = function(error) {
+    console.log(error);
+  };
+
+
+  // Simple RegEx to ensure a valid phone number format.
+  r.isValidPhoneNumber = function (phoneNumber) {
+    return (/^\(?([0-9]{3})\)?[\-. ]?([0-9]{3})[\-. ]?([0-9]{4})$/).test(phoneNumber);
+  };
+
+
+  // Simple RegEx to ensure a valid email address format.
   r.isValidEmailAddress = function (emailAddress) {
     return (/^[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/).test(emailAddress);
   };
+
 
   return r;
 }(rskybox || {}, jQuery));
