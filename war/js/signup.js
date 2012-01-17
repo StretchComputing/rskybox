@@ -3,6 +3,28 @@
 
 var rskybox = (function(r, $) {
 
+  r.UnconfirmedUser = Backbone.Model.extend({
+    initialize: function() {
+      this.bind('error', this.handleError);
+    },
+    handleError: function(model, errors) {
+      var e;
+      for (e in errors) {
+        console.log(e, ':', errors[e]);
+      }
+    },
+    validate: function(attrs) {
+      var errors = {};
+
+      if (!r.isValidEmailAddress(attrs.emailAddress)) {
+        errors.emailAddress = 'invalid email address';
+      }
+
+      if (!_.isEmpty(errors)) { return errors; }
+    }
+  });
+
+/*
   r.Carrier = Backbone.Model.extend({});
   r.Carriers = Backbone.Collection.extend({
     model: r.Carrier,
@@ -100,6 +122,7 @@ var rskybox = (function(r, $) {
     '#confirm': 'confirm',
     '#login': 'login'
   }, r.controller);
+*/
 
   return r;
 })(rskybox || {}, jQuery);

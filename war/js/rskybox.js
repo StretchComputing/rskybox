@@ -25,17 +25,9 @@ var rskybox = (function(r, $) {
   };
 
 
-
-  // The sandbox is what the modules call to get work done.
-  // The sandbox can make calls to the core.
-  r.sandbox = {
+  r.isValidEmailAddress = function (emailAddress) {
+    return (/^[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/).test(emailAddress);
   };
-
-
-  // The core functionality of our app.  Only the sandbox should make calls into it.
-  r.core = {
-  };
-
 
   return r;
 }(rskybox || {}, jQuery));
