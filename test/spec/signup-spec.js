@@ -49,69 +49,98 @@ describe('UnconfirmedUser', function() {
   });
 
   describe('invalid user', function() {
-    it('is not created with missing credentials', function() {
-      this.user.set(unconfirmedUsers.missingEmail);
+    beforeEach(function() {
+      this.eventSpy = sinon.spy();
+      this.user.bind('error', this.eventSpy);
+    });
+
+    afterEach(function() {
+      expect(this.eventSpy).toHaveBeenCalled();
       expect(this.user.get('emailAddress')).toBeUndefined();
+      expect(this.user.get('phoneNumber')).toBeUndefined();
+    });
+
+    it('is not created with missing credentials', function() {
+      this.user.set(unconfirmedUsers.missingCredentials);
     });
     it('is not created with missing email and phone', function() {
       this.user.set(unconfirmedUsers.missingEmailAndPhone);
-      expect(this.user.get('emailAddress')).toBeUndefined();
-      expect(this.user.get('phoneNumber')).toBeUndefined();
     });
     it('is not created with invalid email', function() {
       this.user.set(unconfirmedUsers.invalidEmail);
-      expect(this.user.get('emailAddress')).toBeUndefined();
     });
     it('is not created with missing carrier', function() {
       this.user.set(unconfirmedUsers.missingCarrier);
-      expect(this.user.get('phoneNumber')).toBeUndefined();
     });
     it('is not created with invalid phone number', function() {
       this.user.set(unconfirmedUsers.invalidPhoneNumber);
-      expect(this.user.get('phoneNumber')).toBeUndefined();
     });
   });
 
-  describe('save valid user', function() {
-    it('should be successful', function() {
-      spyOn(Backbone, 'sync').andCallFake(function(method, model, options) {
-        options.success({
-          apiStatus: '100',
-          emailAddress: '1@test.com',
-          confirmationCode: '123'
-        });
-      });
-      this.user.save(unconfirmedUsers.validEmail);
-      expect(this.user.get('emailAddress')).toEqual('1@test.com');
-      expect(this.user.get('apiStatus')).toBeUndefined();
+  describe('save user', function() {
+    beforeEach(function() {
+      this.spy = sinon.spy(this.user, 'handleSuccess');
+      this.server = sinon.fakeServer.create();
     });
-  });
-
-  describe('save confirmed user', function() {
-    it('fails when email already confirmed', function() {
-      spyOn(Backbone, 'sync').andCallFake(function(method, model, options) {
-        options.success({
-          apiStatus: '204',
-          emailAddress: '1@test.com',
-          confirmationCode: '123'
-        });
-      });
-      spyOn(rskybox, 'displayWarning');
-      this.user.save(unconfirmedUsers.validEmail);
-      expect(rskybox.displayWarning).toHaveBeenCalledWith(this.user.warnings.api204);
+    afterEach(function() {
+      expect(this.server.requests.length).toEqual(1);
+      expect(this.spy).toHaveBeenCalled();
+      this.server.restore();
     });
 
-    it('fails when phone already confirmed', function() {
-      spyOn(Backbone, 'sync').andCallFake(function(method, model, options) {
-        options.success({
-          apiStatus: '205',
-          phoneNumber: '630-555-1212',
-          confirmationCode: '123'
-        });
+    describe('with valid credentials', function() {
+      it('should be successful', function() {
+        this.server.respondWith(
+          'POST',
+          rskybox.getRestPrefix() + '/users/requestConfirmation',
+          this.validResponse({
+            apiStatus: '100',
+            emailAddress: '1@test.com',
+            confirmationCode: '123',
+          }, 201)
+        );
+        this.user.save(unconfirmedUsers.validEmail, { success: this.user.handleSuccess });
+        this.server.respond();
       });
-      spyOn(rskybox, 'displayWarning');
-      this.user.save(unconfirmedUsers.validPhoneCredentials);
-      expect(rskybox.displayWarning).toHaveBeenCalledWith(this.user.warnings.api205);
+    });
+
+    describe('already confirmed', function() {
+      beforeEach(function() {
+        this.spyWarning = sinon.spy(rskybox, 'displayWarning');
+      });
+      afterEach(function() {
+        rskybox.displayWarning.restore();
+      });
+
+      it('fails when email already confirmed', function() {
+        this.server.respondWith(
+          'POST',
+          rskybox.getRestPrefix() + '/users/requestConfirmation',
+          this.validResponse({
+            apiStatus: '204',
+            emailAddress: '1@test.com',
+            confirmationCode: '123'
+          }, 201)
+        );
+        this.user.save(unconfirmedUsers.validEmail, { success: this.user.handleSuccess });
+        this.server.respond();
+        expect(this.spyWarning).toHaveBeenCalledWith(this.user.warnings.api204);
+      });
+
+      it('fails when phone already confirmed', function() {
+        this.server.respondWith(
+          'POST',
+          rskybox.getRestPrefix() + '/users/requestConfirmation',
+          this.validResponse({
+            apiStatus: '205',
+            phoneNumber: '630-555-1212',
+            confirmationCode: '123'
+          }, 201)
+        );
+        this.user.save(unconfirmedUsers.validPhoneCredentials, { success: this.user.handleSuccess });
+        this.server.respond();
+        expect(this.spyWarning).toHaveBeenCalledWith(this.user.warnings.api205);
+      });
     });
   });
 });
