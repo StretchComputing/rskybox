@@ -20,7 +20,10 @@
     <script src="/js/libs/underscore-min.js"></script>
     <script src="/js/libs/backbone-min.js"></script>
     <script src="/js/libs/cookie.js"></script>
-    <script src="/js/rskybox.js"></script>
+    <script src="/js/helpers/app.js"></script>
+    <script src="/js/models/signup.js"></script>
+    <script src="/js/views/signup.js"></script>
+    <script src="/js/controllers/signup.js"></script>
   </head>
   <body>
 
@@ -33,30 +36,32 @@
         <div style="text-align: center;">
           <strong>Watch your application from the best seat in the house.</strong>
         </div>
-        <form>
-          <h1>Sign Up Using</h1>
-          <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
-          <input type="email" name="emailAddress" id="emailAddress" placeholder="Email Address">
-          <strong>or</strong>
-          <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
-          <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Phone Number">
-          <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile Carrier:</label>
-          <select name="mobileCarrierId" id="mobileCarrierId"></select>
-
-          <input type="submit" value="Request Confirmation Code">
+        <form id="signup-form">
         </form>
       </div>
     </div>
+    <script type="text/template" id="signup-template">
+      <h1>Sign Up Using</h1>
+      <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
+      <input type="email" name="emailAddress" id="emailAddress" placeholder="Email Address"><%= emailAddress %></input>
+      <strong>or</strong>
+      <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
+      <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Phone Number"><%= phoneNumber %></input>
+      <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile Carrier:</label>
+      <select name="mobileCarrierId" id="mobileCarrierId"></select>
 
-    <div data-role="page" id="confirm" data-title="New User Signup">
+      <input type="submit" value="Request Confirmation Code">
+    </script>
+
+    <div data-role="page" id="confirm" data-title="New User Confirmation">
       <div data-role="header">
-        <h1>New User Signup</h1>
+        <h1>New User Confirmation</h1>
       </div>
       <div data-role="content">
-        <div id="confirmSignup">
+        <div>
           <h3>Please create a password to complete your signup.</h3>
         </div>
-        <form>
+        <form id="confirm-form">
           <p id="emailWrapper" style="display: none;">
             <strong>Email Address: </strong><span id="emailDisplay"></span>
             <input type="hidden" id="confirmEmail">
