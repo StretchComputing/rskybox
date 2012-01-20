@@ -3,7 +3,7 @@
 
 var rskybox = (function(r, $) {
 
-  r.UnconfirmedUser = Backbone.Model.extend({
+  r.User = Backbone.Model.extend({
     url: r.getRestPrefix() + '/users/requestConfirmation',
     initialize: function() {
       _.bindAll(this, 'handleSuccess');
@@ -20,10 +20,10 @@ var rskybox = (function(r, $) {
       }
     },
     handleError: function(model, errors) {
-      console.log('handleError', this, model, errors);
+      r.log.debug(errors);
     },
     handleSuccess: function(model, response) {
-      console.log('handleSuccess', this, model, response);
+      r.log.debug('handleSuccess');
     },
     validate: function(attrs) {
       if (r.isValidEmailAddress(attrs.emailAddress)) { return; }

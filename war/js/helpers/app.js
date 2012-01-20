@@ -3,6 +3,34 @@
 // The main namespace for our application
 var rskybox = (function(r, $) {
 
+  r.logLevels = {
+    error: 1,
+    info: 5,
+    debug: 10
+  };
+
+  r.logLevel = r.logLevels.debur;
+
+  r.log = {
+    level: r.logLevels.debug,
+    error: function(message) {
+      if (r.logLevel < r.logLevels.error) { return }
+      this.base('Error: ' + message);
+    },
+    info: function(message) {
+      if (r.logLevel < r.logLevels.info) { return }
+      this.base('Info: ' + message);
+    },
+    debug: function(message) {
+      if (r.logLevel < r.logLevels.debug) { return }
+      this.base('Debug: ' + message);
+    },
+    base: function(message) {
+      console.log(message);
+    }
+  };
+
+
   // Returns the value of a named parameter from a given JQM URL.
   r.getParameterByName = function (url, name) {
     var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
@@ -27,7 +55,7 @@ var rskybox = (function(r, $) {
 
   // TODO - placeholder until we can do something consistent/logical with errors/warnings
   r.displayWarning = function(error) {
-    console.log(error);
+    r.log.debug(error);
   };
 
 

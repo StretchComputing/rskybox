@@ -1,4 +1,4 @@
-var unconfirmedUsers = {
+var users = {
   validEmail: {
     emailAddress: '1@test.com',
     testApp: true
@@ -31,18 +31,18 @@ var unconfirmedUsers = {
 };
 
 
-describe('UnconfirmedUser', function() {
+describe('User', function() {
   beforeEach(function() {
-    this.user = new rskybox.UnconfirmedUser();
+    this.user = new rskybox.User();
   });
 
   describe('valid user', function() {
     it('is created with valid email address', function() {
-      this.user.set(unconfirmedUsers.validEmail);
+      this.user.set(users.validEmail);
       expect(this.user.get('emailAddress')).toEqual('1@test.com');
     });
     it('is created with valid phone number credentials', function() {
-      this.user.set(unconfirmedUsers.validPhoneCredentials);
+      this.user.set(users.validPhoneCredentials);
       expect(this.user.get('phoneNumber')).toEqual('630-555-1212');
       expect(this.user.get('mobileCarrierId')).toEqual('1');
     });
@@ -61,19 +61,19 @@ describe('UnconfirmedUser', function() {
     });
 
     it('is not created with missing credentials', function() {
-      this.user.set(unconfirmedUsers.missingCredentials);
+      this.user.set(users.missingCredentials);
     });
     it('is not created with missing email and phone', function() {
-      this.user.set(unconfirmedUsers.missingEmailAndPhone);
+      this.user.set(users.missingEmailAndPhone);
     });
     it('is not created with invalid email', function() {
-      this.user.set(unconfirmedUsers.invalidEmail);
+      this.user.set(users.invalidEmail);
     });
     it('is not created with missing carrier', function() {
-      this.user.set(unconfirmedUsers.missingCarrier);
+      this.user.set(users.missingCarrier);
     });
     it('is not created with invalid phone number', function() {
-      this.user.set(unconfirmedUsers.invalidPhoneNumber);
+      this.user.set(users.invalidPhoneNumber);
     });
   });
 
@@ -99,7 +99,7 @@ describe('UnconfirmedUser', function() {
             confirmationCode: '123',
           }, 201)
         );
-        this.user.save(unconfirmedUsers.validEmail, { success: this.user.handleSuccess });
+        this.user.save(users.validEmail, { success: this.user.handleSuccess });
         this.server.respond();
       });
     });
@@ -122,7 +122,7 @@ describe('UnconfirmedUser', function() {
             confirmationCode: '123'
           }, 201)
         );
-        this.user.save(unconfirmedUsers.validEmail, { success: this.user.handleSuccess });
+        this.user.save(users.validEmail, { success: this.user.handleSuccess });
         this.server.respond();
         expect(this.spyWarning).toHaveBeenCalledWith(this.user.warnings.api204);
       });
@@ -137,7 +137,7 @@ describe('UnconfirmedUser', function() {
             confirmationCode: '123'
           }, 201)
         );
-        this.user.save(unconfirmedUsers.validPhoneCredentials, { success: this.user.handleSuccess });
+        this.user.save(users.validPhoneCredentials, { success: this.user.handleSuccess });
         this.server.respond();
         expect(this.spyWarning).toHaveBeenCalledWith(this.user.warnings.api205);
       });
