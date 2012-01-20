@@ -78,21 +78,22 @@ var rskybox = (function(r, $) {
   //}
 
 
+*/
   r.controller = {
     signup: function() {
-      console.log('got the router for signup');
-      r.carriers = new r.Carriers();
-      new r.CarriersView({
-        el: $('#mobileCarrierId'),
-        collection: r.carriers
-      });
-      r.carriers.fetch();
+      r.log.debug('got the router for signup');
+      //r.carriers = new r.Carriers();
+      //new r.CarriersView({
+        //el: $('#mobileCarrierId'),
+        //collection: r.carriers
+      //});
+      //r.carriers.fetch();
     },
     confirm: function() {
-      console.log('got the router for confirm');
+      r.log.debug('got the router for confirm');
     },
     login: function() {
-      console.log('got the router for login');
+      r.log.debug('got the router for login');
     }
   };
 
@@ -101,7 +102,6 @@ var rskybox = (function(r, $) {
     '#confirm': 'confirm',
     '#login': 'login'
   }, r.controller);
-*/
 
   return r;
 })(rskybox || {}, jQuery);

@@ -115,7 +115,8 @@ describe('User', function() {
       it('fails when email already confirmed', function() {
         this.server.respondWith(
           'POST',
-          rskybox.getRestPrefix() + '/users/requestConfirmation',
+          this.user.url,
+          //rskybox.getRestPrefix() + '/users/requestConfirmation',
           this.validResponse({
             apiStatus: '204',
             emailAddress: '1@test.com',
