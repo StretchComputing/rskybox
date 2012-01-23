@@ -1,4 +1,4 @@
-var users = {
+var signups = {
   validEmail: {
     emailAddress: '1@test.com',
     testApp: true
@@ -31,55 +31,55 @@ var users = {
 };
 
 
-describe('User', function() {
+describe('Signup', function() {
   beforeEach(function() {
-    this.user = new rskybox.User();
+    this.signup = new rskybox.Signup();
   });
 
-  describe('valid user', function() {
+  describe('valid signup', function() {
     it('is created with valid email address', function() {
-      this.user.set(users.validEmail);
-      expect(this.user.get('emailAddress')).toEqual('1@test.com');
+      this.signup.set(signups.validEmail);
+      expect(this.signup.get('emailAddress')).toEqual('1@test.com');
     });
     it('is created with valid phone number credentials', function() {
-      this.user.set(users.validPhoneCredentials);
-      expect(this.user.get('phoneNumber')).toEqual('630-555-1212');
-      expect(this.user.get('mobileCarrierId')).toEqual('1');
+      this.signup.set(signups.validPhoneCredentials);
+      expect(this.signup.get('phoneNumber')).toEqual('630-555-1212');
+      expect(this.signup.get('mobileCarrierId')).toEqual('1');
     });
   });
 
-  describe('invalid user', function() {
+  describe('invalid signup', function() {
     beforeEach(function() {
       this.eventSpy = sinon.spy();
-      this.user.bind('error', this.eventSpy);
+      this.signup.bind('error', this.eventSpy);
     });
 
     afterEach(function() {
       expect(this.eventSpy).toHaveBeenCalled();
-      expect(this.user.get('emailAddress')).toBeUndefined();
-      expect(this.user.get('phoneNumber')).toBeUndefined();
+      expect(this.signup.get('emailAddress')).toBeUndefined();
+      expect(this.signup.get('phoneNumber')).toBeUndefined();
     });
 
     it('is not created with missing credentials', function() {
-      this.user.set(users.missingCredentials);
+      this.signup.set(signups.missingCredentials);
     });
     it('is not created with missing email and phone', function() {
-      this.user.set(users.missingEmailAndPhone);
+      this.signup.set(signups.missingEmailAndPhone);
     });
     it('is not created with invalid email', function() {
-      this.user.set(users.invalidEmail);
+      this.signup.set(signups.invalidEmail);
     });
     it('is not created with missing carrier', function() {
-      this.user.set(users.missingCarrier);
+      this.signup.set(signups.missingCarrier);
     });
     it('is not created with invalid phone number', function() {
-      this.user.set(users.invalidPhoneNumber);
+      this.signup.set(signups.invalidPhoneNumber);
     });
   });
 
-  describe('save user', function() {
+  describe('save signup', function() {
     beforeEach(function() {
-      this.spy = sinon.spy(this.user, 'handleSuccess');
+      this.spy = sinon.spy(this.signup, 'handleSuccess');
       this.server = sinon.fakeServer.create();
     });
     afterEach(function() {
@@ -92,14 +92,14 @@ describe('User', function() {
       it('should be successful', function() {
         this.server.respondWith(
           'POST',
-          rskybox.getRestPrefix() + '/users/requestConfirmation',
+          this.signup.url,
           this.validResponse({
             apiStatus: '100',
             emailAddress: '1@test.com',
             confirmationCode: '123',
           }, 201)
         );
-        this.user.save(users.validEmail, { success: this.user.handleSuccess });
+        this.signup.save(signups.validEmail, { success: this.signup.handleSuccess });
         this.server.respond();
       });
     });
@@ -115,32 +115,31 @@ describe('User', function() {
       it('fails when email already confirmed', function() {
         this.server.respondWith(
           'POST',
-          this.user.url,
-          //rskybox.getRestPrefix() + '/users/requestConfirmation',
+          this.signup.url,
           this.validResponse({
             apiStatus: '204',
             emailAddress: '1@test.com',
             confirmationCode: '123'
           }, 201)
         );
-        this.user.save(users.validEmail, { success: this.user.handleSuccess });
+        this.signup.save(signups.validEmail, { success: this.signup.handleSuccess });
         this.server.respond();
-        expect(this.spyWarning).toHaveBeenCalledWith(this.user.warnings.api204);
+        expect(this.spyWarning).toHaveBeenCalledWith(this.signup.warnings.api204);
       });
 
       it('fails when phone already confirmed', function() {
         this.server.respondWith(
           'POST',
-          rskybox.getRestPrefix() + '/users/requestConfirmation',
+          this.signup.url,
           this.validResponse({
             apiStatus: '205',
             phoneNumber: '630-555-1212',
             confirmationCode: '123'
           }, 201)
         );
-        this.user.save(users.validPhoneCredentials, { success: this.user.handleSuccess });
+        this.signup.save(signups.validPhoneCredentials, { success: this.signup.handleSuccess });
         this.server.respond();
-        expect(this.spyWarning).toHaveBeenCalledWith(this.user.warnings.api205);
+        expect(this.spyWarning).toHaveBeenCalledWith(this.signup.warnings.api205);
       });
     });
   });

@@ -3,12 +3,16 @@
 
 var rskybox = (function(r, $) {
 
-  r.User = Backbone.Model.extend({
-    url: r.getRestPrefix() + '/users/requestConfirmation',
+
+  r.Signup = r.BaseModel.extend({
+    apiUrl: '/users/requestConfirmation',
+
     initialize: function() {
+      this.setUrl(this.apiUrl);
       _.bindAll(this, 'handleSuccess');
       this.bind('error', this.handleError);
     },
+
     parse: function(response) {
       switch(+response.apiStatus) {
         case 100:
@@ -19,18 +23,22 @@ var rskybox = (function(r, $) {
         default: r.displayWarning('Unknown error occurred for apiStatus: ' + response.apiStatus); return;
       }
     },
+
     handleError: function(model, errors) {
       r.log.debug(errors);
     },
+
     handleSuccess: function(model, response) {
       r.log.debug('handleSuccess');
     },
+
     validate: function(attrs) {
       if (r.isValidEmailAddress(attrs.emailAddress)) { return; }
       if (r.isValidPhoneNumber(attrs.phoneNumber) && attrs.mobileCarrierId) { return; }
 
       return 'Required: valid email address -OR- valid phone number and mobile carrier';
     },
+
     warnings: {
       api204: 'Your email address has already been confirmed',
       api205: 'Your phone number has already been confirmed'
