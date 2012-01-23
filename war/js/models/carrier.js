@@ -12,7 +12,7 @@ var rskybox = (function(r, $) {
 
     apiUrl: '/mobileCarriers',
 
-    initalize: function() {
+    initialize: function() {
       this.setUrl(this.apiUrl);
     },
 

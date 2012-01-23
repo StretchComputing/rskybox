@@ -19,11 +19,19 @@ var rskybox = (function(r, $) {
 
   r.CarriersView = Backbone.View.extend({
     initialize: function() {
-      //_.bindAll(this, 'addCarrier');
+      _.bindAll(this, 'addCarrier', 'setElId');
       this.collection.bind('reset', this.render, this);
     },
 
+    // This workaround is required because the element is part of another view and not
+    // available when this view is created. So we store the ID and set this.el later in
+    // the render function.
+    setElId: function(id) {
+      this.elId = id;
+    },
+
     render: function() {
+      this.el = $(this.elId);
       $(this.el).empty();
       this.addCarrier(new r.Carrier({ id: '', name: 'Select Mobile Carrier'}));
       this.collection.each(this.addCarrier);
