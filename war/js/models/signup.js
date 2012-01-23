@@ -9,8 +9,8 @@ var rskybox = (function(r, $) {
 
     initialize: function() {
       this.setUrl(this.apiUrl);
-      _.bindAll(this, 'handleSuccess');
-      this.bind('error', this.handleError, this);
+      //_.bindAll(this, 'handleSuccess');
+      //this.bind('error', this.handleError, this);
     },
 
     parse: function(response) {
@@ -24,19 +24,27 @@ var rskybox = (function(r, $) {
       }
     },
 
-    handleError: function(model, errors) {
-      r.log.debug(errors);
-    },
+    //handleError: function(model, errors) {
+      //r.log.debug(errors);
+    //},
 
-    handleSuccess: function(model, response) {
-      r.log.debug('handleSuccess');
-    },
+    //handleSuccess: function(model, response) {
+      //r.log.debug('handleSuccess');
+    //},
 
     validate: function(attrs) {
-      if (r.isValidEmailAddress(attrs.emailAddress)) { return; }
-      if (r.isValidPhoneNumber(attrs.phoneNumber) && attrs.mobileCarrierId) { return; }
+      r.log.debug('validate called');
+      if (r.isValidEmailAddress(attrs.emailAddress)) {
+        r.log.debug('emailAddress is valid');
+        return;
+      }
+      if (r.isValidPhoneNumber(attrs.phoneNumber) && attrs.mobileCarrierId) {
+        r.log.debug('phone credentials are valid');
+        return;
+      }
 
-      return 'Required: valid email address -OR- valid phone number and mobile carrier';
+      r.log.debug('validate returning string');
+      return 'A valid email address -OR- valid phone number and mobile carrier is required.';
     },
 
     warnings: {

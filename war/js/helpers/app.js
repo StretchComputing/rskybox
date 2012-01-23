@@ -33,7 +33,6 @@ var rskybox = (function(r, $) {
 
 
   r.addProperty = function(object, property, value) {
-    console.log('addProperty');
     if (object && property && value) {
       object[property] = value;
     }

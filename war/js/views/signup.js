@@ -6,6 +6,7 @@ var rskybox = (function(r, $) {
 
   r.SignupView = Backbone.View.extend({
     initialize: function() {
+      _.bindAll(this, 'handleError');
       this.model.bind('change', this.render, this);
       this.template = _.template($('#signupTemplate').html());
       this.carriers = new r.Carriers();
@@ -28,16 +29,22 @@ var rskybox = (function(r, $) {
       r.addProperty(form, 'mobileCarrierId', $("select[name='mobileCarrierId']").val());
 
       this.model.save(form, {
-        success: function(model, resp) {
-          r.log.debug('success saving model');
-        },
-
-        error: function() {
-          r.log.debug('error saving model');
-        }
+        success: this.handleSuccess,
+        error: this.handleError,
       });
       e.preventDefault();
       return false;
+    },
+
+    handleSuccess: function(model, response) {
+      r.log.debug('handleSuccess called');
+      $.mobile.changePage('#confirm');
+    },
+
+    handleError: function(model, response) {
+      r.log.debug('handleError called');
+      console.log(model, response);
+      $(this.el).prepend('<div>' + response + '</div>');
     },
 
     render: function() {
