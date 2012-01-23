@@ -16,7 +16,7 @@ var rskybox = (function(r, $) {
         r.log.error('invalid apiUrl: ' + apiUrl);
         this.url = '';
       }
-    }
+    },
   };
 
 

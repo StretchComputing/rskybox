@@ -33,12 +33,6 @@ var rskybox = (function(r, $) {
         model: r.signup
       });
       r.signupView.render();
-      //r.carriers = new r.Carriers();
-      //new r.CarriersView({
-        //el: $('#mobileCarrierId'),
-        //collection: r.carriers
-      //});
-      //r.carriers.fetch();
     },
 
     confirm: function() {
