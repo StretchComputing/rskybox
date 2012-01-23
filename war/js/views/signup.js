@@ -2,12 +2,14 @@
 
 
 var rskybox = (function(r, $) {
+
+
   r.SignupView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'render');
-      this.model.bind('change', this.render);
-      this.template = _.template($('#signup-template').html());
+      this.model.bind('change', this.render, this);
+      this.template = _.template($('#signupTemplate').html());
     },
+
     render: function() {
       var content = this.template(this.model.toJSON());
       $(this.el).html(content);
@@ -15,6 +17,7 @@ var rskybox = (function(r, $) {
       return this;
     }
   });
+
 
   return r;
 })(rskybox || {}, jQuery);

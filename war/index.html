@@ -22,6 +22,7 @@
     <script src="/js/helpers/app.js"></script>
     <script src="/js/models/base.js"></script>
     <script src="/js/models/signup.js"></script>
+    <script src="/js/views/carriers.js"></script>
     <script src="/js/views/signup.js"></script>
     <script src="/js/controllers/signup.js"></script>
   </head>
@@ -36,11 +37,11 @@
         <div style="text-align: center;">
           <strong>Watch your application from the best seat in the house.</strong>
         </div>
-        <form id="signup-form">
+        <form id="signupForm">
         </form>
       </div>
     </div>
-    <script type="text/template" id="signup-template">
+    <script type="text/template" id="signupTemplate">
       <h1>Sign Up Using</h1>
       <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
       <input type="email" name="emailAddress" id="emailAddress" placeholder="Email Address"><%= emailAddress %></input>

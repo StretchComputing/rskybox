@@ -4,7 +4,7 @@
 var rskybox = (function(r, $) {
 
 
-  r.BaseModel = Backbone.Model.extend({
+  r.Base = {
     // The REST base portion of the URL, including the version.
     restUrl: '/rest/v1',
 
@@ -17,7 +17,13 @@ var rskybox = (function(r, $) {
         this.url = '';
       }
     }
-  });
+  };
+
+
+  r.BaseModel = Backbone.Model.extend(r.Base);
+
+
+  r.BaseCollection = Backbone.Collection.extend(r.Base);
 
 
   return r;

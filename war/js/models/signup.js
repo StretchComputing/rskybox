@@ -7,10 +7,16 @@ var rskybox = (function(r, $) {
   r.Signup = r.BaseModel.extend({
     apiUrl: '/users/requestConfirmation',
 
+    defaults: {
+      emailAddress: '',
+      phoneNumber: '',
+      mobileCarrierId: ''
+    },
+
     initialize: function() {
       this.setUrl(this.apiUrl);
       _.bindAll(this, 'handleSuccess');
-      this.bind('error', this.handleError);
+      this.bind('error', this.handleError, this);
     },
 
     parse: function(response) {
