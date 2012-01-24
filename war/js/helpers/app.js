@@ -31,6 +31,18 @@ var rskybox = (function(r, $) {
   };
 
 
+  r.flashError = function(el, message) {
+    var flash, selector;
+
+    selector = '.flash.error';
+    $(el).find(selector).remove();
+
+    flash = $('<div>', {
+      class: 'flash error',
+      text: message
+    });
+    $(el).prepend(flash);
+  };
 
   r.addProperty = function(object, property, value) {
     if (object && property && value) {

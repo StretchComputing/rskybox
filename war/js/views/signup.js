@@ -44,7 +44,7 @@ var rskybox = (function(r, $) {
     handleError: function(model, response) {
       r.log.debug('handleError called');
       console.log(model, response);
-      $(this.el).prepend('<div>' + response + '</div>');
+      r.flashError(this.el, response);
     },
 
     render: function() {
