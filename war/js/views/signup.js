@@ -9,11 +9,6 @@ var rskybox = (function(r, $) {
       _.bindAll(this, 'handleError');
       this.model.bind('change', this.render, this);
       this.template = _.template($('#signupTemplate').html());
-      this.carriers = new r.Carriers();
-      this.carriersView = new r.CarriersView({
-        collection: this.carriers
-      });
-      this.carriersView.setElId('#mobileCarrierId');
     },
 
     events: {
@@ -54,7 +49,11 @@ var rskybox = (function(r, $) {
       $(this.el).empty();
       $(this.el).html(content);
       $(this.el).trigger('create');
-      this.carriers.fetch();
+      this.carriersView = new r.CarriersView({
+        el: $('#mobileCarrierId'),
+        collection: new r.Carriers()
+      });
+      this.carriersView.collection.fetch();
       return this;
     }
   });
