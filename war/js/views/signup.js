@@ -8,6 +8,7 @@ var rskybox = (function(r, $) {
     initialize: function() {
       _.bindAll(this, 'handleError');
       this.model.bind('change', this.render, this);
+      this.model.bind('apiError', this.apiError);
       this.template = _.template($('#signupTemplate').html());
     },
 
@@ -33,13 +34,21 @@ var rskybox = (function(r, $) {
 
     handleSuccess: function(model, response) {
       r.log.debug('handleSuccess called');
+      if (response.apiStatus) {
+        // The apiError event handler will take care of this for us.
+        return;
+      }
       $.mobile.changePage('#confirm');
     },
 
     handleError: function(model, response) {
       r.log.debug('handleError called');
-      console.log(model, response);
       r.flashError(this.el, response);
+    },
+
+    apiError: function(error) {
+      r.log.debug(error);
+      r.flashError(error);
     },
 
     render: function() {
