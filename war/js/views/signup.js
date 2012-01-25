@@ -41,7 +41,7 @@ var rskybox = (function(r, $) {
 
     handleError: function(model, response) {
       r.log.debug('handleError called');
-      r.flashError(response);
+      r.flashError(response, this.el);
     },
 
     handleApiError: function(jqXHR) {
@@ -51,7 +51,7 @@ var rskybox = (function(r, $) {
         r.log.debug('An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiErrors[code]);
+      r.flashError(this.apiErrors[code], this.el);
     },
 
     render: function() {
