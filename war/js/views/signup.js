@@ -50,6 +50,7 @@ var rskybox = (function(r, $) {
       if (!this.apiErrors[code]) {
         r.log.debug('An unknown API error occurred: ' + code);
       }
+      this.model.clear({silent: true});
 
       r.flashError(this.apiErrors[code], this.el);
     },
