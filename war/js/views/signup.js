@@ -40,7 +40,6 @@ var rskybox = (function(r, $) {
     },
 
     handleError: function(model, response) {
-      console.log(model, response);
       r.log.debug('handleError called');
       r.flashError(response);
     },
@@ -73,7 +72,7 @@ var rskybox = (function(r, $) {
     apiErrors: {
       204: 'Your email address has already been confirmed.',
       205: 'Your phone number has already been confirmed.',
-      //500: 'Phone number and mobile carrier ID must be specified together.'
+      500: 'Phone number and mobile carrier ID must be specified together.'
     }
   });
 

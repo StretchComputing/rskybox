@@ -36,15 +36,12 @@ var rskybox = (function(r, $) {
   r.flashError = function(message, el) {
     var flash, selector;
 
-    if (!el) {
-      el = $.mobile.activePage.find(":jqmData(role='content')");
-    }
+    el = el || $.mobile.activePage.find(":jqmData(role='content')");
+
     selector = '.flash.error';
     el.find(selector).remove();
 
-    if (!message) {
-      message = 'An unknown error occurred. Please reload the page to try again.';
-    }
+    message = message || 'An unknown error occurred. Please reload the page to try again.';
     flash = $('<div>', {
       class: 'flash error',
       text: message

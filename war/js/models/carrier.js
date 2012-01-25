@@ -17,10 +17,6 @@ var rskybox = (function(r, $) {
     },
 
     parse: function(response) {
-      if (+response.apiStatus !== 100) {
-        r.displayWarning('Unknown API status: ' + response.apiStatus);
-        return;
-      }
       return response.mobileCarriers;
     }
   });
