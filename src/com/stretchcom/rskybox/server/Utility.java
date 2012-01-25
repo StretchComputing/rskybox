@@ -11,8 +11,10 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.Request;
+import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.ext.servlet.ServletUtils;
+import org.restlet.resource.ServerResource;
 
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;
@@ -20,13 +22,14 @@ import com.stretchcom.rskybox.models.User;
 public class Utility {
     private static final Logger log = Logger.getLogger(Utility.class.getName());
 
-    public static JsonRepresentation apiError(String theApiStatus){
+    public static JsonRepresentation apiError(ServerResource resource, String theApiStatus){
     	if(theApiStatus == null) {
     		log.severe("Utility::apiError() illegal parameter");
     	}
     	
     	JSONObject json = new JSONObject();
     	try {
+    			resource.setStatus(Status.CLIENT_ERROR_UNPROCESSABLE_ENTITY);
 			json.put("apiStatus", theApiStatus);
 		} catch (JSONException e) {
 			log.severe("Utility::apiError()  exception = " + e.getMessage());

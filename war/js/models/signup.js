@@ -12,15 +12,8 @@ var rskybox = (function(r, $) {
     },
 
     parse: function(response) {
-      if (+response.apiStatus === 100) {
-        delete(response.apiStatus);
-        return response;
-      }
-      this.trigger('apiError', this.warnings['api'+response.apiStatus]);
-
-      //case 204: r.displayWarning(this.warnings.api204); return;
-      //case 205: r.displayWarning(this.warnings.api205); return;
-      //default: r.displayWarning('Unknown error occurred for apiStatus: ' + response.apiStatus); return;
+      delete(response.apiStatus);
+      return response;
     },
 
     validate: function(attrs) {
@@ -34,12 +27,6 @@ var rskybox = (function(r, $) {
         return;
       }
       return 'A valid email address -OR- valid phone number and mobile carrier is required.';
-    },
-
-    warnings: {
-      api204: 'Your email address has already been confirmed.',
-      api205: 'Your phone number has already been confirmed.',
-      api500: 'Phone number and mobile carrier ID must be specified together.'
     }
   });
 

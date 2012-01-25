@@ -70,7 +70,7 @@ public class ClientLogsResource extends ServerResource {
     public JsonRepresentation get(Variant variant) {
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
          JSONObject jsonReturn;
@@ -93,7 +93,7 @@ public class ClientLogsResource extends ServerResource {
         log.info("in post");
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
         return save_client_log(entity);
@@ -106,12 +106,12 @@ public class ClientLogsResource extends ServerResource {
         log.info("in put");
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
 		// can't be sure which @put API was called - let's just assume it was Update
     	if ( (this.name == null || this.name.length() == 0) && (this.id == null || this.id.length() == 0) ) {
-			return Utility.apiError(ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
+			return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
 		}
     	
     	if(this.id != null) {
@@ -138,7 +138,7 @@ public class ClientLogsResource extends ServerResource {
         	//////////////////////
         	AppMember appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(appMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
             List<User> users = new ArrayList<User>();
@@ -155,7 +155,7 @@ public class ClientLogsResource extends ServerResource {
 			    			.setParameter("applicationId", this.applicationId)
 			    			.getResultList();
 			    } else {
-			    	return Utility.apiError(ApiStatusCode.INVALID_STATUS_PARAMETER);
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
 			    }
 			} else {
 				// by default, only get 'new' clientLogs
@@ -192,11 +192,11 @@ public class ClientLogsResource extends ServerResource {
         	//////////////////////
         	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(currentUserMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
 			}
 			
             Key key;
@@ -204,7 +204,7 @@ public class ClientLogsResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.CLIENT_LOG_NOT_FOUND);
+				return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_NOT_FOUND);
 			}
     		clientLog = (ClientLog)em.createNamedQuery("ClientLog.getByKey")
 				.setParameter("key", key)
@@ -239,7 +239,7 @@ public class ClientLogsResource extends ServerResource {
             	//////////////////////
             	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
             	if(currentUserMember == null) {
-    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+    				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
             	}
 
                 Key key;
@@ -247,7 +247,7 @@ public class ClientLogsResource extends ServerResource {
     				key = KeyFactory.stringToKey(this.id);
     			} catch (Exception e) {
     				log.info("ID provided cannot be converted to a Key");
-    				return Utility.apiError(ApiStatusCode.CLIENT_LOG_NOT_FOUND);
+    				return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_NOT_FOUND);
     			}
                 clientLog = (ClientLog) em.createNamedQuery("ClientLog.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
@@ -259,7 +259,7 @@ public class ClientLogsResource extends ServerResource {
 					String logLevel = json.getString("logLevel").toLowerCase();
 					clientLog.setLogLevel(logLevel);
 					if(!clientLog.isLogLevelValid(logLevel)) {
-						return Utility.apiError(ApiStatusCode.INVALID_LOG_LEVEL);
+						return Utility.apiError(this, ApiStatusCode.INVALID_LOG_LEVEL);
 					}
 				} else {
 					// default to error
@@ -269,7 +269,7 @@ public class ClientLogsResource extends ServerResource {
 	            if(json.has("logName")) {
 	            	clientLog.setLogName(json.getString("logName"));
 	            } else {
-	            	return Utility.apiError(ApiStatusCode.LOG_NAME_IS_REQUIRED);
+	            	return Utility.apiError(this, ApiStatusCode.LOG_NAME_IS_REQUIRED);
 	            }
 			}
 			
@@ -307,7 +307,7 @@ public class ClientLogsResource extends ServerResource {
 						// timestamp format includes seconds and milli-seconds
 						Date timestamp = GMT.convertToGmtDate(timestampStr, true, tz, RskyboxApplication.APP_ACTION_DATE_FORMAT);
 						if(timestamp == null) {
-							return Utility.apiError(ApiStatusCode.INVALID_TIMESTAMP_PARAMETER);
+							return Utility.apiError(this, ApiStatusCode.INVALID_TIMESTAMP_PARAMETER);
 						}
 						aa.setTimestamp(timestamp);
 					}
@@ -318,7 +318,7 @@ public class ClientLogsResource extends ServerResource {
 							duration = new Integer(durationStr);
 						} catch(NumberFormatException e) {
 							log.info("non-integer durations = " + durationStr);
-							return Utility.apiError(ApiStatusCode.INVALID_DURATION_PARAMETER);
+							return Utility.apiError(this, ApiStatusCode.INVALID_DURATION_PARAMETER);
 						}
 						aa.setDuration(duration);
 					}
@@ -403,10 +403,10 @@ public class ClientLogsResource extends ServerResource {
             if(json.has("mode")) {
             	mode = json.getString("mode");
             	if(!ClientLogRemoteControl.isModeValid(mode)) {
-            		return Utility.apiError(ApiStatusCode.INVALID_MODE);
+            		return Utility.apiError(this, ApiStatusCode.INVALID_MODE);
             	}
             } else {
-            	return Utility.apiError(ApiStatusCode.MODE_IS_REQUIRED);
+            	return Utility.apiError(this, ApiStatusCode.MODE_IS_REQUIRED);
             }
             
             ClientLogRemoteControl.update(this.applicationId, this.name, mode);

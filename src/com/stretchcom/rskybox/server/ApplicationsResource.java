@@ -70,7 +70,7 @@ public class ApplicationsResource extends ServerResource {
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
 		if (this.id == null || this.id.length() == 0) {
-			return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
+			return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);
 		}
         return save_application(entity);
     }
@@ -96,7 +96,7 @@ public class ApplicationsResource extends ServerResource {
             	//////////////////////
             	AppMember appMember = AppMember.getAppMember(id, KeyFactory.keyToString(currentUser.getKey()));
             	if(appMember == null) {
-					return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+					return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
             	}
             	memberRole = appMember.getRole();
             	
@@ -105,7 +105,7 @@ public class ApplicationsResource extends ServerResource {
 					key = KeyFactory.stringToKey(this.id);
 				} catch (Exception e) {
 					log.info("ID provided cannot be converted to a Key");
-					return Utility.apiError(ApiStatusCode.APPLICATION_NOT_FOUND);
+					return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
 				}
                 application = (Application)em.createNamedQuery("Application.getByKey")
                     	.setParameter("key", key)
@@ -122,11 +122,11 @@ public class ApplicationsResource extends ServerResource {
 				
 					Application app = Application.getApplicationWithName(appName);
 					if(app != null) {
-						return Utility.apiError(ApiStatusCode.APPLICATION_NAME_ALREADY_USED);
+						return Utility.apiError(this, ApiStatusCode.APPLICATION_NAME_ALREADY_USED);
 					}
 				} else {
 					log.info("no JSON name field found");
-					return Utility.apiError(ApiStatusCode.APPLICATION_NAME_REQUIRED);
+					return Utility.apiError(this, ApiStatusCode.APPLICATION_NAME_REQUIRED);
 				}
 			} 
 			
@@ -201,12 +201,12 @@ public class ApplicationsResource extends ServerResource {
         	//////////////////////
         	AppMember appMember = AppMember.getAppMember(id, KeyFactory.keyToString(currentUser.getKey()));
         	if(appMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
         	memberRole = appMember.getRole();
 
         	if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);
 			}
 			
             Key key;
@@ -214,7 +214,7 @@ public class ApplicationsResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.APPLICATION_NOT_FOUND);
+				return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
 			}
     		application = (Application)em.createNamedQuery("Application.getByKey")
 				.setParameter("key", key)

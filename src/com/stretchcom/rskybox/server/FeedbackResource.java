@@ -64,7 +64,7 @@ public class FeedbackResource extends ServerResource {
     public JsonRepresentation get(Variant variant) {
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
         if (id != null) {
@@ -84,7 +84,7 @@ public class FeedbackResource extends ServerResource {
         log.info("in post");
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
         return save_feedback(entity);
@@ -96,11 +96,11 @@ public class FeedbackResource extends ServerResource {
         log.info("in put");
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
 		if (this.id == null || this.id.length() == 0) {
-			return Utility.apiError(ApiStatusCode.FEEDBACK_ID_REQUIRED);
+			return Utility.apiError(this, ApiStatusCode.FEEDBACK_ID_REQUIRED);
 		}
         return save_feedback(entity);
     }
@@ -123,7 +123,7 @@ public class FeedbackResource extends ServerResource {
             	//////////////////////
             	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
             	if(currentUserMember == null) {
-    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+    				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
             	}
 
                 Key key;
@@ -131,7 +131,7 @@ public class FeedbackResource extends ServerResource {
 					key = KeyFactory.stringToKey(this.id);
 				} catch (Exception e) {
 					log.info("ID provided cannot be converted to a Key");
-					return Utility.apiError(ApiStatusCode.FEEDBACK_NOT_FOUND);
+					return Utility.apiError(this, ApiStatusCode.FEEDBACK_NOT_FOUND);
 				}
                 feedback = (Feedback)em.createNamedQuery("Feedback.getByKey")
                     	.setParameter("key", key)
@@ -160,7 +160,7 @@ public class FeedbackResource extends ServerResource {
 					Date gmtRecordedDate = GMT.convertToGmtDate(recordedDateStr, true, tz);
 					if(gmtRecordedDate == null) {
 						log.info("invalid recorded date format passed in");
-						return Utility.apiError(ApiStatusCode.INVALID_RECORDED_DATE_PARAMETER);
+						return Utility.apiError(this, ApiStatusCode.INVALID_RECORDED_DATE_PARAMETER);
 					}
 					feedback.setRecordedGmtDate(gmtRecordedDate);
 				}
@@ -177,7 +177,7 @@ public class FeedbackResource extends ServerResource {
 	                    feedback.setStatus(status);
 	            	} else {
 						log.info("invalid status = " + status);
-						return Utility.apiError(ApiStatusCode.INVALID_STATUS);
+						return Utility.apiError(this, ApiStatusCode.INVALID_STATUS);
 	            	}
 	            }
 			} else {
@@ -229,11 +229,11 @@ public class FeedbackResource extends ServerResource {
         	//////////////////////
         	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(currentUserMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.FEEDBACK_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.FEEDBACK_ID_REQUIRED);
 			}
 			
             Key key;
@@ -241,7 +241,7 @@ public class FeedbackResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.FEEDBACK_NOT_FOUND);
+				return Utility.apiError(this, ApiStatusCode.FEEDBACK_NOT_FOUND);
 			}
     		feedback = (Feedback)em.createNamedQuery("Feedback.getByKey")
 				.setParameter("key", key)
@@ -271,7 +271,7 @@ public class FeedbackResource extends ServerResource {
         	//////////////////////
         	AppMember appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(appMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
 			List<Feedback> feedbacks = null;
@@ -288,7 +288,7 @@ public class FeedbackResource extends ServerResource {
 							.setParameter("applicationId", this.applicationId)
 							.getResultList();
 			    } else {
-			    	return Utility.apiError(ApiStatusCode.INVALID_STATUS_PARAMETER);
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
 			    }
 			} else {
 				// by default, only get 'new' feedback

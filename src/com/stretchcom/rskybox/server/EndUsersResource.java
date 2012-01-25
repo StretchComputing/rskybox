@@ -54,7 +54,7 @@ public class EndUsersResource extends ServerResource {
     public JsonRepresentation get(Variant variant) {
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
         if (id != null) {
@@ -74,7 +74,7 @@ public class EndUsersResource extends ServerResource {
         log.info("in post");
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
         return save_end_user(entity);
@@ -86,11 +86,11 @@ public class EndUsersResource extends ServerResource {
         log.info("in put");
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
 		if (this.id == null || this.id.length() == 0) {
-			return Utility.apiError(ApiStatusCode.END_USER_ID_REQUIRED);
+			return Utility.apiError(this, ApiStatusCode.END_USER_ID_REQUIRED);
 		}
         return save_end_user(entity);
     }
@@ -101,7 +101,7 @@ public class EndUsersResource extends ServerResource {
         log.info("in delete");
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
         JSONObject json = new JSONObject();
@@ -111,7 +111,7 @@ public class EndUsersResource extends ServerResource {
         this.setStatus(Status.SUCCESS_OK);
         try {
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.END_USER_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.END_USER_ID_REQUIRED);
 			}
 			
             Key key;
@@ -119,7 +119,7 @@ public class EndUsersResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.END_USER_NOT_FOUND);
+				return Utility.apiError(this, ApiStatusCode.END_USER_NOT_FOUND);
 			}
             em.getTransaction().begin();
             EndUser endUser = (EndUser) em.createNamedQuery("EndUser.getByKey").setParameter("key", key).getSingleResult();
@@ -162,7 +162,7 @@ public class EndUsersResource extends ServerResource {
         	//////////////////////
         	AppMember appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(appMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
             List<EndUser> endUsers = new ArrayList<EndUser>();
@@ -197,11 +197,11 @@ public class EndUsersResource extends ServerResource {
         	//////////////////////
         	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(currentUserMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.END_USER_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.END_USER_ID_REQUIRED);
 			}
 			
 			// id of end user specified
@@ -210,7 +210,7 @@ public class EndUsersResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.END_USER_NOT_FOUND);
+				return Utility.apiError(this, ApiStatusCode.END_USER_NOT_FOUND);
 			}
 			
     		endUser = (EndUser)em.createNamedQuery("EndUser.getByKey")
@@ -250,7 +250,7 @@ public class EndUsersResource extends ServerResource {
             	//////////////////////
             	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
             	if(currentUserMember == null) {
-    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+    				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
             	}
 
                 Key key = KeyFactory.stringToKey(this.id);
@@ -266,7 +266,7 @@ public class EndUsersResource extends ServerResource {
             	if (json.has("userName")) {
                 	endUser.setUserName(json.getString("userName"));
                 } else {
-                	return Utility.apiError(ApiStatusCode.USER_NAME_IS_REQUIRED);
+                	return Utility.apiError(this, ApiStatusCode.USER_NAME_IS_REQUIRED);
                 }
 
                 // EndUser create is designed to be called multiple times. So it's ok if the endUser has not been defined yet and it is also

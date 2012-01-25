@@ -6,7 +6,7 @@ var rskybox = (function(r, $) {
 
   r.SignupView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'handleError');
+      _.bindAll(this, 'handleError', 'handleSuccess', 'handleApiError');
       this.model.bind('change', this.render, this);
       this.model.bind('apiError', this.apiError);
       this.template = _.template($('#signupTemplate').html());
@@ -26,7 +26,9 @@ var rskybox = (function(r, $) {
 
       this.model.save(form, {
         success: this.handleSuccess,
-        error: this.handleError,
+        statusCode: {
+          422: this.handleApiError
+        }
       });
       e.preventDefault();
       return false;
@@ -34,21 +36,23 @@ var rskybox = (function(r, $) {
 
     handleSuccess: function(model, response) {
       r.log.debug('handleSuccess called');
-      if (response.apiStatus) {
-        // The apiError event handler will take care of this for us.
-        return;
-      }
       $.mobile.changePage('#confirm');
     },
 
     handleError: function(model, response) {
+      console.log(model, response);
       r.log.debug('handleError called');
-      r.flashError(this.el, response);
+      r.flashError(response);
     },
 
-    apiError: function(error) {
-      r.log.debug(error);
-      r.flashError(error);
+    handleApiError: function(jqXHR) {
+      var code = r.getApiStatus(jqXHR.responseText);
+
+      if (!this.apiErrors[code]) {
+        r.log.debug('An unknown API error occurred: ' + code);
+      }
+
+      r.flashError(this.apiErrors[code]);
     },
 
     render: function() {
@@ -64,6 +68,12 @@ var rskybox = (function(r, $) {
       });
       this.carriersView.collection.fetch();
       return this;
+    },
+
+    apiErrors: {
+      204: 'Your email address has already been confirmed.',
+      205: 'Your phone number has already been confirmed.',
+      //500: 'Phone number and mobile carrier ID must be specified together.'
     }
   });
 

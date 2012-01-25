@@ -64,7 +64,7 @@ public class CrashDetectsResource extends ServerResource {
     public JsonRepresentation get(Variant variant) {
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
         if (id != null) {
@@ -84,7 +84,7 @@ public class CrashDetectsResource extends ServerResource {
         log.info("in post");
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
         return save_crash_detect(entity);
@@ -96,11 +96,11 @@ public class CrashDetectsResource extends ServerResource {
         log.info("in put");
     	String appIdStatus = Application.verifyApplicationId(this.applicationId);
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(appIdStatus);
+    		return Utility.apiError(this, appIdStatus);
     	}
     	
 		if (this.id == null || this.id.length() == 0) {
-			return Utility.apiError(ApiStatusCode.CRASH_DETECT_ID_REQUIRED);
+			return Utility.apiError(this, ApiStatusCode.CRASH_DETECT_ID_REQUIRED);
 		}
         return save_crash_detect(entity);
     }
@@ -119,7 +119,7 @@ public class CrashDetectsResource extends ServerResource {
         	//////////////////////
         	AppMember appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(appMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
         	List<CrashDetect> crashDetects = new ArrayList<CrashDetect>();
@@ -136,7 +136,7 @@ public class CrashDetectsResource extends ServerResource {
 			    			.setParameter("applicationId", this.applicationId)
 			    			.getResultList();
 			    } else {
-			    	return Utility.apiError(ApiStatusCode.INVALID_STATUS_PARAMETER);
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
 			    }
 			} else {
 				// by default, only get 'new' crashDetects
@@ -173,11 +173,11 @@ public class CrashDetectsResource extends ServerResource {
         	//////////////////////
         	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(currentUserMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.CRASH_DETECT_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.CRASH_DETECT_ID_REQUIRED);
 			}
 			
             Key key;
@@ -185,7 +185,7 @@ public class CrashDetectsResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.CRASH_DETECT_NOT_FOUND);
+				return Utility.apiError(this, ApiStatusCode.CRASH_DETECT_NOT_FOUND);
 			}
     		crashDetect = (CrashDetect)em.createNamedQuery("CrashDetect.getByKey")
 				.setParameter("key", key)
@@ -219,7 +219,7 @@ public class CrashDetectsResource extends ServerResource {
             	//////////////////////
             	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
             	if(currentUserMember == null) {
-    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+    				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
             	}
 
             	Key key;
@@ -227,7 +227,7 @@ public class CrashDetectsResource extends ServerResource {
     				key = KeyFactory.stringToKey(this.id);
     			} catch (Exception e) {
     				log.info("ID provided cannot be converted to a Key");
-    				return Utility.apiError(ApiStatusCode.CRASH_DETECT_NOT_FOUND);
+    				return Utility.apiError(this, ApiStatusCode.CRASH_DETECT_NOT_FOUND);
     			}
                 crashDetect = (CrashDetect) em.createNamedQuery("CrashDetect.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
@@ -255,7 +255,7 @@ public class CrashDetectsResource extends ServerResource {
 					Date gmtDetectedDate = GMT.convertToGmtDate(detectedDateStr, true, tz);
 					if(gmtDetectedDate == null) {
 						log.info("invalid detected date format passed in");
-						return Utility.apiError(ApiStatusCode.INVALID_DETECTED_DATE_PARAMETER);
+						return Utility.apiError(this, ApiStatusCode.INVALID_DETECTED_DATE_PARAMETER);
 					}
 					crashDetect.setDetectedGmtDate(gmtDetectedDate);
 				}
@@ -283,7 +283,7 @@ public class CrashDetectsResource extends ServerResource {
 						// timestamp format includes seconds and milli-seconds
 						Date timestamp = GMT.convertToGmtDate(timestampStr, true, tz, RskyboxApplication.APP_ACTION_DATE_FORMAT);
 						if(timestamp == null) {
-							return Utility.apiError(ApiStatusCode.INVALID_TIMESTAMP_PARAMETER);
+							return Utility.apiError(this, ApiStatusCode.INVALID_TIMESTAMP_PARAMETER);
 						}
 						aa.setTimestamp(timestamp);
 					}
@@ -294,7 +294,7 @@ public class CrashDetectsResource extends ServerResource {
 							duration = new Integer(durationStr);
 						} catch(NumberFormatException e) {
 							log.info("non-integer durations = " + durationStr);
-							return Utility.apiError(ApiStatusCode.INVALID_DURATION_PARAMETER);
+							return Utility.apiError(this, ApiStatusCode.INVALID_DURATION_PARAMETER);
 						}
 						aa.setDuration(duration);
 					}

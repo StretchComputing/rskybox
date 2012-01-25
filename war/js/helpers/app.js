@@ -42,6 +42,9 @@ var rskybox = (function(r, $) {
     selector = '.flash.error';
     el.find(selector).remove();
 
+    if (!message) {
+      message = 'An unknown error occurred. Please reload the page to try again.';
+    }
     flash = $('<div>', {
       class: 'flash error',
       text: message
@@ -49,6 +52,8 @@ var rskybox = (function(r, $) {
     $(el).prepend(flash);
   };
 
+
+  // Add a property to an object, but only if it is defined and not blank.
   r.addProperty = function(object, property, value) {
     if (object && property && value) {
       object[property] = value;
@@ -56,9 +61,9 @@ var rskybox = (function(r, $) {
   };
 
 
-  // TODO - placeholder until we can do something consistent/logical with errors/warnings
-  r.displayWarning = function(error) {
-    r.log.debug(error);
+  // Pull the apiStatus value out of an HTTP error response.
+  r.getApiStatus = function(responseText) {
+    return JSON.parse(responseText).apiStatus;
   };
 
 

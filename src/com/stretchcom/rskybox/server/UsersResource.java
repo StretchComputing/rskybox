@@ -108,7 +108,7 @@ public class UsersResource extends ServerResource {
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
 		if (this.id == null || this.id.length() == 0) {
-			return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
+			return Utility.apiError(this, ApiStatusCode.USER_ID_REQUIRED);
 		}
 		
 		if(id.equalsIgnoreCase("confirm")) {
@@ -134,7 +134,7 @@ public class UsersResource extends ServerResource {
         em.getTransaction().begin();
         try {
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.USER_ID_REQUIRED);
 			}
 			
 			User currentUser = Utility.getCurrentUser(getRequest());
@@ -142,7 +142,7 @@ public class UsersResource extends ServerResource {
 			if(this.id.equalsIgnoreCase(User.CURRENT)) {
 				// special case: id = "current" so return info on currently logged in user
 	        	if(currentUser == null) {
-	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+	        		return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
 	        	}
 	        	key = currentUser.getKey();
 			} else {
@@ -151,7 +151,7 @@ public class UsersResource extends ServerResource {
 	        	//////////////////////
 				// if not the current user, then must be the Super Admin
 	        	if(currentUser == null || !currentUser.getIsSuperAdmin()) {
-	            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
+	            	return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED);
 	        	}
 
 	        	// id of user specified
@@ -159,7 +159,7 @@ public class UsersResource extends ServerResource {
 					key = KeyFactory.stringToKey(this.id);
 				} catch (Exception e) {
 					log.info("ID provided cannot be converted to a Key");
-					return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+					return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
 				}
 			}
     		User user = (User)em.createNamedQuery("User.getByKey")
@@ -204,7 +204,7 @@ public class UsersResource extends ServerResource {
         	//////////////////////
         	User currentUser = Utility.getCurrentUser(getRequest());
         	if(currentUser == null || !currentUser.getIsSuperAdmin()) {
-            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
+            	return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED);
         	}
         	
             List<User> users = new ArrayList<User>();
@@ -233,7 +233,7 @@ public class UsersResource extends ServerResource {
 		User user = null;
 		try {
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.USER_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.USER_ID_REQUIRED);
 			}
 			
         	User currentUser = Utility.getCurrentUser(getRequest());
@@ -241,7 +241,7 @@ public class UsersResource extends ServerResource {
 				isCurrentUser = false;
 				// special case: id = "current" so return info on currently logged in user
 	        	if(currentUser == null) {
-	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+	        		return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
 	        	}
 	        	user = currentUser;
 			} else {
@@ -249,7 +249,7 @@ public class UsersResource extends ServerResource {
 	        	// Authorization Rules
 	        	//////////////////////
 	        	if(currentUser == null || !currentUser.getIsSuperAdmin()) {
-	            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
+	            	return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED);
 	        	}
 
 	        	// id of user specified
@@ -258,7 +258,7 @@ public class UsersResource extends ServerResource {
 					key = KeyFactory.stringToKey(this.id);
 				} catch (Exception e) {
 					log.info("ID provided cannot be converted to a Key");
-					return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+					return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
 				}
 				
 	    		user = (User)em.createNamedQuery("User.getByKey")
@@ -313,7 +313,7 @@ public class UsersResource extends ServerResource {
     			if(this.id.equalsIgnoreCase(User.CURRENT)) {
     				// special case: id = "current" so return info on currently logged in user
     	        	if(currentUser == null) {
-    	        		return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+    	        		return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
     	        	}
     	        	key = currentUser.getKey();
     			} else {
@@ -322,7 +322,7 @@ public class UsersResource extends ServerResource {
     	        	//////////////////////
     				// if not the current user, then must be the Super Admin
     	        	if(currentUser == null || !currentUser.getIsSuperAdmin()) {
-    	            	return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED);
+    	            	return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED);
     	        	}
 
     	        	// id of user specified
@@ -330,7 +330,7 @@ public class UsersResource extends ServerResource {
     					key = KeyFactory.stringToKey(this.id);
     				} catch (Exception e) {
     					log.info("ID provided cannot be converted to a Key");
-    					return Utility.apiError(ApiStatusCode.USER_NOT_FOUND);
+    					return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
     				}
     			}
 	    		user = (User)em.createNamedQuery("User.getByKey")
@@ -348,13 +348,13 @@ public class UsersResource extends ServerResource {
                 	if(phoneNumber != null || user.getPhoneNumber() != null) {
                     	carrierDomainName = MobileCarrier.findEmailDomainName(json.getString("mobileCarrierId"));
                     	if(carrierDomainName == null) {
-                    		return Utility.apiError(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
+                    		return Utility.apiError(this, ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
                     	}
                     	String phoneNumberComponent = phoneNumber == null ? user.getPhoneNumber() : phoneNumber;
                     	String smsEmailAddress = phoneNumberComponent + carrierDomainName;
                     	user.setSmsEmailAddress(smsEmailAddress);
                 	} else {
-                		return Utility.apiError(ApiStatusCode.NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID);
+                		return Utility.apiError(this, ApiStatusCode.NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID);
                 	}
                 }
 
@@ -371,11 +371,11 @@ public class UsersResource extends ServerResource {
                     		if(existingUser == null) {
                             	user.setEmailAddress(emailAddress);
                     		} else {
-                        		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_ALREADY_USED);
+                        		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_ALREADY_USED);
                     		}
                     	}
                     } else {
-                		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_CAN_NO_LONGER_BE_MODIFIED);
+                		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_CAN_NO_LONGER_BE_MODIFIED);
                     }
                 }
 
@@ -394,11 +394,11 @@ public class UsersResource extends ServerResource {
                     		if(existingUser == null) {
                             	user.setPhoneNumber(phoneNumber);
                     		} else {
-                        		return Utility.apiError(ApiStatusCode.PHONE_NUMBER_ALREADY_USED);
+                        		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_ALREADY_USED);
                     		}
                     	}
                     } else {
-                		return Utility.apiError(ApiStatusCode.PHONE_NUMBER_CAN_NO_LONGER_BE_MODIFIED);
+                		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_CAN_NO_LONGER_BE_MODIFIED);
                     }
                 }
             } else {
@@ -413,25 +413,25 @@ public class UsersResource extends ServerResource {
             	if(json.has("confirmationCode")) {
                     confirmationCode = json.getString("confirmationCode");
             	} else {
-            		return Utility.apiError(ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
+            		return Utility.apiError(this, ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
             	}
                 
                 if(emailAddress != null && phoneNumber != null) {
-            		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE);
+            		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE);
                 }
                 
                 if(emailAddress == null && phoneNumber == null) {
-            		return Utility.apiError(ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
+            		return Utility.apiError(this, ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
                 }
                 
                 String storedConfirmationCode = null;
                 if(emailAddress != null) {
                 	user = User.getUser(em, emailAddress, null);
                 	if(user == null) {
-                		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_NOT_FOUND);
+                		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_NOT_FOUND);
                 	}
                 	if(user.getEmailConfirmationCode() == null) {
-                		return Utility.apiError(ApiStatusCode.USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION);
+                		return Utility.apiError(this, ApiStatusCode.USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION);
                 	} else {
                 		storedConfirmationCode = user.getEmailConfirmationCode();
                 		user.setIsEmailConfirmed(true);
@@ -439,10 +439,10 @@ public class UsersResource extends ServerResource {
                  } else {
                 	 user = User.getUserWithPhoneNumber(em, phoneNumber, null);
                 	if(user == null) {
-                		return Utility.apiError(ApiStatusCode.PHONE_NUMBER_NOT_FOUND);
+                		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_NOT_FOUND);
                 	}
                 	if(user.getSmsConfirmationCode() == null) {
-                		return Utility.apiError(ApiStatusCode.USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION);
+                		return Utility.apiError(this, ApiStatusCode.USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION);
                 	} else {
                 		storedConfirmationCode = user.getSmsConfirmationCode();
                 		user.setIsSmsConfirmed(true);
@@ -450,7 +450,7 @@ public class UsersResource extends ServerResource {
                 }
                 
                 if(confirmationCode != null && !storedConfirmationCode.equals(confirmationCode)) {
-            		return Utility.apiError(ApiStatusCode.INVALID_CONFIRMATION_CODE);
+            		return Utility.apiError(this, ApiStatusCode.INVALID_CONFIRMATION_CODE);
                 }
 
             	token = TF.get();
@@ -466,7 +466,7 @@ public class UsersResource extends ServerResource {
 			if(json.has("password")) {
 				String plainTextPassword = json.getString("password");
 				if(plainTextPassword.length() < User.MINIMUM_PASSWORD_SIZE) {
-	        		return Utility.apiError(ApiStatusCode.PASSWORD_TOO_SHORT);
+	        		return Utility.apiError(this, ApiStatusCode.PASSWORD_TOO_SHORT);
 				}
 				String encryptedPassword = Utility.encrypt(plainTextPassword);
 				log.info("encryptedPassword = " + encryptedPassword);
@@ -477,7 +477,7 @@ public class UsersResource extends ServerResource {
 				}
 			} else {
 				if(!isUpdate) {
-	        		return Utility.apiError(ApiStatusCode.PASSWORD_IS_REQUIRED);
+	        		return Utility.apiError(this, ApiStatusCode.PASSWORD_IS_REQUIRED);
 				}
 			}
            
@@ -659,16 +659,16 @@ public class UsersResource extends ServerResource {
             	mobileCarrierId = json.getString("mobileCarrierId");
             	carrierDomainName = MobileCarrier.findEmailDomainName(mobileCarrierId);
             	if(carrierDomainName == null) {
-            		return Utility.apiError(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
+            		return Utility.apiError(this, ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
             	}
             }
             
             if(emailAddress == null && phoneNumber == null) {
-            	return Utility.apiError(ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
+            	return Utility.apiError(this, ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
             }
             
             if(phoneNumber != null && mobileCarrierId == null) {
-            	return Utility.apiError(ApiStatusCode.PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER);
+            	return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER);
             }
             
             String confirmationCode = TF.getConfirmationCode();
@@ -679,7 +679,7 @@ public class UsersResource extends ServerResource {
             	if(user != null) {
             		log.info("user found with emailAddress = " + emailAddress);
             		if(user.getIsEmailConfirmed()) {
-                    	return Utility.apiError(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS);
+                    	return Utility.apiError(this, ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS);
             		}
             	} else {
                     // if there is no existing user, create one now
@@ -705,7 +705,7 @@ public class UsersResource extends ServerResource {
             	if(user != null) {
             		log.info("user found with phoneNumber = " + phoneNumber);
             		if(user.getIsSmsConfirmed() != null && user.getIsSmsConfirmed()) {
-                    	return Utility.apiError(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER);
+                    	return Utility.apiError(this, ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER);
             		}
             	} else {
                     // if there is no existing user, create one now
@@ -760,9 +760,9 @@ public class UsersResource extends ServerResource {
         EntityManager em = EMF.get().createEntityManager();
 
         if(this.userName == null) {
-    		return Utility.apiError(ApiStatusCode.USER_NAME_IS_REQUIRED);
+    		return Utility.apiError(this, ApiStatusCode.USER_NAME_IS_REQUIRED);
         } else if(this.password == null) {
-    		return Utility.apiError(ApiStatusCode.PASSWORD_IS_REQUIRED);
+    		return Utility.apiError(this, ApiStatusCode.PASSWORD_IS_REQUIRED);
         }
         
         // won't really be able to detect if the username is a bad phone number or not
@@ -776,7 +776,7 @@ public class UsersResource extends ServerResource {
         }
         
         if(user == null) {
-    		return Utility.apiError(ApiStatusCode.INVALID_USER_CREDENTIALS);
+    		return Utility.apiError(this, ApiStatusCode.INVALID_USER_CREDENTIALS);
         }
         
         try {
@@ -813,7 +813,7 @@ public class UsersResource extends ServerResource {
         	if(json.has("confirmationCode")) {
                 confirmationCode = json.getString("confirmationCode");
         	} else {
-        		return Utility.apiError(ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
+        		return Utility.apiError(this, ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
         	}
             
             // TODO add email validation
@@ -827,23 +827,23 @@ public class UsersResource extends ServerResource {
             }
             
             if(emailAddress != null && phoneNumber != null) {
-        		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE);
+        		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE);
             }
             
             if(emailAddress == null && phoneNumber == null) {
-        		return Utility.apiError(ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
+        		return Utility.apiError(this, ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
             }
             
             String storedConfirmationCode = null;
             if(emailAddress != null) {
             	user = User.getUser(em, emailAddress, null);
             	if(user == null) {
-            		return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_NOT_FOUND);
+            		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_NOT_FOUND);
             	}
             	if(user.getEmailConfirmationCode() == null) {
-            		return Utility.apiError(ApiStatusCode.USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION);
+            		return Utility.apiError(this, ApiStatusCode.USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION);
             	} else if(user.getIsEmailConfirmed() != null && user.getIsEmailConfirmed()) {
-            		return Utility.apiError(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS);
+            		return Utility.apiError(this, ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS);
             	} else {
             		storedConfirmationCode = user.getEmailConfirmationCode();
             		user.setIsEmailConfirmed(true);
@@ -851,12 +851,12 @@ public class UsersResource extends ServerResource {
              } else {
             	 user = User.getUserWithPhoneNumber(em, phoneNumber, null);
             	if(user == null) {
-            		return Utility.apiError(ApiStatusCode.PHONE_NUMBER_NOT_FOUND);
+            		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_NOT_FOUND);
             	}
             	if(user.getSmsConfirmationCode() == null) {
-            		return Utility.apiError(ApiStatusCode.USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION);
+            		return Utility.apiError(this, ApiStatusCode.USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION);
             	} else if(user.getIsSmsConfirmed() != null && user.getIsSmsConfirmed()) {
-            		return Utility.apiError(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER);
+            		return Utility.apiError(this, ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER);
             	} else {
             		storedConfirmationCode = user.getSmsConfirmationCode();
             		user.setIsSmsConfirmed(true);
@@ -864,7 +864,7 @@ public class UsersResource extends ServerResource {
             }
             
             if(!storedConfirmationCode.equals(confirmationCode)) {
-        		return Utility.apiError(ApiStatusCode.INVALID_CONFIRMATION_CODE);
+        		return Utility.apiError(this, ApiStatusCode.INVALID_CONFIRMATION_CODE);
             }
             
             em.persist(user);

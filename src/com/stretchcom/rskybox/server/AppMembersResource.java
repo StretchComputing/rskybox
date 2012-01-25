@@ -53,11 +53,11 @@ public class AppMembersResource extends ServerResource {
     @Get("json")
     public JsonRepresentation get(Variant variant) {
     	if(this.applicationId == null) {
-    		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
+    		return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);
     	}
 		this.application = Application.getApplicationWithId(this.applicationId);
 		if(application == null) {
-    		return Utility.apiError(ApiStatusCode.APPLICATION_NOT_FOUND);
+    		return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
 		}
     	
         if (id != null) {
@@ -76,11 +76,11 @@ public class AppMembersResource extends ServerResource {
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
     	if(this.applicationId == null) {
-    		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
+    		return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);
     	}
 		this.application = Application.getApplicationWithId(this.applicationId);
 		if(application == null) {
-    		return Utility.apiError(ApiStatusCode.APPLICATION_NOT_FOUND);
+    		return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
 		}
     	
         return save_appMember(entity);
@@ -93,11 +93,11 @@ public class AppMembersResource extends ServerResource {
         log.info("in put");
 		// TODO?? verify application ID is valid
     	if(this.applicationId == null) {
-    		return Utility.apiError(ApiStatusCode.APPLICATION_ID_REQUIRED);
+    		return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);
     	}
 		this.application = Application.getApplicationWithId(this.applicationId);
 		if(application == null) {
-    		return Utility.apiError(ApiStatusCode.APPLICATION_NOT_FOUND);
+    		return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
 		}
     	
     	if(this.id.equalsIgnoreCase("confirmation")) {
@@ -106,7 +106,7 @@ public class AppMembersResource extends ServerResource {
     	} else {
     		// Update AppMember API
     		if (this.id == null || this.id.length() == 0) {
-    			return Utility.apiError(ApiStatusCode.APP_MEMBER_ID_REQUIRED);
+    			return Utility.apiError(this, ApiStatusCode.APP_MEMBER_ID_REQUIRED);
     		}
             return save_appMember(entity);
     	}
@@ -129,11 +129,11 @@ public class AppMembersResource extends ServerResource {
         	//////////////////////
         	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(currentUserMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
         	if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.APP_MEMBER_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.APP_MEMBER_ID_REQUIRED);
 			}
 			
             Key key;
@@ -141,7 +141,7 @@ public class AppMembersResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.APP_MEMBER_NOT_FOUND);
+				return Utility.apiError(this, ApiStatusCode.APP_MEMBER_NOT_FOUND);
 			}
 
     		AppMember appMember = (AppMember)em.createNamedQuery("AppMember.getByKey")
@@ -153,15 +153,15 @@ public class AppMembersResource extends ServerResource {
         	///////////////////////////
     		// app owner can not be deleted
     		if(appMember.getRole().equalsIgnoreCase(AppMember.OWNER_ROLE)) {
-				return Utility.apiError(ApiStatusCode.APP_OWNER_CANNOT_BE_DELETED);
+				return Utility.apiError(this, ApiStatusCode.APP_OWNER_CANNOT_BE_DELETED);
     		}
     		// must be an owner to delete a manager
     		if(!currentUserMember.hasOwnerAuthority() && appMember.getRole().equalsIgnoreCase(AppMember.MANAGER_ROLE)) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_DELETE_MEMBER_WITH_SPECIFIED_ROLE);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_DELETE_MEMBER_WITH_SPECIFIED_ROLE);
     		}
     		// must be a manager to delete a member
     		if(!currentUserMember.hasManagerAuthority()) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_DELETE_MEMBER);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_DELETE_MEMBER);
     		}
             
             em.remove(appMember);
@@ -207,7 +207,7 @@ public class AppMembersResource extends ServerResource {
 					key = KeyFactory.stringToKey(this.id);
 				} catch (Exception e) {
 					log.info("ID provided cannot be converted to a Key");
-					return Utility.apiError(ApiStatusCode.APP_MEMBER_NOT_FOUND);
+					return Utility.apiError(this, ApiStatusCode.APP_MEMBER_NOT_FOUND);
 				}
                 appMember = (AppMember)em.createNamedQuery("AppMember.getByKey")
                     	.setParameter("key", key)
@@ -222,13 +222,13 @@ public class AppMembersResource extends ServerResource {
 					// verify that not already a member of this application
 					AppMember appMemberWithEmail = AppMember.getAppMemberWithEmailAddress(this.applicationId, emailAddress);
 					if(appMemberWithEmail != null) {
-						return Utility.apiError(ApiStatusCode.USER_ALREADY_MEMBER);
+						return Utility.apiError(this, ApiStatusCode.USER_ALREADY_MEMBER);
 					}
 					
 					appMember.setEmailAddress(emailAddress);
 					log.info("stored email address value = " + appMember.getEmailAddress());
 				} else {
-					return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_IS_REQUIRED);
+					return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_IS_REQUIRED);
 				}
 			}
 			
@@ -241,10 +241,10 @@ public class AppMembersResource extends ServerResource {
                     appMember.setRole(role);
             	} else {
 					log.info("invalid status = " + role);
-					return Utility.apiError(ApiStatusCode.INVALID_ROLE);
+					return Utility.apiError(this, ApiStatusCode.INVALID_ROLE);
             	}
 			} else if(!isUpdate) {
-				return Utility.apiError(ApiStatusCode.ROLE_IS_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.ROLE_IS_REQUIRED);
 			}
 			
 			if(isUpdate) {
@@ -261,7 +261,7 @@ public class AppMembersResource extends ServerResource {
 	                    appMember.setStatus(newStatus);
 	            	} else {
 						log.info("invalid status = " + newStatus);
-						return Utility.apiError(ApiStatusCode.INVALID_STATUS);
+						return Utility.apiError(this, ApiStatusCode.INVALID_STATUS);
 	            	}
 	            }
 			} else {
@@ -282,33 +282,33 @@ public class AppMembersResource extends ServerResource {
         	//////////////////////
         	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(currentUserMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
         	if(!currentUserMember.hasManagerAuthority()) {
         		if(isUpdate) {
-    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER);
+    				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER);
         		} else {
-    				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER);
+    				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER);
         		}
         	}
         	if(role != null) {
         		if(isUpdate) {
         			if(originalRole != null && !originalRole.equalsIgnoreCase(role)) {
         				if(role.equalsIgnoreCase(AppMember.OWNER_ROLE) || originalRole.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
-            				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
+            				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
         				}
         				if(!currentUserMember.hasOwnerAuthority()   &&
         					(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) || originalRole.equalsIgnoreCase(AppMember.MANAGER_ROLE)) ) {
-            				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
+            				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
         				}
               		}
         		} else {
             		if(role.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
-        				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
+        				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
             		}
             		
         			if(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) && !currentUserMember.hasOwnerAuthority()) {
-        				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
+        				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
         			}
         		}
         	}
@@ -355,11 +355,11 @@ public class AppMembersResource extends ServerResource {
         	//////////////////////
         	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(currentUserMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
         	if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(ApiStatusCode.APP_MEMBER_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.APP_MEMBER_ID_REQUIRED);
 			}
 			
             Key key;
@@ -367,7 +367,7 @@ public class AppMembersResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(ApiStatusCode.APP_MEMBER_NOT_FOUND);
+				return Utility.apiError(this, ApiStatusCode.APP_MEMBER_NOT_FOUND);
 			}
     		appMember = (AppMember)em.createNamedQuery("AppMember.getByKey")
 				.setParameter("key", key)
@@ -397,7 +397,7 @@ public class AppMembersResource extends ServerResource {
         	//////////////////////
         	AppMember appMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
         	if(appMember == null) {
-				return Utility.apiError(ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
         	List<AppMember> appMembers = null;
@@ -477,11 +477,11 @@ public class AppMembersResource extends ServerResource {
 			}
 			
 			if(emailAddress == null || emailAddress.trim().length() == 0) {
-				return Utility.apiError(ApiStatusCode.EMAIL_ADDRESS_IS_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_IS_REQUIRED);
 			}
 				
 			if(confirmationCode == null || confirmationCode.trim().length() == 0) {
-				return Utility.apiError(ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
 			}
 			
 			appMember = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndEmailAddressAndEmailConfirmationCode")
@@ -491,7 +491,7 @@ public class AppMembersResource extends ServerResource {
 				.getSingleResult();
 			
 			if(!appMember.getStatus().equalsIgnoreCase(AppMember.PENDING_STATUS)) {
-				return Utility.apiError(ApiStatusCode.MEMBER_NOT_PENDING_CONFIRMATION);
+				return Utility.apiError(this, ApiStatusCode.MEMBER_NOT_PENDING_CONFIRMATION);
 			}
 			
 			List<User> users = User.getUsersWithEmailAddress(emailAddress);
