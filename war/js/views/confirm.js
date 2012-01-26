@@ -4,7 +4,7 @@
 var rskybox = (function(r, $) {
 
 
-  r.SignupView = Backbone.View.extend({
+  r.ConfirmView = Backbone.View.extend({
     initialize: function() {
       _.bindAll(this, 'success', 'validationError', 'apiError');
       this.model.bind('change', this.render, this);
@@ -18,16 +18,13 @@ var rskybox = (function(r, $) {
     submit: function(e) {
       r.log.debug('submit triggered');
       var form = new r.BaseModel();
-
       form.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
-        mobileCarrierId: this.$("select[name='mobileCarrierId']").val()
-      }, {silent: true})
-
-      if (this.model.isNew()) {
-        form.prepareNewModel();
-      }
+        confirmationCode: this.$("select[name='confirmationCode']").val(),
+        password: this.$("input[name='password']").val()
+      }, {silent: true});
+      form.unsetEmptyAttributes();
 
       this.model.save(form, {
         success: this.success,
@@ -41,7 +38,7 @@ var rskybox = (function(r, $) {
 
     success: function(model, response) {
       r.log.debug('success called');
-      $.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
+      //$.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
     },
 
     validationError: function(model, response) {

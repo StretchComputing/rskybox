@@ -17,6 +17,20 @@ var rskybox = (function(r, $) {
         this.url = '';
       }
     },
+
+    // Unsets all attributes that are undefined, null, '', or 0 in prepartion
+    // for a new model to be saved.
+    //
+    // !!! This function should be used with caution !!!
+    //
+    prepareNewModel: function() {
+      _.each(_.keys(this.attributes), function(key) {
+        if (!this.get(key)) {
+          this.unset(key, {silent: true});
+        }
+      }, this);
+      return this;
+    }
   };
 
 

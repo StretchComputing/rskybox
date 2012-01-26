@@ -1,7 +1,9 @@
 'use strict';
 
+
 // The main namespace for our application
 var rskybox = (function(r, $) {
+
 
   r.logLevels = {
     error: 1,
@@ -9,7 +11,7 @@ var rskybox = (function(r, $) {
     debug: 10
   };
 
-  r.logLevel = r.logLevels.debur;
+  r.logLevel = r.logLevels.debug;
 
   r.log = {
     level: r.logLevels.debug,
@@ -55,6 +57,29 @@ var rskybox = (function(r, $) {
     if (object && property && value) {
       object[property] = value;
     }
+  };
+
+
+  // Returns the value of a named parameter from a given JQM URL.
+  r.getParameterByName = function (url, name) {
+    var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+  };
+
+
+  // Build a query string from an object.
+  //
+  // props: the object containing the name/value pairs for the query string
+  r.buildQueryString = function (props) {
+    var prop, query;
+
+    query = "?";
+    for (prop in props) {
+      query += prop + '=' + props[prop] + '&';
+    }
+    query = query.slice(0, query.length - 1);
+
+    return query;
   };
 
 

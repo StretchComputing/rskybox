@@ -3,26 +3,6 @@
 
 var rskybox = (function(r, $) {
 
-  //// isValidPassword - check password user wants to submit against business rules
-  //r.isValidPassword = function (password) {
-    //var PASSWORD_MIN_LEN = 6;
-
-    //if (!password || password.length < PASSWORD_MIN_LEN) {
-      //return false;
-    //}
-    //return true;
-  //}
-
-  //// isValidConfirmationCode - check confirmation code user wants to submit against business rules
-  //r.isValidConfirmationCode = function (code) {
-    //var CONFIRMATION_CODE_LEN = 3;
-
-    //if (!code || code.length != CONFIRMATION_CODE_LEN) {
-      //return false;
-    //}
-    //return true;
-  //}
-
 
   r.controller = {
     signup: function() {
@@ -37,6 +17,11 @@ var rskybox = (function(r, $) {
 
     confirm: function() {
       r.log.debug('got the router for confirm');
+      r.confirm = new r.Confirm({
+        emailAddress: r.getParameterByName(location.hash, 'emailAddress'),
+        phoneNumber: r.getParameterByName(location.hash, 'phoneNumber')
+      });
+      r.confirm.prepareNewModel();
     },
 
     login: function() {
