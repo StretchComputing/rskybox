@@ -47,45 +47,42 @@
     <script type="text/template" id="signupTemplate">
       <h1>Sign Up Using</h1>
       <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
-      <input type="email" name="emailAddress" placeholder="Email Address"/>
+      <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>">
       <strong>or</strong>
       <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
-      <input type="tel" name="phoneNumber" placeholder="Phone Number"/>
+      <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>">
       <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile Carrier:</label>
-      <select name="mobileCarrierId" id="mobileCarrierId"/>
+      <select name="mobileCarrierId" id="mobileCarrierId" value="<%= mobileCarrierId %>">
 
       <input type="submit" value="Request Confirmation Code">
     </script>
 
-    <div data-role="page" id="confirm" data-title="New User Confirmation">
+    <div data-role="page" id="confirm" data-title="Complete Signup">
       <div data-role="header">
-        <h1>New User Confirmation</h1>
+        <h1>Complete Signup</h1>
       </div>
       <div data-role="content">
-        <div>
-          <h3>Please create a password to complete your signup.</h3>
-        </div>
-        <form id="confirmForm">
-        </form>
+        <h3>Please complete your signup.</h3>
+        <form id="confirmForm"></form>
       </div>
     </div>
     <script type="text/template" id="confirmTemplate">
-      <p id="emailWrapper" style="display: none;">
-        <strong>Email Address: </strong><span id="emailDisplay"></span>
-        <input type="hidden" name="emailAddress">
-      </p>
-      <p id="phoneWrapper" style="display: none;">
-        <strong>Phone Number: </strong><span id="phoneDisplay"></span>
-        <input type="hidden" name="phoneNumber">
-      </p>
-
-      <strong>Please enter your confirmation code.</strong>
-      <label for="confirmationCode" class="ui-hidden-accessible">Confirmation Code:</label>
-      <input type="tel" name="confirmationCode" placeholder="Confirmation Code">
-
-      <div id="confirmPasswordWrapper">
-        <strong>Create a password. (min 6 chars)</strong>
-        <label for="password" class="ui-hidden-accessible">Password:</label>
+      <div id="emailWrapper" style="display: none">
+        <label for="emailAddress">Your email address: </label>
+        <input type="text" name="emailAddress" value="<%= emailAddress %>" readonly>
+      </div>
+      <div id="phoneWrapper" style="display: none;">
+        <label for="phoneNumber">Your phone number: </label>
+        <input type="text" name="phoneNumber" value="<%= phoneNumber %>" readonly>
+      </div>
+      <br>
+      <div>
+        <label for="confirmationCode">Please enter your confirmation code:</label>
+        <input type="tel" name="confirmationCode" placeholder="Confirmation Code">
+      </div>
+      <br>
+      <div>
+        <label for="password">Please create a password (min 6 chars):</label>
         <input name="password" placeholder="Password">
       </div>
 

@@ -6,7 +6,7 @@ var rskybox = (function(r, $) {
 
   r.SignupView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'success', 'validationError', 'apiError');
+      _.bindAll(this, 'apiError', 'error');
       this.model.bind('change', this.render, this);
       this.template = _.template($('#signupTemplate').html());
     },
@@ -16,7 +16,7 @@ var rskybox = (function(r, $) {
     },
 
     submit: function(e) {
-      r.log.debug('submit triggered');
+      r.log.debug('Signup submit called');
       var form = new r.BaseModel();
 
       form.set({
@@ -26,11 +26,14 @@ var rskybox = (function(r, $) {
       }, {silent: true});
 
       if (this.model.isNew()) {
+        this.model.prepareNewModel();
         form.prepareNewModel();
       }
+      r.dump(form);
 
       this.model.save(form, {
         success: this.success,
+        error: this.error,
         statusCode: {
           422: this.apiError
         }
@@ -40,20 +43,24 @@ var rskybox = (function(r, $) {
     },
 
     success: function(model, response) {
-      r.log.debug('success called');
       $.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
     },
 
-    validationError: function(model, response) {
-      r.log.debug('validationError called');
+    error: function(model, response) {
+      if (response.responseText) {
+        r.log.debug('Signup error: skipping apiError');
+        return;
+      }
+      // If we get here, we're processing a validation error.
       r.flashError(response, this.el);
     },
 
     apiError: function(jqXHR) {
+      r.log.debug('Signup apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.debug('An unknown API error occurred: ' + code);
+        r.log.error('An unknown API error occurred: ' + code);
       }
       this.model.clear({silent: true});
 
@@ -61,8 +68,7 @@ var rskybox = (function(r, $) {
     },
 
     render: function() {
-      r.log.debug('signup view render');
-
+      r.log.debug('Signup render');
       var content = this.template(this.model.toJSON());
       $(this.el).empty();
       $(this.el).html(content);

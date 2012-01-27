@@ -6,9 +6,10 @@ var rskybox = (function(r, $) {
 
   r.ConfirmView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'success', 'validationError', 'apiError');
+      _.bindAll(this, 'apiError');
+      this.model.bind('error', this.validationError, this);
       this.model.bind('change', this.render, this);
-      this.template = _.template($('#signupTemplate').html());
+      this.template = _.template($('#confirmTemplate').html());
     },
 
     events: {
@@ -16,15 +17,18 @@ var rskybox = (function(r, $) {
     },
 
     submit: function(e) {
-      r.log.debug('submit triggered');
+      r.log.debug('Confirm submit');
       var form = new r.BaseModel();
       form.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
-        confirmationCode: this.$("select[name='confirmationCode']").val(),
-        password: this.$("input[name='password']").val()
+        confirmationCode: this.$("input[name='confirmationCode']").val(),
+        password: this.$("input[name='password']").val(),
+        id: 'temp'
       }, {silent: true});
-      form.unsetEmptyAttributes();
+
+        form.prepareNewModel();
+      r.dump(form);
 
       this.model.save(form, {
         success: this.success,
@@ -37,16 +41,18 @@ var rskybox = (function(r, $) {
     },
 
     success: function(model, response) {
-      r.log.debug('success called');
+      r.log.debug('Confirm success.');
       //$.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
     },
 
     validationError: function(model, response) {
-      r.log.debug('validationError called');
+      r.log.debug('Confirm validationError.');
+      r.dump(model);
       r.flashError(response, this.el);
     },
 
     apiError: function(jqXHR) {
+      r.log.debug('Confirm apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
@@ -58,24 +64,30 @@ var rskybox = (function(r, $) {
     },
 
     render: function() {
-      r.log.debug('signup view render');
-
       var content = this.template(this.model.toJSON());
       $(this.el).empty();
       $(this.el).html(content);
+      if (this.model.get('emailAddress')) {
+        this.$('#emailWrapper').show();
+        this.$('#phoneWrapper').hide();
+      }
+      if (this.model.get('phoneNumber')) {
+        this.$('#emailWrapper').hide();
+        this.$('#phoneWrapper').show();
+      }
       $(this.el).trigger('create');
-      this.carriersView = new r.CarriersView({
-        el: $('#mobileCarrierId'),
-        collection: new r.Carriers()
-      });
-      this.carriersView.collection.fetch();
       return this;
     },
 
     apiCodes: {
       204: 'Your email address has already been confirmed.',
       205: 'Your phone number has already been confirmed.',
-      500: 'Phone number and mobile carrier ID must be specified together.'
+      206: 'Your email address is not registered in the system.',
+      207: 'Your phone number is not registered in the system.',
+      308: 'Either an email address or a phone number is required.',
+      309: 'Confirmation code is required.',
+      411: 'Invalid confirmation code.',
+      700: 'Email address and phone number are mutually exclusive.'
     }
   });
 

@@ -6,7 +6,6 @@ var rskybox = (function(r, $) {
 
   r.controller = {
     signup: function() {
-      r.log.debug('got the router for signup');
       r.signup = new r.Signup();
       r.signupView = new r.SignupView({
         el: $('#signupForm'),
@@ -16,12 +15,15 @@ var rskybox = (function(r, $) {
     },
 
     confirm: function() {
-      r.log.debug('got the router for confirm');
       r.confirm = new r.Confirm({
         emailAddress: r.getParameterByName(location.hash, 'emailAddress'),
         phoneNumber: r.getParameterByName(location.hash, 'phoneNumber')
       });
-      r.confirm.prepareNewModel();
+      r.confirmView = new r.ConfirmView({
+        el: $('#confirmForm'),
+        model: r.confirm
+      });
+      r.confirmView.render();
     },
 
     login: function() {

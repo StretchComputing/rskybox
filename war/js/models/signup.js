@@ -7,23 +7,29 @@ var rskybox = (function(r, $) {
   r.Signup = r.BaseModel.extend({
     apiUrl: '/users/requestConfirmation',
 
+    defaults: {
+      emailAddress: '',
+      phoneNumber: '',
+      mobileCarrierId: ''
+    },
+
     initialize: function() {
       this.setUrl(this.apiUrl);
     },
 
+    // We define parse and return nothing, because we don't need the model modifed after
+    // a successful save.
     parse: function(response) {
-      delete(response.apiStatus);
-      return response;
+      r.log.debug('Signup parse called.');
     },
 
     validate: function(attrs) {
-      r.log.debug('validate called');
       if (r.isValidEmailAddress(attrs.emailAddress)) {
-        r.log.debug('emailAddress is valid');
+        r.log.debug('Signup emailAddress is valid.');
         return;
       }
       if (r.isValidPhoneNumber(attrs.phoneNumber) && attrs.mobileCarrierId) {
-        r.log.debug('phone credentials are valid');
+        r.log.debug('Signup phone credentials are valid.');
         return;
       }
       return 'A valid email address -OR- valid phone number and mobile carrier is required.';
