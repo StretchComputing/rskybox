@@ -13,7 +13,7 @@ var rskybox = (function(r, $) {
     },
 
     logLevel: function() {
-      return this.logLevels.info;
+      return this.logLevels.debug;
     },
 
     error: function(message) {
