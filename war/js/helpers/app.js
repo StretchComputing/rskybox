@@ -5,28 +5,32 @@
 var rskybox = (function(r, $) {
 
 
-  r.logLevels = {
-    error: 1,
-    info: 5,
-    debug: 10
-  };
-
-  r.logLevel = r.logLevels.debug;
-
   r.log = {
-    level: r.logLevels.debug,
+    logLevels: {
+      error: 1,
+      info: 5,
+      debug: 10
+    },
+
+    logLevel: function() {
+      return this.logLevels.info;
+    },
+
     error: function(message) {
-      if (r.logLevel < r.logLevels.error) { return }
+      if (this.logLevel() < this.logLevels.error) { return; }
       this.base('Error: ' + message);
     },
+
     info: function(message) {
-      if (r.logLevel < r.logLevels.info) { return }
+      if (this.logLevel() < this.logLevels.info) { return; }
       this.base('Info: ' + message);
     },
+
     debug: function(message) {
-      if (r.logLevel < r.logLevels.debug) { return }
+      if (this.logLevel() < this.logLevels.debug) { return; }
       this.base('Debug: ' + message);
     },
+
     base: function(message) {
       console.log(message);
     }
