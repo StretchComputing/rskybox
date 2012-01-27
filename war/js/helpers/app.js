@@ -37,6 +37,11 @@ var rskybox = (function(r, $) {
   };
 
 
+  r.dump = function(object) {
+    console.log(JSON.stringify(object));
+  };
+
+
   // message: The error message to display.
   // el: If not specified, we'll use the active page's content area.
   r.flashError = function(message, el) {
