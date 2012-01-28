@@ -40,7 +40,6 @@ var rskybox = (function(r, $) {
         message += 'Password must be at least 6 characters. ';
       }
 
-      r.log.debug('Confirm validate message: ' + message);
       if (message) { return message; }
     }
   });
