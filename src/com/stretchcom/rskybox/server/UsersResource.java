@@ -819,11 +819,17 @@ public class UsersResource extends ServerResource {
             // TODO add email validation
             if (json.has("emailAddress")) {
             	emailAddress = json.getString("emailAddress").toLowerCase();
+            	if (emailAddress.length() <= 0) {
+            		emailAddress = null;
+            	}
             }
             
             if (json.has("phoneNumber")) {
             	phoneNumber = json.getString("phoneNumber");
             	phoneNumber = Utility.extractAllDigits(phoneNumber);
+            	if (phoneNumber.length() <= 0) {
+            		phoneNumber = null;
+            	}
             }
             
             if(emailAddress != null && phoneNumber != null) {

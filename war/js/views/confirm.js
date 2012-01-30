@@ -6,8 +6,7 @@ var rskybox = (function(r, $) {
 
   r.ConfirmView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'apiError');
-      this.model.bind('error', this.validationError, this);
+      _.bindAll(this, 'apiError', 'error');
       this.model.bind('change', this.render, this);
       this.template = _.template($('#confirmTemplate').html());
     },
@@ -17,21 +16,20 @@ var rskybox = (function(r, $) {
     },
 
     submit: function(e) {
-      r.log.debug('Confirm submit');
-      var form = new r.BaseModel();
-      form.set({
+      this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         confirmationCode: this.$("input[name='confirmationCode']").val(),
-        password: this.$("input[name='password']").val(),
-        id: 'temp'
+        password: this.$("input[name='password']").val()
       }, {silent: true});
 
-        form.prepareNewModel();
-      r.dump(form);
+      this.model.prepareNewModel();
+      this.model.set({id: 'id'}, {silent: true});
+      console.log(this.model.toJSON());
 
-      this.model.save(form, {
+      this.model.save(this.model.toJSON(), {
         success: this.success,
+        error: this.error,
         statusCode: {
           422: this.apiError
         }
@@ -42,12 +40,17 @@ var rskybox = (function(r, $) {
 
     success: function(model, response) {
       r.log.debug('Confirm success.');
-      //$.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
+      $.mobile.changePage('/applications');
     },
 
-    validationError: function(model, response) {
-      r.log.debug('Confirm validationError.');
-      r.dump(model);
+    error: function(model, response) {
+      console.log('Confirm error:', model, response);
+      if (response.responseText) {
+
+        r.log.debug('Signup error: skipping apiError');
+        return;
+      }
+      // If we get here, we're processing a validation error.
       r.flashError(response, this.el);
     },
 
@@ -64,7 +67,7 @@ var rskybox = (function(r, $) {
     },
 
     render: function() {
-      var content = this.template(this.model.toJSON());
+      var content = this.template(this.model.getMock());
       $(this.el).empty();
       $(this.el).html(content);
       if (this.model.get('emailAddress')) {

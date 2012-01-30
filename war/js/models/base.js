@@ -44,6 +44,11 @@ var rskybox = (function(r, $) {
     getMock: function() {
       var field, mock = {};
 
+      if (!this.fields) {
+        r.log.error('No fields defined for model:');
+        return;
+      }
+
       for (field in this.fields) {
         mock[field] = this.get(field) || null;
       }

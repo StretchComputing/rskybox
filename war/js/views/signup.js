@@ -38,8 +38,6 @@ var rskybox = (function(r, $) {
     },
 
     success: function(model, response) {
-      model.prepareNewModel();
-      r.dump(model);
       $.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
     },
 
