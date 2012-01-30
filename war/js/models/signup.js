@@ -11,6 +11,12 @@ var rskybox = (function(r, $) {
       this.setUrl(this.apiUrl);
     },
 
+    fields: {
+      emailAddress: null,
+      phoneNumber: null,
+      mobileCarrierId: null
+    },
+
     // We define parse and return nothing, because we don't need the model modifed after
     // a successful save.
     parse: function(response) {

@@ -6,7 +6,7 @@ var rskybox = (function(r, $) {
 
   r.SignupView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'apiError', 'error', 'getMockModel');
+      _.bindAll(this, 'apiError', 'error');
       this.model.bind('change', this.render, this);
       this.template = _.template($('#signupTemplate').html());
     },
@@ -17,19 +17,16 @@ var rskybox = (function(r, $) {
 
     submit: function(e) {
       r.log.debug('Signup submit called');
-      var form = new r.BaseModel();
 
-      form.set({
+      this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         mobileCarrierId: this.$("select[name='mobileCarrierId']").val()
       }, {silent: true});
 
-      if (this.model.isNew()) {
-        form.prepareNewModel();
-      }
+      this.model.prepareNewModel();
 
-      this.model.save(form, {
+      this.model.save(this.model.toJSON(), {
         success: this.success,
         error: this.error,
         statusCode: {
@@ -49,9 +46,6 @@ var rskybox = (function(r, $) {
     error: function(model, response) {
       if (response.responseText) {
         r.log.debug('Signup error: skipping apiError');
-        r.dump(model);
-        r.dump(this.model);
-        this.model.set(model.toJSON);
         return;
       }
       // If we get here, we're processing a validation error.
@@ -71,7 +65,7 @@ var rskybox = (function(r, $) {
 
     render: function() {
       r.log.debug('Signup render');
-      var content = this.template(this.getMockModel());
+      var content = this.template(this.model.getMock());
 
       $(this.el).empty();
       $(this.el).html(content);
@@ -82,15 +76,6 @@ var rskybox = (function(r, $) {
       });
       this.carriersView.collection.fetch();
       return this;
-    },
-
-    getMockModel: function() {
-      var mock = {};
-
-      mock.emailAddress = this.model.get('emailAddress') || '';
-      mock.phoneNumber = this.model.get('phoneNumber') || '';
-      mock.mobileCarrierId = this.model.get('mobileCarrierId') || '';
-      return mock;
     },
 
     apiCodes: {
