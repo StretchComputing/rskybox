@@ -27,7 +27,12 @@ var rskybox = (function(r, $) {
     },
 
     login: function() {
-      r.log.debug('got the router for login');
+      r.login = new r.Login();
+      r.loginView = new r.LoginView({
+        el: $('#loginForm'),
+        model: r.login
+      });
+      r.loginView.render();
     }
   };
 

@@ -24,9 +24,11 @@
     <script src="/js/models/carrier.js"></script>
     <script src="/js/models/signup.js"></script>
     <script src="/js/models/confirm.js"></script>
+    <script src="/js/models/login.js"></script>
     <script src="/js/views/carriers.js"></script>
     <script src="/js/views/signup.js"></script>
     <script src="/js/views/confirm.js"></script>
+    <script src="/js/views/login.js"></script>
     <script src="/js/controllers/signup.js"></script>
   </head>
   <body>
@@ -94,22 +96,30 @@
         <h1>Login</h1>
       </div>
       <div data-role="content">
-        <form>
-          <h1>Login Using</h1>
-          <label for="loginEmail" class="ui-hidden-accessible">Login Email Address:</label>
-          <input type="email" name="loginEmail" id="loginEmail" placeholder="Login Email Address">
-          <strong>or</strong>
-          <label for="loginPhone" class="ui-hidden-accessible">Login Phone Number:</label>
-          <input type="tel" name="loginPhone" id="loginPhone" placeholder="Login Phone Number">
-
-          <hr>
-
-          <label for="loginPassword" class="ui-hidden-accessible">Login Password:</label>
-          <input type="password" name="loginPassword" id="loginPassword" placeholder="Login Password">
-
-          <input type="submit" value="Login">
+        <h3>Login With...</h3>
+        <form id="loginForm">
         </form>
       </div>
     </div>
+    <script type="text/template" id="loginTemplate">
+      <div>
+        <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
+        <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>"></input>
+      </div>
+      <div style="text-align: center;">
+        <strong>or</strong>
+      </div>
+      <div>
+        <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
+        <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>"></input>
+      </div>
+      <div style="text-align: center;">
+        <strong>and</strong>
+      </div>
+      <label for="password" class="ui-hidden-accessible">Password:</label>
+      <input type="password" name="password" placeholder="Password" value="<%= password %>"></input>
+
+      <input type="submit" value="Login">
+    </script>
   </body>
 </html>

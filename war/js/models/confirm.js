@@ -8,7 +8,7 @@ var rskybox = (function(r, $) {
     apiUrl: '/users/confirm',
 
     initialize: function() {
-      this.setUrl(this.apiUrl);
+      this.setUrl();
     },
 
     fields: {

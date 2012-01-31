@@ -8,12 +8,12 @@ var rskybox = (function(r, $) {
     // The REST base portion of the URL, including the version.
     restUrl: '/rest/v1',
 
-    // Set apiUrl when creating the concrete model then call makeUrl.
-    setUrl: function(apiUrl) {
-      if (apiUrl) {
+    // Sets the model's URL using a base REST url and the API url.
+    setUrl: function() {
+      if (this.apiUrl) {
         this.url = this.restUrl + this.apiUrl;
       } else {
-        r.log.error('invalid apiUrl: ' + apiUrl);
+        r.log.error('invalid apiUrl');
         this.url = '';
       }
     }
