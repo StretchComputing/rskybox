@@ -42,6 +42,26 @@ var rskybox = (function(r, $) {
   };
 
 
+  // Change to a new HTML page
+  r.changePage = function(page) {
+    var
+      base = '\/html5',
+      pages = {
+        root:         '',
+        applications: '\/applications',
+        settings:     '\/applications#settings'
+      };
+
+    if (!pages[page]) {
+      r.log.error("rskybox.changePage: page '" + page + "' not found.");
+      return;
+    }
+
+    r.log.debug("rskybox.changePage: page '" + pages[page] + "'.");
+    $.mobile.changePage(base + pages[page]);
+  };
+
+
   // message: The error message to display.
   // el: If not specified, we'll use the active page's content area.
   r.flashError = function(message, el) {

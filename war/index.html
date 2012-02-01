@@ -21,6 +21,7 @@
     <script src="/js/lib/cookie.js"></script>
     <script src="/js/helpers/app.js"></script>
     <script src="/js/models/base.js"></script>
+    <script src="/js/models/user.js"></script>
     <script src="/js/models/carrier.js"></script>
     <script src="/js/models/signup.js"></script>
     <script src="/js/models/confirm.js"></script>
@@ -80,7 +81,7 @@
       <br>
       <div>
         <label for="confirmationCode">Please enter your confirmation code:</label>
-        <input type="tel" name="confirmationCode" placeholder="Confirmation Code">
+        <input type="tel" name="confirmationCode" placeholder="Confirmation Code" value="<%= confirmationCode %>"></input>
       </div>
       <br>
       <div>
@@ -117,7 +118,7 @@
         <strong>and</strong>
       </div>
       <label for="password" class="ui-hidden-accessible">Password:</label>
-      <input type="password" name="password" placeholder="Password" value="<%= password %>"></input>
+      <input type="text" name="password" placeholder="Password" value="<%= password %>"></input>
 
       <input type="submit" value="Login">
     </script>

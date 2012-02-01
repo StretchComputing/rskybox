@@ -46,7 +46,7 @@ var rskybox = (function(r, $) {
 
     success: function(model, response) {
       r.log.debug('ConfirmView.success');
-      $.mobile.changePage('\/html5\/applications#settings');
+      r.changePage('settings');
     },
 
     error: function(model, response) {

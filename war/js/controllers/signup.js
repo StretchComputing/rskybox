@@ -5,6 +5,21 @@ var rskybox = (function(r, $) {
 
 
   r.controller = {
+    isLoggedIn: function() {
+      var current;
+
+      r.log.debug('isLoggedIn');
+      current = new r.User({ id: 'current' });
+      current.fetch({
+        success: function() {
+          r.changePage('applications');
+        },
+        error: function(model, response) {
+          r.log.debug('Signup.controller.isLoggedIn: no current user');
+        }
+      });
+    },
+
     signup: function() {
       r.signup = new r.Signup();
       r.signupView = new r.SignupView({
@@ -37,11 +52,12 @@ var rskybox = (function(r, $) {
     }
   };
 
-  r.router = new $.mobile.Router({
-    '#signup': 'signup',
-    '#confirm': 'confirm',
-    '#login': 'login'
-  }, r.controller);
+  r.router = new $.mobile.Router([
+    { '#signup':   { handler: 'isLoggedIn', events: 'bc' } },
+    { '#signup':   'signup' },
+    { '#confirm':  'confirm' },
+    { '#login':    'login' }
+  ], r.controller);
 
 
   return r;

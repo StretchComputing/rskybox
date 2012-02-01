@@ -5,7 +5,7 @@ var rskybox = (function(r, $) {
 
 
   r.Login = r.BaseModel.extend({
-    apiUrl: '/users/token',
+    apiUrl: '\/users\/token',
 
     initialize: function() {
       this.setUrl();
