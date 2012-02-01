@@ -6,8 +6,9 @@ var rskybox = (function(r, $) {
 
   r.SignupView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'apiError', 'error');
-      this.model.bind('change', this.render, this);
+      _.bindAll(this, 'apiError');
+      this.model.on('change', this.render, this);
+      this.model.on('error', this.error, this);
       this.template = _.template($('#signupTemplate').html());
     },
 
@@ -16,24 +17,26 @@ var rskybox = (function(r, $) {
     },
 
     submit: function(e) {
-      r.log.debug('Signup submit called');
+      var valid;
 
-      this.model.set({
+      r.log.debug('Signup submit called');
+      e.preventDefault();
+
+      valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         mobileCarrierId: this.$("select[name='mobileCarrierId']").val()
       }, {silent: true});
+      if (!valid) { return false; }
 
       this.model.prepareNewModel();
 
-      this.model.save(this.model.toJSON(), {
+      this.model.save(null, {
         success: this.success,
-        error: this.error,
         statusCode: {
           422: this.apiError
         }
       });
-      e.preventDefault();
       return false;
     },
 
@@ -47,7 +50,8 @@ var rskybox = (function(r, $) {
         return;
       }
       // If we get here, we're processing a validation error.
-      r.flashError(response, this.el);
+      r.log.debug('Signup validation error.');
+      r.flashError(response, this.$el);
     },
 
     apiError: function(jqXHR) {
@@ -58,7 +62,7 @@ var rskybox = (function(r, $) {
         r.log.error('An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code], this.el);
+      r.flashError(this.apiCodes[code], this.$el);
     },
 
     render: function() {

@@ -8,6 +8,7 @@ var rskybox = (function(r, $) {
     apiUrl: '/users/requestConfirmation',
 
     initialize: function() {
+      r.log.debug('Signup initialize');
       this.setUrl();
     },
 
@@ -24,6 +25,8 @@ var rskybox = (function(r, $) {
     },
 
     validate: function(attrs) {
+      if (_.isEmpty(attrs)) { return; }
+
       if (r.isValidEmailAddress(attrs.emailAddress)) {
         r.log.debug('Signup emailAddress is valid.');
         return;
