@@ -10,7 +10,6 @@ var rskybox = (function(r, $) {
 
     // Sets the model's URL using a base REST url and the API url.
     setUrl: function() {
-      r.log.debug('Base setUrl');
       if (this.apiUrl) {
         this.url = this.restUrl + this.apiUrl;
       } else {

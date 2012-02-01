@@ -19,8 +19,7 @@ var rskybox = (function(r, $) {
     submit: function(e) {
       var valid;
 
-      r.log.debug('Signup submit called');
-      e.preventDefault();
+      r.log.debug('SignupView.submit');
 
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
@@ -38,6 +37,8 @@ var rskybox = (function(r, $) {
           }
         });
       }
+
+      e.preventDefault();
       return false;
     },
 
@@ -46,17 +47,17 @@ var rskybox = (function(r, $) {
     },
 
     error: function(model, response) {
+      r.log.debug('SignupView.error');
       if (response.responseText) {
-        r.log.debug('Signup error: skipping apiError');
+        r.log.debug('SignupView.error: skipping apiError');
         return;
       }
       // If we get here, we're processing a validation error.
-      r.log.debug('Signup validation error.');
       r.flashError(response, this.$el);
     },
 
     apiError: function(jqXHR) {
-      r.log.debug('Signup apiError');
+      r.log.debug('SignupView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
@@ -67,7 +68,7 @@ var rskybox = (function(r, $) {
     },
 
     render: function() {
-      r.log.debug('Signup render');
+      r.log.debug('SignupView.render');
       var content = this.template(this.model.getMock());
 
       $(this.el).empty();

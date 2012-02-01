@@ -8,7 +8,6 @@ var rskybox = (function(r, $) {
     apiUrl: '/users/requestConfirmation',
 
     initialize: function() {
-      r.log.debug('Signup initialize');
       this.setUrl();
     },
 
@@ -21,7 +20,7 @@ var rskybox = (function(r, $) {
     // We define parse and return nothing, because we don't need the model modifed after
     // a successful save.
     parse: function(response) {
-      r.log.debug('Signup parse called.');
+      r.log.debug('Signup.parse');
     },
 
     validate: function(attrs) {
@@ -30,11 +29,11 @@ var rskybox = (function(r, $) {
       r.dump(this.attributes);
 
       if (r.isValidEmailAddress(attrs.emailAddress)) {
-        r.log.debug('Signup emailAddress is valid.');
+        r.log.debug('Signup: emailAddress is valid.');
         return;
       }
       if (r.isValidPhoneNumber(attrs.phoneNumber) && attrs.mobileCarrierId) {
-        r.log.debug('Signup phone credentials are valid.');
+        r.log.debug('Signup: phone credentials are valid.');
         return;
       }
       return 'A valid email address -OR- valid phone number and mobile carrier is required.';

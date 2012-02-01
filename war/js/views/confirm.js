@@ -19,7 +19,7 @@ var rskybox = (function(r, $) {
     submit: function(e) {
       var valid;
 
-      r.log.debug('ConfirmView.submit called');
+      r.log.debug('ConfirmView.submit');
 
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
@@ -45,13 +45,13 @@ var rskybox = (function(r, $) {
     },
 
     success: function(model, response) {
-      r.log.debug('Confirm success.');
+      r.log.debug('ConfirmView.success');
       //$.mobile.changePage('/applications');
     },
 
     error: function(model, response) {
       if (response.responseText) {
-        r.log.debug('Signup error: skipping apiError');
+        // This indicates an apiError.
         return;
       }
       // If we get here, we're processing a validation error.
@@ -59,7 +59,7 @@ var rskybox = (function(r, $) {
     },
 
     apiError: function(jqXHR) {
-      r.log.debug('Confirm apiError');
+      r.log.debug('ConfirmView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
@@ -71,6 +71,7 @@ var rskybox = (function(r, $) {
     },
 
     render: function() {
+      r.log.debug('ConfirmView.render');
       var content = this.template(this.model.getMock());
       $(this.el).empty();
       $(this.el).html(content);
