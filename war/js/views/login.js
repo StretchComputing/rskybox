@@ -6,8 +6,9 @@ var rskybox = (function(r, $) {
 
   r.LoginView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'apiError', 'error');
-      this.model.bind('change', this.render, this);
+      _.bindAll(this, 'apiError');
+      this.model.on('change', this.render, this);
+      this.model.on('error', this.error, this);
       this.template = _.template($('#loginTemplate').html());
     },
 

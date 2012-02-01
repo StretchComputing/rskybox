@@ -24,9 +24,7 @@ var rskybox = (function(r, $) {
     },
 
     validate: function(attrs) {
-      if (_.isEmpty(attrs)) { return; }
-      r.dump(attrs);
-      r.dump(this.attributes);
+      if (!attrs.fullValidation) { return; }
 
       if (r.isValidEmailAddress(attrs.emailAddress)) {
         r.log.debug('Signup: emailAddress is valid.');

@@ -7,8 +7,8 @@ var rskybox = (function(r, $) {
   r.ConfirmView = Backbone.View.extend({
     initialize: function() {
       _.bindAll(this, 'apiError');
-      this.model.bind('change', this.render, this);
-      this.model.bind('error', this.error, this);
+      this.model.on('change', this.render, this);
+      this.model.on('error', this.error, this);
       this.template = _.template($('#confirmTemplate').html());
     },
 
@@ -50,6 +50,7 @@ var rskybox = (function(r, $) {
     },
 
     error: function(model, response) {
+      r.log.debug('ConfirmView.error');
       if (response.responseText) {
         // This indicates an apiError.
         return;
