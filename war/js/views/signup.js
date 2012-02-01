@@ -62,7 +62,7 @@ var rskybox = (function(r, $) {
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('An unknown API error occurred: ' + code);
+        r.log.error('SignupView: An unknown API error occurred: ' + code);
       }
 
       r.flashError(this.apiCodes[code], this.$el);

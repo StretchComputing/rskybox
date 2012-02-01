@@ -34,7 +34,6 @@ var rskybox = (function(r, $) {
           dataType: 'json',
           data: this.model.getQueryObject(),
           success: this.success,
-          error: this.error,
           statusCode: {
             422: this.apiError
           }
@@ -57,19 +56,19 @@ var rskybox = (function(r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response, this.el);
+      r.flashError(response, this.$el);
     },
 
     apiError: function(jqXHR) {
-      r.log.debug('Login apiError');
+      r.log.debug('LoginView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.debug('An unknown API error occurred: ' + code);
+        r.log.debug('LoginView: An unknown API error occurred: ' + code);
       }
       this.model.clear({silent: true});
 
-      r.flashError(this.apiCodes[code], this.el);
+      r.flashError(this.apiCodes[code], this.$el);
     },
 
     render: function() {
