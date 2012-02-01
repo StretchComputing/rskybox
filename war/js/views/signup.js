@@ -27,16 +27,17 @@ var rskybox = (function(r, $) {
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         mobileCarrierId: this.$("select[name='mobileCarrierId']").val()
       }, {silent: true});
-      if (!valid) { return false; }
 
-      this.model.prepareNewModel();
+      if (valid) {
+        this.model.prepareNewModel();
 
-      this.model.save(null, {
-        success: this.success,
-        statusCode: {
-          422: this.apiError
-        }
-      });
+        this.model.save(null, {
+          success: this.success,
+          statusCode: {
+            422: this.apiError
+          }
+        });
+      }
       return false;
     },
 

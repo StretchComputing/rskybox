@@ -17,7 +17,8 @@ var rskybox = (function(r, $) {
     confirm: function() {
       r.confirm = new r.Confirm({
         emailAddress: r.getParameterByName(location.hash, 'emailAddress'),
-        phoneNumber: r.getParameterByName(location.hash, 'phoneNumber')
+        phoneNumber: r.getParameterByName(location.hash, 'phoneNumber'),
+        confirmationCode: r.getParameterByName(location.hash, 'confirmationCode'),
       });
       r.confirmView = new r.ConfirmView({
         el: $('#confirmForm'),

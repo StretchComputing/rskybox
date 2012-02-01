@@ -5,7 +5,7 @@ var rskybox = (function(r, $) {
 
 
   r.Confirm = r.BaseModel.extend({
-    apiUrl: '/users/confirm',
+    apiUrl: '/users',
 
     initialize: function() {
       this.setUrl();
@@ -32,6 +32,8 @@ var rskybox = (function(r, $) {
         code,
         password,
         message = '';
+
+      if (!attrs.fullValidation) { return; }
 
       code = attrs.confirmationCode;
       if (code && code.length == CONFIRMATION_CODE_LEN) {

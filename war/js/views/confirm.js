@@ -6,8 +6,9 @@ var rskybox = (function(r, $) {
 
   r.ConfirmView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'apiError', 'error');
+      _.bindAll(this, 'apiError');
       this.model.bind('change', this.render, this);
+      this.model.bind('error', this.error, this);
       this.template = _.template($('#confirmTemplate').html());
     },
 
@@ -16,42 +17,45 @@ var rskybox = (function(r, $) {
     },
 
     submit: function(e) {
-      this.model.set({
+      var valid;
+
+      r.log.debug('ConfirmView.submit called');
+
+      valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         confirmationCode: this.$("input[name='confirmationCode']").val(),
-        password: this.$("input[name='password']").val()
+        password: this.$("input[name='password']").val(),
+        fullValidation: true
       }, {silent: true});
 
-      this.model.prepareNewModel();
-      this.model.set({id: 'id'}, {silent: true});
-      console.log(this.model.toJSON());
+      if (valid) {
+        this.model.prepareNewModel();
 
-      this.model.save(this.model.toJSON(), {
-        success: this.success,
-        error: this.error,
-        statusCode: {
-          422: this.apiError
-        }
-      });
+        this.model.save(null, {
+          success: this.success,
+          statusCode: {
+            422: this.apiError
+          }
+        });
+      }
+
       e.preventDefault();
       return false;
     },
 
     success: function(model, response) {
       r.log.debug('Confirm success.');
-      $.mobile.changePage('/applications');
+      //$.mobile.changePage('/applications');
     },
 
     error: function(model, response) {
-      console.log('Confirm error:', model, response);
       if (response.responseText) {
-
         r.log.debug('Signup error: skipping apiError');
         return;
       }
       // If we get here, we're processing a validation error.
-      r.flashError(response, this.el);
+      r.flashError(response, this.$el);
     },
 
     apiError: function(jqXHR) {
@@ -63,7 +67,7 @@ var rskybox = (function(r, $) {
       }
       this.model.clear({silent: true});
 
-      r.flashError(this.apiCodes[code], this.el);
+      r.flashError(this.apiCodes[code], this.$el);
     },
 
     render: function() {
