@@ -27,17 +27,17 @@ var rskybox = (function(r, $) {
     // We define parse and return nothing, because we don't need the model modifed after
     // a successful save.
     parse: function(response) {
-      r.log.debug('Confirm parse called.');
-      r.dump(this);
+      r.log.debug('Login.parse');
     },
 
     validate: function(attrs) {
       var password, PASSWORD_MIN_LEN = 6;
 
+      if (!attrs.fullValidation) { return; }
       password = attrs.password;
       if ((password && password.length >= PASSWORD_MIN_LEN) &&
           (r.isValidEmailAddress(attrs.emailAddress) || r.isValidPhoneNumber(attrs.phoneNumber))) {
-        r.log.debug('Login credentials are valid.');
+        r.log.debug('Login: credentials are valid.');
         return;
       }
       return 'A valid email address -OR- valid phone number, -AND- a valid password is required.';

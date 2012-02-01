@@ -50,10 +50,10 @@ var rskybox = (function(r, $) {
     error: function(model, response) {
       r.log.debug('SignupView.error');
       if (response.responseText) {
-        r.log.debug('SignupView.error: skipping apiError');
+        // This is an apiError.
         return;
       }
-      // If we get here, we're processing a validation error.
+      // This is a validation error.
       r.flashError(response, this.$el);
     },
 

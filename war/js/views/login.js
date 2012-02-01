@@ -22,15 +22,12 @@ var rskybox = (function(r, $) {
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
-        password: this.$("input[name='password']").val()
-      }, {
-        error: this.error
-      });
+        password: this.$("input[name='password']").val(),
+        fullValidation: true
+      }, {silent: true});
 
       if (valid) {
         this.model.prepareNewModel();
-        console.log(this.model.url);
-        console.log(JSON.stringify(this.model.getQueryObject()));
 
         $.ajax({
           url: this.model.url,
@@ -48,18 +45,18 @@ var rskybox = (function(r, $) {
     },
 
     success: function(model, response) {
-      r.log.debug('Login success.');
-      $.mobile.changePage('/applications');
+      r.log.debug('Login.success');
+      // TODO - input the correct url to move to.
+      //$.mobile.changePage('/applications');
     },
 
     error: function(model, response) {
-      console.log('Login error:', model, response);
+      r.log.debug('LoginView.error');
       if (response.responseText) {
-
-        r.log.debug('Login error: skipping apiError');
+        // This is an apiError.
         return;
       }
-      // If we get here, we're processing a validation error.
+      // This is a validation error.
       r.flashError(response, this.el);
     },
 

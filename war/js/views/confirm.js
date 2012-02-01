@@ -46,16 +46,17 @@ var rskybox = (function(r, $) {
 
     success: function(model, response) {
       r.log.debug('ConfirmView.success');
+      // TODO - input the correct url to move to.
       //$.mobile.changePage('/applications');
     },
 
     error: function(model, response) {
       r.log.debug('ConfirmView.error');
       if (response.responseText) {
-        // This indicates an apiError.
+        // This is an apiError.
         return;
       }
-      // If we get here, we're processing a validation error.
+      // This is a validation error.
       r.flashError(response, this.$el);
     },
 
