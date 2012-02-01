@@ -45,8 +45,7 @@ var rskybox = (function(r, $) {
 
     success: function(model, response) {
       r.log.debug('Login.success');
-      // TODO - input the correct url to move to.
-      //$.mobile.changePage('/applications');
+      $.mobile.changePage('\/html5\/applications');
     },
 
     error: function(model, response) {

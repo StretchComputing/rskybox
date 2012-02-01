@@ -46,8 +46,7 @@ var rskybox = (function(r, $) {
 
     success: function(model, response) {
       r.log.debug('ConfirmView.success');
-      // TODO - input the correct url to move to.
-      //$.mobile.changePage('/applications');
+      $.mobile.changePage('\/html5\/applications#settings');
     },
 
     error: function(model, response) {
@@ -96,7 +95,13 @@ var rskybox = (function(r, $) {
       207: 'Your phone number is not registered in the system.',
       308: 'Either an email address or a phone number is required.',
       309: 'Confirmation code is required.',
+      311: 'Password is required.',
+      403: 'Invalid email address.',
+      404: 'Invalid mobile carrier.',
       411: 'Invalid confirmation code.',
+      412: 'Password too short.',
+      607: 'Email address not found.',
+      608: 'Phone number not found.',
       700: 'Email address and phone number are mutually exclusive.'
     }
   });
