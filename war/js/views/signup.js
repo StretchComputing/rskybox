@@ -69,8 +69,10 @@ var rskybox = (function(r, $) {
     },
 
     render: function() {
-      r.log.debug('SignupView.render');
       var content = this.template(this.model.getMock());
+
+      r.log.debug('SignupView.render');
+      $.mobile.showPageLoadingMsg();
 
       $(this.el).empty();
       $(this.el).html(content);
@@ -79,6 +81,12 @@ var rskybox = (function(r, $) {
         el: $('#mobileCarrierId'),
         collection: new r.Carriers()
       });
+
+      this.carriersView.on('rendered', function() {
+        this.carriersView.off('rendered');
+        $.mobile.hidePageLoadingMsg();
+      }, this);
+
       this.carriersView.collection.fetch();
       return this;
     },
