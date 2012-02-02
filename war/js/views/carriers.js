@@ -28,7 +28,6 @@ var rskybox = (function(r, $) {
       this.addCarrier(new r.Carrier({ id: '', name: 'Select Mobile Carrier'}));
       this.collection.each(this.addCarrier);
       $(this.el).selectmenu('refresh');
-      this.trigger('rendered');
       return this;
     },
 

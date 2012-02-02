@@ -5,7 +5,7 @@ var rskybox = (function(r, $) {
 
 
   r.controller = {
-    signupBeforeCreate: function() {
+    isLoggedIn: function() {
       var current;
 
       r.log.debug('isLoggedIn');
@@ -32,7 +32,7 @@ var rskybox = (function(r, $) {
       r.signupView.render();
     },
 
-    confirm: function() {
+    confirmBeforeShow: function() {
       r.confirm = new r.Confirm({
         emailAddress: r.getParameterByName(location.hash, 'emailAddress'),
         phoneNumber: r.getParameterByName(location.hash, 'phoneNumber'),
@@ -45,7 +45,7 @@ var rskybox = (function(r, $) {
       r.confirmView.render();
     },
 
-    login: function() {
+    loginBeforeShow: function() {
       r.login = new r.Login();
       r.loginView = new r.LoginView({
         el: $('#loginForm'),
@@ -56,13 +56,14 @@ var rskybox = (function(r, $) {
   };
 
   r.router = new $.mobile.Router([
-    { '#signup':   { handler: 'signupBeforeCreate', events: 'bc' } },
+    { '.*':        { handler: 'isLoggedIn', events: 'bc' } },
     { '#signup':   { handler: 'signupBeforeShow', events: 'bs' } },
     { '#signup':   { handler: 'signupShow', events: 's' } },
-    { '#confirm':  'confirm' },
-    { '#login':    'login' }
+    { '#confirm':  { handler: 'confirmBeforeShow', events: 'bs' } },
+    { '#login':    { handler: 'loginBeforeShow', events: 'bs' } },
   ], r.controller);
 
 
   return r;
 })(rskybox || {}, jQuery);
+

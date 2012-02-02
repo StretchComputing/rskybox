@@ -132,3 +132,17 @@ var rskybox = (function(r, $) {
 
   return r;
 }(rskybox || {}, jQuery));
+
+
+// This is here so we automatically get page loading messages when Ajax requests start and
+// they are hidden when the Ajax requests are complete.
+$(document).bind('pagebeforeshow', function() {
+  $('body').ajaxSend(function() {
+    rskybox.log.debug('ajaxSend');
+    $.mobile.showPageLoadingMsg();
+  });
+  $('body').ajaxComplete(function() {
+    rskybox.log.debug('ajaxComplete');
+    $.mobile.hidePageLoadingMsg();
+  });
+});
