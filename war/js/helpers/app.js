@@ -42,7 +42,8 @@ var rskybox = (function(r, $) {
   },
 
 
-  r.unSetCookie = function(token) {
+  r.unsetCookie = function(token) {
+    Cookie.unset('token', '/');
   },
 
 
@@ -52,15 +53,28 @@ var rskybox = (function(r, $) {
 
 
   // Change to a new HTML page.
-  r.changePage = function(page) {
+  r.changePage = function(page, area) {
     var
-      base = '\/html5',
+      base,
       newPage,
       pages = {
-        root:         '',
+        root: '\/',
         applications: '',
-        settings:     '#settings'
+        settings: '#settings'
       };
+
+    switch (area) {
+      case 'signup':
+        base = '';
+        break;
+      case 'admin':
+        base = '\/html5\/admin';
+        break;
+      default:
+        base = '\/html5';
+        break;
+    }
+
 
     if (pages[page] === undefined) {
       r.log.error("rskybox.changePage: page '" + page + "' not found.");
