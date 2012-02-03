@@ -46,6 +46,7 @@ var rskybox = (function(r, $) {
 
     success: function(model, response) {
       r.log.debug('ConfirmView.success');
+      r.setCookie(model.token);
       r.changePage('settings');
     },
 

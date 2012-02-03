@@ -37,15 +37,25 @@ var rskybox = (function(r, $) {
   };
 
 
+  r.setCookie = function(token) {
+    Cookie.set('token', token, 9000, '\/');
+  },
+
+
+  r.unSetCookie = function(token) {
+  },
+
+
   r.dump = function(object) {
     console.log(JSON.stringify(object));
   };
 
 
-  // Change to a new HTML page
+  // Change to a new HTML page.
   r.changePage = function(page) {
     var
       base = '\/html5',
+      newPage,
       pages = {
         root:         '',
         applications: '\/applications',
@@ -57,8 +67,10 @@ var rskybox = (function(r, $) {
       return;
     }
 
-    r.log.debug("rskybox.changePage: page '" + pages[page] + "'.");
-    $.mobile.changePage(base + pages[page]);
+    newPage = base + pages[page];
+    r.log.debug("rskybox.changePage: page '" + newPage + "'.");
+    window.location = newPage;
+    //$.mobile.changePage(newPage);
   };
 
 
