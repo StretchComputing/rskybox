@@ -24,12 +24,6 @@ var rskybox = (function(r, $) {
       };
     },
 
-    // We define parse and return nothing, because we don't need the model modifed after
-    // a successful save.
-    parse: function(response) {
-      r.log.debug('Login.parse');
-    },
-
     validate: function(attrs) {
       var password, PASSWORD_MIN_LEN = 6;
 
