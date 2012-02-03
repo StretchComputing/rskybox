@@ -5,228 +5,101 @@
     <script> if (location.hostname === "www.rskybox.com") { location.href = "https://rskybox-stretchcom.appspot.com"; } </script>
     <title>rSkybox</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0/jquery.mobile-1.0.min.css" />
+    <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0.1/jquery.mobile-1.0.1.min.css" />
     <link rel="stylesheet" href="/css/styles.css">
-    <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.6.4.min.js"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1.min.js"></script>
     <script>
-      jQuery || document.write('<script src="\/js\/libs\/jquery-1.6.4.min.js"><\/script\>')
+      jQuery || document.write('<script src="\/js\/lib\/jquery-1.7.1.min.js"><\/script\>')
     </script>
-    <script src="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0/jquery.mobile-1.0.min.js"></script>
+    <script src="/js/lib/jquery.mobile.router.js"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.mobile/1.0.1/jquery.mobile-1.0.1.min.js"></script>
     <script>
-      jQuery.mobile || document.write('<script src="\/js\/libs\/jquery.mobile-1.0.min.js"\><\/script\>')
+      jQuery.mobile || document.write('<script src="\/js\/lib\/jquery.mobile-1.0.1.min.js"\><\/script\>')
     </script>
-    <script src="/js/libs/cookie.js"></script>
-    <script src="/js/rmodule.js"></script>
+    <script src="/js/lib/underscore-min.js"></script>
+    <script src="/js/lib/backbone-min.js"></script>
+    <script src="/js/lib/cookie.js"></script>
+    <script src="/js/helpers/app.js"></script>
+    <script src="/js/models/base.js"></script>
+    <script src="/js/models/application.js"></script>
+    <script src="/js/views/applications.js"></script>
+    <script src="/js/controllers/main.js"></script>
   </head>
   <body>
-    <script src="/js/forms.js"></script>
-<script src="/js/item.js"></script>
-<script>
-'use strict';
 
-var RMODULE = (function (my, $) {
-
-  var
-    old_init,
-    saveItem,
-    saveSettings;
-
-  my.itemName = function () {
-    return 'applications';
-  };
-
-  my.buildListItemContent = function (application) {
-    var display, markup;
-
-    display = application.name + ' ' + application.version + ', ' + application.date;
-    markup =  '<li>';
-    markup += '<a href="#item?id=' + application.id + '">' + display + '<\/a>';
-    if (application.role === my.ROLES.owner.id || application.role === my.ROLES.manager.id) {
-      markup += '<a href="/html5/admin?id=' + application.id + '" rel="external" data-icon="gear" title="admin">Admin<\/a>';
-    }
-    markup += '<\/li>';
-    return markup;
-  };
-
-  my.buildItemPage = function (page, application) {
-    var markup, title;
-
-    title = application.name;
-    document.title = title;
-    my.pageHeader(page).find('h1').html(title);
-    markup  = '<p>';
-    markup +=   'AppID: ' + application.id + '<br>';
-    markup +=   'Token: ' + application.token;
-    markup += '<\/p><br>';
-    markup += '<ul data-role="listview">';
-    markup +=   '<li><a href="/html5\/feedback?id=' + application.id +'" rel="external">Feedback<\/a><\/li>';
-    markup +=   '<li><a href="/html5\/crashdetects?id=' + application.id +'" rel="external">Crash Detects<\/a><\/li>';
-    markup +=   '<li><a href="/html5\/clientlogs?id=' + application.id +'" rel="external">Client Logs<\/a><\/li>';
-    markup += '<\/ul>';
-    my.pageContent(page, markup).find(':jqmData(role=listview)').listview();
-  };
-
-  my.populateSettings = function (page, user) {
-    var smsEnabled = user.sendSmsNotifications;
-
-    page.find('form')[0].reset();
-    $('#id').val(user.id);
-    $('#sendEmailNotifications').prop('checked', user.sendEmailNotifications).checkboxradio('refresh');
-    $('#sendSmsNotifications').prop('checked', smsEnabled).checkboxradio('refresh');
-    my.enableSmsDetails(smsEnabled);
-    $('#phoneNumber').val(user.phoneNumber);
-    $('#mobileCarrierId').val(user.mobileCarrierId).selectmenu('refresh');
-    $('#adminButton').toggle(user.isSuperAdmin);
-  };
-
-  saveSettings = function () {
-    var restUrl, json;
-
-    if (!my.validateSms()) { return false; }
-
-    restUrl = my.getRestPrefix() + '\/users\/' + $('#id').val();
-    json = JSON.stringify({
-      phoneNumber : $('#phoneNumber').val(),
-      mobileCarrierId : $('#mobileCarrierId').val(),
-      sendEmailNotifications : $('#sendEmailNotifications').prop('checked'),
-      sendSmsNotifications : $('#sendSmsNotifications').prop('checked')
-    });
-
-    my.putJson(restUrl, json, function () {
-      history.back();
-    });
-
-    return false;
-  };
-
-  saveItem = function () {
-    var app, json;
-
-    app = {};
-    my.addFormProperty(app, 'name', $('#name').val());
-    my.addFormProperty(app, 'version', $('#version').val());
-    if (!app.name) {
-      alert('Please enter an application name.');
-      return false;
-    }
-
-    json = JSON.stringify(app);
-    my.postJson(my.getRestPrefix() + '\/' + my.itemName(), json, function (data) {
-      $.mobile.changePage('#index');
-    });
-    return false;
-  };
-
-  old_init = my.init;
-  my.init = function () {
-    old_init();
-
-    $('#new').live('pagecreate', function () {
-      $(this).find('form').submit(saveItem);
-    });
-
-    $('#settings').live('pagecreate', function () {
-      $(this).find('form').submit(saveSettings);
-
-      $('#logout').click(function () {
-        my.logout();
-      });
-
-      $('#sendSmsNotifications').change(function () {
-        my.enableSmsDetails($(this).prop('checked'));
-      });
-    });
-
-    $('#settings').live('pageshow', function () {
-      var restUrl;
-
-      my.jsonPopulate(my.getMobileCarriersUrl(), $('#mobileCarrierId'), function (select, carriers) {
-        select.html(my.getOptionsForSelect(carriers.mobileCarriers, 'Mobile Carriers'));
-        restUrl = my.getRestPrefix() + '\/users\/current';
-        my.jsonPopulate(restUrl, $('#settings'), my.populateSettings);
-      });
-    });
-  };
-
-  return my;
-}(RMODULE || {}, jQuery));
-
-RMODULE.init();
-</script>
-
-<!-- Home -->
-<div data-role="page" id="index" data-title="rSkybox">
-  <div data-role="header">
-    <a href="#settings" data-icon="arrow-l" data-direction="reverse">Settings</a>
-    <h1>rSkybox</h1>
-    <a href="#new" data-icon="plus" data-iconpos="right">New App</a>
-  </div>
-  <div data-role="content"></div>
-</div>
-
-
-<!-- Settings -->
-<div data-role="page" id="settings" data-title="rSkybox Settings">
-  <div data-role="header">
-    <a href="/html5/admin/users" id="adminButton" rel="external" style="display: none;" data-icon="star">Users Admin</a>
-    <h1>Settings</h1>
-    <a href="#index" data-icon="home" data-iconpos="right">Home</a>
-  </div>
-  <div data-role="content">
-    <form>
-      <input id="id" type="hidden">
-      <input type="checkbox" name="sendEmailNotifications" id="sendEmailNotifications">
-      <label for="sendEmailNotifications">Email Notifications</label>
-      <hr>
-      <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications">
-      <label for="sendSmsNotifications">SMS Notifications</label>
-      <input type="tel" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" required disabled>
-      <select name="mobileCarrierId" id="mobileCarrierId">
-      </select>
-      <hr>
-      <input type="submit" value="Save">
-    </form>
-  </div>
-  <div data-role="footer" class="ui-bar" style="text-align: center;">
-    <a href="#" id="logout" rel="external">Logout</a>
-  </div>
-</div>
-
-
-<!-- Application -->
-<div data-role="page" id="item">
-  <div data-role="header">
-    <a href="#" data-rel="back" data-icon="home">Home</a>
-    <h1></h1>
-  </div>
-  <div data-role="content"></div>
-</div>
-
-
-<!-- New Application -->
-<div data-role="page" id="new">
-  <div data-role="header">
-    <h1>New Application</h1>
-  </div>
-  <div data-role="content">
-    <form>
-      <label for="name" class="ui-hidden-accessible">Application Name:</label>
-      <input name="name" id="name" placeholder="Application Name" required>
-
-      <label for="version" class="ui-hidden-accessible">Application Version:</label>
-      <input name="version" id="version" placeholder="Application Version">
-
-      <input type="submit" value="Save">
-    </form>
-  </div>
-  <div data-role="footer">
-    <div data-role="navbar">
-      <ul>
-        <li><a href="#" data-rel="back">Cancel</a></li>
-      </ul>
+    <!-- Applications -->
+    <div data-role="page" id="applications" data-title="Applications">
+      <div data-role="header">
+        <a href="#settings" data-icon="arrow-l" data-direction="reverse">Settings</a>
+        <h1>Applications</h1>
+        <a href="#newApp" data-icon="plus" data-iconpos="right">New App</a>
+      </div>
+      <div data-role="content"></div>
     </div>
-  </div>
-</div>
+    <script type="text/template" id="appListTemplate">
+      <a href="#application?id=<%= id %>"><%= name %> <%= version %>, <%= date %></a>
+    </script>
 
+
+    <!-- Application -->
+    <div data-role="page" id="item">
+      <div data-role="header">
+        <a href="#" data-rel="back" data-icon="home">Home</a>
+        <h1></h1>
+      </div>
+      <div data-role="content"></div>
+    </div>
+
+
+    <!-- Settings -->
+    <div data-role="page" id="settings" data-title="Settings">
+      <div data-role="header">
+        <a href="/html5/admin/users" id="adminButton" rel="external" style="display: none;" data-icon="star">Users Admin</a>
+        <h1>Settings</h1>
+        <a href="#applications" data-icon="home" data-iconpos="right">Home</a>
+      </div>
+      <div data-role="content">
+        <form id="settingsForm"></form>
+      </div>
+    </div>
+    <script type="text/template" id="confirmTemplate">
+      <div>
+        <label for="emailAddress">Email address: </label>
+        <input type="email" name="emailAddress" value="<%= emailAddress %>" readonly>
+      </div>
+      <div>
+        <label for="phoneNumber">Your phone number: </label>
+        <input type="tel" name="phoneNumber" value="<%= phoneNumber %>" readonly>
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input name="password" placeholder="Password">
+      </div>
+
+      <input type="submit" value="Save">
+    </script>
+
+
+    <!-- New Application -->
+    <div data-role="page" id="newApp" data-title="New Application">
+      <div data-role="header">
+        <a href="#applications" data-icon="arrow-l" data-direction="reverse">Cancel</a>
+        <h1>New Application</h1>
+      </div>
+      <div data-role="content">
+        <form id="newAppForm"></form>
+      </div>
+    </div>
+    <script type="text/template" id="newAppTemplate">
+      <div>
+        <label for="name" class="ui-hidden-accessible">Application Name:</label>
+        <input name="name" placeholder="Application Name" value="<%= name %>"></input>
+      </div>
+      <div>
+        <label for="version" class="ui-hidden-accessible">Application Version:</label>
+        <input name="version" placeholder="Application Version" value="<%= version %>"></input>
+      </div>
+      <input type="submit" value="Save">
+    </script>
   </body>
 </html>

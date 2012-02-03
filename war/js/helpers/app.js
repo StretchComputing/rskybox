@@ -58,11 +58,11 @@ var rskybox = (function(r, $) {
       newPage,
       pages = {
         root:         '',
-        applications: '\/applications',
-        settings:     '\/applications#settings'
+        applications: '',
+        settings:     '#settings'
       };
 
-    if (!pages[page]) {
+    if (pages[page] === undefined) {
       r.log.error("rskybox.changePage: page '" + page + "' not found.");
       return;
     }
@@ -73,12 +73,16 @@ var rskybox = (function(r, $) {
   };
 
 
+  r.getContentDiv = function() {
+    return $.mobile.activePage.find(":jqmData(role='content')");
+  };
+
   // message: The error message to display.
   // el: If not specified, we'll use the active page's content area.
   r.flashError = function(message, el) {
     var flash, selector;
 
-    el = el || $.mobile.activePage.find(":jqmData(role='content')");
+    el = el || r.getContentDiv();
 
     selector = '.flash.error';
     el.find(selector).remove();
@@ -147,7 +151,7 @@ var rskybox = (function(r, $) {
 
 // This is here so we automatically get page loading messages when Ajax requests start and
 // they are hidden when the Ajax requests are complete.
-$(document).bind('pagebeforeshow', function() {
+(function() {
   var hidePageLoadingMessage, pageLoad, pageLoadCount, showPageLoadingMessage;
 
   pageLoadCount = 0;
@@ -178,12 +182,12 @@ $(document).bind('pagebeforeshow', function() {
     $.mobile.showPageLoadingMsg();
   };
 
-  $('body').ajaxSend(function() {
-    rskybox.log.debug('ajaxSend');
+  $('html').ajaxSend(function(event, jqXHR, settings) {
+    rskybox.log.debug('ajaxSend: ' + settings.url);
     showPageLoadingMessage();
   });
-  $('body').ajaxComplete(function() {
-    rskybox.log.debug('ajaxComplete');
+  $('html').ajaxComplete(function(event, jqXHR, settings) {
+    rskybox.log.debug('ajaxComplete: ' + settings.url);
     hidePageLoadingMessage();
   });
-});
+})();
