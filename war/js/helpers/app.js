@@ -148,12 +148,42 @@ var rskybox = (function(r, $) {
 // This is here so we automatically get page loading messages when Ajax requests start and
 // they are hidden when the Ajax requests are complete.
 $(document).bind('pagebeforeshow', function() {
+  var hidePageLoadingMessage, pageLoad, pageLoadCount, showPageLoadingMessage;
+
+  pageLoadCount = 0;
+  pageLoad = function (operator) {
+    switch (operator) {
+    case 'decrement':
+      pageLoadCount -= pageLoadCount === 0 ? 0 : 1;
+      break;
+    case 'increment':
+      pageLoadCount += 1;
+      break;
+    default:
+      window.console.log('pageLoadingCount called with inappropriate operator.');
+    }
+    return pageLoadCount;
+  };
+
+
+  // Manage showing/hiding the page loading message based on the number of times it's been called.
+  hidePageLoadingMessage = function () {
+    if (pageLoad('decrement') <= 0) {
+      $.mobile.hidePageLoadingMsg();
+    }
+  };
+
+  showPageLoadingMessage = function () {
+    pageLoad('increment');
+    $.mobile.showPageLoadingMsg();
+  };
+
   $('body').ajaxSend(function() {
     rskybox.log.debug('ajaxSend');
-    $.mobile.showPageLoadingMsg();
+    showPageLoadingMessage();
   });
   $('body').ajaxComplete(function() {
     rskybox.log.debug('ajaxComplete');
-    $.mobile.hidePageLoadingMsg();
+    hidePageLoadingMessage();
   });
 });
