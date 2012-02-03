@@ -25,7 +25,7 @@ var rskybox = (function(r, $) {
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         confirmationCode: this.$("input[name='confirmationCode']").val(),
-        password: this.$("input[name='password']").val(),
+        password: this.$("input[name='password']").val()
       });
 
       if (valid) {

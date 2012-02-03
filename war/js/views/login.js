@@ -22,7 +22,7 @@ var rskybox = (function(r, $) {
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
-        password: this.$("input[name='password']").val(),
+        password: this.$("input[name='password']").val()
       });
 
       if (valid) {
