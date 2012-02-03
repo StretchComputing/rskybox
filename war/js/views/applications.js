@@ -9,11 +9,11 @@ var rskybox = (function(r, $) {
 
     initialize: function() {
       _.bindAll(this, 'render');
-      template: _.template('#appListTemplate');
+      this.template = _.template($('#appListTemplate').html());
     },
 
     render: function() {
-      $(this.el).attr('value', this.model.get('id')).html(this.model.get('name'));
+      this.$el.html(this.template(this.model));
       return this;
     }
   });
@@ -24,17 +24,22 @@ var rskybox = (function(r, $) {
     initialize: function() {
       _.bindAll(this, 'addApplication');
       this.collection.bind('reset', this.render, this);
+      this.template = _.template($('#appEmptyTemplate').html());
     },
 
     render: function() {
       $(this.el).empty();
-      this.collection.each(this.addApplication);
-      //$(this.el).selectmenu('refresh');
+      if (this.collection.length <= 0) {
+        this.$el.html(this.template());
+      } else {
+        this.collection.each(this.addApplication);
+      }
+      //this.$el.selectmenu('refresh');
       return this;
     },
 
     addApplication: function(app) {
-      $(this.el).append(new r.ApplicationView({ model: app }).render().el);
+      this.$el.append(new r.ApplicationView({ model: app }).render().el);
     }
   });
 
