@@ -91,6 +91,7 @@ var rskybox = (function(r, $) {
     return $.mobile.activePage.find(":jqmData(role='content')");
   };
 
+
   // message: The error message to display.
   // el: If not specified, we'll use the active page's content area.
   r.flashError = function(message, el) {

@@ -4,7 +4,18 @@
 var rskybox = (function(r, $) {
 
 
-  r.Application = Backbone.Model.extend({});
+  r.Application = r.BaseModel.extend({
+    apiUrl: '/applications',
+    fields: {
+      id: null,
+      name: null,
+      version: null
+    },
+
+    initialize: function() {
+      this.setUrl();
+    },
+  });
 
 
   r.Applications = r.BaseCollection.extend({

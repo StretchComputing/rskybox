@@ -74,8 +74,8 @@ var rskybox = (function(r, $) {
     render: function() {
       r.log.debug('ConfirmView.render');
       var content = this.template(this.model.getMock());
-      $(this.el).empty();
-      $(this.el).html(content);
+      this.$el.empty();
+      this.$el.html(content);
       if (this.model.get('emailAddress')) {
         this.$('#emailWrapper').show();
         this.$('#phoneWrapper').hide();
@@ -84,7 +84,7 @@ var rskybox = (function(r, $) {
         this.$('#emailWrapper').hide();
         this.$('#phoneWrapper').show();
       }
-      $(this.el).trigger('create');
+      this.$el.trigger('create');
       return this;
     },
 

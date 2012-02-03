@@ -6,15 +6,14 @@ var rskybox = (function(r, $) {
 
   r.Signup = r.BaseModel.extend({
     apiUrl: '/users/requestConfirmation',
-
-    initialize: function() {
-      this.setUrl();
-    },
-
     fields: {
       emailAddress: null,
       phoneNumber: null,
       mobileCarrierId: null
+    },
+
+    initialize: function() {
+      this.setUrl();
     },
 
     // We define parse and return nothing, because we don't need the model modifed after

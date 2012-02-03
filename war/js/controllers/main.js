@@ -40,9 +40,15 @@ var rskybox = (function(r, $) {
     newAppBeforeShow: function() {
       r.log.debug('newAppBeforeShow');
       r.newApp = new r.Application();
-      r.newAppView = new r.ApplicationView({
+      r.newAppView = new r.NewApplicationView({
+        el: $('#newAppForm'),
         model: r.newApp
       });
+    },
+
+    newAppShow: function() {
+      r.log.debug('newAppShow');
+      r.newAppView.render();
     },
 
   };
@@ -54,6 +60,7 @@ var rskybox = (function(r, $) {
     { '#settings':      { handler: 'settingsBeforeShow', events: 'bs' } },
     { '#settings':      { handler: 'settingsShow', events: 's' } },
     { '#newApp':        { handler: 'newAppBeforeShow', events: 'bs' } },
+    { '#newApp':        { handler: 'newAppShow', events: 's' } },
   ], r.controller);
 
 
