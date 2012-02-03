@@ -18,12 +18,6 @@ var rskybox = (function(r, $) {
       password: null
     },
 
-    // We define parse and return nothing, because we don't need the model modifed after
-    // a successful save.
-    parse: function(response) {
-      r.log.debug('Confirm.parse');
-    },
-
     validate: function(attrs) {
       var
         PASSWORD_MIN_LEN = 6,
@@ -31,8 +25,6 @@ var rskybox = (function(r, $) {
         code,
         password,
         message = '';
-
-      if (!attrs.fullValidation) { return; }
 
       code = attrs.confirmationCode;
       if (code && code.length == CONFIRMATION_CODE_LEN) {

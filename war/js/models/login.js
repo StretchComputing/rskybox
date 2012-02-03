@@ -33,8 +33,6 @@ var rskybox = (function(r, $) {
     validate: function(attrs) {
       var password, PASSWORD_MIN_LEN = 6;
 
-      if (!attrs.fullValidation) { return; }
-
       password = attrs.password;
       if ((password && password.length >= PASSWORD_MIN_LEN) &&
           (r.isValidEmailAddress(attrs.emailAddress) || r.isValidPhoneNumber(attrs.phoneNumber))) {

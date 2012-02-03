@@ -25,8 +25,7 @@ var rskybox = (function(r, $) {
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         mobileCarrierId: this.$("select[name='mobileCarrierId']").val(),
-        fullValidation: true
-      }, {silent: true});
+      });
 
       if (valid) {
         this.model.prepareNewModel();

@@ -26,8 +26,7 @@ var rskybox = (function(r, $) {
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         confirmationCode: this.$("input[name='confirmationCode']").val(),
         password: this.$("input[name='password']").val(),
-        fullValidation: true
-      }, {silent: true});
+      });
 
       if (valid) {
         this.model.prepareNewModel();
@@ -46,7 +45,7 @@ var rskybox = (function(r, $) {
 
     success: function(model, response) {
       r.log.debug('ConfirmView.success');
-      r.setCookie(model.token);
+      r.setCookie(model.get('token'));
       r.changePage('settings');
     },
 

@@ -23,8 +23,7 @@ var rskybox = (function(r, $) {
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         password: this.$("input[name='password']").val(),
-        fullValidation: true
-      }, {silent: true});
+      });
 
       if (valid) {
         this.model.prepareNewModel();
@@ -45,7 +44,7 @@ var rskybox = (function(r, $) {
 
     success: function(model, response) {
       r.log.debug('Login.success');
-      r.setCookie(model.token);
+      r.setCookie(model.set('token'));
       r.changePage('applications');
     },
 

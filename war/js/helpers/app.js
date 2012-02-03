@@ -70,7 +70,6 @@ var rskybox = (function(r, $) {
     newPage = base + pages[page];
     r.log.debug("rskybox.changePage: page '" + newPage + "'.");
     window.location = newPage;
-    //$.mobile.changePage(newPage);
   };
 
 
