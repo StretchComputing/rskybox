@@ -9,7 +9,8 @@ var rskybox = (function(r, $) {
     fields: {
       id: null,
       name: null,
-      version: null
+      version: null,
+      date: null
     },
 
     initialize: function() {

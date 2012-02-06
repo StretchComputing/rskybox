@@ -13,36 +13,40 @@ var rskybox = (function(r, $) {
     },
 
     render: function() {
-      this.$el.html(this.template(this.model));
+      this.$el.html(this.template(this.model.getMock()));
       return this;
     }
   });
 
   r.ApplicationsView = Backbone.View.extend({
-    tagName: 'ul',
-
     initialize: function() {
       _.bindAll(this, 'addApplication');
       this.collection.bind('reset', this.render, this);
-      this.template = _.template($('#appEmptyTemplate').html());
+      this.template = _.template($('#noAppsTemplate').html());
     },
 
     render: function() {
+      var list;
+
       $(this.el).empty();
       if (this.collection.length <= 0) {
         this.$el.html(this.template());
       } else {
-        this.collection.each(this.addApplication);
+        list = $('<ul>');
+        this.collection.each(function(app) {
+          this.addApplication(list, app);
+        }, this);
+        this.$el.html(list);
+        list.listview();
       }
-      //this.$el.selectmenu('refresh');
       return this;
     },
 
-    addApplication: function(app) {
-      this.$el.append(new r.ApplicationView({ model: app }).render().el);
+    addApplication: function(list, app) {
+      list.append(new r.ApplicationView({ model: app }).render().el);
     }
   });
 
 
   return r;
-})(rskybox || {}, jQuery);
+}(rskybox || {}, jQuery));
