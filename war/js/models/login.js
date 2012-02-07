@@ -39,4 +39,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-})(rskybox || {}, jQuery);
+}(rskybox || {}, jQuery));

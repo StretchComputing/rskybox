@@ -205,4 +205,4 @@ var rskybox = (function(r, $) {
     rskybox.log.debug('ajaxComplete: ' + settings.url);
     hidePageLoadingMessage();
   });
-})();
+}());
