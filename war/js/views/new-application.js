@@ -31,9 +31,9 @@ var rskybox = (function(r, $) {
 
         this.model.save(null, {
           success: this.success,
-          statusCode: {
+          statusCode: _.extend({
             422: this.apiError
-          }
+          }, r.statusCodeHandlers)
         });
       }
 

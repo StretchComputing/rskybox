@@ -17,7 +17,9 @@ var rskybox = (function(r, $) {
 
     applicationsShow: function() {
       r.log.debug('applicationsShow');
-      r.applications.fetch();
+      r.applications.fetch({
+        statusCode: r.statusCodeHandlers
+      });
     },
 
     applicationBeforeShow: function() {

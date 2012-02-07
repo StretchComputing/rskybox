@@ -36,15 +36,24 @@ var rskybox = (function(r, $) {
     }
   };
 
+  r.statusCodeHandlers = {
+    401: function(jqXHR) {
+      r.log.debug('401 - unauthorized');
+      r.unsetCookie();
+      r.changePage('root', 'signup');
+      // TODO - Add flash message to home page after 401 occurs.
+    }
+  };
+
 
   r.setCookie = function(token) {
     Cookie.set('token', token, 9000, '\/');
-  },
+  };
 
 
-  r.unsetCookie = function(token) {
+  r.unsetCookie = function() {
     Cookie.unset('token', '/');
-  },
+  };
 
 
   r.dump = function(object) {

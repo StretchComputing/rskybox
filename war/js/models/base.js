@@ -31,6 +31,7 @@ var rskybox = (function(r, $) {
 
   r.BaseModelExtended = Backbone.Model.extend(r.Base);
 
+
   r.BaseModel = r.BaseModelExtended.extend({
     // Unsets all attributes that are undefined, null, '', or 0 in prepartion
     // for a new model to be saved.
