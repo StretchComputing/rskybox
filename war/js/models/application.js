@@ -10,7 +10,8 @@ var rskybox = (function(r, $) {
       id: null,
       name: null,
       version: null,
-      date: null
+      date: null,
+      token: null
     },
 
     initialize: function() {

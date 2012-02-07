@@ -9,9 +9,18 @@ var rskybox = (function(r, $) {
     restUrl: '/rest/v1',
 
     // Sets the model's URL using a base REST url and the API url.
+    // If there is an ID, set the urlRoot for use outside of a collection.
     setUrl: function() {
+      var url;
+
       if (this.apiUrl) {
-        this.url = this.restUrl + this.apiUrl;
+        url = this.restUrl + this.apiUrl;
+
+        if (this.get('id')) {
+          this.urlRoot = url;
+        } else {
+          this.url = url;
+        }
       } else {
         r.log.error('invalid apiUrl');
         this.url = '';
@@ -61,4 +70,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-})(rskybox || {}, jQuery);
+}(rskybox || {}, jQuery));

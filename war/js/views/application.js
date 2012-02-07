@@ -4,12 +4,12 @@
 var rskybox = (function(r, $) {
 
 
-  r.NewApplicationView = Backbone.View.extend({
+  r.ApplicationView = Backbone.View.extend({
     initialize: function() {
       _.bindAll(this, 'render');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
-      this.template = _.template($('#newAppTemplate').html());
+      this.template = _.template($('#applicationTemplate').html());
     },
 
     events: {
@@ -19,7 +19,7 @@ var rskybox = (function(r, $) {
     submit: function(e) {
       var valid;
 
-      r.log.debug('NewApplicationView.submit');
+      r.log.debug('ApplicationView.submit');
 
       valid = this.model.set({
         name: this.$("input[name='name']").val(),
@@ -42,11 +42,13 @@ var rskybox = (function(r, $) {
     },
 
     success: function(model, response) {
-      $.mobile.changePage('#application?id=' + model.get('applicationId'));
+      $.mobile.changePage('#application');
     },
 
     error: function(model, response) {
-      r.log.debug('NewApplicationView.error');
+      r.log.debug('ApplicationView.error');
+      r.dump(model);
+      r.dump(response);
       if (response.responseText) {
         // This is an apiError.
         return;
@@ -56,11 +58,11 @@ var rskybox = (function(r, $) {
     },
 
     apiError: function(jqXHR) {
-      r.log.debug('NewApplicationView.apiError');
+      r.log.debug('ApplicationView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('NewApplicationView: An unknown API error occurred: ' + code);
+        r.log.error('ApplicationView: An unknown API error occurred: ' + code);
       }
 
       r.flashError(this.apiCodes[code], this.$el);
@@ -73,7 +75,7 @@ var rskybox = (function(r, $) {
     },
 
     apiCodes: {
-      306: 'An application name is required.'
+      605: 'The application was not found.'
     }
   });
 

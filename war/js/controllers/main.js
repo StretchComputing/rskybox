@@ -20,6 +20,23 @@ var rskybox = (function(r, $) {
       r.applications.fetch();
     },
 
+    applicationBeforeShow: function() {
+      r.log.debug('applicationBeforeShow');
+      delete(r.application);
+      r.application = new r.Application({
+        id: r.getParameterByName(location.hash, 'id')
+      });
+      r.applicationView = new r.ApplicationView({
+        el: r.getContentDiv(),
+        model: r.application
+      });
+    },
+
+    applicationShow: function() {
+      r.log.debug('applicationShow');
+      r.application.fetch();
+    },
+
     settingsCreate: function() {
       r.log.debug('settingsCreate');
       $('#logout').click(function() {
@@ -56,6 +73,8 @@ var rskybox = (function(r, $) {
   r.router = new $.mobile.Router([
     { '#applications':  { handler: 'applicationsBeforeShow', events: 'bs' } },
     { '#applications':  { handler: 'applicationsShow', events: 's' } },
+    { '#application[?]id=.*':   { handler: 'applicationBeforeShow', events: 'bs' } },
+    { '#application[?]id=.*':   { handler: 'applicationShow', events: 's' } },
     { '#settings':      { handler: 'settingsCreate', events: 'c' } },
     { '#settings':      { handler: 'settingsBeforeShow', events: 'bs' } },
     { '#settings':      { handler: 'settingsShow', events: 's' } },

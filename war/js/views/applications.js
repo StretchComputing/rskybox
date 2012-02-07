@@ -4,12 +4,12 @@
 var rskybox = (function(r, $) {
 
 
-  r.ApplicationView = Backbone.View.extend({
+  r.AppEntryView = Backbone.View.extend({
     tagName: 'li',
 
     initialize: function() {
       _.bindAll(this, 'render');
-      this.template = _.template($('#appListTemplate').html());
+      this.template = _.template($('#appEntryTemplate').html());
     },
 
     render: function() {
@@ -20,7 +20,7 @@ var rskybox = (function(r, $) {
 
   r.ApplicationsView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'addApplication');
+      _.bindAll(this, 'addAppEntry');
       this.collection.bind('reset', this.render, this);
       this.template = _.template($('#noAppsTemplate').html());
     },
@@ -34,7 +34,7 @@ var rskybox = (function(r, $) {
       } else {
         list = $('<ul>');
         this.collection.each(function(app) {
-          this.addApplication(list, app);
+          this.addAppEntry(list, app);
         }, this);
         this.$el.html(list);
         list.listview();
@@ -42,8 +42,8 @@ var rskybox = (function(r, $) {
       return this;
     },
 
-    addApplication: function(list, app) {
-      list.append(new r.ApplicationView({ model: app }).render().el);
+    addAppEntry: function(list, app) {
+      list.append(new r.AppEntryView({ model: app }).render().el);
     }
   });
 
