@@ -16,6 +16,13 @@ var rskybox = (function(r, $) {
     initialize: function() {
       this.setUrl();
     },
+
+    validate: function(attrs) {
+      if (attrs.name) {
+        return;
+      }
+      return 'A name is required for your application.';
+    }
   });
 
 
@@ -34,4 +41,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-})(rskybox || {}, jQuery);
+}(rskybox || {}, jQuery));

@@ -73,8 +73,7 @@ var rskybox = (function(r, $) {
     },
 
     apiCodes: {
-      306: 'An application name is required.',
-      //406: 'The application name is already in use. Please choose a different name.'
+      306: 'An application name is required.'
     }
   });
 
