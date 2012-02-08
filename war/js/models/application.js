@@ -11,7 +11,8 @@ var rskybox = (function(r, $) {
       name: null,
       version: null,
       date: null,
-      token: null
+      token: null,
+      role: null,
     },
 
     initialize: function() {

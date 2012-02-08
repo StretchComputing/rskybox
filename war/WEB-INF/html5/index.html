@@ -50,7 +50,7 @@
       </p>
     </script>
     <script type="text/template" id="appEntryTemplate">
-      <a href="#application?id=<%= id %>"><%= name %><%= version && (', ' + version) %></a>
+      <a href="#application?id=<%= id %>"><%= name %><%= version && (', ' + version) %> (<%= role %>)</a>
     </script>
 
 
@@ -64,10 +64,16 @@
     </div>
     <script type="text/template" id="applicationTemplate">
       <ul data-role="listview" data-inset="true">
+        <li><a href="#feedback?id=<%= id %>">Feedback</a></li>
+        <li><a href="#logs?id=<%= id %>">Logs</a></li>
+        <li><a href="#crashes?id=<%= id %>">Crashes</a></li>
+      </ul>
+      <ul data-role="listview" data-inset="true">
         <li>Name: <%= name %></li>
         <li>Version: <%= version ? version : 'n/a' %></li>
+        <li>Role: <%= role %></li>
         <li>Token: <%= token %></li>
-        <li>Created: <%= date %>
+        <li>Created: <%= date %></li>
       </ul>
     </script>
 
