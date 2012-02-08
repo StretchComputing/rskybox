@@ -36,15 +36,26 @@ var rskybox = (function(r, $) {
     }
   };
 
-  r.statusCodeHandlers = {
-    401: function(jqXHR) {
-      r.log.debug('401 - unauthorized');
-      r.unsetCookie();
-      r.changePage('root', 'signup');
-      // TODO - Add flash message to home page after 401 occurs.
-    }
+  // General status code handlers.
+  // apiError: optional handler for API errors
+  r.statusCodeHandlers = function(apiError) {
+    var general = {
+      401: function(jqXHR) {
+        r.log.debug('401 - unauthorized');
+        r.unsetCookie();
+        r.changePage('root', 'signup');
+        // TODO - Add flash message to home page after 401 occurs.
+      },
+      404: function() {
+        r.log.debug('404 - not found');
+      },
+      500: function() {
+        r.log.debug('500 - server error');
+      }
+    };
+    apiError && _.extend(general, { 422: apiError });
+    return general;
   };
-
 
   r.setCookie = function(token) {
     Cookie.set('token', token, 9000, '\/');
@@ -52,7 +63,7 @@ var rskybox = (function(r, $) {
 
 
   r.unsetCookie = function() {
-    Cookie.unset('token', '/');
+    Cookie.unset('token', '\/');
   };
 
 

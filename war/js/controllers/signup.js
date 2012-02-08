@@ -8,7 +8,6 @@ var rskybox = (function(r, $) {
     isLoggedIn: function() {
       var current;
 
-      r.log.debug('isLoggedIn');
       current = new r.User({ id: 'current' });
       current.fetch({
         success: function() {

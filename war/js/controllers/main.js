@@ -18,7 +18,7 @@ var rskybox = (function(r, $) {
     applicationsShow: function() {
       r.log.debug('applicationsShow');
       r.applications.fetch({
-        statusCode: r.statusCodeHandlers
+        statusCode: r.statusCodeHandlers()
       });
     },
 
@@ -36,7 +36,9 @@ var rskybox = (function(r, $) {
 
     applicationShow: function() {
       r.log.debug('applicationShow');
-      r.application.fetch();
+      r.application.fetch({
+        statusCode: r.statusCodeHandlers()
+      });
     },
 
     settingsCreate: function() {

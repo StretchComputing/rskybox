@@ -6,7 +6,7 @@ var rskybox = (function(r, $) {
 
   r.NewApplicationView = Backbone.View.extend({
     initialize: function() {
-      _.bindAll(this, 'render');
+      _.bindAll(this, 'apiError');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
       this.template = _.template($('#newAppTemplate').html());
@@ -18,7 +18,6 @@ var rskybox = (function(r, $) {
 
     submit: function(e) {
       var valid;
-
       r.log.debug('NewApplicationView.submit');
 
       valid = this.model.set({
@@ -31,9 +30,7 @@ var rskybox = (function(r, $) {
 
         this.model.save(null, {
           success: this.success,
-          statusCode: _.extend({
-            422: this.apiError
-          }, r.statusCodeHandlers)
+          statusCode: r.statusCodeHandlers(this.apiError)
         });
       }
 
@@ -56,8 +53,8 @@ var rskybox = (function(r, $) {
     },
 
     apiError: function(jqXHR) {
-      r.log.debug('NewApplicationView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
+      r.log.debug('NewApplicationView.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.error('NewApplicationView: An unknown API error occurred: ' + code);
