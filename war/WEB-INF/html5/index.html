@@ -65,6 +65,12 @@
         <li><a href="#logs?id=<%= id %>">Logs</a></li>
         <li><a href="#crashes?id=<%= id %>">Crashes</a></li>
       </ul>
+      <% if (role !== 'member') { %>
+        <ul data-role="listview" data-inset="true">
+          <li><a href="#members?id=<%= id %>">Members</a></li>
+          <li><a href="#endusers?id=<%= id %>">End Users</a></li>
+        </ul>
+      <% } %>
       <ul data-role="listview" data-inset="true">
         <li>Name: <%= name %></li>
         <li>Version: <%= version ? version : 'n/a' %></li>
@@ -101,7 +107,7 @@
     <!-- Settings -->
     <div data-role="page" id="settings" data-title="Settings">
       <div data-role="header">
-        <a href="/html5/admin/users" id="adminButton" rel="external" style="display: none;" data-icon="star">Users Admin</a>
+        <a href="" data-icon="star">Users Admin</a>
         <h1>Settings</h1>
         <a href="#applications" data-icon="home" data-iconpos="right">Home</a>
       </div>
@@ -127,6 +133,62 @@
       </div>
 
       <input type="submit" value="Save">
+    </script>
+
+
+    <!-- Feedback -->
+    <div data-role="page" id="feedback" data-title="">
+      <div data-role="header">
+        <a href="#application?id=<% something %>" data-icon="arrow-l">Back</a>
+        <h1>Feedback</h1>
+        <a href="#archives" data-theme="b" data-icon="check" data-iconpos="right">Archives</a>
+      </div>
+      <div data-role="content">
+      </div>
+    </div>
+    <script type="text/template" id="feedbackTemplate">
+    </script>
+
+
+    <!-- Logs -->
+    <div data-role="page" id="logs" data-title="">
+      <div data-role="header">
+        <a href="#application?id=<% something %>" data-icon="arrow-l">Back</a>
+        <h1>Logs</h1>
+        <a href="#archives" data-theme="b" data-icon="check" data-iconpos="right">Archives</a>
+      </div>
+      <div data-role="content">
+      </div>
+    </div>
+    <script type="text/template" id="logsTemplate">
+    </script>
+
+
+    <!-- Crashes -->
+    <div data-role="page" id="crashes" data-title="">
+      <div data-role="header">
+        <a href="#application?id=<% something %>" data-icon="arrow-l">Back</a>
+        <h1>Crashes</h1>
+        <a href="#archives" data-theme="b" data-icon="check" data-iconpos="right">Archives</a>
+      </div>
+      <div data-role="content">
+      </div>
+    </div>
+    <script type="text/template" id="crashesTemplate">
+    </script>
+
+
+    <!-- -->
+    <div data-role="page" id="" data-title="">
+      <div data-role="header">
+        <a href="#application?id=<% something %>" data-icon="arrow-l">Back</a>
+        <h1></h1>
+        <a href="#archives" data-icon="home" data-iconpos="right">Home</a>
+      </div>
+      <div data-role="content">
+      </div>
+    </div>
+    <script type="text/template" id="Template">
     </script>
   </body>
 </html>

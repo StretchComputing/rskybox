@@ -3,6 +3,7 @@ var RSKYBOX = (function (r, $) {
 
 
   r.controller = {
+    // Applications
     applicationsBeforeShow: function () {
       r.log.debug('applicationsBeforeShow');
       delete(r.applications);
@@ -20,6 +21,8 @@ var RSKYBOX = (function (r, $) {
       });
     },
 
+
+    // Application
     applicationBeforeShow: function () {
       r.log.debug('applicationBeforeShow');
       delete(r.application);
@@ -39,6 +42,8 @@ var RSKYBOX = (function (r, $) {
       });
     },
 
+
+    // Settings
     settingsCreate: function () {
       r.log.debug('settingsCreate');
       $('#logout').click(function () {
@@ -56,6 +61,8 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('settingsShow');
     },
 
+
+    // New App
     newAppBeforeShow: function () {
       r.log.debug('newAppBeforeShow');
       r.newApp = new r.Application();
@@ -70,6 +77,35 @@ var RSKYBOX = (function (r, $) {
       r.newAppView.render();
     },
 
+
+    // Feedback
+    feedbackBeforeShow: function () {
+      r.log.debug('feedbackBeforeShow');
+    },
+
+    feedbackShow: function () {
+      r.log.debug('feedbackShow');
+    },
+
+
+    // Logs
+    logsBeforeShow: function () {
+      r.log.debug('logsBeforeShow');
+    },
+
+    logsShow: function () {
+      r.log.debug('logsShow');
+    },
+
+
+    // Crashes
+    crashesBeforeShow: function () {
+      r.log.debug('crashesBeforeShow');
+    },
+
+    crashesShow: function () {
+      r.log.debug('crashesShow');
+    },
   };
 
   r.router = new $.mobile.Router([
@@ -82,6 +118,12 @@ var RSKYBOX = (function (r, $) {
     { '#settings':      { handler: 'settingsShow', events: 's' } },
     { '#newApp':        { handler: 'newAppBeforeShow', events: 'bs' } },
     { '#newApp':        { handler: 'newAppShow', events: 's' } },
+    { '#feedback':      { handler: 'feedbackBeforeShow', events: 'bs' } },
+    { '#feedback':      { handler: 'feedbackShow', events: 's' } },
+    { '#logs':      { handler: 'logsBeforeShow', events: 'bs' } },
+    { '#logs':      { handler: 'logsShow', events: 's' } },
+    { '#crashes':      { handler: 'crashesBeforeShow', events: 'bs' } },
+    { '#crashes':      { handler: 'crashesShow', events: 's' } },
   ], r.controller);
 
 
