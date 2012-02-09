@@ -1,11 +1,9 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.NewApplicationView = Backbone.View.extend({
-    initialize: function() {
+    initialize: function () {
       _.bindAll(this, 'apiError');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
@@ -16,7 +14,7 @@ var rskybox = (function(r, $) {
       'submit': 'submit'
     },
 
-    submit: function(e) {
+    submit: function (e) {
       var valid;
       r.log.debug('NewApplicationView.submit');
 
@@ -38,11 +36,11 @@ var rskybox = (function(r, $) {
       return false;
     },
 
-    success: function(model, response) {
+    success: function (model, response) {
       $.mobile.changePage('#application?id=' + model.get('applicationId'));
     },
 
-    error: function(model, response) {
+    error: function (model, response) {
       r.log.debug('NewApplicationView.error');
       if (response.responseText) {
         // This is an apiError.
@@ -52,7 +50,7 @@ var rskybox = (function(r, $) {
       r.flashError(response, this.$el);
     },
 
-    apiError: function(jqXHR) {
+    apiError: function (jqXHR) {
       var code = r.getApiStatus(jqXHR.responseText);
       r.log.debug('NewApplicationView.apiError');
 
@@ -63,7 +61,7 @@ var rskybox = (function(r, $) {
       r.flashError(this.apiCodes[code], this.$el);
     },
 
-    render: function() {
+    render: function () {
       this.$el.html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;
@@ -76,4 +74,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));

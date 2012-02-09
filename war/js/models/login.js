@@ -1,13 +1,11 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.Login = r.BaseModel.extend({
     apiUrl: '\/users\/token',
 
-    initialize: function() {
+    initialize: function () {
       this.setUrl();
     },
 
@@ -17,14 +15,14 @@ var rskybox = (function(r, $) {
       password: null
     },
 
-    getQueryObject: function() {
+    getQueryObject: function () {
       return {
         userName: this.get('emailAddress') || this.get('phoneNumber') || '',
         password: this.get('password')
       };
     },
 
-    validate: function(attrs) {
+    validate: function (attrs) {
       var password, PASSWORD_MIN_LEN = 6;
 
       password = attrs.password;
@@ -39,4 +37,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));

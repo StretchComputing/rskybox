@@ -1,7 +1,5 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.Application = r.BaseModel.extend({
@@ -15,11 +13,11 @@ var rskybox = (function(r, $) {
       role: null,
     },
 
-    initialize: function() {
+    initialize: function () {
       this.setUrl();
     },
 
-    validate: function(attrs) {
+    validate: function (attrs) {
       if (attrs.name) {
         return;
       }
@@ -32,15 +30,15 @@ var rskybox = (function(r, $) {
     model: r.Application,
     apiUrl: '/applications',
 
-    initialize: function() {
+    initialize: function () {
       this.setUrl();
     },
 
-    parse: function(response) {
+    parse: function (response) {
       return response.applications;
     }
   });
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));

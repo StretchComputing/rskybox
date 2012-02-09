@@ -1,25 +1,23 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.controller = {
-    isLoggedIn: function() {
+    isLoggedIn: function () {
       var current;
 
       current = new r.User({ id: 'current' });
       current.fetch({
-        success: function() {
+        success: function () {
           r.changePage('applications');
         },
-        error: function(model, response) {
+        error: function (model, response) {
           r.log.debug('Signup.controller.isLoggedIn: no current user');
         }
       });
     },
 
-    signupBeforeShow: function() {
+    signupBeforeShow: function () {
       r.signup = new r.Signup();
       r.signupView = new r.SignupView({
         el: $('#signupForm'),
@@ -27,11 +25,11 @@ var rskybox = (function(r, $) {
       });
     },
 
-    signupShow: function() {
+    signupShow: function () {
       r.signupView.render();
     },
 
-    confirmBeforeShow: function() {
+    confirmBeforeShow: function () {
       r.confirm = new r.Confirm({
         emailAddress: r.getParameterByName(location.hash, 'emailAddress'),
         phoneNumber: r.getParameterByName(location.hash, 'phoneNumber'),
@@ -44,7 +42,7 @@ var rskybox = (function(r, $) {
       r.confirmView.render();
     },
 
-    loginBeforeShow: function() {
+    loginBeforeShow: function () {
       r.login = new r.Login();
       r.loginView = new r.LoginView({
         el: $('#loginForm'),
@@ -64,5 +62,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-}(rskybox || {}, jQuery));
-
+}(RSKYBOX || {}, jQuery));

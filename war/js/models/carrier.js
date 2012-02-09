@@ -1,7 +1,5 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.Carrier = Backbone.Model.extend({});
@@ -12,15 +10,15 @@ var rskybox = (function(r, $) {
 
     apiUrl: '/mobileCarriers',
 
-    initialize: function() {
+    initialize: function () {
       this.setUrl();
     },
 
-    parse: function(response) {
+    parse: function (response) {
       return response.mobileCarriers;
     }
   });
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));

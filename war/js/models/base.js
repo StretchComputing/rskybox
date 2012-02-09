@@ -1,7 +1,5 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.Base = {
@@ -10,7 +8,7 @@ var rskybox = (function(r, $) {
 
     // Sets the model's URL using a base REST url and the API url.
     // If there is an ID, set the urlRoot for use outside of a collection.
-    setUrl: function() {
+    setUrl: function () {
       var url;
 
       if (this.apiUrl) {
@@ -38,9 +36,9 @@ var rskybox = (function(r, $) {
     //
     // !!! This function should be used with caution !!!
     //
-    prepareNewModel: function() {
+    prepareNewModel: function () {
       if (this.isNew()) {
-        _.each(_.keys(this.attributes), function(key) {
+        _.each(_.keys(this.attributes), function (key) {
           if (!this.get(key)) {
             this.unset(key, {silent: true});
           }
@@ -51,7 +49,7 @@ var rskybox = (function(r, $) {
 
     // Gets a mock object for use in HTML forms. Set up a 'fields' attribute in the model
     // that has all the form/model fields in order to use this method.
-    getMock: function() {
+    getMock: function () {
       var field, mock = {};
 
       if (!this.fields) {
@@ -71,4 +69,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));

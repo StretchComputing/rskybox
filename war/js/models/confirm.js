@@ -1,13 +1,11 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.Confirm = r.BaseModel.extend({
     apiUrl: '/users',
 
-    initialize: function() {
+    initialize: function () {
       this.setUrl();
     },
 
@@ -18,7 +16,7 @@ var rskybox = (function(r, $) {
       password: null
     },
 
-    validate: function(attrs) {
+    validate: function (attrs) {
       var
         PASSWORD_MIN_LEN = 6,
         CONFIRMATION_CODE_LEN = 3,
@@ -46,4 +44,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));

@@ -1,7 +1,5 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.Signup = r.BaseModel.extend({
@@ -12,17 +10,17 @@ var rskybox = (function(r, $) {
       mobileCarrierId: null
     },
 
-    initialize: function() {
+    initialize: function () {
       this.setUrl();
     },
 
     // We define parse and return nothing, because we don't need the model modifed after
     // a successful save.
-    parse: function(response) {
+    parse: function (response) {
       r.log.debug('Signup.parse');
     },
 
-    validate: function(attrs) {
+    validate: function (attrs) {
       if (r.isValidEmailAddress(attrs.emailAddress)) {
         r.log.debug('Signup: emailAddress is valid.');
         return;
@@ -37,4 +35,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));

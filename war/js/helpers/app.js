@@ -1,9 +1,5 @@
-'use strict';
-
-
-// The main namespace for our application
-var rskybox = (function(r, $) {
-
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
   r.log = {
     logLevels: {
@@ -12,44 +8,44 @@ var rskybox = (function(r, $) {
       debug: 10
     },
 
-    logLevel: function() {
+    logLevel: function () {
       return this.logLevels.debug;
     },
 
-    error: function(message) {
+    error: function (message) {
       if (this.logLevel() < this.logLevels.error) { return; }
       this.base('Error: ' + message);
     },
 
-    info: function(message) {
+    info: function (message) {
       if (this.logLevel() < this.logLevels.info) { return; }
       this.base('Info: ' + message);
     },
 
-    debug: function(message) {
+    debug: function (message) {
       if (this.logLevel() < this.logLevels.debug) { return; }
       this.base('Debug: ' + message);
     },
 
-    base: function(message) {
+    base: function (message) {
       console.log(message);
     }
   };
 
   // General status code handlers.
   // apiError: optional handler for API errors
-  r.statusCodeHandlers = function(apiError) {
+  r.statusCodeHandlers = function (apiError) {
     var general = {
-      401: function(jqXHR) {
+      401: function (jqXHR) {
         r.log.debug('401 - unauthorized');
         r.unsetCookie();
         r.changePage('root', 'signup');
         // TODO - Add flash message to home page after 401 occurs.
       },
-      404: function() {
+      404: function () {
         r.log.debug('404 - not found');
       },
-      500: function() {
+      500: function () {
         r.log.debug('500 - server error');
       }
     };
@@ -57,23 +53,23 @@ var rskybox = (function(r, $) {
     return general;
   };
 
-  r.setCookie = function(token) {
+  r.setCookie = function (token) {
     Cookie.set('token', token, 9000, '\/');
   };
 
 
-  r.unsetCookie = function() {
+  r.unsetCookie = function () {
     Cookie.unset('token', '\/');
   };
 
 
-  r.dump = function(object) {
+  r.dump = function (object) {
     console.log(JSON.stringify(object));
   };
 
 
   // Change to a new HTML page.
-  r.changePage = function(page, area) {
+  r.changePage = function (page, area) {
     var
       base,
       newPage,
@@ -97,24 +93,24 @@ var rskybox = (function(r, $) {
 
 
     if (pages[page] === undefined) {
-      r.log.error("rskybox.changePage: page '" + page + "' not found.");
+      r.log.error("RSKYBOX.changePage: page '" + page + "' not found.");
       return;
     }
 
     newPage = base + pages[page];
-    r.log.debug("rskybox.changePage: page '" + newPage + "'.");
+    r.log.debug("RSKYBOX.changePage: page '" + newPage + "'.");
     window.location = newPage;
   };
 
 
-  r.getContentDiv = function() {
+  r.getContentDiv = function () {
     return $.mobile.activePage.find(":jqmData(role='content')");
   };
 
 
   // message: The error message to display.
   // el: If not specified, we'll use the active page's content area.
-  r.flashError = function(message, el) {
+  r.flashError = function (message, el) {
     var flash, selector;
 
     el = el || r.getContentDiv();
@@ -132,7 +128,7 @@ var rskybox = (function(r, $) {
 
 
   // Add a property to an object, but only if it is defined and not blank.
-  r.addProperty = function(object, property, value) {
+  r.addProperty = function (object, property, value) {
     if (object && property && value) {
       object[property] = value;
     }
@@ -163,7 +159,7 @@ var rskybox = (function(r, $) {
 
 
   // Pull the apiStatus value out of an HTTP error response.
-  r.getApiStatus = function(responseText) {
+  r.getApiStatus = function (responseText) {
     return JSON.parse(responseText).apiStatus;
   };
 
@@ -181,12 +177,13 @@ var rskybox = (function(r, $) {
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));
 
 
 // This is here so we automatically get page loading messages when Ajax requests start and
 // they are hidden when the Ajax requests are complete.
-(function() {
+(function ($) {
+  'use strict';
   var hidePageLoadingMessage, pageLoad, pageLoadCount, showPageLoadingMessage;
 
   pageLoadCount = 0;
@@ -217,12 +214,12 @@ var rskybox = (function(r, $) {
     $.mobile.showPageLoadingMsg();
   };
 
-  $('html').ajaxSend(function(event, jqXHR, settings) {
-    rskybox.log.debug('ajaxSend: ' + settings.url);
+  $('html').ajaxSend(function (event, jqXHR, settings) {
+    RSKYBOX.log.debug('ajaxSend: ' + settings.url);
     showPageLoadingMessage();
   });
-  $('html').ajaxComplete(function(event, jqXHR, settings) {
-    rskybox.log.debug('ajaxComplete: ' + settings.url);
+  $('html').ajaxComplete(function (event, jqXHR, settings) {
+    RSKYBOX.log.debug('ajaxComplete: ' + settings.url);
     hidePageLoadingMessage();
   });
-}());
+}(jQuery));

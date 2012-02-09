@@ -1,29 +1,27 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.CarrierView = Backbone.View.extend({
     tagName: 'option',
 
-    initialize: function() {
+    initialize: function () {
       _.bindAll(this, 'render');
     },
 
-    render: function() {
+    render: function () {
       $(this.el).attr('value', this.model.get('id')).html(this.model.get('name'));
       return this;
     }
   });
 
   r.CarriersView = Backbone.View.extend({
-    initialize: function() {
+    initialize: function () {
       _.bindAll(this, 'addCarrier');
       this.collection.bind('reset', this.render, this);
     },
 
-    render: function() {
+    render: function () {
       $(this.el).empty();
       this.addCarrier(new r.Carrier({ id: '', name: 'Select Mobile Carrier'}));
       this.collection.each(this.addCarrier);
@@ -31,11 +29,11 @@ var rskybox = (function(r, $) {
       return this;
     },
 
-    addCarrier: function(carrier) {
+    addCarrier: function (carrier) {
       $(this.el).append(new r.CarrierView({ model: carrier }).render().el);
     }
   });
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));

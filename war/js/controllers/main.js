@@ -1,11 +1,9 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.controller = {
-    applicationsBeforeShow: function() {
+    applicationsBeforeShow: function () {
       r.log.debug('applicationsBeforeShow');
       delete(r.applications);
       r.applications = new r.Applications();
@@ -15,14 +13,14 @@ var rskybox = (function(r, $) {
       });
     },
 
-    applicationsShow: function() {
+    applicationsShow: function () {
       r.log.debug('applicationsShow');
       r.applications.fetch({
         statusCode: r.statusCodeHandlers()
       });
     },
 
-    applicationBeforeShow: function() {
+    applicationBeforeShow: function () {
       r.log.debug('applicationBeforeShow');
       delete(r.application);
       r.application = new r.Application({
@@ -34,31 +32,31 @@ var rskybox = (function(r, $) {
       });
     },
 
-    applicationShow: function() {
+    applicationShow: function () {
       r.log.debug('applicationShow');
       r.application.fetch({
         statusCode: r.statusCodeHandlers()
       });
     },
 
-    settingsCreate: function() {
+    settingsCreate: function () {
       r.log.debug('settingsCreate');
-      $('#logout').click(function() {
+      $('#logout').click(function () {
         r.log.debug('logout');
         r.unsetCookie();
         r.changePage('root', 'signup');
       });
     },
 
-    settingsBeforeShow: function() {
+    settingsBeforeShow: function () {
       r.log.debug('settingsBeforeShow');
     },
 
-    settingsShow: function() {
+    settingsShow: function () {
       r.log.debug('settingsShow');
     },
 
-    newAppBeforeShow: function() {
+    newAppBeforeShow: function () {
       r.log.debug('newAppBeforeShow');
       r.newApp = new r.Application();
       r.newAppView = new r.NewApplicationView({
@@ -67,7 +65,7 @@ var rskybox = (function(r, $) {
       });
     },
 
-    newAppShow: function() {
+    newAppShow: function () {
       r.log.debug('newAppShow');
       r.newAppView.render();
     },
@@ -88,5 +86,4 @@ var rskybox = (function(r, $) {
 
 
   return r;
-}(rskybox || {}, jQuery));
-
+}(RSKYBOX || {}, jQuery));

@@ -1,17 +1,15 @@
-'use strict';
-
-
-var rskybox = (function(r, $) {
+var RSKYBOX = (function (r, $) {
+  'use strict';
 
 
   r.User = r.BaseModel.extend({
     apiUrl: '/users',
 
-    initialize: function() {
+    initialize: function () {
       this.setUrl();
     },
   });
 
 
   return r;
-}(rskybox || {}, jQuery));
+}(RSKYBOX || {}, jQuery));
