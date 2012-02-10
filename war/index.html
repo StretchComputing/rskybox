@@ -72,21 +72,21 @@
     <script type="text/template" id="confirmTemplate">
       <div id="emailWrapper" style="display: none">
         <label for="emailAddress">Your email address: </label>
-        <input type="text" name="emailAddress" value="<%= emailAddress %>" readonly>
+        <input type="email" name="emailAddress" value="<%= emailAddress %>" readonly>
       </div>
       <div id="phoneWrapper" style="display: none;">
         <label for="phoneNumber">Your phone number: </label>
-        <input type="text" name="phoneNumber" value="<%= phoneNumber %>" readonly>
+        <input type="tel" name="phoneNumber" value="<%= phoneNumber %>" readonly>
       </div>
       <br>
       <div>
         <label for="confirmationCode">Please enter your confirmation code:</label>
-        <input type="tel" name="confirmationCode" placeholder="Confirmation Code" value="<%= confirmationCode %>"></input>
+        <input name="confirmationCode" placeholder="Confirmation Code" value="<%= confirmationCode %>">
       </div>
       <br>
       <div>
         <label for="password">Please create a password (min 6 chars):</label>
-        <input name="password" placeholder="Password">
+        <input name="password" placeholder="Password" autocorrect="off" autocapitalize="off">
       </div>
 
       <input type="submit" value="Complete Sign Up">
@@ -105,20 +105,20 @@
     <script type="text/template" id="loginTemplate">
       <div>
         <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
-        <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>"></input>
+        <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>">
       </div>
       <div style="text-align: center;">
         <strong>or</strong>
       </div>
       <div>
         <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
-        <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>"></input>
+        <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>">
       </div>
       <div style="text-align: center;">
         <strong>and</strong>
       </div>
       <label for="password" class="ui-hidden-accessible">Password:</label>
-      <input type="text" name="password" placeholder="Password" value="<%= password %>"></input>
+      <input name="password" placeholder="Password" value="<%= password %>" autocorrect="off" autocapitalize="off">
 
       <input type="submit" value="Login">
     </script>
