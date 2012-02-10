@@ -337,6 +337,7 @@ public class FeedbackResource extends ServerResource {
             	json.put("userName", feedback.getUserName());
             	json.put("instanceUrl", feedback.getInstanceUrl());
             	json.put("status", feedback.getStatus());
+            	json.put("appId", feedback.getApplicationId());
         	}
         } catch (JSONException e) {
         	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());
