@@ -24,6 +24,10 @@ var RSKYBOX = (function (r, $) {
   r.FeedbackList = r.BaseCollection.extend({
     model: r.Feedback,
     apiUrl: '/feedback',
+
+    parse: function (response) {
+      return response.feedback;
+    }
   });
 
 
