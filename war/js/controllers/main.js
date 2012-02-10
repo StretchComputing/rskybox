@@ -79,12 +79,20 @@ var RSKYBOX = (function (r, $) {
 
 
     // Feedback
-    feedbackBeforeShow: function () {
-      r.log.debug('feedbackBeforeShow');
+    feedbackListBeforeShow: function () {
+      r.log.debug('feedbackListBeforeShow');
+      delete(r.feedbackList);
+      r.feedbackList = new r.FeedbackList();
+      r.feedbackList.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.feedbackListView = new r.FeedbackListView({
+        el: r.getContentDiv(),
+        collection: r.feedbackList
+      });
     },
 
-    feedbackShow: function () {
-      r.log.debug('feedbackShow');
+    feedbackListShow: function () {
+      r.log.debug('feedbackListShow');
+      r.feedbackList.fetch();
     },
 
 
@@ -106,6 +114,26 @@ var RSKYBOX = (function (r, $) {
     crashesShow: function () {
       r.log.debug('crashesShow');
     },
+
+
+    // Members
+    membersBeforeShow: function () {
+      r.log.debug('membersBeforeShow');
+    },
+
+    membersShow: function () {
+      r.log.debug('membersShow');
+    },
+
+
+    // End Users
+    endusersBeforeShow: function () {
+      r.log.debug('endusersBeforeShow');
+    },
+
+    endusersShow: function () {
+      r.log.debug('endusersShow');
+    },
   };
 
   r.router = new $.mobile.Router([
@@ -118,12 +146,16 @@ var RSKYBOX = (function (r, $) {
     { '#settings':      { handler: 'settingsShow', events: 's' } },
     { '#newApp':        { handler: 'newAppBeforeShow', events: 'bs' } },
     { '#newApp':        { handler: 'newAppShow', events: 's' } },
-    { '#feedback':      { handler: 'feedbackBeforeShow', events: 'bs' } },
-    { '#feedback':      { handler: 'feedbackShow', events: 's' } },
-    { '#logs':      { handler: 'logsBeforeShow', events: 'bs' } },
-    { '#logs':      { handler: 'logsShow', events: 's' } },
-    { '#crashes':      { handler: 'crashesBeforeShow', events: 'bs' } },
-    { '#crashes':      { handler: 'crashesShow', events: 's' } },
+    { '#feedbackList':  { handler: 'feedbackListBeforeShow', events: 'bs' } },
+    { '#feedbackList':  { handler: 'feedbackListShow', events: 's' } },
+    { '#logs':          { handler: 'logsBeforeShow', events: 'bs' } },
+    { '#logs':          { handler: 'logsShow', events: 's' } },
+    { '#crashes':       { handler: 'crashesBeforeShow', events: 'bs' } },
+    { '#crashes':       { handler: 'crashesShow', events: 's' } },
+    { '#members':       { handler: 'membersBeforeShow', events: 'bs' } },
+    { '#members':       { handler: 'membersShow', events: 's' } },
+    { '#endusers':      { handler: 'endusersBeforeShow', events: 'bs' } },
+    { '#endusers':      { handler: 'endusersShow', events: 's' } },
   ], r.controller);
 
 

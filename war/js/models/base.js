@@ -5,25 +5,45 @@ var RSKYBOX = (function (r, $) {
   r.Base = {
     // The REST base portion of the URL, including the version.
     restUrl: '/rest/v1',
+    appUrl: '/applications/',
 
     // Sets the model's URL using a base REST url and the API url.
     // If there is an ID, set the urlRoot for use outside of a collection.
     setUrl: function () {
       var url;
 
-      if (this.apiUrl) {
-        url = this.restUrl + this.apiUrl;
-
-        if (this.get('id')) {
-          this.urlRoot = url;
-        } else {
-          this.url = url;
-        }
-      } else {
+      if (!this.apiUrl) {
         r.log.error('invalid apiUrl');
         this.url = '';
+        return false;
       }
-    }
+
+      url = this.restUrl + this.apiUrl;
+      if (this.get('id')) {
+        this.urlRoot = url;
+      } else {
+        this.url = url;
+      }
+      return true;
+    },
+
+    setAppUrl: function (appId) {
+      var url;
+
+      if (!this.apiUrl || !appId) {
+        r.log.error('invalid apiUrl (' + this.apiUrl + ') or appId (' + appId + ')');
+        this.url = '';
+        return false;
+      }
+
+      url = this.restUrl + this.appUrl + appId + this.apiUrl;
+      if (this.get('id')) {
+        this.urlRoot = url;
+      } else {
+        this.url = url;
+      }
+      return true;
+    },
   };
 
 

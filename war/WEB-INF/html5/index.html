@@ -22,9 +22,11 @@
     <script src="/js/helpers/app.js"></script>
     <script src="/js/models/base.js"></script>
     <script src="/js/models/application.js"></script>
+    <script src="/js/models/feedback-list.js"></script>
     <script src="/js/views/applications.js"></script>
     <script src="/js/views/application.js"></script>
     <script src="/js/views/new-application.js"></script>
+    <script src="/js/views/feedback-list.js"></script>
     <script src="/js/controllers/main.js"></script>
   </head>
   <body>
@@ -61,7 +63,7 @@
     </div>
     <script type="text/template" id="applicationTemplate">
       <ul data-role="listview" data-inset="true">
-        <li><a href="#feedback?id=<%= id %>">Feedback</a></li>
+        <li><a href="#feedbackList?id=<%= id %>">Feedback</a></li>
         <li><a href="#logs?id=<%= id %>">Logs</a></li>
         <li><a href="#crashes?id=<%= id %>">Crashes</a></li>
       </ul>
@@ -137,23 +139,46 @@
 
 
     <!-- Feedback -->
-    <div data-role="page" id="feedback" data-title="">
+    <div data-role="page" id="feedbackList" data-title="">
       <div data-role="header">
-        <a href="#application?id=<% something %>" data-icon="arrow-l">Back</a>
+        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Feedback</h1>
         <a href="#archives" data-theme="b" data-icon="check" data-iconpos="right">Archives</a>
       </div>
       <div data-role="content">
       </div>
     </div>
+    <script type="text/template" id="noFeedbackTemplate">
+      <h3>No feedback at this time.</h3>
+    </script>
+    <script type="text/template" id="feedbackEntryTemplate">
+      <a href="#feedback?appId=<%= appId %>&id=<%= id %>"><%= userName %>:
+        <% if (instanceUrl) { print(instanceUrl + ', '); } %><%= date %></a>
+    </script>
+
+    <div data-role="page" id="feedback">
+      <div data-role="header">
+        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <h1></h1>
+      </div>
+      <div data-role="content"></div>
+    </div>
     <script type="text/template" id="feedbackTemplate">
+      <ul data-role="listview" data-inset="true">
+        <li>Recorded: <%= date %></li>
+        <li>By: <%= userName %></li>
+        <% if (instanceUrl) { %>
+          <li>For: <%= instanceUrl %></li>
+        <% } %>
+        <li>Feedback: <%= audioUrl %></li>
+      </ul>
     </script>
 
 
     <!-- Logs -->
     <div data-role="page" id="logs" data-title="">
       <div data-role="header">
-        <a href="#application?id=<% something %>" data-icon="arrow-l">Back</a>
+        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Logs</h1>
         <a href="#archives" data-theme="b" data-icon="check" data-iconpos="right">Archives</a>
       </div>
@@ -167,7 +192,7 @@
     <!-- Crashes -->
     <div data-role="page" id="crashes" data-title="">
       <div data-role="header">
-        <a href="#application?id=<% something %>" data-icon="arrow-l">Back</a>
+        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Crashes</h1>
         <a href="#archives" data-theme="b" data-icon="check" data-iconpos="right">Archives</a>
       </div>
@@ -178,17 +203,29 @@
     </script>
 
 
-    <!-- -->
-    <div data-role="page" id="" data-title="">
+    <!-- Members -->
+    <div data-role="page" id="members" data-title="">
       <div data-role="header">
-        <a href="#application?id=<% something %>" data-icon="arrow-l">Back</a>
-        <h1></h1>
-        <a href="#archives" data-icon="home" data-iconpos="right">Home</a>
+        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <h1>Members</h1>
       </div>
       <div data-role="content">
       </div>
     </div>
-    <script type="text/template" id="Template">
+    <script type="text/template" id="membersTemplate">
+    </script>
+
+
+    <!-- End Users -->
+    <div data-role="page" id="endusers" data-title="">
+      <div data-role="header">
+        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <h1>End Users</h1>
+      </div>
+      <div data-role="content">
+      </div>
+    </div>
+    <script type="text/template" id="endusersTemplate">
     </script>
   </body>
 </html>
