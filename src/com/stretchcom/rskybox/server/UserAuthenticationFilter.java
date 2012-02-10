@@ -264,6 +264,7 @@ public class UserAuthenticationFilter implements Filter {
 		}
 		
 		// if we get this far, no cookie token was found so extract from HTTP authorization header
+		// Format of authentication header=> Authorization: Basic token:<token_value>
 		String authHeader = httpRequest.getHeader("Authorization");
 		log.info("Authorization header contains '" + authHeader + '"');
 		if (authHeader != null) {
@@ -274,6 +275,7 @@ public class UserAuthenticationFilter implements Filter {
 					String rawCredentials = st.nextToken();
 					
 					// 'credentials' is of the form "token:<token_value>"
+					// this is a key:value pair -- only the value is extracted -- key can be anything
 			        byte[] credentialsArr = Base64.decodeBase64(rawCredentials);
 					String credentials = new String(credentialsArr);
 					int index = credentials.indexOf(":");
