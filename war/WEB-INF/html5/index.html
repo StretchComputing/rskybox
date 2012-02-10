@@ -22,11 +22,12 @@
     <script src="/js/helpers/app.js"></script>
     <script src="/js/models/base.js"></script>
     <script src="/js/models/application.js"></script>
-    <script src="/js/models/feedback-list.js"></script>
+    <script src="/js/models/feedback.js"></script>
     <script src="/js/views/applications.js"></script>
     <script src="/js/views/application.js"></script>
     <script src="/js/views/new-application.js"></script>
     <script src="/js/views/feedback-list.js"></script>
+    <script src="/js/views/feedback.js"></script>
     <script src="/js/controllers/main.js"></script>
   </head>
   <body>
@@ -152,7 +153,7 @@
       <h3>No feedback at this time.</h3>
     </script>
     <script type="text/template" id="feedbackEntryTemplate">
-      <a href="#feedback?appId=<%= appId %>&id=<%= id %>"><%= userName %>:
+      <a href="#feedback?id=<%= id %>&appId=<%= appId %>"><%= userName %>:
         <% if (instanceUrl) { print(instanceUrl + ', '); } %><%= date %></a>
     </script>
 
@@ -165,12 +166,16 @@
     </div>
     <script type="text/template" id="feedbackTemplate">
       <ul data-role="listview" data-inset="true">
+        <li>
+          <audio controls>
+            <source src="<%= audioUrl %>.mp4" type="audio/mp4">
+          </audio>
+        </li>
         <li>Recorded: <%= date %></li>
         <li>By: <%= userName %></li>
         <% if (instanceUrl) { %>
           <li>For: <%= instanceUrl %></li>
         <% } %>
-        <li>Feedback: <%= audioUrl %></li>
       </ul>
     </script>
 

@@ -78,7 +78,7 @@ var RSKYBOX = (function (r, $) {
     },
 
 
-    // Feedback
+    // Feedback List
     feedbackListBeforeShow: function () {
       r.log.debug('feedbackListBeforeShow');
       delete(r.feedbackList);
@@ -93,6 +93,28 @@ var RSKYBOX = (function (r, $) {
     feedbackListShow: function () {
       r.log.debug('feedbackListShow');
       r.feedbackList.fetch();
+    },
+
+
+    // Feedback
+    feedbackBeforeShow: function () {
+      r.log.debug('feedbackBeforeShow');
+      delete(r.feedback);
+      r.feedback = new r.Feedback({
+        id: r.getParameterByName(location.hash, 'id')
+      });
+      r.feedback.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.feedbackView = new r.FeedbackView({
+        el: r.getContentDiv(),
+        model: r.feedback
+      });
+    },
+
+    feedbackShow: function () {
+      r.log.debug('feedbackShow');
+      r.feedback.fetch({
+        statusCode: r.statusCodeHandlers()
+      });
     },
 
 
@@ -148,6 +170,8 @@ var RSKYBOX = (function (r, $) {
     { '#newApp':        { handler: 'newAppShow', events: 's' } },
     { '#feedbackList':  { handler: 'feedbackListBeforeShow', events: 'bs' } },
     { '#feedbackList':  { handler: 'feedbackListShow', events: 's' } },
+    { '#feedback[?]id=.*':      { handler: 'feedbackBeforeShow', events: 'bs' } },
+    { '#feedback[?]id=.*':      { handler: 'feedbackShow', events: 's' } },
     { '#logs':          { handler: 'logsBeforeShow', events: 'bs' } },
     { '#logs':          { handler: 'logsShow', events: 's' } },
     { '#crashes':       { handler: 'crashesBeforeShow', events: 'bs' } },

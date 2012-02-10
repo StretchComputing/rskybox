@@ -4,7 +4,7 @@ var RSKYBOX = (function (r, $) {
 
   r.ApplicationView = Backbone.View.extend({
     initialize: function () {
-      _.bindAll(this, 'render');
+      _.bindAll(this, 'apiError');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
       this.template = _.template($('#applicationTemplate').html());

@@ -3,6 +3,7 @@ var RSKYBOX = (function (r, $) {
 
 
   r.Feedback = r.BaseModel.extend({
+    apiUrl: '/feedback',
     fields: {
       id: null,
       appId: null,
@@ -10,10 +11,12 @@ var RSKYBOX = (function (r, $) {
       userName: null,
       instanceUrl: null,
       status: null,
+      audioUrl: null,
     },
 
-    audioUrl: function() {
-      return '/audio/' + this.get('appId') + '/' + this.id;
+    parse: function (response) {
+      response.audioUrl = '/audio/' + response.appId + '/' + response.id;
+      return response;
     },
   });
 
@@ -21,10 +24,6 @@ var RSKYBOX = (function (r, $) {
   r.FeedbackList = r.BaseCollection.extend({
     model: r.Feedback,
     apiUrl: '/feedback',
-
-    parse: function (response) {
-      return response.feedback;
-    }
   });
 
 
