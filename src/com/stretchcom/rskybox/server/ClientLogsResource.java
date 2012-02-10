@@ -483,6 +483,7 @@ public class ClientLogsResource extends ServerResource {
             	String status = clientLog.getStatus();
             	if(status == null || status.length() == 0) {status = "new";}
             	json.put("status", status);
+            	json.put("appId", clientLog.getApplicationId());
         	}
         } catch (JSONException e) {
         	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
