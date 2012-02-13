@@ -161,10 +161,40 @@ var RSKYBOX = (function (r, $) {
     // Crashes
     crashesBeforeShow: function () {
       r.log.debug('crashesBeforeShow');
+      delete(r.crashes);
+      r.crashes = new r.Crashes();
+      r.crashes.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.crashesView = new r.CrashesView({
+        el: r.getContentDiv(),
+        collection: r.crashes
+      });
     },
 
     crashesShow: function () {
       r.log.debug('crashesShow');
+      r.crashes.fetch();
+    },
+
+
+    // Crash
+    crashBeforeShow: function () {
+      r.log.debug('crashBeforeShow');
+      delete(r.crash);
+      r.crash = new r.Crash({
+        id: r.getParameterByName(location.hash, 'id')
+      });
+      r.crash.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.crashView = new r.CrashView({
+        el: r.getContentDiv(),
+        model: r.crash
+      });
+    },
+
+    crashShow: function () {
+      r.log.debug('crashShow');
+      r.crash.fetch({
+        statusCode: r.statusCodeHandlers()
+      });
     },
 
 
@@ -204,10 +234,12 @@ var RSKYBOX = (function (r, $) {
     { '#feedback[?]id=.*':      { handler: 'feedbackShow', events: 's' } },
     { '#logs':          { handler: 'logsBeforeShow', events: 'bs' } },
     { '#logs':          { handler: 'logsShow', events: 's' } },
-    { '#log[?]id=.*':          { handler: 'logBeforeShow', events: 'bs' } },
-    { '#log[?]id=.*':          { handler: 'logShow', events: 's' } },
+    { '#log[?]id=.*':   { handler: 'logBeforeShow', events: 'bs' } },
+    { '#log[?]id=.*':   { handler: 'logShow', events: 's' } },
     { '#crashes':       { handler: 'crashesBeforeShow', events: 'bs' } },
     { '#crashes':       { handler: 'crashesShow', events: 's' } },
+    { '#crash[?]id=.*': { handler: 'crashBeforeShow', events: 'bs' } },
+    { '#crash[?]id=.*': { handler: 'crashShow', events: 's' } },
     { '#members':       { handler: 'membersBeforeShow', events: 'bs' } },
     { '#members':       { handler: 'membersShow', events: 's' } },
     { '#endusers':      { handler: 'endusersBeforeShow', events: 'bs' } },
