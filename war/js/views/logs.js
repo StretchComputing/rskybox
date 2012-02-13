@@ -2,12 +2,12 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.FeedbackEntryView = Backbone.View.extend({
+  r.LogEntryView = Backbone.View.extend({
     tagName: 'li',
 
     initialize: function () {
       _.bindAll(this, 'render');
-      this.template = _.template($('#feedbackEntryTemplate').html());
+      this.template = _.template($('#logEntryTemplate').html());
     },
 
     render: function () {
@@ -16,11 +16,11 @@ var RSKYBOX = (function (r, $) {
     }
   });
 
-  r.FeedbackListView = Backbone.View.extend({
+  r.LogsView = Backbone.View.extend({
     initialize: function () {
-      _.bindAll(this, 'addFeedbackEntry');
+      _.bindAll(this, 'addLogEntry');
       this.collection.bind('reset', this.render, this);
-      this.template = _.template($('#noFeedbackTemplate').html());
+      this.template = _.template($('#noLogsTemplate').html());
     },
 
     render: function () {
@@ -31,8 +31,8 @@ var RSKYBOX = (function (r, $) {
         this.$el.html(this.template());
       } else {
         list = $('<ul>');
-        this.collection.each(function (feedback) {
-          this.addFeedbackEntry(list, feedback);
+        this.collection.each(function (log) {
+          this.addLogEntry(list, log);
         }, this);
         this.$el.html(list);
         list.listview();
@@ -40,8 +40,8 @@ var RSKYBOX = (function (r, $) {
       return this;
     },
 
-    addFeedbackEntry: function (list, feedback) {
-      list.append(new r.FeedbackEntryView({ model: feedback }).render().el);
+    addLogEntry: function (list, log) {
+      list.append(new r.LogEntryView({ model: log }).render().el);
     }
   });
 

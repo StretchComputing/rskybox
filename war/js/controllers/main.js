@@ -121,10 +121,40 @@ var RSKYBOX = (function (r, $) {
     // Logs
     logsBeforeShow: function () {
       r.log.debug('logsBeforeShow');
+      delete(r.logs);
+      r.logs = new r.Logs();
+      r.logs.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.logsView = new r.LogsView({
+        el: r.getContentDiv(),
+        collection: r.logs
+      });
     },
 
     logsShow: function () {
       r.log.debug('logsShow');
+      r.logs.fetch();
+    },
+
+
+    // Log
+    logBeforeShow: function () {
+      r.log.debug('logBeforeShow');
+      delete(r.logCurrent);
+      r.logCurrent = new r.Log({
+        id: r.getParameterByName(location.hash, 'id')
+      });
+      r.logCurrent.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.logView = new r.LogView({
+        el: r.getContentDiv(),
+        model: r.logCurrent
+      });
+    },
+
+    logShow: function () {
+      r.log.debug('logShow');
+      r.logCurrent.fetch({
+        statusCode: r.statusCodeHandlers()
+      });
     },
 
 
@@ -174,6 +204,8 @@ var RSKYBOX = (function (r, $) {
     { '#feedback[?]id=.*':      { handler: 'feedbackShow', events: 's' } },
     { '#logs':          { handler: 'logsBeforeShow', events: 'bs' } },
     { '#logs':          { handler: 'logsShow', events: 's' } },
+    { '#log[?]id=.*':          { handler: 'logBeforeShow', events: 'bs' } },
+    { '#log[?]id=.*':          { handler: 'logShow', events: 's' } },
     { '#crashes':       { handler: 'crashesBeforeShow', events: 'bs' } },
     { '#crashes':       { handler: 'crashesShow', events: 's' } },
     { '#members':       { handler: 'membersBeforeShow', events: 'bs' } },
