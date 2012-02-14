@@ -2,26 +2,45 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.CrashEntryView = Backbone.View.extend({
+  r.MemberEntryView = Backbone.View.extend({
     tagName: 'li',
 
     initialize: function () {
       _.bindAll(this, 'render');
-      this.template = _.template($('#crashEntryTemplate').html());
+      this.template = _.template($('#memberEntryTemplate').html());
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.getMock()));
+      var display = '',
+          mock = this.model.getMock();
+
+      if (mock.emailAddress) {
+        display += mock.emailAddress;
+      } else if (mock.phoneNumber) {
+        display += mock.phoneNumber;
+      }
+      switch (mock.role) {
+      case 'owner':
+        display += ' $$';
+        break;
+      case 'manager':
+        display += ' *';
+        break;
+      default:
+        break;
+      }
+
+      mock.display = display;
+      this.$el.html(this.template(mock));
       return this;
     }
   });
 
-
-  r.CrashesView = Backbone.View.extend({
+  r.MembersView = Backbone.View.extend({
     initialize: function () {
-      _.bindAll(this, 'addCrashEntry');
+      _.bindAll(this, 'addMemberEntry');
       this.collection.bind('reset', this.render, this);
-      this.template = _.template($('#noCrashesTemplate').html());
+      this.template = _.template($('#noMembersTemplate').html());
     },
 
     render: function () {
@@ -32,8 +51,8 @@ var RSKYBOX = (function (r, $) {
         this.$el.html(this.template());
       } else {
         list = $('<ul>');
-        this.collection.each(function (crash) {
-          this.addCrashEntry(list, crash);
+        this.collection.each(function (member) {
+          this.addMemberEntry(list, member);
         }, this);
         this.$el.html(list);
         list.listview();
@@ -41,17 +60,17 @@ var RSKYBOX = (function (r, $) {
       return this;
     },
 
-    addCrashEntry: function (list, crash) {
-      list.append(new r.CrashEntryView({ model: crash }).render().el);
+    addMemberEntry: function (list, member) {
+      list.append(new r.MemberEntryView({ model: member }).render().el);
     }
   });
 
 
-  r.CrashView = Backbone.View.extend({
+  r.MemberView = Backbone.View.extend({
     initialize: function () {
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
-      this.template = _.template($('#crashTemplate').html());
+      this.template = _.template($('#memberTemplate').html());
     },
 
     render: function () {
@@ -61,7 +80,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('CrashView.error');
+      r.log.debug('MemberView.error');
       if (response.responseText) {
         // This is an apiError.
         return;
@@ -71,11 +90,11 @@ var RSKYBOX = (function (r, $) {
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('CrashView.apiError');
+      r.log.debug('MemberView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('CrashView: An unknown API error occurred: ' + code);
+        r.log.error('MemberView: An unknown API error occurred: ' + code);
       }
 
       r.flashError(this.apiCodes[code], this.$el);
@@ -84,8 +103,9 @@ var RSKYBOX = (function (r, $) {
     apiCodes: {
       203: 'You are not authorized for this application.',
       305: 'Application ID required.',
-      602: 'Crash was not found',
+      307: 'Member ID required.',
       605: 'Application was not found',
+      606: 'Member was not found',
     }
   });
 

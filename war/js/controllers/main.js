@@ -201,10 +201,40 @@ var RSKYBOX = (function (r, $) {
     // Members
     membersBeforeShow: function () {
       r.log.debug('membersBeforeShow');
+      delete(r.members);
+      r.members = new r.Members();
+      r.members.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.membersView = new r.MembersView({
+        el: r.getContentDiv(),
+        collection: r.members
+      });
     },
 
     membersShow: function () {
       r.log.debug('membersShow');
+      r.members.fetch();
+    },
+
+
+    // Member
+    memberBeforeShow: function () {
+      r.log.debug('memberBeforeShow');
+      delete(r.member);
+      r.member = new r.Member({
+        id: r.getParameterByName(location.hash, 'id')
+      });
+      r.member.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.memberView = new r.MemberView({
+        el: r.getContentDiv(),
+        model: r.member
+      });
+    },
+
+    memberShow: function () {
+      r.log.debug('memberShow');
+      r.member.fetch({
+        statusCode: r.statusCodeHandlers()
+      });
     },
 
 
@@ -242,6 +272,8 @@ var RSKYBOX = (function (r, $) {
     { '#crash[?]id=.*': { handler: 'crashShow', events: 's' } },
     { '#members':       { handler: 'membersBeforeShow', events: 'bs' } },
     { '#members':       { handler: 'membersShow', events: 's' } },
+    { '#member[?]id=.*':        { handler: 'memberBeforeShow', events: 'bs' } },
+    { '#member[?]id=.*':        { handler: 'memberShow', events: 's' } },
     { '#endusers':      { handler: 'endusersBeforeShow', events: 'bs' } },
     { '#endusers':      { handler: 'endusersShow', events: 's' } },
   ], r.controller);
