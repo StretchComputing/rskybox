@@ -224,11 +224,13 @@
         <li>Message: <%= message %></li>
         <li>Status: <%= status %></li>
         <li>Stack Back Trace:<br><%= stackBackTrace %></li>
-        <li>App Actions:<br>
-          <% appActions.forEach(function(action) { %>
-            <%= action.timestamp %> - <%= action.duration %>ms: <%= action.description %><br>
-          <% }); %>
-        </li>
+        <% if (appActions) { %>
+          <li>App Actions:<br>
+            <% appActions.forEach(function(action) { %>
+              <%= action.timestamp %> - <%= action.duration %>ms: <%= action.description %><br>
+            <% }); %>
+          </li>
+        <% } %>
       </ul>
     </script>
 
@@ -265,11 +267,13 @@
         <li>For: <%= instanceUrl %></li>
         <li>Status: <%= status %></li>
         <li>Summary: <%= summary %></li>
-        <li>App Actions:<br>
-          <% appActions.forEach(function(action) { %>
-            <%= action.timestamp %> - <%= action.duration %>ms: <%= action.description %><br>
-          <% }); %>
-        </li>
+        <% if (appActions) { %>
+          <li>App Actions:<br>
+            <% appActions.forEach(function(action) { %>
+              <%= action.timestamp %> - <%= action.duration %>ms: <%= action.description %><br>
+            <% }); %>
+          </li>
+        <% } %>
       </ul>
       Crash Stack Data: <a href="/crashStackData/<%= appId %>/<%= id %>.plcrash" data-ajax="false">plcrash file</a>
     </script>
