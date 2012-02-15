@@ -60,10 +60,10 @@
 
 
     <!-- Application -->
-    <div data-role="page" id="application">
+    <div data-role="page" id="application" data-title="Application">
       <div data-role="header">
         <a href="#applications" data-direction="reverse" data-icon="home">Home</a>
-        <h1></h1>
+        <h1>Application</h1>
       </div>
       <div data-role="content"></div>
     </div>
@@ -145,7 +145,7 @@
 
 
     <!-- Feedback -->
-    <div data-role="page" id="feedbackList" data-title="">
+    <div data-role="page" id="feedbackList" data-title="Feedback">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Feedback</h1>
@@ -162,7 +162,7 @@
         <% if (instanceUrl) { print(instanceUrl + ', '); } %><%= date %></a>
     </script>
 
-    <div data-role="page" id="feedback">
+    <div data-role="page" id="feedback" data-title="Feedback">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1></h1>
@@ -186,7 +186,7 @@
 
 
     <!-- Logs -->
-    <div data-role="page" id="logs" data-title="">
+    <div data-role="page" id="logs" data-title="Logs">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Logs</h1>
@@ -203,7 +203,7 @@
         <% if (instanceUrl) { print(instanceUrl + ', '); } %><%= date %></a>
     </script>
 
-    <div data-role="page" id="log">
+    <div data-role="page" id="log" data-title="Log">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Log</h1>
@@ -235,7 +235,7 @@
 
 
     <!-- Crashes -->
-    <div data-role="page" id="crashes">
+    <div data-role="page" id="crashes" data-title="Crashes">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Crashes</h1>
@@ -252,7 +252,7 @@
         <% if (instanceUrl) { print(instanceUrl + ', '); } %><%= date %></a>
     </script>
 
-    <div data-role="page" id="crash">
+    <div data-role="page" id="crash" data-title="Crash">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Crash</h1>
@@ -279,7 +279,7 @@
 
 
     <!-- Members -->
-    <div data-role="page" id="members" data-title="">
+    <div data-role="page" id="members" data-title="Members">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Members</h1>
@@ -294,7 +294,7 @@
       <a href="#member?id=<%= id %>&appId=<%= appId %>"><%= display %></a>
     </script>
 
-    <div data-role="page" id="member">
+    <div data-role="page" id="member" data-title="Member">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Member</h1>
@@ -313,7 +313,7 @@
 
 
     <!-- End Users -->
-    <div data-role="page" id="endusers" data-title="">
+    <div data-role="page" id="endusers" data-title="End Users">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>End Users</h1>
@@ -328,7 +328,7 @@
       <a href="#enduser?id=<%= id %>&appId=<%= appId %>"><%= userName %> : <%= version %></a>
     </script>
 
-    <div data-role="page" id="enduser">
+    <div data-role="page" id="enduser" data-title="End User">
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>End User</h1>
