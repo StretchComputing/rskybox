@@ -238,13 +238,43 @@ var RSKYBOX = (function (r, $) {
     },
 
 
-    // End Users
+    // Endusers
     endusersBeforeShow: function () {
       r.log.debug('endusersBeforeShow');
+      delete(r.endusers);
+      r.endusers = new r.Endusers();
+      r.endusers.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.endusersView = new r.EndusersView({
+        el: r.getContentDiv(),
+        collection: r.endusers
+      });
     },
 
     endusersShow: function () {
       r.log.debug('endusersShow');
+      r.endusers.fetch();
+    },
+
+
+    // Enduser
+    enduserBeforeShow: function () {
+      r.log.debug('enduserBeforeShow');
+      delete(r.enduser);
+      r.enduser = new r.Enduser({
+        id: r.getParameterByName(location.hash, 'id')
+      });
+      r.enduser.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.enduserView = new r.EnduserView({
+        el: r.getContentDiv(),
+        model: r.enduser
+      });
+    },
+
+    enduserShow: function () {
+      r.log.debug('enduserShow');
+      r.enduser.fetch({
+        statusCode: r.statusCodeHandlers()
+      });
     },
   };
 
@@ -276,6 +306,8 @@ var RSKYBOX = (function (r, $) {
     { '#member[?]id=.*':        { handler: 'memberShow', events: 's' } },
     { '#endusers':      { handler: 'endusersBeforeShow', events: 'bs' } },
     { '#endusers':      { handler: 'endusersShow', events: 's' } },
+    { '#enduser[?]id=.*':       { handler: 'enduserBeforeShow', events: 'bs' } },
+    { '#enduser[?]id=.*':       { handler: 'enduserShow', events: 's' } },
   ], r.controller);
 
 
