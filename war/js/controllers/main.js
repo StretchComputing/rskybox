@@ -6,7 +6,6 @@ var RSKYBOX = (function (r, $) {
     // Applications
     applicationsBeforeShow: function () {
       r.log.debug('applicationsBeforeShow');
-      delete(r.applications);
       r.applications = new r.Applications();
       r.applicationsView = new r.ApplicationsView({
         el: r.getContentDiv(),
@@ -25,7 +24,6 @@ var RSKYBOX = (function (r, $) {
     // Application
     applicationBeforeShow: function () {
       r.log.debug('applicationBeforeShow');
-      delete(r.application);
       r.application = new r.Application({
         id: r.getParameterByName(location.hash, 'id')
       });
@@ -81,7 +79,6 @@ var RSKYBOX = (function (r, $) {
     // Feedback List
     feedbackListBeforeShow: function () {
       r.log.debug('feedbackListBeforeShow');
-      delete(r.feedbackList);
       r.feedbackList = new r.FeedbackList();
       r.feedbackList.setAppUrl(r.getParameterByName(location.hash, 'id'));
       r.feedbackListView = new r.FeedbackListView({
@@ -99,7 +96,6 @@ var RSKYBOX = (function (r, $) {
     // Feedback
     feedbackBeforeShow: function () {
       r.log.debug('feedbackBeforeShow');
-      delete(r.feedback);
       r.feedback = new r.Feedback({
         id: r.getParameterByName(location.hash, 'id')
       });
@@ -121,7 +117,6 @@ var RSKYBOX = (function (r, $) {
     // Logs
     logsBeforeShow: function () {
       r.log.debug('logsBeforeShow');
-      delete(r.logs);
       r.logs = new r.Logs();
       r.logs.setAppUrl(r.getParameterByName(location.hash, 'id'));
       r.logsView = new r.LogsView({
@@ -139,7 +134,6 @@ var RSKYBOX = (function (r, $) {
     // Log
     logBeforeShow: function () {
       r.log.debug('logBeforeShow');
-      delete(r.logCurrent);
       r.logCurrent = new r.Log({
         id: r.getParameterByName(location.hash, 'id')
       });
@@ -161,7 +155,6 @@ var RSKYBOX = (function (r, $) {
     // Crashes
     crashesBeforeShow: function () {
       r.log.debug('crashesBeforeShow');
-      delete(r.crashes);
       r.crashes = new r.Crashes();
       r.crashes.setAppUrl(r.getParameterByName(location.hash, 'id'));
       r.crashesView = new r.CrashesView({
@@ -179,7 +172,6 @@ var RSKYBOX = (function (r, $) {
     // Crash
     crashBeforeShow: function () {
       r.log.debug('crashBeforeShow');
-      delete(r.crash);
       r.crash = new r.Crash({
         id: r.getParameterByName(location.hash, 'id')
       });
@@ -201,7 +193,6 @@ var RSKYBOX = (function (r, $) {
     // Members
     membersBeforeShow: function () {
       r.log.debug('membersBeforeShow');
-      delete(r.members);
       r.members = new r.Members();
       r.members.setAppUrl(r.getParameterByName(location.hash, 'id'));
       r.membersView = new r.MembersView({
@@ -219,7 +210,6 @@ var RSKYBOX = (function (r, $) {
     // Member
     memberBeforeShow: function () {
       r.log.debug('memberBeforeShow');
-      delete(r.member);
       r.member = new r.Member({
         id: r.getParameterByName(location.hash, 'id')
       });
@@ -241,7 +231,6 @@ var RSKYBOX = (function (r, $) {
     // Endusers
     endusersBeforeShow: function () {
       r.log.debug('endusersBeforeShow');
-      delete(r.endusers);
       r.endusers = new r.Endusers();
       r.endusers.setAppUrl(r.getParameterByName(location.hash, 'id'));
       r.endusersView = new r.EndusersView({
@@ -259,7 +248,6 @@ var RSKYBOX = (function (r, $) {
     // Enduser
     enduserBeforeShow: function () {
       r.log.debug('enduserBeforeShow');
-      delete(r.enduser);
       r.enduser = new r.Enduser({
         id: r.getParameterByName(location.hash, 'id')
       });
@@ -276,6 +264,11 @@ var RSKYBOX = (function (r, $) {
         statusCode: r.statusCodeHandlers()
       });
     },
+
+    testHandler: function (eventType, matchObj, ui, page, evt) {
+      r.log.debug('testHandler');
+      console.log(eventType, matchObj, ui, page, evt);
+    }
   };
 
   r.router = new $.mobile.Router([
@@ -308,6 +301,7 @@ var RSKYBOX = (function (r, $) {
     { '#endusers':      { handler: 'endusersShow', events: 's' } },
     { '#enduser[?]id=.*':       { handler: 'enduserBeforeShow', events: 'bs' } },
     { '#enduser[?]id=.*':       { handler: 'enduserShow', events: 's' } },
+    { '#test': { handler: 'testHandler', events: 'bc,c,i,bs,s,bh,h,rm' } },
   ], r.controller);
 
 
