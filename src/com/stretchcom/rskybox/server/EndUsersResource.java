@@ -349,6 +349,7 @@ public class EndUsersResource extends ServerResource {
                 json.put("application", theEndUser.getApplication());
                 json.put("version", theEndUser.getVersion());
                 json.put("instanceUrl", theEndUser.getInstanceUrl());
+                json.put("appId", theEndUser.getApplicationId());
         	}
         } catch (JSONException e) {
         	log.severe("getEndUserJson() error creating JSON return object. Exception = " + e.getMessage());
