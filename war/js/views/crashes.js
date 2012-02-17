@@ -46,7 +46,11 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-  r.CrashView = Backbone.View.extend({
+  r.CrashView = r.JqmPageBaseView.extend({
+    events: {
+      'click .changeStatus': 'changeStatus',
+    },
+
     initialize: function () {
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
@@ -54,7 +58,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.getMock()));
+      this.renderStatusButton();
+      this.getContent().html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;
     },
@@ -66,7 +71,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response, this.$el);
+      r.flashError(response, this.getContent());
     },
 
     apiError: function (jqXHR) {
@@ -77,7 +82,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('CrashView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code], this.$el);
+      r.flashError(this.apiCodes[code], this.getContent());
     },
 
     apiCodes: {
