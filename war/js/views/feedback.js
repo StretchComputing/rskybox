@@ -37,7 +37,6 @@ var RSKYBOX = (function (r, $) {
         this.getContent().html(list);
         list.listview();
       }
-      this.renderArchiveButton('#feedbackList');
       return this;
     },
 

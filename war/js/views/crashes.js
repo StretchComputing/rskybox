@@ -17,9 +17,8 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-  r.CrashesView = Backbone.View.extend({
+  r.CrashesView = r.JqmPageBaseView.extend({
     initialize: function () {
-      _.bindAll(this, 'addCrashEntry');
       this.collection.bind('reset', this.render, this);
       this.template = _.template($('#noCrashesTemplate').html());
     },
@@ -27,15 +26,15 @@ var RSKYBOX = (function (r, $) {
     render: function () {
       var list;
 
-      $(this.el).empty();
+      this.getContent().empty();
       if (this.collection.length <= 0) {
-        this.$el.html(this.template());
+        this.getContent().html(this.template());
       } else {
         list = $('<ul>');
         this.collection.each(function (crash) {
           this.addCrashEntry(list, crash);
         }, this);
-        this.$el.html(list);
+        this.getContent().html(list);
         list.listview();
       }
       return this;

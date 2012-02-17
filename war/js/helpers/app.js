@@ -206,12 +206,14 @@ var RSKYBOX = (function (r, $) {
   hidePageLoadingMessage = function () {
     if (pageLoad('decrement') <= 0) {
       $.mobile.hidePageLoadingMsg();
+      //$('html').removeClass('ui-loading');
     }
   };
 
   showPageLoadingMessage = function () {
     pageLoad('increment');
     $.mobile.showPageLoadingMsg();
+    //$('html').addClass('ui-loading');
   };
 
   $('html').ajaxSend(function (event, jqXHR, settings) {

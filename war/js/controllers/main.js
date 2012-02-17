@@ -25,7 +25,7 @@ var RSKYBOX = (function (r, $) {
     applicationBeforeShow: function () {
       r.log.debug('applicationBeforeShow');
       r.application = new r.Application({
-        id: r.getParameterByName(location.hash, 'id')
+        id: r.session.params.id
       });
       r.applicationView = new r.ApplicationView({
         el: r.getContentDiv(),
@@ -85,6 +85,7 @@ var RSKYBOX = (function (r, $) {
         el: $.mobile.activePage,
         collection: r.feedbackList
       });
+      r.feedbackListView.renderArchiveButton('#feedbackList');
     },
 
     feedbackListShow: function () {
@@ -97,7 +98,7 @@ var RSKYBOX = (function (r, $) {
     feedbackBeforeShow: function () {
       r.log.debug('feedbackBeforeShow');
       r.feedback = new r.Feedback({
-        id: r.getParameterByName(location.hash, 'id')
+        id: r.session.params.id
       });
       r.feedback.setAppUrl(r.session.params.appId);
       r.feedbackView = new r.FeedbackView({
@@ -118,16 +119,17 @@ var RSKYBOX = (function (r, $) {
     logsBeforeShow: function () {
       r.log.debug('logsBeforeShow');
       r.logs = new r.Logs();
-      r.logs.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.logs.setAppUrl(r.session.params.id);
       r.logsView = new r.LogsView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         collection: r.logs
       });
+      r.logsView.renderArchiveButton('#logs');
     },
 
     logsShow: function () {
       r.log.debug('logsShow');
-      r.logs.fetch();
+      r.logs.fetch({data: { status: r.session.params.status }});
     },
 
 
@@ -135,9 +137,9 @@ var RSKYBOX = (function (r, $) {
     logBeforeShow: function () {
       r.log.debug('logBeforeShow');
       r.logCurrent = new r.Log({
-        id: r.getParameterByName(location.hash, 'id')
+        id: r.session.params.id
       });
-      r.logCurrent.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.logCurrent.setAppUrl(r.session.params.appId);
       r.logView = new r.LogView({
         el: r.getContentDiv(),
         model: r.logCurrent
@@ -156,16 +158,17 @@ var RSKYBOX = (function (r, $) {
     crashesBeforeShow: function () {
       r.log.debug('crashesBeforeShow');
       r.crashes = new r.Crashes();
-      r.crashes.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.crashes.setAppUrl(r.session.params.id);
       r.crashesView = new r.CrashesView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         collection: r.crashes
       });
+      r.crashesView.renderArchiveButton('#crashes');
     },
 
     crashesShow: function () {
       r.log.debug('crashesShow');
-      r.crashes.fetch();
+      r.crashes.fetch({data: { status: r.session.params.status }});
     },
 
 
@@ -173,9 +176,9 @@ var RSKYBOX = (function (r, $) {
     crashBeforeShow: function () {
       r.log.debug('crashBeforeShow');
       r.crash = new r.Crash({
-        id: r.getParameterByName(location.hash, 'id')
+        id: r.session.params.id
       });
-      r.crash.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.crash.setAppUrl(r.session.params.appId);
       r.crashView = new r.CrashView({
         el: r.getContentDiv(),
         model: r.crash
@@ -194,7 +197,7 @@ var RSKYBOX = (function (r, $) {
     membersBeforeShow: function () {
       r.log.debug('membersBeforeShow');
       r.members = new r.Members();
-      r.members.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.members.setAppUrl(r.session.params.id);
       r.membersView = new r.MembersView({
         el: r.getContentDiv(),
         collection: r.members
@@ -211,9 +214,9 @@ var RSKYBOX = (function (r, $) {
     memberBeforeShow: function () {
       r.log.debug('memberBeforeShow');
       r.member = new r.Member({
-        id: r.getParameterByName(location.hash, 'id')
+        id: r.session.params.id
       });
-      r.member.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.member.setAppUrl(r.session.params.appId);
       r.memberView = new r.MemberView({
         el: r.getContentDiv(),
         model: r.member
@@ -232,7 +235,7 @@ var RSKYBOX = (function (r, $) {
     endusersBeforeShow: function () {
       r.log.debug('endusersBeforeShow');
       r.endusers = new r.Endusers();
-      r.endusers.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.endusers.setAppUrl(r.session.params.id);
       r.endusersView = new r.EndusersView({
         el: r.getContentDiv(),
         collection: r.endusers
@@ -249,9 +252,9 @@ var RSKYBOX = (function (r, $) {
     enduserBeforeShow: function () {
       r.log.debug('enduserBeforeShow');
       r.enduser = new r.Enduser({
-        id: r.getParameterByName(location.hash, 'id')
+        id: r.session.params.id
       });
-      r.enduser.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.enduser.setAppUrl(r.session.params.appId);
       r.enduserView = new r.EnduserView({
         el: r.getContentDiv(),
         model: r.enduser
@@ -263,11 +266,6 @@ var RSKYBOX = (function (r, $) {
       r.enduser.fetch({
         statusCode: r.statusCodeHandlers()
       });
-    },
-
-    testHandler: function (eventType, matchObj, ui, page, evt) {
-      r.log.debug('testHandler');
-      console.log(eventType, matchObj, ui, page, evt);
     },
 
     setupSession: function (eventType, matchObj, ui, page, evt) {
@@ -308,7 +306,6 @@ var RSKYBOX = (function (r, $) {
     { '#endusers':      { handler: 'endusersShow', events: 's' } },
     { '#enduser[?]id=.*':       { handler: 'enduserBeforeShow', events: 'bs' } },
     { '#enduser[?]id=.*':       { handler: 'enduserShow', events: 's' } },
-    { '#test': { handler: 'testHandler', events: 'bc,c,i,bs,s,bh,h,rm' } },
   ], r.controller);
 
 
