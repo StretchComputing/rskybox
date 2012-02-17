@@ -102,7 +102,7 @@ var RSKYBOX = (function (r, $) {
       });
       r.feedback.setAppUrl(r.session.params.appId);
       r.feedbackView = new r.FeedbackView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         model: r.feedback
       });
     },

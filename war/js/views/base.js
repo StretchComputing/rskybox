@@ -34,6 +34,32 @@ var RSKYBOX = (function (r, $) {
       el.find('.ui-btn-text').text(model.display);
     },
 
+    changeStatus: function () {
+      switch (this.model.get('status')) {
+        case 'new':
+          this.model.set('status', 'archived');
+          break;
+        case 'archived':
+          this.model.set('status', 'new');
+          break;
+        default:
+          r.log.error('Invalid status for feedback: ' + this.model.get('id'));
+          break;
+      }
+      this.model.save(null, {
+        statusCode: {
+          422: this.apiError
+        }
+      });
+    },
+
+    renderStatusButton: function () {
+      var el, text;
+
+      text = this.model.get('status') === 'new' ? 'Archive' : 'Un-archive'
+      el = this.getHeader().find('.changeStatus');
+      el.find('.ui-btn-text').text(text);
+    }
   });
 
 

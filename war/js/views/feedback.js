@@ -47,15 +47,21 @@ var RSKYBOX = (function (r, $) {
 
 
 
-  r.FeedbackView = Backbone.View.extend({
+  r.FeedbackView = r.JqmPageBaseView.extend({
+    events: {
+      'click .changeStatus': 'changeStatus',
+    },
+
     initialize: function () {
+      _.bindAll(this, 'changeStatus');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
       this.template = _.template($('#feedbackTemplate').html());
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.getMock()));
+      this.renderStatusButton(this.model.get('status') === 'new' ? 'Archive' : 'Un-archive');
+      this.getContent().html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;
     },
@@ -67,7 +73,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response, this.$el);
+      r.flashError(response, this.getContent());
     },
 
     apiError: function (jqXHR) {
@@ -78,7 +84,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('FeedbackView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code], this.$el);
+      r.flashError(this.apiCodes[code], this.getContent());
     },
 
     apiCodes: {
