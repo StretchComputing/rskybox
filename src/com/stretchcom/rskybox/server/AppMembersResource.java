@@ -447,6 +447,7 @@ public class AppMembersResource extends ServerResource {
             	json.put("phoneNumber", appMember.getPhoneNumber());
             	json.put("role", appMember.getRole());
             	json.put("status", appMember.getStatus());
+            	json.put("appId", appMember.getApplicationId());
         	}
         } catch (JSONException e) {
         	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());
