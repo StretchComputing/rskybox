@@ -82,14 +82,15 @@ var RSKYBOX = (function (r, $) {
       r.feedbackList = new r.FeedbackList();
       r.feedbackList.setAppUrl(r.getParameterByName(location.hash, 'id'));
       r.feedbackListView = new r.FeedbackListView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         collection: r.feedbackList
       });
     },
 
     feedbackListShow: function () {
       r.log.debug('feedbackListShow');
-      r.feedbackList.fetch();
+      var parms = r.router.getParams(location.hash);
+      r.feedbackList.fetch({data: { status: parms.status }});
     },
 
 

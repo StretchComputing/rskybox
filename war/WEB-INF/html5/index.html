@@ -27,6 +27,7 @@
     <script src="/js/models/member.js"></script>
     <script src="/js/models/enduser.js"></script>
     <script src="/js/models/crash.js"></script>
+    <script src="/js/views/base.js"></script>
     <script src="/js/views/applications.js"></script>
     <script src="/js/views/feedback.js"></script>
     <script src="/js/views/logs.js"></script>
@@ -148,10 +149,9 @@
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Feedback</h1>
-        <a href="#feedbackList" class="archives" data-theme="b" data-icon="check" data-iconpos="right">Archives</a>
+        <a href="#feedbackList" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Archives</a>
       </div>
-      <div data-role="content">
-      </div>
+      <div data-role="content"></div>
     </div>
     <script type="text/template" id="noFeedbackTemplate">
       <h3>No feedback at this time.</h3>
@@ -191,8 +191,7 @@
         <h1>Logs</h1>
         <a href="#archives" data-theme="b" data-icon="check" data-iconpos="right">Archives</a>
       </div>
-      <div data-role="content">
-      </div>
+      <div data-role="content"></div>
     </div>
     <script type="text/template" id="noLogsTemplate">
       <h3>No logs at this time.</h3>
@@ -240,8 +239,7 @@
         <h1>Crashes</h1>
         <a href="#archives" data-theme="b" data-icon="check" data-iconpos="right">Archives</a>
       </div>
-      <div data-role="content">
-      </div>
+      <div data-role="content"></div>
     </div>
     <script type="text/template" id="noCrashesTemplate">
       <h3>No crashes at this time.</h3>
@@ -283,8 +281,7 @@
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Members</h1>
       </div>
-      <div data-role="content">
-      </div>
+      <div data-role="content"></div>
     </div>
     <script type="text/template" id="noMembersTemplate">
       <h3>No members at this time.</h3>
@@ -317,8 +314,7 @@
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>End Users</h1>
       </div>
-      <div data-role="content">
-      </div>
+      <div data-role="content"></div>
     </div>
     <script type="text/template" id="noEndusersTemplate">
       <h3>No End Users at this time.</h3>

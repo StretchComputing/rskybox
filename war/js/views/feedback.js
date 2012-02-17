@@ -17,26 +17,55 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-  r.FeedbackListView = Backbone.View.extend({
+  r.FeedbackSelectionView = Backbone.View.extend({
+    initialize: function () {
+      this.params = r.router.getParams(location.hash);
+    },
+
+    render: function () {
+      var hrefTemplate = _.template('#feedbackList?id=<%= id %>&status=<%= status %>'),
+          model = {};
+
+      model.id = this.params.id;
+      if (this.params.status === 'archived') {
+        model.status = 'new';
+        model.display = 'Active';
+      } else {
+        model.status = 'archived';
+        model.display = 'Archives';
+      }
+
+      this.$el.attr('href', hrefTemplate(model));
+      this.$el.find('.ui-btn-text').text(model.display);
+      return this;
+    }
+  });
+
+
+  r.FeedbackListView = r.JqmPageBaseView.extend({
     initialize: function () {
       _.bindAll(this, 'addFeedbackEntry');
       this.collection.bind('reset', this.render, this);
-      this.template = _.template($('#noFeedbackTemplate').html());
+      this.noFeedbackTemplate = _.template($('#noFeedbackTemplate').html());
     },
 
     render: function () {
       var list;
 
-      $(this.el).empty();
+      this.getContent().empty();
       if (this.collection.length <= 0) {
-        this.$el.html(this.template());
+        this.getContent().html(this.noFeedbackTemplate());
       } else {
         list = $('<ul>');
         this.collection.each(function (feedback) {
           this.addFeedbackEntry(list, feedback);
         }, this);
-        this.$el.html(list);
+        this.getContent().html(list);
         list.listview();
+
+        new r.FeedbackSelectionView({
+          el: this.getHeader().find('.archives'),
+        }).render();
       }
       return this;
     },
