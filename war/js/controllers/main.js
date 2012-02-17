@@ -80,7 +80,7 @@ var RSKYBOX = (function (r, $) {
     feedbackListBeforeShow: function () {
       r.log.debug('feedbackListBeforeShow');
       r.feedbackList = new r.FeedbackList();
-      r.feedbackList.setAppUrl(r.getParameterByName(location.hash, 'id'));
+      r.feedbackList.setAppUrl(r.session.params.id);
       r.feedbackListView = new r.FeedbackListView({
         el: $.mobile.activePage,
         collection: r.feedbackList
@@ -89,8 +89,7 @@ var RSKYBOX = (function (r, $) {
 
     feedbackListShow: function () {
       r.log.debug('feedbackListShow');
-      var parms = r.router.getParams(location.hash);
-      r.feedbackList.fetch({data: { status: parms.status }});
+      r.feedbackList.fetch({data: { status: r.session.params.status }});
     },
 
 
@@ -100,7 +99,7 @@ var RSKYBOX = (function (r, $) {
       r.feedback = new r.Feedback({
         id: r.getParameterByName(location.hash, 'id')
       });
-      r.feedback.setAppUrl(r.getParameterByName(location.hash, 'appId'));
+      r.feedback.setAppUrl(r.session.params.appId);
       r.feedbackView = new r.FeedbackView({
         el: r.getContentDiv(),
         model: r.feedback
@@ -269,10 +268,17 @@ var RSKYBOX = (function (r, $) {
     testHandler: function (eventType, matchObj, ui, page, evt) {
       r.log.debug('testHandler');
       console.log(eventType, matchObj, ui, page, evt);
-    }
+    },
+
+    setupSession: function (eventType, matchObj, ui, page, evt) {
+      r.log.debug('setupSession');
+      r.session = {};
+      r.session.params = r.router.getParams(location.hash);
+    },
   };
 
   r.router = new $.mobile.Router([
+    { '.*':             { handler: 'setupSession', events: 'bs' } },
     { '#applications':  { handler: 'applicationsBeforeShow', events: 'bs' } },
     { '#applications':  { handler: 'applicationsShow', events: 's' } },
     { '#application[?]id=.*':   { handler: 'applicationBeforeShow', events: 'bs' } },
