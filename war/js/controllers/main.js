@@ -141,7 +141,7 @@ var RSKYBOX = (function (r, $) {
       });
       r.logCurrent.setAppUrl(r.session.params.appId);
       r.logView = new r.LogView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         model: r.logCurrent
       });
     },
@@ -180,7 +180,7 @@ var RSKYBOX = (function (r, $) {
       });
       r.crash.setAppUrl(r.session.params.appId);
       r.crashView = new r.CrashView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         model: r.crash
       });
     },

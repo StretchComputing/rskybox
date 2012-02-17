@@ -46,15 +46,21 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-  r.LogView = Backbone.View.extend({
+  r.LogView = r.JqmPageBaseView.extend({
+    events: {
+      'click .changeStatus': 'changeStatus',
+    },
+
     initialize: function () {
+      _.bindAll(this, 'changeStatus');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
       this.template = _.template($('#logTemplate').html());
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.getMock()));
+      this.renderStatusButton();
+      this.getContent().html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;
     },
@@ -66,7 +72,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response, this.$el);
+      r.flashError(response, this.getContent());
     },
 
     apiError: function (jqXHR) {
@@ -77,11 +83,13 @@ var RSKYBOX = (function (r, $) {
         r.log.error('LogView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code], this.$el);
+      r.flashError(this.apiCodes[code], this.getContent());
     },
 
     apiCodes: {
+      201: 'Invalid status.',
       203: 'You are not authorized for this application.',
+      302: 'Log ID required.',
       305: 'Application ID required.',
       603: 'Log was not found',
       605: 'Application was not found',

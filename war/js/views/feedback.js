@@ -88,7 +88,9 @@ var RSKYBOX = (function (r, $) {
     },
 
     apiCodes: {
+      201: 'Invalid status.',
       203: 'You are not authorized for this application.',
+      300: 'Feedback ID required.',
       305: 'Application ID required.',
       601: 'Feedback was not found',
       605: 'Application was not found',
