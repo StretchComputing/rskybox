@@ -76,6 +76,10 @@ var RSKYBOX = (function (r, $) {
 
 
   r.MemberView = r.JqmPageBaseView.extend({
+    events: {
+      'click .delete': 'deleteMember',
+    },
+
     initialize: function () {
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
@@ -87,6 +91,22 @@ var RSKYBOX = (function (r, $) {
       this.getContent().trigger('create');
       return this;
     },
+
+    deleteMember: function (e) {
+      if (!confirm('Are you sure you want to delete this member?.')) {
+        return;
+      }
+      this.model.destroy({
+        success: function () {
+          history.back();
+        },
+        statusCode: r.statusCodeHandlers(this.apiError)
+      });
+
+      e.preventDefault();
+      return false;
+    },
+
 
     error: function (model, response) {
       r.log.debug('MemberView.error');
