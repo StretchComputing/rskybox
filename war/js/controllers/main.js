@@ -199,7 +199,7 @@ var RSKYBOX = (function (r, $) {
       r.members = new r.Members();
       r.members.setAppUrl(r.session.params.id);
       r.membersView = new r.MembersView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         collection: r.members
       });
     },
@@ -218,7 +218,7 @@ var RSKYBOX = (function (r, $) {
       });
       r.member.setAppUrl(r.session.params.appId);
       r.memberView = new r.MemberView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         model: r.member
       });
     },
@@ -231,13 +231,30 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    // New Member
+    newMemberBeforeShow: function () {
+      r.log.debug('newMemberBeforeShow');
+      r.newMember = new r.Member();
+      r.newMember.setAppUrl(r.session.params.id);
+      r.newMemberView = new r.NewMemberView({
+        el: $('#newMemberForm'),
+        model: r.newMember
+      });
+    },
+
+    newMemberShow: function () {
+      r.log.debug('newMemberShow');
+      r.newMemberView.render();
+    },
+
+
     // Endusers
     endusersBeforeShow: function () {
       r.log.debug('endusersBeforeShow');
       r.endusers = new r.Endusers();
       r.endusers.setAppUrl(r.session.params.id);
       r.endusersView = new r.EndusersView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         collection: r.endusers
       });
     },
@@ -256,7 +273,7 @@ var RSKYBOX = (function (r, $) {
       });
       r.enduser.setAppUrl(r.session.params.appId);
       r.enduserView = new r.EnduserView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         model: r.enduser
       });
     },
@@ -302,6 +319,8 @@ var RSKYBOX = (function (r, $) {
     { '#members':       { handler: 'membersShow', events: 's' } },
     { '#member[?]id=.*':        { handler: 'memberBeforeShow', events: 'bs' } },
     { '#member[?]id=.*':        { handler: 'memberShow', events: 's' } },
+    { '#newMember':     { handler: 'newMemberBeforeShow', events: 'bs' } },
+    { '#newMember':     { handler: 'newMemberShow', events: 's' } },
     { '#endusers':      { handler: 'endusersBeforeShow', events: 'bs' } },
     { '#endusers':      { handler: 'endusersShow', events: 's' } },
     { '#enduser[?]id=.*':       { handler: 'enduserBeforeShow', events: 'bs' } },

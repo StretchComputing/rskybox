@@ -13,6 +13,14 @@ var RSKYBOX = (function (r, $) {
       role: null,
       status: null,
     },
+
+    validate: function (attrs) {
+      if (r.isValidEmailAddress(attrs.emailAddress) && attrs.role) {
+        r.log.debug('Member: member is valid.');
+        return;
+      }
+      return 'A valid email address and selected role are required.';
+    }
   });
 
 

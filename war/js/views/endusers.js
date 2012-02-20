@@ -16,7 +16,7 @@ var RSKYBOX = (function (r, $) {
     }
   });
 
-  r.EndusersView = Backbone.View.extend({
+  r.EndusersView = r.JqmPageBaseView.extend({
     initialize: function () {
       _.bindAll(this, 'addEnduserEntry');
       this.collection.bind('reset', this.render, this);
@@ -26,15 +26,15 @@ var RSKYBOX = (function (r, $) {
     render: function () {
       var list;
 
-      $(this.el).empty();
+      this.getContent().empty();
       if (this.collection.length <= 0) {
-        this.$el.html(this.template());
+        this.getContent().html(this.template());
       } else {
         list = $('<ul>');
         this.collection.each(function (enduser) {
           this.addEnduserEntry(list, enduser);
         }, this);
-        this.$el.html(list);
+        this.getContent().html(list);
         list.listview();
       }
       return this;
@@ -46,7 +46,7 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-  r.EnduserView = Backbone.View.extend({
+  r.EnduserView = r.JqmPageBaseView.extend({
     initialize: function () {
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
@@ -54,8 +54,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.getMock()));
-      this.$el.trigger('create');
+      this.getContent().html(this.template(this.model.getMock()));
+      this.getContent().trigger('create');
       return this;
     },
 
