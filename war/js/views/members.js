@@ -11,8 +11,9 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      var display = '',
-          mock = this.model.getMock();
+      var
+        display = '',
+        mock = this.model.getMock();
 
       if (mock.emailAddress) {
         display += mock.emailAddress;

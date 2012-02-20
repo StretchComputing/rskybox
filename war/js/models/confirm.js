@@ -25,7 +25,7 @@ var RSKYBOX = (function (r, $) {
         message = '';
 
       code = attrs.confirmationCode;
-      if (code && code.length == CONFIRMATION_CODE_LEN) {
+      if (code && code.length === CONFIRMATION_CODE_LEN) {
         r.log.debug('Confirm: confirmation code is valid');
       } else {
         message += 'Confirmation code must be exactly 3 characters. ';

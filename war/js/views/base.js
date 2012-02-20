@@ -14,10 +14,11 @@ var RSKYBOX = (function (r, $) {
     },
 
     renderArchiveButton: function (pageLink) {
-      var el,
-          hrefTemplate = _.template('<%= pageLink %>?id=<%= id %>&status=<%= status %>'),
-          model = {},
-          params = r.session.params;
+      var
+        el,
+        hrefTemplate = _.template('<%= pageLink %>?id=<%= id %>&status=<%= status %>'),
+        model = {},
+        params = r.session.params;
 
       model.id = params.id;
       model.pageLink = pageLink;
@@ -36,15 +37,15 @@ var RSKYBOX = (function (r, $) {
 
     changeStatus: function () {
       switch (this.model.get('status')) {
-        case 'new':
-          this.model.set('status', 'archived');
-          break;
-        case 'archived':
-          this.model.set('status', 'new');
-          break;
-        default:
-          r.log.error('Invalid status for feedback: ' + this.model.get('id'));
-          break;
+      case 'new':
+        this.model.set('status', 'archived');
+        break;
+      case 'archived':
+        this.model.set('status', 'new');
+        break;
+      default:
+        r.log.error('Invalid status for feedback: ' + this.model.get('id'));
+        break;
       }
       this.model.save(null, {
         statusCode: {
@@ -56,7 +57,7 @@ var RSKYBOX = (function (r, $) {
     renderStatusButton: function () {
       var el, text;
 
-      text = this.model.get('status') === 'new' ? 'Archive' : 'Un-archive'
+      text = this.model.get('status') === 'new' ? 'Archive' : 'Un-archive';
       el = this.getHeader().find('.changeStatus');
       el.find('.ui-btn-text').text(text);
     }

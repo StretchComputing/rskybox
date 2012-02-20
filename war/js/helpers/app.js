@@ -49,7 +49,9 @@ var RSKYBOX = (function (r, $) {
         r.log.debug('500 - server error');
       }
     };
-    apiError && _.extend(general, { 422: apiError });
+    if (apiError) {
+      $.extend(general, { 422: apiError });
+    }
     return general;
   };
 
@@ -80,15 +82,15 @@ var RSKYBOX = (function (r, $) {
       };
 
     switch (area) {
-      case 'signup':
-        base = '';
-        break;
-      case 'admin':
-        base = '\/html5\/admin';
-        break;
-      default:
-        base = '\/html5';
-        break;
+    case 'signup':
+      base = '';
+      break;
+    case 'admin':
+      base = '\/html5\/admin';
+      break;
+    default:
+      base = '\/html5';
+      break;
     }
 
 
@@ -149,9 +151,9 @@ var RSKYBOX = (function (r, $) {
     var prop, query;
 
     query = "?";
-    for (prop in props) {
+    Object.keys(props).forEach(function (prop) {
       query += prop + '=' + props[prop] + '&';
-    }
+    });
     query = query.slice(0, query.length - 1);
 
     return query;

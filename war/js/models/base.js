@@ -58,7 +58,7 @@ var RSKYBOX = (function (r, $) {
     //
     prepareNewModel: function () {
       if (this.isNew()) {
-        _.each(_.keys(this.attributes), function (key) {
+        Object.keys(this.attributes).forEach(function (key) {
           if (!this.get(key)) {
             this.unset(key, {silent: true});
           }
@@ -77,9 +77,9 @@ var RSKYBOX = (function (r, $) {
         return;
       }
 
-      for (field in this.fields) {
+      Object.keys(this.fields).forEach(function (field) {
         mock[field] = this.get(field) || null;
-      }
+      }, this);
       return mock;
     },
   });
