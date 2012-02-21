@@ -227,9 +227,19 @@
         <li>Message: <%= message %></li>
         <li>Status: <%= status %></li>
         <% if (appActions) { %>
-          <li>App Actions:<br>
+          <li>
+            <h3>App Actions:</h3>
+            <% var on = false; %>
             <% appActions.forEach(function(action) { %>
-              <%= action.timestamp %> - <%= action.duration %>ms: <%= action.description %><br>
+              <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
+                <%= action.timestamp %>
+                <% if (action.duration) { %>
+                  - <%= action.duration %>ms
+                <% } %>
+                <br>
+                <%= action.description %>
+              </div>
+              <% on = !on; %>
             <% }); %>
           </li>
         <% } %>
