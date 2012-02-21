@@ -49,10 +49,11 @@ var RSKYBOX = (function (r, $) {
   r.LogView = r.JqmPageBaseView.extend({
     events: {
       'click .changeStatus': 'changeStatus',
+      'click .mode': 'changeMode',
     },
 
     initialize: function () {
-      _.bindAll(this, 'changeStatus');
+      _.bindAll(this, 'changeStatus', 'changeMode', 'success');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
       this.template = _.template($('#logTemplate').html());
@@ -63,6 +64,28 @@ var RSKYBOX = (function (r, $) {
       this.getContent().html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;
+    },
+
+    changeMode: function (e) {
+      var json;
+
+      json = JSON.stringify({
+        mode : (this.model.get('logMode') === 'inactive' ? 'active' : 'inactive')
+      });
+      $.ajax({
+        url: this.model.urlRoot + '/remoteControl/' + this.model.get('logName'),
+        type: 'PUT',
+        data: json,
+        success: this.success,
+        statusCode: r.statusCodeHandlers(this.apiError),
+      });
+
+      e.preventDefault();
+      return false;
+    },
+
+    success: function () {
+      this.model.fetch();
     },
 
     error: function (model, response) {
