@@ -17,7 +17,7 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-  r.ApplicationsView = Backbone.View.extend({
+  r.ApplicationsView = r.JqmPageBaseView.extend({
     initialize: function () {
       _.bindAll(this, 'addAppEntry');
       this.collection.bind('reset', this.render, this);
@@ -27,7 +27,7 @@ var RSKYBOX = (function (r, $) {
     render: function () {
       var list;
 
-      $(this.el).empty();
+      this.getContent().empty();
       if (this.collection.length <= 0) {
         this.$el.html(this.template());
       } else {
@@ -35,7 +35,7 @@ var RSKYBOX = (function (r, $) {
         this.collection.each(function (app) {
           this.addAppEntry(list, app);
         }, this);
-        this.$el.html(list);
+        this.getContent().html(list);
         list.listview();
       }
       return this;
@@ -47,7 +47,7 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-  r.ApplicationView = Backbone.View.extend({
+  r.ApplicationView = r.JqmPageBaseView.extend({
     initialize: function () {
       _.bindAll(this, 'apiError');
       this.model.on('change', this.render, this);
@@ -112,8 +112,9 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.getMock()));
-      this.$el.trigger('create');
+      this.getHeader().find('h1').html(this.model.get('name'));
+      this.getContent().html(this.template(this.model.getMock()));
+      this.getContent().trigger('create');
       return this;
     },
 

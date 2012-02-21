@@ -8,7 +8,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('applicationsBeforeShow');
       r.applications = new r.Applications();
       r.applicationsView = new r.ApplicationsView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         collection: r.applications
       });
     },
@@ -28,7 +28,7 @@ var RSKYBOX = (function (r, $) {
         id: r.session.params.id
       });
       r.applicationView = new r.ApplicationView({
-        el: r.getContentDiv(),
+        el: $.mobile.activePage,
         model: r.application
       });
     },
