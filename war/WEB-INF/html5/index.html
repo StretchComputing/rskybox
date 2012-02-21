@@ -222,7 +222,9 @@
           </button>
         </li>
         <li>User: <%= userName %></li>
-        <li>For: <%= instanceUrl %></li>
+        <% if (instanceUrl) { %>
+          <li>For: <%= instanceUrl %></li>
+        <% } %>
         <li>Log Level: <%= logLevel %></li>
         <li>Message: <%= message %></li>
         <li>Status: <%= status %></li>
