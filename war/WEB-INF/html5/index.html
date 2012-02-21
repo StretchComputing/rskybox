@@ -263,8 +263,8 @@
       <h3>No crashes at this time.</h3>
     </script>
     <script type="text/template" id="crashEntryTemplate">
-      <a href="#crash?id=<%= id %>&appId=<%= appId %>"><%= userName %>:
-        <% if (instanceUrl) { print(instanceUrl + ', '); } %><%= date %></a>
+      <a href="#crash?id=<%= id %>&appId=<%= appId %>"><%= userName ? userName + ':' : '' %>
+        <%= instanceUrl ? instanceUrl + ', ' : '' %><%= date %></a>
     </script>
 
     <div data-role="page" id="crash" data-title="Crash">
@@ -278,14 +278,28 @@
     <script type="text/template" id="crashTemplate">
       <ul data-role="listview" data-inset="true">
         <li>Detected: <%= date %></li>
-        <li>User: <%= userName %></li>
-        <li>For: <%= instanceUrl %></li>
+        <% if (userName) { %>
+          <li>User: <%= userName %></li>
+        <% } %>
+        <% if (instanceUrl) { %>
+          <li>For: <%= instanceUrl %></li>
+        <% } %>
         <li>Status: <%= status %></li>
         <li>Summary: <%= summary %></li>
         <% if (appActions) { %>
-          <li>App Actions:<br>
+          <li>
+            <h3>App Actions:</h3>
+            <% var on = false; %>
             <% appActions.forEach(function(action) { %>
-              <%= action.timestamp %> - <%= action.duration %>ms: <%= action.description %><br>
+              <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
+                <%= action.timestamp %>
+                <% if (action.duration) { %>
+                  - <%= action.duration %>ms
+                <% } %>
+                <br>
+                <%= action.description %>
+              </div>
+              <% on = !on; %>
             <% }); %>
           </li>
         <% } %>
