@@ -226,7 +226,6 @@
         <li>Log Level: <%= logLevel %></li>
         <li>Message: <%= message %></li>
         <li>Status: <%= status %></li>
-        <li>Stack Back Trace:<br><%= stackBackTrace %></li>
         <% if (appActions) { %>
           <li>App Actions:<br>
             <% appActions.forEach(function(action) { %>
@@ -234,6 +233,7 @@
             <% }); %>
           </li>
         <% } %>
+        <li>Stack Back Trace:<br><%= stackBackTrace %></li>
       </ul>
     </script>
 
