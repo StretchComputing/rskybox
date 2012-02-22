@@ -166,7 +166,6 @@
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Feedback</h1>
-        <a href="#" data-theme="b" data-icon="check" data-iconpos"right" class="changeStatus">Archive</a>
       </div>
       <div data-role="content"></div>
     </div>
@@ -181,7 +180,13 @@
         <li>By: <%= userName %></li>
         <% if (instanceUrl) { %>
           <li>For: <%= instanceUrl %></li>
-          <% } %>
+        <% } %>
+        <li>
+          Status: <%= status %>
+          <button class="changeStatus" data-inline="true" data-theme="b">
+            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
+          </button>
+        </li>
       </ul>
     </script>
 
@@ -209,7 +214,6 @@
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Log</h1>
-        <a href="#" data-theme="b" data-icon="check" data-iconpos"right" class="changeStatus">Archive</a>
       </div>
       <div data-role="content"></div>
     </div>
@@ -229,7 +233,12 @@
         <% } %>
         <li>Log Level: <%= logLevel %></li>
         <li>Message: <%= message %></li>
-        <li>Status: <%= status %></li>
+        <li>
+          Status: <%= status %>
+          <button class="changeStatus" data-inline="true" data-theme="b">
+            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
+          </button>
+        </li>
         <% if (appActions) { %>
           <li>
             <h3>App Actions:</h3>
@@ -273,7 +282,6 @@
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Crash</h1>
-        <a href="#" data-theme="b" data-icon="check" data-iconpos"right" class="changeStatus">Archive</a>
       </div>
       <div data-role="content"></div>
     </div>
@@ -286,7 +294,12 @@
         <% if (instanceUrl) { %>
           <li>For: <%= instanceUrl %></li>
         <% } %>
-        <li>Status: <%= status %></li>
+        <li>
+          Status: <%= status %>
+          <button class="changeStatus" data-inline="true" data-theme="b">
+            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
+          </button>
+        </li>
         <li>Summary: <%= summary %></li>
         <% if (appActions) { %>
           <li>

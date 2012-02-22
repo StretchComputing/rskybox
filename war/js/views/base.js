@@ -53,14 +53,6 @@ var RSKYBOX = (function (r, $) {
         }
       });
     },
-
-    renderStatusButton: function () {
-      var el, text;
-
-      text = this.model.get('status') === 'new' ? 'Archive' : 'Un-archive';
-      el = this.getHeader().find('.changeStatus');
-      el.find('.ui-btn-text').text(text);
-    }
   });
 
 

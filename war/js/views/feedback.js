@@ -60,7 +60,6 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      this.renderStatusButton();
       this.getContent().html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;
