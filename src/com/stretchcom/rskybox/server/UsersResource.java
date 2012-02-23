@@ -593,6 +593,8 @@ public class UsersResource extends ServerResource {
                 json.put("token", user.getToken());
                 json.put("authHeader", user.getAuthHeader());
                 json.put("memberConfirmed", user.getWasMembershipConfirmed());
+                json.put("isEmailConfirmed", user.getIsEmailConfirmed());
+                json.put("isSmsConfirmed", user.getIsSmsConfirmed());
             	json.put("isSuperAdmin", user.getIsSuperAdmin());
 
                 if(isCurrentUser) {
