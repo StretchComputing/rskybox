@@ -5,7 +5,7 @@ var RSKYBOX = (function (r, $) {
   r.SettingsView = r.JqmPageBaseView.extend({
     events: {
       'click .logout': 'logout',
-      'submit': 'submit'
+      'click .savePassword': 'savePassword'
     },
 
     initialize: function () {
@@ -20,6 +20,11 @@ var RSKYBOX = (function (r, $) {
       r.unsetCookie();
       r.changePage('root', 'signup');
 
+      e.preventDefault();
+      return false;
+    },
+
+    savePassword: function (e) {
       e.preventDefault();
       return false;
     },

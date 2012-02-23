@@ -134,36 +134,53 @@
       <% } %>
       <ul data-role="listview" data-inset="true">
         <li data-role="fieldcontain">
-          <h3>Name:</h3>
+          <h3>Name</h3>
           <label for="firstName" class="ui-hidden-accessible">First Name:</label>
           <input name="firstName" id="firstName" value="<%= firstName %>" placeholder="First Name">
           <label for="lastName" class="ui-hidden-accessible">Last Name:</label>
           <input name="lastName" id="lastName" value="<%= lastName %>" placeholder="Last Name">
         </li>
         <li data-role="fieldcontain">
-          <h3>Email:</h3>
-          <label for="emailAddress" class="ui-hidden-accessible">Email address:</label>
-          <input name="emailAddress" id="emailAddress" value="<%= emailAddress %>" placeholder="Email Address">
-          <input type="checkbox" name="sendEmailNotifications" id="sendEmailNotifications" value="">
-          <label for="sendEmailNotifications">Receive email notifications</label>
+          <h3>Email</h3>
+          <% if (isEmailConfirmed) { %>
+            <p><%= emailAddress %></p>
+            <input type="checkbox" name="sendEmailNotifications" id="sendEmailNotifications"<% if (sendEmailNotifications) { %> checked <% } %>>
+            <label for="sendEmailNotifications">Receive email notifications</label>
+          <% } else { %>
+            <label for="emailAddress" class="ui-hidden-accessible">Email address:</label>
+            <input name="emailAddress" id="emailAddress" value="<%= emailAddress %>" placeholder="Email Address">
+            <button class="requestEmailConfirmation">Request Confirmation</button>
+            <% if (emailAddress) { %>
+              <label for="emailConfirmationCode">Please enter your confirmation code:</label>
+              <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%= emailConfirmationCode %>">
+              <button class="emailConfirmationCode">Confirm Email</button>
+            <% } %>
+          <% } %>
         </li>
         <li data-role="fieldcontain">
-          <h3>Phone:</h3>
-          <label for="phoneNumber" class="ui-hidden-accessible">Phone number:</label>
-          <input name="phoneNumber" id="phoneNumber" value="<%= phoneNumber %>" placeholder="Phone Number">
-          <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile carrier:</label>
-          <select name="mobileCarrierId" id="mobileCarrierId" value=""></select>
-          <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications" value="">
-          <label for="sendSmsNotifications">Receive SMS notifications</label>
+          <h3>Phone</h3>
+          <% if (isSmsConfirmed) { %>
+            <p><%= phoneNumber %></p>
+            <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications"<% if (sendSmsNotifications) { %> checked <% } %>>
+            <label for="sendSmsNotifications">Receive SMS notifications</label>
+          <% } else { %>
+            <label for="phoneNumber" class="ui-hidden-accessible">Phone number:</label>
+            <input name="phoneNumber" id="phoneNumber" value="<%= phoneNumber %>" placeholder="Phone Number">
+            <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile carrier:</label>
+            <select name="mobileCarrierId" id="mobileCarrierId" value=""></select>
+            <button class="requestSmsConfirmation">Request Confirmation</button>
+            <% if (phoneNumber) { %>
+              <label for="phoneConfirmationCode">Please enter your confirmation code:</label>
+              <input name="phoneConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>">
+              <button class="phoneConfirmationCode">Confirm Phone</button>
+            <% } %>
+          <% } %>
         </li>
         <li data-role="fieldcontain">
-          <h3>Password:</h3>
+          <h3>Change Password</h3>
           <label for="password" class="ui-hidden-accessible">Password:</label>
           <input name="password" id="password" placeholder="Password">
-        </li>
-
-        <li data-role="fieldcontain">
-          <input type="submit" value="Save">
+          <button class="savePassword">Save Password</button>
         </li>
       </ul>
     </script>
