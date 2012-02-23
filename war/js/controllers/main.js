@@ -42,21 +42,22 @@ var RSKYBOX = (function (r, $) {
 
 
     // Settings
-    settingsCreate: function () {
-      r.log.debug('settingsCreate');
-      $('#logout').click(function () {
-        r.log.debug('logout');
-        r.unsetCookie();
-        r.changePage('root', 'signup');
-      });
-    },
-
     settingsBeforeShow: function () {
       r.log.debug('settingsBeforeShow');
+      r.currentUser = new r.User({
+        id: 'current'
+      });
+      r.settingsView = new r.SettingsView({
+        el: $.mobile.activePage,
+        model: r.currentUser
+      });
     },
 
     settingsShow: function () {
       r.log.debug('settingsShow');
+      r.currentUser.fetch({
+        statusCode: r.statusCodeHandlers()
+      });
     },
 
 
@@ -298,7 +299,6 @@ var RSKYBOX = (function (r, $) {
     { '#applications':  { handler: 'applicationsShow', events: 's' } },
     { '#application[?]id=.*':   { handler: 'applicationBeforeShow', events: 'bs' } },
     { '#application[?]id=.*':   { handler: 'applicationShow', events: 's' } },
-    { '#settings':      { handler: 'settingsCreate', events: 'c' } },
     { '#settings':      { handler: 'settingsBeforeShow', events: 'bs' } },
     { '#settings':      { handler: 'settingsShow', events: 's' } },
     { '#newApp':        { handler: 'newAppBeforeShow', events: 'bs' } },
