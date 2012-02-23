@@ -40,24 +40,29 @@
         <a href="#login" class="ui-btn-right" data-icon="arrow-r" data-iconpos="right">Log In</a>
       </div>
       <div data-role="content">
-        <div style="text-align: center;">
-          <strong>Watch your application from the best seat in the house.</strong>
-        </div>
-        <form id="signupForm">
-        </form>
+        <form id="signupForm"></form>
       </div>
     </div>
     <script type="text/template" id="signupTemplate">
-      <h1>Sign Up Using</h1>
-      <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
-      <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>">
-      <strong>or</strong>
-      <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
-      <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>">
-      <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile Carrier:</label>
-      <select name="mobileCarrierId" id="mobileCarrierId" value="<%= mobileCarrierId %>">
-
-      <input type="submit" value="Request Confirmation Code">
+      <div style="text-align: center;">
+        <strong>Watch your application from the best seat in the house.</strong>
+        <h3>Sign Up Using</h3>
+        <br>
+      </div>
+      <ul data-role="listview">
+        <li data-role="fieldcontain">
+          <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
+          <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>">
+          <h3>or</h3>
+          <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
+          <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>">
+          <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile Carrier:</label>
+          <select name="mobileCarrierId" id="mobileCarrierId" value="<%= mobileCarrierId %>"></select>
+        </li>
+        <li data-role="fieldcontain">
+          <input type="submit" value="Request Confirmation Code">
+        </li>
+      </ul>
     </script>
 
     <div data-role="page" id="confirm" data-title="Complete Signup">
@@ -65,31 +70,30 @@
         <h1>Complete Signup</h1>
       </div>
       <div data-role="content">
-        <h3>Please complete your signup.</h3>
         <form id="confirmForm"></form>
       </div>
     </div>
     <script type="text/template" id="confirmTemplate">
-      <div id="emailWrapper" style="display: none">
-        <label for="emailAddress">Your email address: </label>
-        <input type="email" name="emailAddress" value="<%= emailAddress %>" readonly>
-      </div>
-      <div id="phoneWrapper" style="display: none;">
-        <label for="phoneNumber">Your phone number: </label>
-        <input type="tel" name="phoneNumber" value="<%= phoneNumber %>" readonly>
-      </div>
-      <br>
-      <div>
-        <label for="confirmationCode">Please enter your confirmation code:</label>
-        <input name="confirmationCode" placeholder="Confirmation Code" value="<%= confirmationCode %>">
-      </div>
-      <br>
-      <div>
+      <ul data-role="listview">
+        <li id="emailWrapper" style="display: none" data-role="fieldcontain">
+          <label for="emailAddress">Your email address: </label>
+          <input type="email" name="emailAddress" id="emailAddress" value="<%= emailAddress %>" readonly>
+        </li>
+        <li id="phoneWrapper" style="display: none;" data-role="fieldcontain">
+          <label for="phoneNumber">Your phone number: </label>
+          <input type="tel" name="phoneNumber" id="phoneNumber" value="<%= phoneNumber %>" readonly>
+        </li>
+        <li data-role="fieldcontain">
+          <label for="confirmationCode">Please enter your confirmation code:</label>
+          <input name="confirmationCode" id="confirmationCode" placeholder="Confirmation Code" value="<%= confirmationCode %>">
+        </li>
+        <li data-role="fieldcontain">
         <label for="password">Please create a password (min 6 chars):</label>
-        <input name="password" placeholder="Password" autocorrect="off" autocapitalize="off">
-      </div>
-
-      <input type="submit" value="Complete Sign Up">
+          <input name="password" id="password" placeholder="Password" autocorrect="off" autocapitalize="off">
+        </li>
+        <li data-role="fieldcontain">
+          <input type="submit" value="Complete Sign Up">
+        </li>
     </script>
 
     <div data-role="page" id="login" data-title="Login">
@@ -97,30 +101,28 @@
         <h1>Login</h1>
       </div>
       <div data-role="content">
-        <h3>Login With...</h3>
-        <form id="loginForm">
-        </form>
+        <form id="loginForm"></form>
       </div>
     </div>
     <script type="text/template" id="loginTemplate">
-      <div>
-        <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
-        <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>">
-      </div>
-      <div style="text-align: center;">
-        <strong>or</strong>
-      </div>
-      <div>
-        <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
-        <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>">
-      </div>
-      <div style="text-align: center;">
-        <strong>and</strong>
-      </div>
-      <label for="password" class="ui-hidden-accessible">Password:</label>
-      <input name="password" placeholder="Password" value="<%= password %>" autocorrect="off" autocapitalize="off">
+      <ul data-role="listview">
+        <li data-role="fieldcontain">
+          <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
+          <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>">
+          <div style="text-align: center;">
+            <strong>or</strong>
+          </div>
+          <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
+          <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>">
+        </li>
+        <li data-role="fieldcontain">
+          <label for="password" class="ui-hidden-accessible">Password:</label>
+          <input name="password" placeholder="Password" value="<%= password %>" autocorrect="off" autocapitalize="off">
 
-      <input type="submit" value="Login">
+        <li data-role="fieldcontain">
+          <input type="submit" value="Login">
+        </li>
+      </ul>
     </script>
   </body>
 </html>
