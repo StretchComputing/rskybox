@@ -29,7 +29,7 @@ var RSKYBOX = (function (r, $) {
 
       this.getContent().empty();
       if (this.collection.length <= 0) {
-        this.$el.html(this.template());
+        this.getContent().html(this.template());
       } else {
         list = $('<ul>');
         this.collection.each(function (app) {

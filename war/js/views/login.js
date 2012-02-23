@@ -31,9 +31,7 @@ var RSKYBOX = (function (r, $) {
           dataType: 'json',
           data: this.model.getQueryObject(),
           success: this.success,
-          statusCode: {
-            422: this.apiError
-          }
+          statusCode: r.statusCodeHandlers(this.apiError)
         });
       }
       e.preventDefault();

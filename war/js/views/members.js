@@ -206,7 +206,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     apiCodes: {
-      306: 'An member name is required.'
+      306: 'A member name is required.'
     }
   });
 
