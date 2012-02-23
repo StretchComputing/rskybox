@@ -115,7 +115,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response, this.$el);
+      r.flashError(response);
     },
 
     apiError: function (jqXHR) {
@@ -126,7 +126,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('MemberView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code], this.$el);
+      r.flashError(this.apiCodes[code]);
     },
 
     apiCodes: {

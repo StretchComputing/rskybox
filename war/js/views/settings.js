@@ -9,7 +9,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     initialize: function () {
-      _.bindAll(this, 'apiError');
+      _.bindAll(this, 'save', 'apiError');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
       this.template = _.template($('#settingsTemplate').html());
@@ -25,34 +25,18 @@ var RSKYBOX = (function (r, $) {
     },
 
     savePassword: function (e) {
+      this.save({
+        password: this.$('input[name=password]').val()
+      });
       e.preventDefault();
       return false;
     },
 
-    submit: function (e) {
-      var valid;
-
-      r.log.debug('SettingsView.submit');
-
-      valid = this.model.set({
-        emailAddress: this.$("input[name='emailAddress']").val(),
-        phoneNumber: this.$("input[name='phoneNumber']").val(),
-        mobileCarrierId: this.$("select[name='mobileCarrierId']").val()
+    save: function (attrs) {
+      this.model.save(attrs, {
+        success: this.success,
+        statusCode: r.statusCodeHandlers(this.apiError)
       });
-
-      if (valid) {
-        this.model.prepareNewModel();
-
-        this.model.save(null, {
-          success: this.success,
-          statusCode: {
-            422: this.apiError
-          }
-        });
-      }
-
-      e.preventDefault();
-      return false;
     },
 
     success: function (model, response) {
@@ -66,7 +50,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response, this.$el);
+      r.flashError(response);
     },
 
     apiError: function (jqXHR) {
@@ -77,7 +61,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('SettingsView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code], this.$el);
+      r.flashError(this.apiCodes[code]);
     },
 
     render: function () {

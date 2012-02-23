@@ -23,6 +23,17 @@ var RSKYBOX = (function (r, $) {
     initialize: function () {
       this.setUrl();
     },
+
+    validate: function (attrs) {
+      var password, PASSWORD_MIN_LEN = 6;
+
+      r.log.debug('User.validate');
+      r.dump(attrs);
+      password = attrs.password;
+      if (password && password.length < PASSWORD_MIN_LEN) {
+        return 'Minimum password length is ' + PASSWORD_MIN_LEN + ' characters.';
+      }
+    },
   });
 
 

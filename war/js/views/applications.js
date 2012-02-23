@@ -59,6 +59,7 @@ var RSKYBOX = (function (r, $) {
       'submit': 'submit'
     },
 
+    // TODO - implement update application attributes form
     submit: function (e) {
       var valid;
 
@@ -74,9 +75,7 @@ var RSKYBOX = (function (r, $) {
 
         this.model.save(null, {
           success: this.success,
-          statusCode: {
-            422: this.apiError
-          }
+          statusCode: r.statusCodeHandlers(this.apiError)
         });
       }
 
@@ -90,14 +89,12 @@ var RSKYBOX = (function (r, $) {
 
     error: function (model, response) {
       r.log.debug('ApplicationView.error');
-      r.dump(model);
-      r.dump(response);
       if (response.responseText) {
         // This is an apiError.
         return;
       }
       // This is a validation error.
-      r.flashError(response, this.$el);
+      r.flashError(response);
     },
 
     apiError: function (jqXHR) {
@@ -108,7 +105,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('ApplicationView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code], this.$el);
+      r.flashError(this.apiCodes[code]);
     },
 
     render: function () {
