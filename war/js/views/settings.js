@@ -9,7 +9,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     initialize: function () {
-      _.bindAll(this, 'save', 'apiError');
+      _.bindAll(this, 'save', 'success', 'apiError');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
       this.template = _.template($('#settingsTemplate').html());
@@ -25,6 +25,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     savePassword: function (e) {
+      this.model.setUpdating('password');
       this.save({
         password: this.$('input[name=password]').val()
       });
@@ -40,6 +41,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
+      this.model.clearUpdating();
       //$.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
     },
 
@@ -81,9 +83,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     apiCodes: {
-      204: 'Your email address has already been confirmed.',
-      205: 'Your phone number has already been confirmed.',
-      500: 'Phone number and mobile carrier ID must be specified together.'
+      208: 'Email address can no longer be modified.',
+      209: 'Phone number can no longer be modified.',
+      218: 'User not authorized.',
+      303: 'User ID requried.',
+      405: 'Email address is already in use.',
+      413: 'Phone number is already in use.',
+      501: 'Phone number and mobile carrier ID must be specified together.',
+      600: 'User not found.'
     }
   });
 
