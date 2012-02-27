@@ -82,6 +82,46 @@ var RSKYBOX = (function (r, $) {
       }, this);
       return mock;
     },
+
+    partial: (function () {
+      var fields = {}, partial = {};
+
+      partial.setField = function (field) {
+        fields[field] = true;
+      };
+
+      partial.getFields = function () {
+        return fields;
+      };
+
+      partial.clear = function () {
+        partial.fields = {};
+      };
+
+      partial.any = function () {
+        return Object.keys(fields).length > 0;
+      };
+
+      return partial;
+    }()),
+
+    isFieldBeingUpdated: function (field) {
+      return field && (!this.partial.any() || this.partial.getFields()[field]);
+    },
+
+    toJSON: function () {
+      var json = {};
+
+      if (this.partial.any()) {
+        Object.keys(this.partial.getFields()).forEach(function (field) {
+          json[field] = this.get(field);
+        }, this);
+        return json;
+      }
+
+      // This is the exact line from backbone's toJSON method.
+      return _.clone(this.attributes);
+    },
   });
 
 

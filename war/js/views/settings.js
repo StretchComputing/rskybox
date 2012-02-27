@@ -9,7 +9,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     initialize: function () {
-      _.bindAll(this, 'save', 'success', 'apiError');
+      _.bindAll(this, 'partialSave', 'success', 'apiError');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
       this.template = _.template($('#settingsTemplate').html());
@@ -25,23 +25,26 @@ var RSKYBOX = (function (r, $) {
     },
 
     savePassword: function (e) {
-      this.model.setUpdating('password');
-      this.save({
+      this.partialSave({
         password: this.$('input[name=password]').val()
       });
       e.preventDefault();
       return false;
     },
 
-    save: function (attrs) {
+    partialSave: function (attrs) {
+      Object.keys(attrs).forEach(function (key) {
+        this.model.partial.setField(key);
+      }, this);
+
       this.model.save(attrs, {
         success: this.success,
         statusCode: r.statusCodeHandlers(this.apiError)
       });
+      this.model.partial.clear();
     },
 
     success: function (model, response) {
-      this.model.clearUpdating();
       //$.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
     },
 
