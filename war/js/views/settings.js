@@ -5,6 +5,8 @@ var RSKYBOX = (function (r, $) {
   r.SettingsView = r.JqmPageBaseView.extend({
     events: {
       'click .logout': 'logout',
+      'blur input[name=firstName]': 'saveFirstName',
+      'blur input[name=lastName]': 'saveLastName',
       'click .savePassword': 'savePassword'
     },
 
@@ -24,6 +26,23 @@ var RSKYBOX = (function (r, $) {
       return false;
     },
 
+    saveFirstName: function (e) {
+      r.log.debug('Settings.saveFirstName');
+      this.partialSave({
+        firstName: this.$('input[name=firstName]').val()
+      });
+      return true;
+    },
+
+    saveLastName: function (e) {
+      r.log.debug('Settings.saveLastName');
+      this.partialSave({
+        lastName: this.$('input[name=lastName]').val()
+      });
+      e.preventDefault();
+      return false;
+    },
+
     savePassword: function (e) {
       this.partialSave({
         password: this.$('input[name=password]').val()
@@ -33,19 +52,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     partialSave: function (attrs) {
-      Object.keys(attrs).forEach(function (key) {
-        this.model.partial.setField(key);
-      }, this);
-
-      this.model.save(attrs, {
+      this.model.partial.save(this.model, attrs, {
         success: this.success,
         statusCode: r.statusCodeHandlers(this.apiError)
       });
-      this.model.partial.clear();
     },
 
     success: function (model, response) {
-      //$.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
+      r.flash.notice('Changes were saved');
     },
 
     error: function (model, response) {
@@ -55,7 +69,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response);
+      r.flash.error(response);
     },
 
     apiError: function (jqXHR) {
@@ -66,7 +80,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('SettingsView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code]);
+      r.flash.error(this.apiCodes[code]);
     },
 
     render: function () {

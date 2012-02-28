@@ -51,6 +51,53 @@ var RSKYBOX = (function (r, $) {
 
 
   r.BaseModel = r.BaseModelExtended.extend({
+    constructor: function () {
+      Backbone.Model.prototype.constructor.apply(this, arguments);
+
+      this.partial = (function () {
+        var fields = {}, partial = {};
+
+        partial.setField = function (field) {
+          fields[field] = true;
+        };
+
+        partial.getFields = function () {
+          return fields;
+        };
+
+        partial.clear = function () {
+          this.fields = {};
+        };
+
+        partial.any = function () {
+          return Object.keys(fields).length > 0;
+        };
+
+        // model: the model that's being saved
+        // attrs: attributes to be partially updated
+        // handlers: object containing the ajax handlers
+        partial.save = function (model, attrs, handlers) {
+          var proceed = false;
+
+          // Set the fields that have changed.
+          Object.keys(attrs).forEach(function (key) {
+            if (model.get(key) !== attrs[key]) {
+              partial.setField(key);
+              proceed = true;
+            }
+          });
+
+          if (proceed) {
+            model.save(attrs, handlers);
+          }
+          partial.clear();
+        };
+
+        return partial;
+      }());
+
+    },
+
     // Unsets all attributes that are undefined, null, '', or 0 in prepartion
     // for a new model to be saved.
     //
@@ -82,28 +129,6 @@ var RSKYBOX = (function (r, $) {
       }, this);
       return mock;
     },
-
-    partial: (function () {
-      var fields = {}, partial = {};
-
-      partial.setField = function (field) {
-        fields[field] = true;
-      };
-
-      partial.getFields = function () {
-        return fields;
-      };
-
-      partial.clear = function () {
-        partial.fields = {};
-      };
-
-      partial.any = function () {
-        return Object.keys(fields).length > 0;
-      };
-
-      return partial;
-    }()),
 
     isFieldBeingUpdated: function (field) {
       return field && (!this.partial.any() || this.partial.getFields()[field]);

@@ -109,23 +109,42 @@ var RSKYBOX = (function (r, $) {
     return $.mobile.activePage.find(":jqmData(role='content')");
   };
 
+  r.flash = (function () {
+    var display, flash = {};
 
-  // message: The error message to display.
-  // el: If not specified, we'll use the active page's content area.
+    // type: string indicating type of message; 'error', 'notice', etc.
+    // message: message to display
+    // el: the container to display the message within, or undefined to display in main content area
+    display = function (type, message, el) {
+      var flash, selector;
+
+      selector = '.flash.' + type;
+      el = el || r.getContentDiv();
+
+      el.find(selector).remove();
+
+      flash = $('<div>', {
+        class: 'flash ' + type,
+        text: message
+      });
+
+      $(el).prepend(flash);
+    };
+
+    flash.notice = function (message, el) {
+      display('notice', message, el);
+    };
+
+    flash.error = function (message, el) {
+      message = message || 'An unknown error occurred. Please reload the page to try again.';
+      display('error', message, el);
+    };
+
+    return flash;
+  }());
+
   r.flashError = function (message, el) {
-    var flash, selector;
-
-    el = el || r.getContentDiv();
-
-    selector = '.flash.error';
-    el.find(selector).remove();
-
-    message = message || 'An unknown error occurred. Please reload the page to try again.';
-    flash = $('<div>', {
-      class: 'flash error',
-      text: message
-    });
-    $(el).prepend(flash);
+    r.log.error('flashError is no longer in use');
   };
 
 

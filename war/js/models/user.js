@@ -29,9 +29,10 @@ var RSKYBOX = (function (r, $) {
 
       r.log.debug('User.validate');
       password = attrs.password;
-      if (this.isFieldBeingUpdated(password) && password.length < PASSWORD_MIN_LEN) {
+      if ((password !== undefined) && (password.length < PASSWORD_MIN_LEN)) {
         return 'Minimum password length is ' + PASSWORD_MIN_LEN + ' characters.';
       }
+      r.log.debug('User.validate passed');
     },
   });
 
