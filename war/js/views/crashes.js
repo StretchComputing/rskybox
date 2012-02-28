@@ -70,7 +70,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response);
+      r.flash.error(response);
     },
 
     apiError: function (jqXHR) {
@@ -81,7 +81,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('CrashView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code]);
+      r.flash.error(this.apiCodes[code]);
     },
 
     apiCodes: {

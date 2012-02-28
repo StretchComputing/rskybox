@@ -143,10 +143,6 @@ var RSKYBOX = (function (r, $) {
     return flash;
   }());
 
-  r.flashError = function (message, el) {
-    r.log.error('flashError is no longer in use');
-  };
-
 
   // Add a property to an object, but only if it is defined and not blank.
   r.addProperty = function (object, property, value) {

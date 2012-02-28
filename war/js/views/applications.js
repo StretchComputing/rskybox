@@ -94,7 +94,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response);
+      r.flash.error(response);
     },
 
     apiError: function (jqXHR) {
@@ -105,7 +105,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('ApplicationView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code]);
+      r.flash.error(this.apiCodes[code]);
     },
 
     render: function () {
@@ -166,7 +166,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
       // This is a validation error.
-      r.flashError(response, this.$el);
+      r.flash.error(response, this.$el);
     },
 
     apiError: function (jqXHR) {
@@ -177,7 +177,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('NewApplicationView: An unknown API error occurred: ' + code);
       }
 
-      r.flashError(this.apiCodes[code], this.$el);
+      r.flash.error(this.apiCodes[code], this.$el);
     },
 
     render: function () {
