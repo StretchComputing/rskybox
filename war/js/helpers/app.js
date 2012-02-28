@@ -1,36 +1,6 @@
 var RSKYBOX = (function (r, $) {
   'use strict';
 
-  r.log = {
-    logLevels: {
-      error: 1,
-      info: 5,
-      debug: 10
-    },
-
-    logLevel: function () {
-      return this.logLevels.debug;
-    },
-
-    error: function (message) {
-      if (this.logLevel() < this.logLevels.error) { return; }
-      this.base('Error: ' + message);
-    },
-
-    info: function (message) {
-      if (this.logLevel() < this.logLevels.info) { return; }
-      this.base('Info: ' + message);
-    },
-
-    debug: function (message) {
-      if (this.logLevel() < this.logLevels.debug) { return; }
-      this.base('Debug: ' + message);
-    },
-
-    base: function (message) {
-      console.log(message);
-    }
-  };
 
   // General status code handlers.
   // apiError: optional handler for API errors
@@ -55,10 +25,100 @@ var RSKYBOX = (function (r, $) {
     return general;
   };
 
+
+  r.SkyboxLog = r.Log.extend({
+    initialize: function () {
+      _.bindAll(this, 'success', 'apiError');
+      this.on('error', this.errorHandler, this);
+    },
+
+    logLevels: {
+      error: 1,
+      info: 5,
+      debug: 10
+    },
+
+    logLevel: function () {
+      return this.logLevels.debug;
+    },
+
+    error: function (message, logName) {
+      if (this.logLevel() < this.logLevels.error) { return; }
+      this.send({
+        logName: logName || 'default error',
+        logLevel: 'error',
+        message: message,
+      });
+    },
+
+    info: function (message) {
+      if (this.logLevel() < this.logLevels.info) { return; }
+      this.base('Info: ' + message);
+    },
+
+    debug: function (message) {
+      if (this.logLevel() < this.logLevels.debug) { return; }
+      this.base('Debug: ' + message);
+    },
+
+    base: function (message) {
+      console.log(message);
+    },
+
+    send: function (attrs) {
+      attrs.userName = Cookie.get('token');
+      this.save(attrs, {
+        success: this.success,
+        statusCode: r.statusCodeHandlers(this.apiError),
+        headers: {
+          Authorization: "Basic TG9naW46bnRnMHE3Y2U0cGV2OXE3MWU2bGRqaXQ2M2c=",
+        },
+      });
+    },
+
+    success: function (model, response) {
+      r.log.debug('Skybox.log.error saved');
+    },
+
+    errorHandler: function (model, response) {
+      r.log.debug('SettingsView.error');
+      if (response.responseText) {
+        // This is an apiError.
+        return;
+      }
+      // This is a validation error.
+      r.flash.error(response);
+    },
+
+    apiError: function (jqXHR) {
+      r.log.debug('SettingsView.apiError');
+      var code = r.getApiStatus(jqXHR.responseText);
+
+      if (!this.apiCodes[code]) {
+        r.log.error('SettingsView: An unknown API error occurred: ' + code);
+      }
+
+      r.flash.error(this.apiCodes[code]);
+    },
+
+    apiCodes: {
+      202: 'Invalid log level.',
+      305: 'Application ID required.',
+      315: 'Log name is required.',
+      414: 'Invalid timestamp parameter.',
+      415: 'Invalid duration parameter.',
+      605: 'Application not found.',
+    },
+  });
+
+  r.log = new r.SkyboxLog({});
+  r.log.setAppUrl('ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGB8M');
+  r.log.set('appId', 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGB8M');
+
+
   r.setCookie = function (token) {
     Cookie.set('token', token, 9000, '\/');
   };
-
 
   r.unsetCookie = function () {
     Cookie.unset('token', '\/');
@@ -76,7 +136,7 @@ var RSKYBOX = (function (r, $) {
       base,
       newPage,
       pages = {
-        root: '\/',
+        root: '/',
         applications: '',
         settings: '#settings'
       };
@@ -86,10 +146,10 @@ var RSKYBOX = (function (r, $) {
       base = '';
       break;
     case 'admin':
-      base = '\/html5\/admin';
+      base = '/html5/admin';
       break;
     default:
-      base = '\/html5';
+      base = '/html5';
       break;
     }
 
@@ -223,21 +283,26 @@ var RSKYBOX = (function (r, $) {
   hidePageLoadingMessage = function () {
     if (pageLoad('decrement') <= 0) {
       $.mobile.hidePageLoadingMsg();
-      //$('html').removeClass('ui-loading');
     }
   };
 
   showPageLoadingMessage = function () {
     pageLoad('increment');
     $.mobile.showPageLoadingMsg();
-    //$('html').addClass('ui-loading');
   };
 
   $('html').ajaxSend(function (event, jqXHR, settings) {
+    if (settings.headers && settings.headers.Authorization) {
+      return;
+    }
     RSKYBOX.log.debug('ajaxSend: ' + settings.url);
     showPageLoadingMessage();
   });
+
   $('html').ajaxComplete(function (event, jqXHR, settings) {
+    if (settings.headers && settings.headers.Authorization) {
+      return;
+    }
     RSKYBOX.log.debug('ajaxComplete: ' + settings.url);
     hidePageLoadingMessage();
   });

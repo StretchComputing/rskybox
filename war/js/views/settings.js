@@ -31,7 +31,8 @@ var RSKYBOX = (function (r, $) {
       this.partialSave({
         firstName: this.$('input[name=firstName]').val()
       });
-      return true;
+      e.preventDefault();
+      return false;
     },
 
     saveLastName: function (e) {
@@ -95,7 +96,7 @@ var RSKYBOX = (function (r, $) {
         collection: new r.Carriers()
       });
 
-      this.carriersView.collection.fetch();
+      //this.carriersView.collection.fetch();
       return this;
     },
 
