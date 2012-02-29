@@ -2,6 +2,18 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
+  // Terry's dev app
+  //var rSkybox = {
+    //appId: 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGB8M',
+    //authToken: 'Basic TG9naW46bnRnMHE3Y2U0cGV2OXE3MWU2bGRqaXQ2M2c=',
+  //};
+
+  // Production app
+  var rSkybox = {
+    appId: 'ahRzfnJza3lib3gtc3RyZXRjaGNvbXITCxILQXBwbGljYXRpb24Y0c4NDA',
+    authToken: 'Basic TG9naW46MnNwa2RlN2Y1dTdlNnU1Nzg2aXA1djl1ZjE=',
+  };
+
   // General status code handlers.
   // apiError: optional handler for API errors
   r.statusCodeHandlers = function (apiError) {
@@ -71,7 +83,7 @@ var RSKYBOX = (function (r, $) {
         success: this.success,
         statusCode: r.statusCodeHandlers(this.apiError),
         headers: {
-          Authorization: "Basic TG9naW46bnRnMHE3Y2U0cGV2OXE3MWU2bGRqaXQ2M2c=",
+          Authorization: rSkybox.authToken,
         },
       });
     },
@@ -112,8 +124,8 @@ var RSKYBOX = (function (r, $) {
   });
 
   r.log = new r.SkyboxLog({});
-  r.log.setAppUrl('ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGB8M');
-  r.log.set('appId', 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGB8M');
+  r.log.setAppUrl(rSkybox.appId);
+  r.log.set('appId', rSkybox.appId);
 
 
   r.setCookie = function (token) {
