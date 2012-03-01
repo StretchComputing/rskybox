@@ -75,8 +75,8 @@ var RSKYBOX = (function (r, $) {
 
         // model: the model that's being saved
         // attrs: attributes to be partially updated
-        // handlers: object containing the ajax handlers
-        partial.save = function (model, attrs, handlers) {
+        // options: backbone save options, including ajax handlers
+        partial.save = function (model, attrs, options) {
           var proceed = false;
 
           // Set the fields that have changed.
@@ -88,7 +88,7 @@ var RSKYBOX = (function (r, $) {
           });
 
           if (proceed) {
-            model.save(attrs, handlers);
+            model.save(attrs, options);
           }
           partial.clear();
         };
