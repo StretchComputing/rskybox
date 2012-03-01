@@ -22,11 +22,9 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      r.log.info('CarrierView.render');
       this.$el.empty();
       this.addCarrier(new r.Carrier({ id: '', name: 'Select Mobile Carrier'}));
       this.collection.each(this.addCarrier);
-      this.$el.selectmenu();
       this.$el.selectmenu('refresh');
       return this;
     },

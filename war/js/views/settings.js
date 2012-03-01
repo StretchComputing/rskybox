@@ -90,6 +90,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('SettingsView.render');
 
       this.getContent().html(content);
+      this.$el.trigger('create');
       if (!this.carriersView) {
         this.carriersView = new r.CarriersView({
           el: '#mobileCarrierId',
@@ -100,7 +101,6 @@ var RSKYBOX = (function (r, $) {
         this.carriersView.setElement('#mobileCarrierId');
         this.carriersView.render();
       }
-      this.$el.trigger('create');
       return this;
     },
 
