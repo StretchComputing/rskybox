@@ -148,14 +148,15 @@ var RSKYBOX = (function (r, $) {
       base,
       newPage,
       pages = {
-        root: '/',
+        root: '',
+        login: '#login',
         applications: '',
-        settings: '#settings'
+        settings: '#settings',
       };
 
     switch (area) {
     case 'signup':
-      base = '';
+      base = '/';
       break;
     case 'admin':
       base = '/html5/admin';
