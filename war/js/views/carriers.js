@@ -19,12 +19,14 @@ var RSKYBOX = (function (r, $) {
     initialize: function () {
       _.bindAll(this, 'addCarrier');
       this.collection.bind('reset', this.render, this);
+      this.value = '';
     },
 
     render: function () {
       this.$el.empty();
       this.addCarrier(new r.Carrier({ id: '', name: 'Select Mobile Carrier'}));
       this.collection.each(this.addCarrier);
+      this.$el.val(this.value);
       this.$el.selectmenu('refresh');
       return this;
     },

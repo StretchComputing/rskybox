@@ -7,7 +7,8 @@ var RSKYBOX = (function (r, $) {
       'click .logout': 'logout',
       'blur input[name=firstName]': 'saveFirstName',
       'blur input[name=lastName]': 'saveLastName',
-      'click .savePassword': 'savePassword'
+      'click .requestSmsConfirmation': 'requestSmsConfirmation',
+      'click .savePassword': 'savePassword',
     },
 
     initialize: function () {
@@ -47,6 +48,15 @@ var RSKYBOX = (function (r, $) {
     savePassword: function (e) {
       this.partialSave({
         password: this.$('input[name=password]').val()
+      });
+      e.preventDefault();
+      return false;
+    },
+
+    requestSmsConfirmation: function (e) {
+      this.partialSave({
+        phoneNumber: this.$('input[name=phoneNumber]').val(),
+        mobileCarrierId: this.$('select[name=mobileCarrierId]').val()
       });
       e.preventDefault();
       return false;
@@ -93,12 +103,14 @@ var RSKYBOX = (function (r, $) {
       this.$el.trigger('create');
       if (!this.carriersView) {
         this.carriersView = new r.CarriersView({
-          el: '#mobileCarrierId',
+          el: $('#mobileCarrierId'),
           collection: new r.Carriers()
         });
+        this.carriersView.value = this.model.get('mobileCarrierId');
         this.carriersView.collection.fetch();
       } else {
-        this.carriersView.setElement('#mobileCarrierId');
+        this.carriersView.setElement($('#mobileCarrierId'));
+        this.carriersView.value = this.model.get('mobileCarrierId');
         this.carriersView.render();
       }
       return this;

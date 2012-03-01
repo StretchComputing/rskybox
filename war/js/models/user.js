@@ -32,6 +32,12 @@ var RSKYBOX = (function (r, $) {
       if ((password !== undefined) && (password.length < PASSWORD_MIN_LEN)) {
         return 'Minimum password length is ' + PASSWORD_MIN_LEN + ' characters.';
       }
+
+      if ((attrs.phoneNumber !== undefined) &&
+          (!r.isValidPhoneNumber(attrs.phoneNumber) || !attrs.mobileCarrierId)) {
+        return 'Valid phone number and mobile carrier selection required.';
+      }
+
       r.log.debug('User.validate passed');
     },
   });

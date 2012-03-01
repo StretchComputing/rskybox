@@ -164,16 +164,17 @@
             <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications"<% if (sendSmsNotifications) { %> checked <% } %>>
             <label for="sendSmsNotifications">Receive SMS notifications</label>
           <% } else { %>
-            <label for="phoneNumber" class="ui-hidden-accessible">Phone number:</label>
-            <input type="tel" name="phoneNumber" id="phoneNumber" value="<%= phoneNumber %>" placeholder="Phone Number">
-            <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile carrier:</label>
-            <select name="mobileCarrierId" id="mobileCarrierId" value=""></select>
-            <button class="requestSmsConfirmation">Request Confirmation</button>
             <% if (phoneNumber) { %>
               <label for="phoneConfirmationCode">Please enter your confirmation code:</label>
               <input name="phoneConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>">
               <button class="phoneConfirmationCode">Confirm Phone</button>
+              <hr>
             <% } %>
+            <label for="phoneNumber" class="ui-hidden-accessible">Phone number:</label>
+            <input type="tel" name="phoneNumber" id="phoneNumber" value="<%= phoneNumber %>" placeholder="Phone Number">
+            <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile carrier:</label>
+            <select name="mobileCarrierId" id="mobileCarrierId"></select>
+            <button class="requestSmsConfirmation">Request Confirmation</button>
           <% } %>
         </li>
         <li data-role="fieldcontain">
