@@ -10,7 +10,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      $(this.el).attr('value', this.model.get('id')).html(this.model.get('name'));
+      this.$el.attr('value', this.model.get('id')).html(this.model.get('name'));
       return this;
     }
   });
@@ -22,15 +22,17 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      $(this.el).empty();
+      r.log.info('CarrierView.render');
+      this.$el.empty();
       this.addCarrier(new r.Carrier({ id: '', name: 'Select Mobile Carrier'}));
       this.collection.each(this.addCarrier);
-      $(this.el).selectmenu('refresh');
+      this.$el.selectmenu();
+      this.$el.selectmenu('refresh');
       return this;
     },
 
     addCarrier: function (carrier) {
-      $(this.el).append(new r.CarrierView({ model: carrier }).render().el);
+      this.$el.append(new r.CarrierView({ model: carrier }).render().el);
     }
   });
 

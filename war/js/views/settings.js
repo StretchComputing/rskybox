@@ -55,7 +55,7 @@ var RSKYBOX = (function (r, $) {
     partialSave: function (attrs) {
       this.model.partial.save(this.model, attrs, {
         success: this.success,
-        statusCode: r.statusCodeHandlers(this.apiError)
+        statusCode: r.statusCodeHandlers(this.apiError),
       });
     },
 
@@ -90,13 +90,17 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('SettingsView.render');
 
       this.getContent().html(content);
+      if (!this.carriersView) {
+        this.carriersView = new r.CarriersView({
+          el: '#mobileCarrierId',
+          collection: new r.Carriers()
+        });
+        this.carriersView.collection.fetch();
+      } else {
+        this.carriersView.setElement('#mobileCarrierId');
+        this.carriersView.render();
+      }
       this.$el.trigger('create');
-      this.carriersView = new r.CarriersView({
-        el: $('#mobileCarrierId'),
-        collection: new r.Carriers()
-      });
-
-      //this.carriersView.collection.fetch();
       return this;
     },
 
