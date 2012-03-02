@@ -1,5 +1,5 @@
-/*
- * jQueryMobile-router v0.6
+/*!
+ * jQueryMobile-router v0.8
  * http://github.com/azicchetti/jquerymobile-router
  *
  * Copyright 2011 (c) Andrea Zicchetti
@@ -25,7 +25,8 @@ $(document).bind("mobileinit",function(){
 	*/
 
 	var config=$.extend({
-		fixFirstPageDataUrl: false, firstPageDataUrl: "index.html", ajaxApp: false
+		fixFirstPageDataUrl: false, firstPageDataUrl: "index.html",
+		ajaxApp: false, firstMatchOnly: false
 	},$.mobile.jqmRouter || {});
 
 
@@ -37,43 +38,44 @@ $(document).bind("mobileinit",function(){
 	var previousUrl=null, nextUrl=null;
 
 	$(document).bind("pagebeforechange", function( e, data ) {
-		// We only want to handle changePage() calls where the caller is
-		// asking us to load a page by URL.
-		if ( typeof data.toPage === "string" ) {
-			// We are being asked to load a page by URL, but we only
-			// want to handle URLs that request the data for a specific
-			// category.
-			var u = $.mobile.path.parseUrl( data.toPage );
-			previousUrl=nextUrl;
-			nextUrl=u;
+		var toPage=( typeof data.toPage === "string" ) ? data.toPage : data.toPage.jqmData("url")||"";
 
-			if ( u.hash.indexOf("?") !== -1 ) {
-				var page=u.hash.replace( /\?.*$/, "" );
-				// We don't want the data-url of the page we just modified
-				// to be the url that shows up in the browser's location field,
-				// so set the dataUrl option to the URL with hash parameters
-				data.options.dataUrl = u.href;
-				// Now call changePage() and tell it to switch to
-				// the page we just modified, but only in case it's different
-				// from the current page
-				if (	$.mobile.activePage &&
-					page.replace(/^#/,"")==$.mobile.activePage.jqmData("url")
-				){
-					data.options.allowSamePageTransition=true;
-					$.mobile.changePage( $(page), data.options );
-				} else {
-					$.mobile.changePage( $(page), data.options );
-				}
-				// Make sure to tell changePage() we've handled this call so it doesn't
-				// have to do anything.
-				e.preventDefault();
+		if ( data.options.hasOwnProperty("_jqmrouter_handled") ){ return; }
+		data.options._jqmrouter_handled = true;
+
+		var u = $.mobile.path.parseUrl( toPage );
+		previousUrl=nextUrl;
+		nextUrl=u;
+
+		if ( u.hash.indexOf("?") !== -1 ) {
+			var page=u.hash.replace( /\?.*$/, "" );
+			// We don't want the data-url of the page we just modified
+			// to be the url that shows up in the browser's location field,
+			// so set the dataUrl option to the URL with hash parameters
+			data.options.dataUrl = u.href;
+			// Now call changePage() and tell it to switch to
+			// the page we just modified, but only in case it's different
+			// from the current page
+			if (	$.mobile.activePage &&
+				page.replace(/^#/,"")==$.mobile.activePage.jqmData("url")
+			){
+				data.options.allowSamePageTransition=true;
+				$.mobile.changePage( $(page), data.options );
+			} else {
+				$.mobile.changePage( $(page), data.options );
 			}
+			// Make sure to tell changePage() we've handled this call so it doesn't
+			// have to do anything.
+			e.preventDefault();
 		}
 	});
 
 
 	if (config.fixFirstPageDataUrl){
 		$(document).ready(function(){
+			if (!window.location.pathname.match("/$")){
+				return;
+			}			
 			var page=$(":jqmData(role='page')").first();
 			var	dataUrl=page.jqmData("url"),
 				guessedDataUrl=window.location.pathname
@@ -81,9 +83,7 @@ $(document).bind("mobileinit",function(){
 					+window.location.search
 					+window.location.hash
 			;
-			if (!window.location.pathname.match("/$")){
-				return;
-			}
+
 			if (dataUrl!=guessedDataUrl){
 				page.attr("data-url",guessedDataUrl)
 					.jqmData("url",guessedDataUrl);
@@ -165,16 +165,21 @@ $(document).bind("mobileinit",function(){
 						evtList.push(evt);
 					}
 				});
-				if (!this.userHandlers) this.userHandlers={};
-				$.extend(this.userHandlers,userHandlers||{});
+				if (!this.userHandlers){
+					this.userHandlers=userHandlers||{};
+				} else {
+					$.extend(this.userHandlers,userHandlers||{});
+				}
 				this._detachEvents();
 				if (evtList.length>0){
-					this._liveData={
+					this._eventData={
 						events: evtList.join(" "),
+						selectors: ":jqmData(role='page'),:jqmData(role='dialog')",
 						handler: function(e,ui){ _self._processRoutes(e,ui,this); }
 					};
-					$(":jqmData(role='page'),:jqmData(role='dialog')").live(
-						this._liveData.events, this._liveData.handler
+					$(document).delegate(
+						this._eventData.selectors,
+						this._eventData.events, this._eventData.handler
 					);
 				}
 			}
@@ -226,25 +231,28 @@ $(document).bind("mobileinit",function(){
 						handleFn=_self.userHandlers[handler];
 					}
 					if (handleFn){
-						try { handleFn(e.type,res,ui,page,e); bHandled = true;
+						try { handleFn.apply(_self.userHandlers, [e.type,res,ui,page,e]);
+							bHandled = true;
 						}catch(err){ debug(err); }
 					}
 				}
+				if (bHandled && _self.conf.firstMatchOnly) return false;
 			});
 			//Pass to default if specified and can handle this event type
 			if (!bHandled && this.conf.defaultHandler && this.defaultHandlerEvents[e.type]) {
 				if (typeof(this.conf.defaultHandler) == "function") {
 					try {
-						this.conf.defaultHandler(e.type, ui, page, e);
+						this.conf.defaultHandler.apply(_self.userHandlers, [e.type, ui, page, e]);
 					} catch(err) { debug(err); }
 				}
 			}
 		},
 
 		_detachEvents: function(){
-			if (this._liveData){
-				$(":jqmData(role='page'),:jqmData(role='dialog')").die(
-					this._liveData.events, this._liveData.handler
+			if (this._eventData){
+				$(document).undelegate(
+					this._eventData.selectors,
+					this._eventData.events, this._eventData.handler
 				);
 			}
 		} ,
@@ -264,9 +272,9 @@ $(document).bind("mobileinit",function(){
 					if (!(params[tmp[0]] instanceof Array)){
 						params[tmp[0]]=[ params[tmp[0]] ];
 					}
-					params[tmp[0]].push(tmp[1]);
+					params[tmp[0]].push(decodeURIComponent(tmp[1]));
 				} else {
-					params[tmp[0]]=tmp[1];
+					params[tmp[0]]=decodeURIComponent(tmp[1]);
 				}
 			});
 			if ($.isEmptyObject(params)) return null;
