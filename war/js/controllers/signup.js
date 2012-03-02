@@ -14,7 +14,7 @@ var RSKYBOX = (function (r, $) {
           r.changePage('applications');
         },
         error: function (model, response) {
-          r.log.debug('Signup.controller.isLoggedIn: no current user');
+          r.log.debug('no current user', 'signup.controller.isLoggedIn');
         }
       });
     },
@@ -34,15 +34,43 @@ var RSKYBOX = (function (r, $) {
     confirmMember: function () {
       var member;
 
-      r.log.debug('confirmMember');
+      r.log.debug('entering', 'signup.controller.confirmMember');
       member = new r.Member({
         id: 'confirmation',
+      });
+
+      member.setAppUrl(r.session.params.applicationId);
+      //member.url += '/confirmation';
+      console.log(member);
+
+      member.save({
         emailAddress: r.session.params.emailAddress,
         confirmationCode: r.session.params.confirmationCode,
+        role: 'null', // required to pass validation
+      }, {
+        success: function (model, response) {
+          r.log.debug('membership confirmed', 'memberConfirmSuccess');
+          r.changePage('applications');
+        },
+        error: function (model, response) {
+          if (response.responseText) {
+            // This is an apiError.
+            return;
+          }
+          // We shouldn't be seeing errors except for apiStatus returns.
+          r.log.error(response, 'memberConfirmation');
+        },
+        statusCode: function () {
+          r.statusCodeHandlers(r.controller.memberConfirmFail);
+        },
       });
-      r.log.debug('confirmMember');
 
-      member.setAppUrl(r.session.params.applicationID);
+    },
+
+    memberConfirmFail: function () {
+      // remove memberconfirmation parameter from url and direct to the confirm
+      // page again so the user can complete their user signup process.
+      r.log.debug('member confirmation failed', 'memberConfirmFail');
     },
 
     confirmBeforeShow: function () {
@@ -72,7 +100,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     setupSession: function (eventType, matchObj, ui, page, evt) {
-      r.log.debug('setupSession');
+      r.log.debug('entering', 'signup.controller.setupSession');
       r.session = {};
       r.session.params = r.router.getParams(location.hash);
     },
