@@ -3,8 +3,10 @@ var RSKYBOX = (function (r, $) {
 
 
   r.controller = {
-    isLoggedIn: function () {
+    isLoggedIn: function (eventType, matchObj) {
       var current;
+
+      if (matchObj[0].indexOf('#confirm') === 0) { return; }
 
       current = new r.User({ id: 'current' });
       current.fetch({
@@ -29,11 +31,29 @@ var RSKYBOX = (function (r, $) {
       r.signupView.render();
     },
 
+    confirmMember: function () {
+      var member;
+
+      r.log.debug('confirmMember');
+      member = new r.Member({
+        id: 'confirmation',
+        emailAddress: r.session.params.emailAddress,
+        confirmationCode: r.session.params.confirmationCode,
+      });
+      r.log.debug('confirmMember');
+
+      member.setAppUrl(r.session.params.applicationID);
+    },
+
     confirmBeforeShow: function () {
+      if (r.session.params.memberConfirmation === 'true') {
+        r.controller.confirmMember();
+        return;
+      }
       r.confirm = new r.Confirm({
-        emailAddress: r.getParameterByName(location.hash, 'emailAddress'),
-        phoneNumber: r.getParameterByName(location.hash, 'phoneNumber'),
-        confirmationCode: r.getParameterByName(location.hash, 'confirmationCode'),
+        emailAddress: r.session.params.emailAddress,
+        phoneNumber: r.session.params.phoneNumber,
+        confirmationCode: r.session.params.confirmationCode,
       });
       r.confirmView = new r.ConfirmView({
         el: $('#confirmForm'),
@@ -49,11 +69,18 @@ var RSKYBOX = (function (r, $) {
         model: r.login
       });
       r.loginView.render();
-    }
+    },
+
+    setupSession: function (eventType, matchObj, ui, page, evt) {
+      r.log.debug('setupSession');
+      r.session = {};
+      r.session.params = r.router.getParams(location.hash);
+    },
   };
 
   r.router = new $.mobile.Router([
     { '.*':        { handler: 'isLoggedIn', events: 'bc' } },
+    { '.*':        { handler: 'setupSession', events: 'bs' } },
     { '#signup':   { handler: 'signupBeforeShow', events: 'bs' } },
     { '#signup':   { handler: 'signupShow', events: 's' } },
     { '#confirm':  { handler: 'confirmBeforeShow', events: 'bs' } },

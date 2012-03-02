@@ -2,17 +2,129 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  // Terry's dev app
-  //var rSkybox = {
-    //appId: 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGB8M',
-    //authToken: 'Basic TG9naW46bnRnMHE3Y2U0cGV2OXE3MWU2bGRqaXQ2M2c=',
-  //};
-
-  // Production app
-  var rSkybox = {
-    appId: 'ahRzfnJza3lib3gtc3RyZXRjaGNvbXITCxILQXBwbGljYXRpb24Y0c4NDA',
-    authToken: 'Basic TG9naW46MnNwa2RlN2Y1dTdlNnU1Nzg2aXA1djl1ZjE=',
+  r.dump = function (object) {
+    console.log(JSON.stringify(object));
   };
+
+
+  var rSkybox = {
+    // Terry's dev app
+    //appId: '',
+    //authToken: 'Basic ',
+
+    // Production app
+    //appId: 'ahRzfnJza3lib3gtc3RyZXRjaGNvbXITCxILQXBwbGljYXRpb24Y0c4NDA',
+    //authToken: 'Basic TG9naW46MnNwa2RlN2Y1dTdlNnU1Nzg2aXA1djl1ZjE=',
+  };
+
+  r.SkyboxLog = r.Log.extend({
+    initialize: function () {
+      _.bindAll(this, 'success', 'apiError');
+      this.on('error', this.errorHandler, this);
+    },
+
+    logLevels: {
+      exception: 5,
+      error: 10,
+      info: 25,
+      debug: 50,
+      local: 75,
+      off: 99
+    },
+
+    exception: function (message, logName) {
+      this.base('exception', message, logName);
+    },
+
+    error: function (message, logName) {
+      this.base('error', message, logName);
+    },
+
+    info: function (message, logName) {
+      this.base('info', message, logName);
+    },
+
+    debug: function (message, logName) {
+      this.base('debug', message, logName);
+    },
+
+    local: function (message, logName) {
+      this.base('local', message, logName);
+    },
+
+    base: function (level, message, logName) {
+      var
+        localLevel = this.logLevels.debug,
+        serverLevel = this.logLevels.error;
+
+      if (localLevel >= this.logLevels[level]) {
+        console.log(level + (logName ? '(' + logName + ')' : '') + ': ' + message);
+      }
+
+      if ((serverLevel >= this.logLevels[level]) && this.get('appId') &&
+          rSkybox.appId && rSkybox.authToken) {
+        this.logToServer(level, message, logName);
+      }
+    },
+
+
+    // Server functionality for the rest of the class below.
+    logToServer: function (level, message, logName) {
+      var attrs = {
+        logName: logName,
+        logLevel: level,
+        message: message,
+        userName: Cookie.get('token'),
+      };
+
+      this.save(attrs, {
+        success: this.success,
+        statusCode: r.statusCodeHandlers(this.apiError),
+        headers: {
+          Authorization: rSkybox.authToken,
+        },
+      });
+    },
+
+    success: function (model, response) {
+      r.log.local('Skybox.log.error saved');
+    },
+
+    errorHandler: function (model, response) {
+      r.log.local('SettingsView.error');
+      if (response.responseText) {
+        // This is an apiError.
+        return;
+      }
+      // This is a validation error.
+      r.flash.error(response);
+    },
+
+    apiError: function (jqXHR) {
+      r.log.local('SettingsView.apiError');
+      var code = r.getApiStatus(jqXHR.responseText);
+
+      if (!this.apiCodes[code]) {
+        r.log.local('SettingsView: An unknown API error occurred: ' + code);
+      }
+
+      r.flash.error(this.apiCodes[code]);
+    },
+
+    apiCodes: {
+      202: 'Invalid log level.',
+      305: 'Application ID required.',
+      315: 'Log name is required.',
+      414: 'Invalid timestamp parameter.',
+      415: 'Invalid duration parameter.',
+      605: 'Application not found.',
+    },
+  });
+
+  r.log = new r.SkyboxLog({});
+  r.log.setAppUrl(rSkybox.appId);
+  r.log.set('appId', rSkybox.appId);
+
 
   // General status code handlers.
   // apiError: optional handler for API errors
@@ -38,107 +150,12 @@ var RSKYBOX = (function (r, $) {
   };
 
 
-  r.SkyboxLog = r.Log.extend({
-    initialize: function () {
-      _.bindAll(this, 'success', 'apiError');
-      this.on('error', this.errorHandler, this);
-    },
-
-    logLevels: {
-      error: 1,
-      info: 5,
-      debug: 10
-    },
-
-    logLevel: function () {
-      return this.logLevels.debug;
-    },
-
-    error: function (message, logName) {
-      if (this.logLevel() < this.logLevels.error) { return; }
-      this.send({
-        logName: logName || 'default error',
-        logLevel: 'error',
-        message: message,
-      });
-    },
-
-    info: function (message) {
-      if (this.logLevel() < this.logLevels.info) { return; }
-      this.base('Info: ' + message);
-    },
-
-    debug: function (message) {
-      if (this.logLevel() < this.logLevels.debug) { return; }
-      this.base('Debug: ' + message);
-    },
-
-    base: function (message) {
-      console.log(message);
-    },
-
-    send: function (attrs) {
-      attrs.userName = Cookie.get('token');
-      this.save(attrs, {
-        success: this.success,
-        statusCode: r.statusCodeHandlers(this.apiError),
-        headers: {
-          Authorization: rSkybox.authToken,
-        },
-      });
-    },
-
-    success: function (model, response) {
-      r.log.debug('Skybox.log.error saved');
-    },
-
-    errorHandler: function (model, response) {
-      r.log.debug('SettingsView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response);
-    },
-
-    apiError: function (jqXHR) {
-      r.log.debug('SettingsView.apiError');
-      var code = r.getApiStatus(jqXHR.responseText);
-
-      if (!this.apiCodes[code]) {
-        r.log.error('SettingsView: An unknown API error occurred: ' + code);
-      }
-
-      r.flash.error(this.apiCodes[code]);
-    },
-
-    apiCodes: {
-      202: 'Invalid log level.',
-      305: 'Application ID required.',
-      315: 'Log name is required.',
-      414: 'Invalid timestamp parameter.',
-      415: 'Invalid duration parameter.',
-      605: 'Application not found.',
-    },
-  });
-
-  r.log = new r.SkyboxLog({});
-  r.log.setAppUrl(rSkybox.appId);
-  r.log.set('appId', rSkybox.appId);
-
-
   r.setCookie = function (token) {
     Cookie.set('token', token, 9000, '\/');
   };
 
   r.unsetCookie = function () {
     Cookie.unset('token', '\/');
-  };
-
-
-  r.dump = function (object) {
-    console.log(JSON.stringify(object));
   };
 
 
