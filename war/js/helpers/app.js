@@ -1,16 +1,43 @@
 var RSKYBOX = (function (r, $) {
   'use strict';
 
+  // **** These must be defined here so they can be used further down in this function. ****
+  //
+  // General status code handlers.
+  // apiError: optional handler for API errors
+  r.statusCodeHandlers = function (apiError) {
+    var general = {
+      401: function (jqXHR) {
+        r.log.debug('401 - unauthorized');
+        r.unsetCookie();
+        r.changePage('root', 'signup');
+        // TODO - Add flash message to home page after 401 occurs.
+      },
+      404: function () {
+        r.log.debug('404 - not found');
+      },
+      500: function () {
+        r.log.debug('500 - server error');
+      }
+    };
+    if (apiError) {
+      $.extend(general, { 422: apiError });
+    }
+    return general;
+  };
+
 
   r.dump = function (object) {
     console.log(JSON.stringify(object));
   };
 
 
+  // Format for authToken is: 'Basic "Login:<token>"'
+  //    where the inner string is Base64 encoded
   var rSkybox = {
     // Terry's dev app
-    //appId: '',
-    //authToken: 'Basic ',
+    appId: 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGAIM',
+    authToken: 'Basic TG9naW46YnZjaTJtN2Rsbzk5bzBiMHZkNmEyazRuazA=',
 
     // Production app
     //appId: 'ahRzfnJza3lib3gtc3RyZXRjaGNvbXITCxILQXBwbGljYXRpb24Y0c4NDA',
@@ -54,11 +81,11 @@ var RSKYBOX = (function (r, $) {
 
     base: function (level, message, logName) {
       var
-        localLevel = this.logLevels.debug,
+        localLevel = this.logLevels.local,
         serverLevel = this.logLevels.error;
 
       if (localLevel >= this.logLevels[level]) {
-        console.log(level + (logName ? '(' + logName + ')' : '') + ': ' + message);
+        console.log(level.toUpperCase() + ' ' + message + (logName ? ' \t(' + logName + ')' : ''));
       }
 
       if ((serverLevel >= this.logLevels[level]) && this.get('appId') &&
@@ -71,7 +98,7 @@ var RSKYBOX = (function (r, $) {
     // Server functionality for the rest of the class below.
     logToServer: function (level, message, logName) {
       var attrs = {
-        logName: logName,
+        logName: logName || message,
         logLevel: level,
         message: message,
         userName: Cookie.get('token'),
@@ -124,30 +151,8 @@ var RSKYBOX = (function (r, $) {
   r.log = new r.SkyboxLog({});
   r.log.setAppUrl(rSkybox.appId);
   r.log.set('appId', rSkybox.appId);
-
-
-  // General status code handlers.
-  // apiError: optional handler for API errors
-  r.statusCodeHandlers = function (apiError) {
-    var general = {
-      401: function (jqXHR) {
-        r.log.debug('401 - unauthorized');
-        r.unsetCookie();
-        r.changePage('root', 'signup');
-        // TODO - Add flash message to home page after 401 occurs.
-      },
-      404: function () {
-        r.log.debug('404 - not found');
-      },
-      500: function () {
-        r.log.debug('500 - server error');
-      }
-    };
-    if (apiError) {
-      $.extend(general, { 422: apiError });
-    }
-    return general;
-  };
+  r.log.local('appId: ' + rSkybox.appId, 'rSkyboxLog.setup');
+  r.log.local('authToken: ' + rSkybox.authToken, 'rSkyboxLog.setup');
 
 
   r.setCookie = function (token) {
@@ -325,7 +330,7 @@ var RSKYBOX = (function (r, $) {
     if (settings.headers && settings.headers.Authorization) {
       return;
     }
-    RSKYBOX.log.debug('ajaxSend: ' + settings.url);
+    RSKYBOX.log.local(settings.url, 'ajaxSend');
     showPageLoadingMessage();
   });
 
@@ -333,7 +338,7 @@ var RSKYBOX = (function (r, $) {
     if (settings.headers && settings.headers.Authorization) {
       return;
     }
-    RSKYBOX.log.debug('ajaxComplete: ' + settings.url);
+    RSKYBOX.log.local(settings.url, 'ajaxComplete');
     hidePageLoadingMessage();
   });
 }(jQuery));
