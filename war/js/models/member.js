@@ -15,7 +15,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     validate: function (attrs) {
-      if (r.isValidEmailAddress(attrs.emailAddress) && attrs.role) {
+      if (r.isValidEmailAddress(attrs.emailAddress) && (attrs.role || attrs.memberConfirmation)) {
         r.log.debug('Member: member is valid.');
         return;
       }

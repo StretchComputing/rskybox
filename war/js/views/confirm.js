@@ -2,7 +2,7 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.ConfirmView = Backbone.View.extend({
+  r.ConfirmUserView = Backbone.View.extend({
     initialize: function () {
       _.bindAll(this, 'apiError');
       this.model.on('change', this.render, this);
@@ -98,7 +98,7 @@ var RSKYBOX = (function (r, $) {
       412: 'Password too short.',
       607: 'Email address not found.',
       608: 'Phone number not found.',
-      700: 'Email address and phone number are mutually exclusive.'
+      700: 'Email address and phone number are mutually exclusive.',
     }
   });
 

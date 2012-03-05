@@ -83,6 +83,10 @@ var RSKYBOX = (function (r, $) {
     apiCodes: {
       204: 'Your email address has already been confirmed.',
       205: 'Your phone number has already been confirmed.',
+      308: 'Either an email address or a phone number is required.',
+      403: 'Invalid email address.',
+      404: 'Invalid mobile carrier.',
+      410: 'Invalid phone number.',
       500: 'Phone number and mobile carrier ID must be specified together.'
     }
   });

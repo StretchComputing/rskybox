@@ -11,7 +11,8 @@ var RSKYBOX = (function (r, $) {
         r.log.debug('401 - unauthorized');
         r.unsetCookie();
         r.changePage('root', 'signup');
-        // TODO - Add flash message to home page after 401 occurs.
+        // TODO - Add flash message to home page after 401 occurs or
+        // build a real 401 page.
       },
       404: function () {
         r.log.debug('404 - not found');
@@ -28,7 +29,7 @@ var RSKYBOX = (function (r, $) {
 
 
   r.dump = function (object) {
-    console.log(JSON.stringify(object));
+    r.log.debug(JSON.stringify(object));
   };
 
 
@@ -163,38 +164,36 @@ var RSKYBOX = (function (r, $) {
     Cookie.unset('token', '\/');
   };
 
+  r.isCookieSet = function () {
+    return !!Cookie.get('\/');
+  };
+
 
   // Change to a new HTML page.
-  r.changePage = function (page, area) {
-    var
-      base,
-      newPage,
-      pages = {
-        root: '',
+  r.changePage = function (page, area, params) {
+    var newPage, pages, query;
+
+    if (!page) { page = ''; }
+    if (!area) { area = 'app'; }
+
+    pages = {
+      signup: {
+        base: '/',
         login: '#login',
+        confirm: '#confirm',
+      },
+      app: {
+        base: '/html5',
         applications: '',
         settings: '#settings',
-      };
+      },
+      admin: {
+        base: '/html5/admin',
+      },
+    };
 
-    switch (area) {
-    case 'signup':
-      base = '/';
-      break;
-    case 'admin':
-      base = '/html5/admin';
-      break;
-    default:
-      base = '/html5';
-      break;
-    }
-
-
-    if (pages[page] === undefined) {
-      r.log.error("RSKYBOX.changePage: page '" + page + "' not found.");
-      return;
-    }
-
-    newPage = base + pages[page];
+    query = r.buildQueryString(params);
+    newPage = pages[area].base + pages[area][page] + query;
     r.log.debug("RSKYBOX.changePage: page '" + newPage + "'.");
     window.location = newPage;
   };

@@ -3,6 +3,7 @@ var RSKYBOX = (function (r, $) {
 
 
   r.controller = {
+
     isLoggedIn: function (eventType, matchObj) {
       var current;
 
@@ -19,6 +20,7 @@ var RSKYBOX = (function (r, $) {
       });
     },
 
+
     signupBeforeShow: function () {
       r.signup = new r.Signup();
       r.signupView = new r.SignupView({
@@ -31,8 +33,9 @@ var RSKYBOX = (function (r, $) {
       r.signupView.render();
     },
 
-    confirmMember: function () {
-      var member;
+
+    confirmMember: function (e) {
+      var confirmFailed, member, proceed;
 
       r.log.debug('entering', 'signup.controller.confirmMember');
       member = new r.Member({
@@ -40,17 +43,24 @@ var RSKYBOX = (function (r, $) {
       });
 
       member.setAppUrl(r.session.params.applicationId);
-      //member.url += '/confirmation';
-      console.log(member);
 
+      e.preventDefault();
       member.save({
         emailAddress: r.session.params.emailAddress,
         confirmationCode: r.session.params.confirmationCode,
-        role: 'null', // required to pass validation
+        memberConfirmation: r.session.params.memberConfirmation,
       }, {
         success: function (model, response) {
+          // TODO - This initial block won't be necessary when Joe fixes issue #128.
+          if (+model.apiStatus !== 100) {
+            confirmFailed({responseText: '{ "apiStatus": ' + model.get('apiStatus') + ' }' });
+            return;
+          }
+          // TODO - end block to remove
+
+
           r.log.debug('membership confirmed', 'memberConfirmSuccess');
-          r.changePage('applications');
+          proceed();
         },
         error: function (model, response) {
           if (response.responseText) {
@@ -61,34 +71,72 @@ var RSKYBOX = (function (r, $) {
           r.log.error(response, 'memberConfirmation');
         },
         statusCode: function () {
-          r.statusCodeHandlers(r.controller.memberConfirmFail);
+          r.statusCodeHandlers(confirmFailed);
         },
       });
 
+      confirmFailed = function (jqXHR) {
+        // remove memberconfirmation parameter from url and direct to the confirm
+        // page again so the user can complete their user signup process.
+        var
+          apiCodes = {
+            214: 'Member not pending confirmation.',
+            215: 'Member not a registered user.',
+            309: 'Confirmation code is required.',
+            313: 'Email address is required.',
+            606: 'App member not found.'
+          },
+          code = +r.getApiStatus(jqXHR.responseText),
+          params;
+        r.log.debug('member confirmation failed', 'memberConfirmFail');
+
+
+        if (!apiCodes[code]) {
+          r.log.debug('LoginView: An unknown API error occurred: ' + code);
+          r.flash.error(undefined);
+          return;
+        }
+        if (code === 215) {
+          params = r.session.params;
+          delete params.memberConfirmation;
+          delete params.applicationId;
+          r.changePage('confirm', 'signup', params);
+        } else {
+          r.flash.error(apiCodes[code]);
+        }
+      };
+
+      proceed = function () {
+        if (r.isCookieSet()) {
+          r.changePage('applications');
+        } else {
+          r.changePage('login', 'signup');
+        }
+      };
     },
 
-    memberConfirmFail: function () {
-      // remove memberconfirmation parameter from url and direct to the confirm
-      // page again so the user can complete their user signup process.
-      r.log.debug('member confirmation failed', 'memberConfirmFail');
-    },
 
-    confirmBeforeShow: function () {
-      if (r.session.params.memberConfirmation === 'true') {
-        r.controller.confirmMember();
-        return;
-      }
+    confirmUser: function () {
       r.confirm = new r.Confirm({
         emailAddress: r.session.params.emailAddress,
         phoneNumber: r.session.params.phoneNumber,
         confirmationCode: r.session.params.confirmationCode,
       });
-      r.confirmView = new r.ConfirmView({
+      r.confirmUserView = new r.ConfirmUserView({
         el: $('#confirmForm'),
         model: r.confirm
       });
-      r.confirmView.render();
+      r.confirmUserView.render();
     },
+
+    confirmBeforeShow: function (eventType, matchObj, ui, page, evt) {
+      if (r.session.params.memberConfirmation === 'true') {
+        this.confirmMember(evt);
+      } else {
+        this.confirmUser();
+      }
+    },
+
 
     loginBeforeShow: function () {
       r.login = new r.Login();
@@ -99,12 +147,14 @@ var RSKYBOX = (function (r, $) {
       r.loginView.render();
     },
 
+
     setupSession: function (eventType, matchObj, ui, page, evt) {
       r.log.debug('entering', 'signup.controller.setupSession');
       r.session = {};
       r.session.params = r.router.getParams(location.hash);
     },
   };
+
 
   r.router = new $.mobile.Router([
     { '.*':        { handler: 'isLoggedIn', events: 'bc' } },
