@@ -51,8 +51,9 @@ var RSKYBOX = (function (r, $) {
         memberConfirmation: r.session.params.memberConfirmation,
       }, {
         success: function (model, response) {
+          r.dump(model);
           // TODO - This initial block won't be necessary when Joe fixes issue #128.
-          if (+model.apiStatus !== 100) {
+          if (+model.get('apiStatus') !== 100) {
             confirmFailed({responseText: '{ "apiStatus": ' + model.get('apiStatus') + ' }' });
             return;
           }
@@ -92,7 +93,7 @@ var RSKYBOX = (function (r, $) {
 
 
         if (!apiCodes[code]) {
-          r.log.debug('LoginView: An unknown API error occurred: ' + code);
+          r.log.debug('An unknown API error occurred: ' + code, 'confirmFailed');
           r.flash.error(undefined);
           return;
         }

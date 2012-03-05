@@ -11,8 +11,7 @@ var RSKYBOX = (function (r, $) {
         r.log.debug('401 - unauthorized');
         r.unsetCookie();
         r.changePage('root', 'signup');
-        // TODO - Add flash message to home page after 401 occurs or
-        // build a real 401 page.
+        // TODO - Add flash message to home page after 401 occurs
       },
       404: function () {
         r.log.debug('404 - not found');
@@ -179,6 +178,7 @@ var RSKYBOX = (function (r, $) {
     pages = {
       signup: {
         base: '/',
+        root: '',
         login: '#login',
         confirm: '#confirm',
       },
@@ -192,8 +192,9 @@ var RSKYBOX = (function (r, $) {
       },
     };
 
-    query = r.buildQueryString(params);
-    newPage = pages[area].base + pages[area][page] + query;
+    newPage = pages[area].base + pages[area][page];
+    if (params) { newPage += r.buildQueryString(params); }
+
     r.log.debug("RSKYBOX.changePage: page '" + newPage + "'.");
     window.location = newPage;
   };
