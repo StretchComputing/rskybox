@@ -19,7 +19,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     logout: function (e) {
-      r.log.debug('logout');
+      r.log.debug('entering', 'SettingsView.logout');
       r.unsetCookie();
       r.changePage('root', 'signup');
 
@@ -28,7 +28,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     saveFirstName: function (e) {
-      r.log.debug('Settings.saveFirstName');
+      r.log.debug('entering', 'SettingsView.saveFirstName');
       this.partialSave({
         firstName: this.$('input[name=firstName]').val()
       });
@@ -37,7 +37,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     saveLastName: function (e) {
-      r.log.debug('Settings.saveLastName');
+      r.log.debug('entering', 'SettingsView.saveLastName');
       this.partialSave({
         lastName: this.$('input[name=lastName]').val()
       });
@@ -46,6 +46,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     savePassword: function (e) {
+      r.log.debug('entering', 'SettingsView.savePassword');
       this.partialSave({
         password: this.$('input[name=password]').val()
       });
@@ -74,30 +75,24 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('SettingsView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response);
+      r.log.debug('entering', 'SettingsView.error');
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.error(response);                // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('SettingsView.apiError');
+      r.log.debug('entering', 'SettingsView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('SettingsView: An unknown API error occurred: ' + code);
+        r.log.error('Undefined apiStatus: ' + code, 'SettingsView.apiError');
       }
-
       r.flash.error(this.apiCodes[code]);
     },
 
     render: function () {
+      r.log.debug('entering', 'SettingsView.render');
       var content = this.template(this.model.getMock());
-
-      r.log.debug('SettingsView.render');
 
       this.getContent().html(content);
       this.$el.trigger('create');

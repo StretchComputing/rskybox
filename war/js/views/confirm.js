@@ -15,8 +15,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     submit: function (e) {
+      r.log.debug('entering', 'ConfirmUserView.submit');
       var valid;
-      r.log.debug('submit', 'ConfirmUserView');
 
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
@@ -38,23 +38,23 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.debug('success', 'ConfirmUserView');
+      r.log.debug('entering', 'ConfirmUserView.success');
       r.setCookie(model.get('token'));
       r.changePage('settings');
     },
 
     error: function (model, response) {
-      r.log.debug('error', 'ConfirmUserView');
+      r.log.debug('entering', 'ConfirmUserView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.error(response, this.$el);      // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('apiError', 'ConfirmUserView');
+      r.log.debug('entering', 'ConfirmUserView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error(code + ': ' + this.apiCodes[code], 'ConfirmUserView');
+        r.log.error('Undefined apiStatus: ' + code, 'ConfirmUserView.apiError');
       }
       this.model.clear({silent: true});
       r.flash.error(this.apiCodes[code], this.$el);
@@ -107,7 +107,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     submit: function (e) {
-      r.log.debug('submit', 'ConfirmMemberView');
+      r.log.debug('entering', 'ConfirmMemberView.submit');
       this.model.save(null, {
         success: this.success,
         statusCode: r.statusCodeHandlers(this.apiError),
@@ -118,23 +118,25 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.debug('ConfirmMemberView.success');
+      r.log.debug('entering', 'ConfirmMemberView.success');
       // TODO - This initial block won't be necessary when Joe fixes issue #128.
       if (+model.get('apiStatus') !== 100) {
+        r.log.error('TODO - change this code after #128 is fixed.', 'ConfirmMemberView.success');
         this.apiError({responseText: '{ "apiStatus": ' + model.get('apiStatus') + ' }' });
         return;
       }
       // TODO - end block to remove
 
-      r.log.debug('success: membership confirmed', 'ConfirmMemberView');
+      r.log.debug('membership confirmed', 'ConfirmMemberView.success');
       this.proceed();
     },
 
     error: function (model, response) {
-      r.log.debug('error', 'ConfirmMemberView');
+      r.log.debug('entering', 'ConfirmMemberView.error');
       if (response.responseText) { return; }  // This is an apiError.
+
       // Shouldn't see errors except for apiStatus returns handled above.
-      r.log.error(response, 'ConfirmMemberView');
+      r.log.error('Unexpected execution: ' + response, 'ConfirmMemberView.error');
     },
 
     apiError: function (jqXHR) {
@@ -151,11 +153,11 @@ var RSKYBOX = (function (r, $) {
         r.changePage('confirm', 'signup', params);
         return;
       case 606:
-        r.log.error(code + ': ' + this.apiCodes[code], 'ConfirmMemberView');
+        r.log.error('Undefined apiStatus: ' + code, 'ConfirmMemberView.apiError');
         this.proceed(true);
         return;
       case undefined:
-        r.log.error(code + ': ' + this.apiCodes[code], 'ConfirmMemberView');
+        r.log.error('Undefined apiStatus: ' + code, 'ConfirmMemberView.apiError');
         break;
       }
       this.model.clear({silent: true});
@@ -163,8 +165,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      var content = this.template(this.model.getMock());
       r.log.debug('entering', 'ConfirmMemberView.render');
+      var content = this.template(this.model.getMock());
 
       this.$el.html(content);
       this.$('#emailWrapper').show();

@@ -15,9 +15,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     submit: function (e) {
+      r.log.debug('entering', 'SignupView.submit');
       var valid;
-
-      r.log.debug('SignupView.submit');
 
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
@@ -43,40 +42,40 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('SignupView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response, this.$el);
+      r.log.debug('entering', 'SignupView.error');
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.error(response, this.$el);      // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('SignupView.apiError');
+      r.log.debug('entering', 'SignupView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('SignupView: An unknown API error occurred: ' + code);
+        r.log.error('Undefined apiStatus: ' + code, 'SignupView.apiError');
       }
 
       r.flash.error(this.apiCodes[code], this.$el);
     },
 
     render: function () {
+      r.log.debug('entering', 'SignupView.render');
       var content = this.template(this.model.getMock());
 
-      r.log.debug('SignupView.render');
-
-      $(this.el).empty();
-      $(this.el).html(content);
-      $(this.el).trigger('create');
-      this.carriersView = new r.CarriersView({
-        el: $('#mobileCarrierId'),
-        collection: new r.Carriers()
-      });
-
-      this.carriersView.collection.fetch();
+      this.$el.html(content);
+      this.$el.trigger('create');
+      if (!this.carriersView) {
+        this.carriersView = new r.CarriersView({
+          el: $('#mobileCarrierId'),
+          collection: new r.Carriers()
+        });
+        this.carriersView.value = this.model.get('mobileCarrierId');
+        this.carriersView.collection.fetch();
+      } else {
+        this.carriersView.setElement($('#mobileCarrierId'));
+        this.carriersView.value = this.model.get('mobileCarrierId');
+        this.carriersView.render();
+      }
       return this;
     },
 
