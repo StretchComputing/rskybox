@@ -96,10 +96,10 @@ var RSKYBOX = (function (r, $) {
     { '#signup':   { handler: 'signupShow', events: 's' } },
 
     // this route only matches when memberConfirmation is NOT present
-    { '#confirm(?!.*(memberConfirmation))':  { handler: 'confirmUserBeforeShow', events: 'bs' } },
+    { '#confirm(?!.*memberConfirmation)':  { handler: 'confirmUserBeforeShow', events: 'bs' } },
 
     // this route only matches when memberConfirmation IS present
-    { '#confirm(?=.*(memberConfirmation))':  { handler: 'confirmMemberBeforeShow', events: 'bs' } },
+    { '#confirm(?=.*memberConfirmation)':  { handler: 'confirmMemberBeforeShow', events: 'bs' } },
 
     { '#login':    { handler: 'loginBeforeShow', events: 'bs' } },
   ], r.controller);
