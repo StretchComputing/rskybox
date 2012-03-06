@@ -195,7 +195,7 @@ var RSKYBOX = (function (r, $) {
     newPage = pages[area].base + pages[area][page];
     if (params) { newPage += r.buildQueryString(params); }
 
-    r.log.debug("RSKYBOX.changePage: page '" + newPage + "'.");
+    r.log.debug(newPage, 'RSKYBOX.changePage');
     window.location = newPage;
   };
 

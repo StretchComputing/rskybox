@@ -69,6 +69,7 @@ var RSKYBOX = (function (r, $) {
       r.flash.error(response);
     },
 
+    //  This may not be in use.  Thanks Joe for pointing out my mistakes.
     apiError: function (jqXHR) {
       r.log.debug('EnduserView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
