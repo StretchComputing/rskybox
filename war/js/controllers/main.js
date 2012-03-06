@@ -286,6 +286,8 @@ var RSKYBOX = (function (r, $) {
       });
     },
 
+
+    // Session Setup
     setupSession: function (eventType, matchObj, ui, page, evt) {
       r.log.debug('setupSession');
       r.session = {};

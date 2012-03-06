@@ -12,6 +12,7 @@ var RSKYBOX = (function (r, $) {
       date: null,
       role: null,
       status: null,
+      confirmationCode: null,  // used during member confirmation only
     },
 
     validate: function (attrs) {

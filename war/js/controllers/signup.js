@@ -4,6 +4,7 @@ var RSKYBOX = (function (r, $) {
 
   r.controller = {
 
+    // Check if the user is logged in
     isLoggedIn: function (eventType, matchObj) {
       var current;
 
@@ -21,6 +22,7 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    // Signup
     signupBeforeShow: function () {
       r.signup = new r.Signup();
       r.signupView = new r.SignupView({
@@ -34,89 +36,26 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    // Confirm Member
     confirmMember: function (e) {
-      var confirmFailed, member, proceed;
-
-      r.log.debug('entering', 'signup.controller.confirmMember');
-      member = new r.Member({
+      r.log.debug('entering', 'SingupController.confirmMember');
+      r.member = new r.Member({
         id: 'confirmation',
-      });
-
-      member.setAppUrl(r.session.params.applicationId);
-
-      e.preventDefault();
-      member.save({
         emailAddress: r.session.params.emailAddress,
         confirmationCode: r.session.params.confirmationCode,
         memberConfirmation: r.session.params.memberConfirmation,
-      }, {
-        success: function (model, response) {
-          r.dump(model);
-          // TODO - This initial block won't be necessary when Joe fixes issue #128.
-          if (+model.get('apiStatus') !== 100) {
-            confirmFailed({responseText: '{ "apiStatus": ' + model.get('apiStatus') + ' }' });
-            return;
-          }
-          // TODO - end block to remove
-
-
-          r.log.debug('membership confirmed', 'memberConfirmSuccess');
-          proceed();
-        },
-        error: function (model, response) {
-          if (response.responseText) {
-            // This is an apiError.
-            return;
-          }
-          // We shouldn't be seeing errors except for apiStatus returns.
-          r.log.error(response, 'memberConfirmation');
-        },
-        statusCode: function () {
-          r.statusCodeHandlers(confirmFailed);
-        },
       });
-
-      confirmFailed = function (jqXHR) {
-        // remove memberconfirmation parameter from url and direct to the confirm
-        // page again so the user can complete their user signup process.
-        var
-          apiCodes = {
-            214: 'Member not pending confirmation.',
-            215: 'Member not a registered user.',
-            309: 'Confirmation code is required.',
-            313: 'Email address is required.',
-            606: 'App member not found.'
-          },
-          code = +r.getApiStatus(jqXHR.responseText),
-          params;
-        r.log.debug('member confirmation failed', 'memberConfirmFail');
-
-
-        if (!apiCodes[code]) {
-          r.log.debug('An unknown API error occurred: ' + code, 'confirmFailed');
-          r.flash.error(undefined);
-          return;
-        }
-        if (code === 215) {
-          params = r.session.params;
-          delete params.memberConfirmation;
-          delete params.applicationId;
-          r.changePage('confirm', 'signup', params);
-        } else {
-          r.flash.error(apiCodes[code]);
-        }
-      };
-
-      proceed = function () {
-        if (r.isCookieSet()) {
-          r.changePage('applications');
-        } else {
-          r.changePage('login', 'signup');
-        }
-      };
+      r.member.setAppUrl(r.session.params.applicationId);
+      r.confirmMemberView = new r.ConfirmMemberView({
+        el: $('#confirmForm'),
+        model: r.member,
+      });
+      //r.confirmMemberView.render();
+      r.confirmMemberView.$el.trigger('submit');
     },
 
 
+    // Confirm User
     confirmUser: function () {
       r.confirm = new r.Confirm({
         emailAddress: r.session.params.emailAddress,
@@ -125,13 +64,17 @@ var RSKYBOX = (function (r, $) {
       });
       r.confirmUserView = new r.ConfirmUserView({
         el: $('#confirmForm'),
-        model: r.confirm
+        model: r.confirm,
       });
       r.confirmUserView.render();
     },
 
+
+    // Confirm starting point
+    // TODO - try to replace this with routes
     confirmBeforeShow: function (eventType, matchObj, ui, page, evt) {
       if (r.session.params.memberConfirmation === 'true') {
+        evt.preventDefault();
         this.confirmMember(evt);
       } else {
         this.confirmUser();
@@ -139,6 +82,7 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    // Login
     loginBeforeShow: function () {
       r.login = new r.Login();
       r.loginView = new r.LoginView({
@@ -149,6 +93,7 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    // Session Setup
     setupSession: function (eventType, matchObj, ui, page, evt) {
       r.log.debug('entering', 'signup.controller.setupSession');
       r.session = {};
