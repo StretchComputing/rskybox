@@ -7,6 +7,8 @@ var RSKYBOX = (function (r, $) {
       'click .logout': 'logout',
       'blur input[name=firstName]': 'saveFirstName',
       'blur input[name=lastName]': 'saveLastName',
+      'change input[name=sendEmailNotifications]': 'sendEmailNotifications',
+      'change input[name=sendSmsNotifications]': 'sendSmsNotifications',
       'click .requestSmsConfirmation': 'requestSmsConfirmation',
       'click .savePassword': 'savePassword',
     },
@@ -45,6 +47,24 @@ var RSKYBOX = (function (r, $) {
       return false;
     },
 
+    sendEmailNotifications: function (e) {
+      r.log.debug('entering', 'SettingsView.sendEmailNotifications');
+      this.partialSave({
+        sendEmailNotifications: this.$('input[name=sendEmailNotifications]')[0].checked,
+      });
+      e.preventDefault();
+      return false;
+    },
+
+    sendSmsNotifications: function (e) {
+      r.log.debug('entering', 'SettingsView.sendSmsNotifications');
+      this.partialSave({
+        sendSmsNotifications: this.$('input[name=sendSmsNotifications]')[0].checked,
+      });
+      e.preventDefault();
+      return false;
+    },
+
     savePassword: function (e) {
       r.log.debug('entering', 'SettingsView.savePassword');
       this.partialSave({
@@ -67,6 +87,7 @@ var RSKYBOX = (function (r, $) {
       this.model.partial.save(this.model, attrs, {
         success: this.success,
         statusCode: r.statusCodeHandlers(this.apiError),
+        wait: true,
       });
     },
 
