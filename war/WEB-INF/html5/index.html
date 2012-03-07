@@ -247,7 +247,7 @@
     </script>
     <script type="text/template" id="logEntryTemplate">
       <a href="#log?id=<%= id %>&appId=<%= appId %>">
-        <h3><%= date %></h3>
+        <h3><%= date %> <%= logMode === 'inactive' ? '(inactive)' : '' %></h3>
         <p><%= logName %></p>
         <p><%= message %></p></a>
     </script>

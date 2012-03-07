@@ -458,6 +458,12 @@ public class ClientLogsResource extends ServerResource {
             	json.put("logName", clientLog.getLogName());
             	json.put("message", clientLog.getMessage());
             	json.put("stackBackTrace", clientLog.getStackBackTrace());
+                	
+                ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
+                // if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
+                String logMode = ClientLogRemoteControl.ACITVE_MODE;
+                if(clrc != null) {logMode = clrc.getMode();}
+                json.put("logMode", logMode);
             	
             	if(!isList) {
                 	JSONArray appActionsJsonArray = new JSONArray();
@@ -471,12 +477,6 @@ public class ClientLogsResource extends ServerResource {
                 		appActionsJsonArray.put(appActionJsonObj);
                 	}
                 	if(appActions.size() > 0) {json.put("appActions", appActionsJsonArray);}
-                	
-                	ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
-                	// if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
-                	String logMode = ClientLogRemoteControl.ACITVE_MODE;
-                	if(clrc != null) {logMode = clrc.getMode();}
-    				json.put("logMode", logMode);
             	}
             	
             	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
