@@ -148,9 +148,10 @@
             <label for="sendEmailNotifications">Receive email notifications</label>
           <% } else { %>
             <% if (emailAddress) { %>
-              <label for="emailConfirmationCode">Please enter your confirmation code:</label>
+              <label for="emailConfirmationCode">Confirmation code for <%= emailAddress %>:</label>
               <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%= emailConfirmationCode %>">
               <button class="emailConfirmationCode">Confirm Email</button>
+              <hr>
             <% } %>
             <label for="emailAddress" class="ui-hidden-accessible">Email address:</label>
             <input type="email" name="emailAddress" id="emailAddress" value="<%= emailAddress %>" placeholder="Email Address">
@@ -165,7 +166,7 @@
             <label for="sendSmsNotifications">Receive SMS notifications</label>
           <% } else { %>
             <% if (phoneNumber) { %>
-              <label for="phoneConfirmationCode">Please enter your confirmation code:</label>
+              <label for="phoneConfirmationCode">Confirmation code for <%= phoneNumber %>:</label>
               <input name="phoneConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>">
               <button class="phoneConfirmationCode">Confirm Phone</button>
               <hr>
