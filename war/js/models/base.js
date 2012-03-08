@@ -54,6 +54,7 @@ var RSKYBOX = (function (r, $) {
     constructor: function () {
       Backbone.Model.prototype.constructor.apply(this, arguments);
 
+      // Partial updates are enabled by overriding toJSON. (see toJSON below)
       this.partial = (function () {
         var fields = {}, partial = {};
 
@@ -76,12 +77,13 @@ var RSKYBOX = (function (r, $) {
         // model: the model that's being saved
         // attrs: attributes to be partially updated
         // options: backbone save options, including ajax handlers
-        partial.save = function (model, attrs, options) {
+        // force: whether or not to proceed with update even if no changes were made
+        partial.save = function (model, attrs, options, force) {
           var proceed = false;
 
           // Set the fields that have changed.
           Object.keys(attrs).forEach(function (key) {
-            if (model.get(key) !== attrs[key]) {
+            if (force || model.get(key) !== attrs[key]) {
               partial.setField(key);
               proceed = true;
             }
@@ -134,6 +136,8 @@ var RSKYBOX = (function (r, $) {
       return field && (!this.partial.any() || this.partial.getFields()[field]);
     },
 
+    // Partial updates work because we intercept toJSON when we want to work with
+    // a subset of fields from the model.
     toJSON: function () {
       var json = {};
 

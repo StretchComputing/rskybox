@@ -86,7 +86,7 @@ var RSKYBOX = (function (r, $) {
       if (this.model.isEmailValid(email)) {
         this.partialSave({
           emailAddress: email,
-        });
+        }, true);
       } else {
         r.flash.error('Valid email address required.');
       }
@@ -103,7 +103,7 @@ var RSKYBOX = (function (r, $) {
         this.partialSave({
           phoneNumber: phone,
           mobileCarrierId: carrier,
-        });
+        }, true);
       } else {
         r.flash.error('Valid phone number and mobile carrier selection required.');
       }
@@ -111,12 +111,12 @@ var RSKYBOX = (function (r, $) {
       return false;
     },
 
-    partialSave: function (attrs) {
+    partialSave: function (attrs, force) {
       this.model.partial.save(this.model, attrs, {
         success: this.success,
         statusCode: r.statusCodeHandlers(this.apiError),
         wait: true,
-      });
+      }, force);
     },
 
     success: function (model, response) {
