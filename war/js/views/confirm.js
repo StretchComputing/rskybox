@@ -150,7 +150,7 @@ var RSKYBOX = (function (r, $) {
         this.proceed();
         return;
       case 606:
-        r.log.error('Undefined apiStatus: ' + code, 'ConfirmMemberView.apiError');
+        r.log.error('App Member not found.', 'ConfirmMemberView.apiError');
         this.proceed(true);
         return;
       case undefined:
