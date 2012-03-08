@@ -120,10 +120,10 @@ public class ApplicationsResource extends ServerResource {
 					application.setName(appName);
 					log.info("stored name value = " + application.getName());
 				
-					Application app = Application.getApplicationWithName(appName);
-					if(app != null) {
-						return Utility.apiError(this, ApiStatusCode.APPLICATION_NAME_ALREADY_USED);
-					}
+//					Application app = Application.getApplicationWithName(appName);
+//					if(app != null) {
+//						return Utility.apiError(this, ApiStatusCode.APPLICATION_NAME_ALREADY_USED);
+//					}
 				} else {
 					log.info("no JSON name field found");
 					return Utility.apiError(this, ApiStatusCode.APPLICATION_NAME_REQUIRED);
