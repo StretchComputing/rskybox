@@ -5,16 +5,20 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.util.logging.Logger;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.Request;
+import org.restlet.data.CookieSetting;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.ext.servlet.ServletUtils;
 import org.restlet.resource.ServerResource;
+import org.restlet.util.Series;
 
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;
@@ -130,4 +134,11 @@ public class Utility {
 		}
 		return output;
 	}
+	
+    public static void setCookie(HttpServletResponse theHttpResponse, String theCookieName, String theCookieValue, int theCookieAgeInMilliSeconds){
+    	String cookieValue = theCookieValue == null ? "" : theCookieValue;
+    	Cookie newCookie = new Cookie(theCookieName, theCookieValue);
+    	newCookie.setMaxAge(theCookieAgeInMilliSeconds);
+    	theHttpResponse.addCookie(newCookie);
+    }
 }
