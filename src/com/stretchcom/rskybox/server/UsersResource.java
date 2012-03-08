@@ -310,18 +310,14 @@ public class UsersResource extends ServerResource {
             	
 	            Key key;
 				User currentUser = Utility.getCurrentUser(getRequest());
-    			if(this.id.equalsIgnoreCase(User.CURRENT)) {
-    				// special case: id = "current" so return info on currently logged in user
-    	        	if(currentUser == null) {
-    	        		return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
-    	        	}
+    			if(this.id.equalsIgnoreCase(User.CURRENT) || this.id.equalsIgnoreCase(KeyFactory.keyToString(currentUser.getKey()))) {
     	        	key = currentUser.getKey();
     			} else {
     	        	//////////////////////
     	        	// Authorization Rules
     	        	//////////////////////
     				// if not the current user, then must be the Super Admin
-    	        	if(currentUser == null || !currentUser.getIsSuperAdmin()) {
+    	        	if(currentUser == null || currentUser.getIsSuperAdmin() == null || !currentUser.getIsSuperAdmin()) {
     	            	return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED);
     	        	}
 
