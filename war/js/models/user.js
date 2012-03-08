@@ -24,21 +24,18 @@ var RSKYBOX = (function (r, $) {
       this.setUrl();
     },
 
-    validate: function (attrs) {
-      var password, PASSWORD_MIN_LEN = 6;
+    isPasswordValid: function (password) {
+      var PASSWORD_MIN_LEN = 6;
 
-      r.log.debug('User.validate');
-      password = attrs.password;
-      if ((password !== undefined) && (password.length < PASSWORD_MIN_LEN)) {
-        return 'Minimum password length is ' + PASSWORD_MIN_LEN + ' characters.';
-      }
+      return password.length >= PASSWORD_MIN_LEN;
+    },
 
-      if ((attrs.phoneNumber !== undefined) &&
-          (!r.isValidPhoneNumber(attrs.phoneNumber) || !attrs.mobileCarrierId)) {
-        return 'Valid phone number and mobile carrier selection required.';
-      }
+    isPhoneValid: function (phone, carrier) {
+      return r.isValidPhoneNumber(phone) && carrier;
+    },
 
-      r.log.debug('User.validate passed');
+    isEmailValid: function (email) {
+      return r.isValidEmailAddress(email);
     },
   });
 

@@ -9,6 +9,7 @@ var RSKYBOX = (function (r, $) {
       'blur input[name=lastName]': 'saveLastName',
       'change input[name=sendEmailNotifications]': 'sendEmailNotifications',
       'change input[name=sendSmsNotifications]': 'sendSmsNotifications',
+      'click .requestEmailConfirmation': 'requestEmailConfirmation',
       'click .requestSmsConfirmation': 'requestSmsConfirmation',
       'click .savePassword': 'savePassword',
     },
@@ -66,19 +67,46 @@ var RSKYBOX = (function (r, $) {
     },
 
     savePassword: function (e) {
-      r.log.debug('entering', 'SettingsView.savePassword');
-      this.partialSave({
-        password: this.$('input[name=password]').val()
-      });
+      var password = this.$('input[name=password]').val();
+
+      if (this.model.isPasswordValid(password)) {
+        this.partialSave({
+          password: password,
+        });
+      } else {
+        r.flash.error('Minimum password length is 6 characters.');
+      }
+      e.preventDefault();
+      return false;
+    },
+
+    requestEmailConfirmation: function (e) {
+      var email = this.$('input[name=emailAddress]').val();
+
+      if (this.model.isEmailValid(email)) {
+        this.partialSave({
+          emailAddress: email,
+        });
+      } else {
+        r.flash.error('Valid email address required.');
+      }
       e.preventDefault();
       return false;
     },
 
     requestSmsConfirmation: function (e) {
-      this.partialSave({
-        phoneNumber: this.$('input[name=phoneNumber]').val(),
-        mobileCarrierId: this.$('select[name=mobileCarrierId]').val()
-      });
+      var
+        phone = this.$('input[name=phoneNumber]').val(),
+        carrier = this.$('select[name=mobileCarrierId]').val();
+
+      if (this.model.isPhoneValid(phone, carrier)) {
+        this.partialSave({
+          phoneNumber: phone,
+          mobileCarrierId: carrier,
+        });
+      } else {
+        r.flash.error('Valid phone number and mobile carrier selection required.');
+      }
       e.preventDefault();
       return false;
     },

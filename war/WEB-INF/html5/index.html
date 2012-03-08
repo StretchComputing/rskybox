@@ -147,14 +147,14 @@
             <input type="checkbox" name="sendEmailNotifications" id="sendEmailNotifications"<% if (sendEmailNotifications) { %> checked <% } %>>
             <label for="sendEmailNotifications">Receive email notifications</label>
           <% } else { %>
-            <label for="emailAddress" class="ui-hidden-accessible">Email address:</label>
-            <input type="email" name="emailAddress" id="emailAddress" value="<%= emailAddress %>" placeholder="Email Address">
-            <button class="requestEmailConfirmation">Request Confirmation</button>
             <% if (emailAddress) { %>
               <label for="emailConfirmationCode">Please enter your confirmation code:</label>
               <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%= emailConfirmationCode %>">
               <button class="emailConfirmationCode">Confirm Email</button>
             <% } %>
+            <label for="emailAddress" class="ui-hidden-accessible">Email address:</label>
+            <input type="email" name="emailAddress" id="emailAddress" value="<%= emailAddress %>" placeholder="Email Address">
+            <button class="requestEmailConfirmation">Request Confirmation</button>
           <% } %>
         </li>
         <li data-role="fieldcontain">
