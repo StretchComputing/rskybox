@@ -119,13 +119,16 @@ var RSKYBOX = (function (r, $) {
 
     success: function (model, response) {
       r.log.debug('entering', 'ConfirmMemberView.success');
-      // TODO - This initial block won't be necessary when Joe fixes issue #128.
-      if (+model.get('apiStatus') !== 100) {
-        r.log.error('TODO - change this code after #128 is fixed.', 'ConfirmMemberView.success');
-        this.apiError({responseText: '{ "apiStatus": ' + model.get('apiStatus') + ' }' });
+      var params;
+
+      if (+model.get('apiStatus') === 215) {
+        r.log.debug('Member is not a registered user.', 'ConfirmMemberView.success');
+        params = r.session.params;
+        delete params.memberConfirmation;
+        delete params.applicationId;
+        r.changePage('confirm', 'signup', params);
         return;
       }
-      // TODO - end block to remove
 
       r.log.debug('membership confirmed', 'ConfirmMemberView.success');
       this.proceed();
@@ -140,17 +143,11 @@ var RSKYBOX = (function (r, $) {
     },
 
     apiError: function (jqXHR) {
-      var code = +r.getApiStatus(jqXHR.responseText), params;
+      var code = +r.getApiStatus(jqXHR.responseText);
 
       switch (code) {
       case 214:
         this.proceed();
-        return;
-      case 215:
-        params = r.session.params;
-        delete params.memberConfirmation;
-        delete params.applicationId;
-        r.changePage('confirm', 'signup', params);
         return;
       case 606:
         r.log.error('Undefined apiStatus: ' + code, 'ConfirmMemberView.apiError');
