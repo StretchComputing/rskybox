@@ -31,6 +31,7 @@ public class UserAuthenticationFilter implements Filter {
     private static final Logger log = Logger.getLogger(UserAuthenticationFilter.class.getName());
     
     private Boolean tokenCookieFound = false;
+    private FilterConfig filterConfig;
 
     @Override
     public void destroy() {
@@ -294,6 +295,7 @@ public class UserAuthenticationFilter implements Filter {
 
     @Override
     public void init(FilterConfig fc) throws ServletException {
+    	this.filterConfig = fc;
     }
     
     private String getURL(HttpServletRequest req) {
@@ -327,15 +329,19 @@ public class UserAuthenticationFilter implements Filter {
     
     private void setRskyboxAppIdTokenIfAppropirate(HttpServletRequest theHttpRequest, HttpServletResponse theHttpResponse) {
     	// only set the rSkybox App ID token if this is an authorized end user or rSkybox (i.e. cookie token found)
+    	log.info("setRskyboxAppIdTokenIfAppropirate() entered, tokenCookieFound = " + this.tokenCookieFound);
     	if(!this.tokenCookieFound) {return;}
     	
     	String appId = extractCookie(theHttpRequest, RSKYBOX_APP_ID_COOKIE_NAME);
     	if(appId == null) {
+    		String cookieValue = null;
+    		if(SystemProperty.environment.value() == SystemProperty.Environment.Value.Development) {
+        		cookieValue = this.filterConfig.getServletContext().getInitParameter("dev.rskybox.appid");
+    		} else {
+        		cookieValue = this.filterConfig.getServletContext().getInitParameter("prod.rskybox.appid");
+    		}
+    		log.info("***** cookieValue = " + cookieValue);
     		// cookie not set so we need to set it with age of one year
-    		
-    		// *** I AM HERE -- get cookie value from web.xml depending on Dev or Prod environments
-    		
-    		String cookieValue = xyz;
     		Utility.setCookie(theHttpResponse, RSKYBOX_APP_ID_COOKIE_NAME, cookieValue, 31557600);
     	}
     }
