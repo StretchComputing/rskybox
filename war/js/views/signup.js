@@ -38,7 +38,10 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      $.mobile.changePage('#confirm' + r.buildQueryString(model.toJSON()));
+      var params = model.toJSON();
+
+      params.preregistration = true;
+      $.mobile.changePage('#confirm' + r.buildQueryString(params));
     },
 
     error: function (model, response) {

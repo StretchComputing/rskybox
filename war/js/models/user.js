@@ -24,10 +24,16 @@ var RSKYBOX = (function (r, $) {
       this.setUrl();
     },
 
+    isConfirmCodeValid: function (code) {
+      var CODE_LEN = 3;
+
+      return code && code.length === CODE_LEN;
+    },
+
     isPasswordValid: function (password) {
       var PASSWORD_MIN_LEN = 6;
 
-      return password.length >= PASSWORD_MIN_LEN;
+      return password && password.length >= PASSWORD_MIN_LEN;
     },
 
     isPhoneValid: function (phone, carrier) {

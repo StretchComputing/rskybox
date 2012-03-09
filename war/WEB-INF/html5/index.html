@@ -149,8 +149,9 @@
           <% } else { %>
             <% if (emailAddress) { %>
               <label for="emailConfirmationCode">Confirmation code for <%= emailAddress %>:</label>
+              <input type="hidden" name="confirmEmailAddress" value="<%= emailAddress %>">
               <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%= emailConfirmationCode %>">
-              <button class="emailConfirmationCode">Confirm Email</button>
+              <button class="confirmEmail">Confirm Email</button>
               <hr>
             <% } %>
             <label for="emailAddress" class="ui-hidden-accessible">Email address:</label>
@@ -166,9 +167,10 @@
             <label for="sendSmsNotifications">Receive SMS notifications</label>
           <% } else { %>
             <% if (phoneNumber) { %>
-              <label for="phoneConfirmationCode">Confirmation code for <%= phoneNumber %>:</label>
-              <input name="phoneConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>">
-              <button class="phoneConfirmationCode">Confirm Phone</button>
+              <label for="phoneNumberConfirmationCode">Confirmation code for <%= phoneNumber %>:</label>
+              <input type="hidden" name="confirmPhoneNumber" value="<%= phoneNumber %>">
+              <input name="phoneNumberConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>">
+              <button class="confirmPhone">Confirm Phone</button>
               <hr>
             <% } %>
             <label for="phoneNumber" class="ui-hidden-accessible">Phone number:</label>

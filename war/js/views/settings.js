@@ -9,6 +9,8 @@ var RSKYBOX = (function (r, $) {
       'blur input[name=lastName]': 'saveLastName',
       'change input[name=sendEmailNotifications]': 'sendEmailNotifications',
       'change input[name=sendSmsNotifications]': 'sendSmsNotifications',
+      'click .confirmEmail': 'confirmEmail',
+      'click .confirmPhone': 'confirmPhone',
       'click .requestEmailConfirmation': 'requestEmailConfirmation',
       'click .requestSmsConfirmation': 'requestSmsConfirmation',
       'click .savePassword': 'savePassword',
@@ -106,6 +108,44 @@ var RSKYBOX = (function (r, $) {
         }, true);
       } else {
         r.flash.error('Valid phone number and mobile carrier selection required.');
+      }
+      e.preventDefault();
+      return false;
+    },
+
+    confirmEmail: function (e) {
+      var
+        code = this.$('input[name=emailConfirmationCode]').val(),
+        params;
+
+      if (this.model.isConfirmCodeValid(code)) {
+        params = {
+          emailAddress: this.$('input[name=confirmEmailAddress]').val(),
+          confirmationCode: code,
+          preregistration: false,
+        };
+        r.changePage('confirm', 'signup', params);
+      } else {
+        r.flash.error('Confirmation code must be 3 characters.');
+      }
+      e.preventDefault();
+      return false;
+    },
+
+    confirmPhone: function (e) {
+      var
+        code = this.$('input[name=phoneNumberConfirmationCode]').val(),
+        params;
+
+      if (this.model.isConfirmCodeValid(code)) {
+        params = {
+          phoneNumber: this.$('input[name=confirmPhoneNumber]').val(),
+          confirmationCode: code,
+          preregistration: false,
+        };
+        r.changePage('confirm', 'signup', params);
+      } else {
+        r.flash.error('Confirmation code must be 3 characters.');
       }
       e.preventDefault();
       return false;

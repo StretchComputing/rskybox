@@ -2,7 +2,7 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.ConfirmUserView = Backbone.View.extend({
+  r.ConfirmNewUserView = Backbone.View.extend({
     initialize: function () {
       _.bindAll(this, 'apiError');
       this.model.on('change', this.render, this);
@@ -15,14 +15,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     submit: function (e) {
-      r.log.debug('entering', 'ConfirmUserView.submit');
+      r.log.debug('entering', 'ConfirmNewUserView.submit');
       var valid;
 
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
         confirmationCode: this.$("input[name='confirmationCode']").val(),
-        password: this.$("input[name='password']").val()
+        password: this.$("input[name='password']").val(),
       });
 
       if (valid) {
@@ -38,23 +38,23 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.debug('entering', 'ConfirmUserView.success');
+      r.log.debug('entering', 'ConfirmNewUserView.success');
       r.setCookie(model.get('token'));
       r.changePage('settings');
     },
 
     error: function (model, response) {
-      r.log.debug('entering', 'ConfirmUserView.error');
+      r.log.debug('entering', 'ConfirmNewUserView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.error(response, this.$el);      // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('entering', 'ConfirmUserView.apiError');
+      r.log.debug('entering', 'ConfirmNewUserView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'ConfirmUserView.apiError');
+        r.log.error('Undefined apiStatus: ' + code, 'ConfirmNewUserView.apiError');
       }
       this.model.clear({silent: true});
       r.flash.error(this.apiCodes[code], this.$el);
@@ -94,6 +94,93 @@ var RSKYBOX = (function (r, $) {
   });
 
 
+  r.ConfirmExistingUserView = Backbone.View.extend({
+    initialize: function () {
+      _.bindAll(this, 'apiError');
+      this.model.on('change', this.render, this);
+      this.model.on('error', this.error, this);
+      this.template = _.template($('#confirmTemplate').html());
+    },
+
+    events: {
+      'submit': 'submit'
+    },
+
+    submit: function (e) {
+      r.log.debug('entering', 'ConfirmExistingUserView.submit');
+      var valid;
+
+      valid = this.model.set({
+        emailAddress: this.$("input[name='emailAddress']").val(),
+        phoneNumber: this.$("input[name='phoneNumber']").val(),
+        confirmationCode: this.$("input[name='confirmationCode']").val(),
+      });
+
+      if (valid) {
+        this.model.prepareNewModel();
+        this.model.save(null, {
+          success: this.success,
+          statusCode: r.statusCodeHandlers(this.apiError)
+        });
+      }
+
+      e.preventDefault();
+      return false;
+    },
+
+    success: function (model, response) {
+      r.log.debug('entering', 'ConfirmExistingUserView.success');
+      r.changePage('settings');
+    },
+
+    error: function (model, response) {
+      r.log.debug('entering', 'ConfirmExistingUserView.error');
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.error(response, this.$el);      // This is a validation error.
+    },
+
+    apiError: function (jqXHR) {
+      r.log.debug('entering', 'ConfirmExistingUserView.apiError');
+      var code = r.getApiStatus(jqXHR.responseText);
+
+      if (!this.apiCodes[code]) {
+        r.log.error('Undefined apiStatus: ' + code, 'ConfirmExistingUserView.apiError');
+      }
+      this.model.clear({silent: true});
+      r.flash.error(this.apiCodes[code], this.$el);
+    },
+
+    render: function () {
+      var content = this.template(this.model.getMock());
+      this.$el.html(content);
+      this.$('#passwordWrapper').hide();
+      if (this.model.get('emailAddress')) {
+        this.$('#emailWrapper').show();
+        this.$('#phoneWrapper').hide();
+      }
+      if (this.model.get('phoneNumber')) {
+        this.$('#emailWrapper').hide();
+        this.$('#phoneWrapper').show();
+      }
+      this.$el.trigger('create');
+      return this;
+    },
+
+    apiCodes: {
+      204: 'Your email address has already been confirmed.',
+      205: 'Your phone number has already been confirmed.',
+      206: 'Your email address is not registered in the system.',
+      207: 'Your phone number is not registered in the system.',
+      308: 'Either an email address or a phone number is required.',
+      309: 'Confirmation code is required.',
+      411: 'Invalid confirmation code.',
+      607: 'Email address not found.',
+      608: 'Phone number not found.',
+      700: 'Email address and phone number are mutually exclusive.',
+    }
+  });
+
+
   r.ConfirmMemberView = Backbone.View.extend({
     initialize: function () {
       _.bindAll(this, 'apiError', 'success');
@@ -126,6 +213,7 @@ var RSKYBOX = (function (r, $) {
         params = r.session.params;
         delete params.memberConfirmation;
         delete params.applicationId;
+        params.preregistration = true;
         r.changePage('confirm', 'signup', params);
         return;
       }

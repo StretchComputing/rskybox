@@ -36,21 +36,6 @@ var RSKYBOX = (function (r, $) {
     },
 
 
-    // Confirm User
-    confirmUserBeforeShow: function () {
-      r.confirm = new r.Confirm({
-        emailAddress: r.session.params.emailAddress,
-        phoneNumber: r.session.params.phoneNumber,
-        confirmationCode: r.session.params.confirmationCode,
-      });
-      r.confirmUserView = new r.ConfirmUserView({
-        el: $('#confirmForm'),
-        model: r.confirm,
-      });
-      r.confirmUserView.render();
-    },
-
-
     // Login
     loginBeforeShow: function () {
       r.login = new r.Login();
@@ -59,6 +44,44 @@ var RSKYBOX = (function (r, $) {
         model: r.login
       });
       r.loginView.render();
+    },
+
+
+    // Confirm New User
+    confirmNewUserBeforeShow: function () {
+      r.log.debug('entering', 'confirmNewUserBeforeShow');
+      r.confirm = new r.Confirm({
+        emailAddress: r.session.params.emailAddress,
+        phoneNumber: r.session.params.phoneNumber,
+        confirmationCode: r.session.params.confirmationCode,
+        new: true,
+      });
+      r.confirmNewUserView = new r.ConfirmNewUserView({
+        el: $('#confirmForm'),
+        model: r.confirm,
+      });
+      r.confirmNewUserView.render();
+    },
+
+
+    // Confirm Existing User
+    confirmExistingUserBeforeShow: function () {
+      r.log.debug('entering', 'confirmExistingUserBeforeShow');
+      r.confirm = new r.Confirm({
+        emailAddress: r.session.params.emailAddress,
+        phoneNumber: r.session.params.phoneNumber,
+        confirmationCode: r.session.params.confirmationCode,
+        new: false,
+      });
+      r.confirm.apiUrl = '/users/confirm';
+      r.confirm.setUrl();
+      r.confirm.set('id', 'confirm');
+      r.confirmExistingUserView = new r.ConfirmExistingUserView({
+        el: $('#confirmForm'),
+        model: r.confirm,
+      });
+      r.confirmExistingUserView.render();
+      r.confirmExistingUserView.$el.trigger('submit');
     },
 
 
@@ -82,7 +105,7 @@ var RSKYBOX = (function (r, $) {
 
     // Session Setup
     setupSession: function (eventType, matchObj, ui, page, evt) {
-      r.log.debug('entering', 'signup.controller.setupSession');
+      r.log.debug('entering', 'SignupController.setupSession');
       r.session = {};
       r.session.params = r.router.getParams(location.hash);
     },
@@ -95,10 +118,11 @@ var RSKYBOX = (function (r, $) {
     { '#signup':   { handler: 'signupBeforeShow', events: 'bs' } },
     { '#signup':   { handler: 'signupShow', events: 's' } },
 
-    // this route only matches when memberConfirmation is NOT present
-    { '#confirm(?!.*memberConfirmation)':  { handler: 'confirmUserBeforeShow', events: 'bs' } },
+    // these routes only match when preregistration is present
+    { '#confirm(?=.*preregistration=true)':  { handler: 'confirmNewUserBeforeShow', events: 'bs' } },
+    { '#confirm(?=.*preregistration=false)':  { handler: 'confirmExistingUserBeforeShow', events: 'bs' } },
 
-    // this route only matches when memberConfirmation IS present
+    // this route only matches when memberConfirmation is present
     { '#confirm(?=.*memberConfirmation)':  { handler: 'confirmMemberBeforeShow', events: 'bs' } },
 
     { '#login':    { handler: 'loginBeforeShow', events: 'bs' } },
