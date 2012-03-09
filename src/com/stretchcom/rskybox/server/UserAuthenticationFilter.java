@@ -25,7 +25,13 @@ import com.stretchcom.rskybox.models.User;
 public class UserAuthenticationFilter implements Filter {
 
     private static final String HTML_DIR = "/WEB-INF";
+    private static final String TOKEN_COOKIE_NAME = "token";
+    private static final String RSKYBOX_APP_ID_COOKIE_NAME = "appId";
+
     private static final Logger log = Logger.getLogger(UserAuthenticationFilter.class.getName());
+    
+    private Boolean tokenCookieFound = false;
+    private FilterConfig filterConfig;
 
     @Override
     public void destroy() {
@@ -89,6 +95,9 @@ public class UserAuthenticationFilter implements Filter {
     				// URL was adjusted which includes a forward to the dispatcher, so we're done
     				return;
     			}
+    			
+        		// if this is an rSkybox end user, then need to send rSkybox AppId back via a token
+        		setRskyboxAppIdTokenIfAppropirate(httpRequest, httpResponse);
     		} else {
     			log.info("request is NOT authentic");
     			sendErrorResponse(thisURL, httpResponse);
@@ -251,17 +260,12 @@ public class UserAuthenticationFilter implements Filter {
 //        }
 //        log.info(output);
 
-        String token = null;
-		// first attempt to find the token in a cookie of the form "token=<token_value>"
-		Cookie[] cookies = httpRequest.getCookies();
-		if(cookies != null && cookies.length > 0) {
-			for(Cookie c : cookies) {
-				if (c.getName().equals("token")) {
-				    log.info("getToken is returning the Cookie token");
-					return c.getValue();
-				}
-			}
-		}
+        String token = extractCookie(httpRequest, TOKEN_COOKIE_NAME);
+        if(token != null){
+		    log.info("getToken is returning the Cookie token");
+		    this.tokenCookieFound = true;
+        	return token;
+        }
 		
 		// if we get this far, no cookie token was found so extract from HTTP authorization header
 		// Format of authentication header=> Authorization: Basic token:<token_value>
@@ -291,6 +295,7 @@ public class UserAuthenticationFilter implements Filter {
 
     @Override
     public void init(FilterConfig fc) throws ServletException {
+    	this.filterConfig = fc;
     }
     
     private String getURL(HttpServletRequest req) {
@@ -320,6 +325,40 @@ public class UserAuthenticationFilter implements Filter {
             url.append("?").append(queryString);
         }
         return url.toString();
-    }    
+    } 
+    
+    private void setRskyboxAppIdTokenIfAppropirate(HttpServletRequest theHttpRequest, HttpServletResponse theHttpResponse) {
+    	// only set the rSkybox App ID token if this is an authorized end user or rSkybox (i.e. cookie token found)
+    	log.info("setRskyboxAppIdTokenIfAppropirate() entered, tokenCookieFound = " + this.tokenCookieFound);
+    	if(!this.tokenCookieFound) {return;}
+    	
+    	String appId = extractCookie(theHttpRequest, RSKYBOX_APP_ID_COOKIE_NAME);
+    	if(appId == null) {
+    		String cookieValue = null;
+    		if(SystemProperty.environment.value() == SystemProperty.Environment.Value.Development) {
+        		cookieValue = this.filterConfig.getServletContext().getInitParameter("dev.rskybox.appid");
+    		} else {
+        		cookieValue = this.filterConfig.getServletContext().getInitParameter("prod.rskybox.appid");
+    		}
+    		log.info("***** cookieValue = " + cookieValue);
+    		// cookie not set so we need to set it with age of one year
+    		Utility.setCookie(theHttpResponse, RSKYBOX_APP_ID_COOKIE_NAME, cookieValue, 31557600);
+    	}
+    }
+    
+    // return cookie value if cookie found; null otherwise
+    private String extractCookie(HttpServletRequest theHttpRequest, String theCookieName) {
+		// first attempt to find the token in a cookie of the form "name=<cookie_value>"
+		Cookie[] cookies = theHttpRequest.getCookies();
+		if(cookies != null && cookies.length > 0) {
+			for(Cookie c : cookies) {
+				if (c.getName().equals(theCookieName)) {
+				    log.info("extractCookie():  cookie with name = " + theCookieName + " found with value = " + c.getValue());
+					return c.getValue();
+				}
+			}
+		}
+		return null;
+    }
 
 }

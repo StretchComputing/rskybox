@@ -96,5 +96,17 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
       <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
+  
+  <context-param>
+     <description>rSkybox App ID for development</description>
+    <param-name>dev.rskybox.appid</param-name>
+    <param-value>this_is_dev_app_id</param-value>
+  </context-param>   
+  
+  <context-param>
+     <description>rSkybox App ID for production</description>
+    <param-name>prod.rskybox.appid</param-name>
+    <param-value>this_is_prod_app_id</param-value>
+  </context-param>   
 
 </web-app>
