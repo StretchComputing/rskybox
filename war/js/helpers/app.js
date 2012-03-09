@@ -200,6 +200,10 @@ var RSKYBOX = (function (r, $) {
   };
 
 
+  r.getHeaderDiv = function () {
+    return $.mobile.activePage.find(":jqmData(role='header')");
+  };
+
   r.getContentDiv = function () {
     return $.mobile.activePage.find(":jqmData(role='content')");
   };

@@ -62,7 +62,9 @@ var RSKYBOX = (function (r, $) {
 
     render: function () {
       var content = this.template(this.model.getMock());
+      r.getHeaderDiv().find('h1').text('Complete Signup');
       this.$el.html(content);
+      this.$el.find('input[type=submit]').text('Complete Signup');
       if (this.model.get('emailAddress')) {
         this.$('#emailWrapper').show();
         this.$('#phoneWrapper').hide();
@@ -130,7 +132,7 @@ var RSKYBOX = (function (r, $) {
 
     success: function (model, response) {
       r.log.debug('entering', 'ConfirmExistingUserView.success');
-      r.changePage('settings');
+      r.changePage('applications');
     },
 
     error: function (model, response) {
@@ -152,7 +154,9 @@ var RSKYBOX = (function (r, $) {
 
     render: function () {
       var content = this.template(this.model.getMock());
+      r.getHeaderDiv().find('h1').text('Confirmation');
       this.$el.html(content);
+      this.$el.find('input[type=submit]').text('Confirm');
       this.$('#passwordWrapper').hide();
       if (this.model.get('emailAddress')) {
         this.$('#emailWrapper').show();
@@ -253,9 +257,12 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'ConfirmMemberView.render');
       var content = this.template(this.model.getMock());
 
+      r.getHeaderDiv().find('h1').text('Confirmation');
       this.$el.html(content);
+      this.$el.find('input[type=submit]').text('Confirm Membership');
       this.$('#emailWrapper').show();
       this.$('#phoneWrapper').hide();
+      this.$('#passwordWrapper').hide();
       this.$el.trigger('create');
       return this;
     },

@@ -99,6 +99,7 @@ var RSKYBOX = (function (r, $) {
         el: $('#confirmForm'),
         model: r.member,
       });
+      r.confirmMemberView.render();
       r.confirmMemberView.$el.trigger('submit');
     },
 
