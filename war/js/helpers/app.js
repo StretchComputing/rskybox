@@ -32,16 +32,8 @@ var RSKYBOX = (function (r, $) {
   };
 
 
-  // Format for authToken is: 'Basic "Login:<token>"'
-  //    where the inner string is Base64 encoded
   var rSkybox = {
-    // Terry's dev app
-    appId: 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGAIM',
-    authToken: 'Basic TG9naW46YnZjaTJtN2Rsbzk5bzBiMHZkNmEyazRuazA=',
-
-    // Production app
-    //appId: 'ahRzfnJza3lib3gtc3RyZXRjaGNvbXITCxILQXBwbGljYXRpb24Y0c4NDA',
-    //authToken: 'Basic TG9naW46MnNwa2RlN2Y1dTdlNnU1Nzg2aXA1djl1ZjE=',
+    appId: Cookie.get('appId'),
   };
 
   r.SkyboxLog = r.Log.extend({
@@ -88,8 +80,7 @@ var RSKYBOX = (function (r, $) {
         console.log(level.toUpperCase() + ' ' + message + (logName ? ' \t(' + logName + ')' : ''));
       }
 
-      if ((serverLevel >= this.logLevels[level]) && this.get('appId') &&
-          rSkybox.appId && rSkybox.authToken) {
+      if (this.get('appId') && (serverLevel >= this.logLevels[level])) {
         this.logToServer(level, message, logName);
       }
     },
@@ -151,8 +142,6 @@ var RSKYBOX = (function (r, $) {
   r.log = new r.SkyboxLog({});
   r.log.setAppUrl(rSkybox.appId);
   r.log.set('appId', rSkybox.appId);
-  r.log.local('appId: ' + rSkybox.appId, 'rSkyboxLog.setup');
-  r.log.local('authToken: ' + rSkybox.authToken, 'rSkyboxLog.setup');
 
 
   r.setCookie = function (token) {

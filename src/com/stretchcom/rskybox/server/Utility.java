@@ -138,6 +138,7 @@ public class Utility {
     public static void setCookie(HttpServletResponse theHttpResponse, String theCookieName, String theCookieValue, int theCookieAgeInMilliSeconds){
     	String cookieValue = theCookieValue == null ? "" : theCookieValue;
     	Cookie newCookie = new Cookie(theCookieName, theCookieValue);
+    	newCookie.setPath("/html5");
     	newCookie.setMaxAge(theCookieAgeInMilliSeconds);
     	theHttpResponse.addCookie(newCookie);
     }
