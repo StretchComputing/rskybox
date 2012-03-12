@@ -67,12 +67,8 @@ var RSKYBOX = (function (r, $) {
 
     error: function (model, response) {
       r.log.debug('FeedbackView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response);
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -80,10 +76,10 @@ var RSKYBOX = (function (r, $) {
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('FeedbackView: An unknown API error occurred: ' + code);
+        r.log.error('Undefined apiStatus: ' + code, 'FeedbackView.apiError');
       }
 
-      r.flash.error(this.apiCodes[code]);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     apiCodes: {

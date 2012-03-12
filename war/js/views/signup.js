@@ -47,7 +47,7 @@ var RSKYBOX = (function (r, $) {
     error: function (model, response) {
       r.log.debug('entering', 'SignupView.error');
       if (response.responseText) { return; }  // This is an apiError.
-      r.flash.error(response, this.$el);      // This is a validation error.
+      r.flash.warning(response, this.$el);    // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -58,7 +58,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('Undefined apiStatus: ' + code, 'SignupView.apiError');
       }
 
-      r.flash.error(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code], this.$el);
     },
 
     render: function () {

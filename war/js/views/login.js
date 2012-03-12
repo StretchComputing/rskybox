@@ -47,7 +47,7 @@ var RSKYBOX = (function (r, $) {
     error: function (model, response) {
       r.log.debug('LoginView.error');
       if (response.responseText) { return; }  // This is an apiError.
-      r.flash.error(response, this.$el);      // This is a validation error.
+      r.flash.warning(response, this.$el);    // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -55,11 +55,10 @@ var RSKYBOX = (function (r, $) {
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.debug('LoginView: An unknown API error occurred: ' + code);
+        r.log.error('Undefined apiStatus: ' + code, 'LoginView.apiError');
       }
       this.model.clear({silent: true});
-
-      r.flash.error(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code], this.$el);
     },
 
     render: function () {
@@ -71,7 +70,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     apiCodes: {
-      200: 'Your username (email or phone) and password were not recognized by the system.'
+      200: 'Your username (email or phone) and password were not recognized by the system.',
     }
   });
 
