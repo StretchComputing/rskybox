@@ -5,7 +5,7 @@ var RSKYBOX = (function (r, $) {
   r.controller = {
     // Applications
     applicationsBeforeShow: function () {
-      r.log.debug('applicationsBeforeShow');
+      r.log.debug('entering', 'MainController.applicationsBeforeShow');
       r.applications = new r.Applications();
       r.applicationsView = new r.ApplicationsView({
         el: $.mobile.activePage,
@@ -14,7 +14,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     applicationsShow: function () {
-      r.log.debug('applicationsShow');
+      r.log.debug('entering', 'MainController.applicationsShow');
       r.applications.fetch({
         statusCode: r.statusCodeHandlers()
       });
@@ -23,7 +23,7 @@ var RSKYBOX = (function (r, $) {
 
     // Application
     applicationBeforeShow: function () {
-      r.log.debug('applicationBeforeShow');
+      r.log.debug('entering', 'MainController.applicationBeforeShow');
       r.application = new r.Application({
         id: r.session.params.id
       });
@@ -34,7 +34,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     applicationShow: function () {
-      r.log.debug('applicationShow');
+      r.log.debug('entering', 'MainController.applicationShow');
       r.application.fetch({
         statusCode: r.statusCodeHandlers()
       });
@@ -43,7 +43,7 @@ var RSKYBOX = (function (r, $) {
 
     // Settings
     settingsBeforeShow: function () {
-      r.log.debug('settingsBeforeShow');
+      r.log.debug('entering', 'MainController.settingsBeforeShow');
       r.currentUser = new r.User({
         id: 'current'
       });
@@ -54,7 +54,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     settingsShow: function () {
-      r.log.debug('settingsShow');
+      r.log.debug('entering', 'MainController.settingsShow');
       r.currentUser.fetch({
         statusCode: r.statusCodeHandlers()
       });
@@ -63,7 +63,7 @@ var RSKYBOX = (function (r, $) {
 
     // New App
     newAppBeforeShow: function () {
-      r.log.debug('newAppBeforeShow');
+      r.log.debug('entering', 'MainController.newAppBeforeShow');
       r.newApp = new r.Application();
       r.newAppView = new r.NewApplicationView({
         el: $('#newAppForm'),
@@ -72,14 +72,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     newAppShow: function () {
-      r.log.debug('newAppShow');
+      r.log.debug('entering', 'MainController.newAppShow');
       r.newAppView.render();
     },
 
 
     // Feedback List
     feedbackListBeforeShow: function () {
-      r.log.debug('feedbackListBeforeShow');
+      r.log.debug('entering', 'MainController.feedbackListBeforeShow');
       r.feedbackList = new r.FeedbackList();
       r.feedbackList.setAppUrl(r.session.params.id);
       r.feedbackListView = new r.FeedbackListView({
@@ -90,14 +90,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     feedbackListShow: function () {
-      r.log.debug('feedbackListShow');
+      r.log.debug('entering', 'MainController.feedbackListShow');
       r.feedbackList.fetch({data: { status: r.session.params.status }});
     },
 
 
     // Feedback
     feedbackBeforeShow: function () {
-      r.log.debug('feedbackBeforeShow');
+      r.log.debug('entering', 'MainController.feedbackBeforeShow');
       r.feedback = new r.Feedback({
         id: r.session.params.id
       });
@@ -109,7 +109,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     feedbackShow: function () {
-      r.log.debug('feedbackShow');
+      r.log.debug('entering', 'MainController.feedbackShow');
       r.feedback.fetch({
         statusCode: r.statusCodeHandlers()
       });
@@ -118,7 +118,7 @@ var RSKYBOX = (function (r, $) {
 
     // Logs
     logsBeforeShow: function () {
-      r.log.debug('logsBeforeShow');
+      r.log.debug('entering', 'MainController.logsBeforeShow');
       r.logs = new r.Logs();
       r.logs.setAppUrl(r.session.params.id);
       r.logsView = new r.LogsView({
@@ -129,14 +129,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     logsShow: function () {
-      r.log.debug('logsShow');
+      r.log.debug('entering', 'MainController.logsShow');
       r.logs.fetch({data: { status: r.session.params.status }});
     },
 
 
     // Log
     logBeforeShow: function () {
-      r.log.debug('logBeforeShow');
+      r.log.debug('entering', 'MainController.logBeforeShow');
       r.logCurrent = new r.Log({
         id: r.session.params.id
       });
@@ -148,7 +148,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     logShow: function () {
-      r.log.debug('logShow');
+      r.log.debug('entering', 'MainController.logShow');
       r.logCurrent.fetch({
         statusCode: r.statusCodeHandlers()
       });
@@ -157,7 +157,7 @@ var RSKYBOX = (function (r, $) {
 
     // Crashes
     crashesBeforeShow: function () {
-      r.log.debug('crashesBeforeShow');
+      r.log.debug('entering', 'MainController.crashesBeforeShow');
       r.crashes = new r.Crashes();
       r.crashes.setAppUrl(r.session.params.id);
       r.crashesView = new r.CrashesView({
@@ -168,14 +168,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     crashesShow: function () {
-      r.log.debug('crashesShow');
+      r.log.debug('entering', 'MainController.crashesShow');
       r.crashes.fetch({data: { status: r.session.params.status }});
     },
 
 
     // Crash
     crashBeforeShow: function () {
-      r.log.debug('crashBeforeShow');
+      r.log.debug('entering', 'MainController.crashBeforeShow');
       r.crash = new r.Crash({
         id: r.session.params.id
       });
@@ -187,7 +187,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     crashShow: function () {
-      r.log.debug('crashShow');
+      r.log.debug('entering', 'MainController.crashShow');
       r.crash.fetch({
         statusCode: r.statusCodeHandlers()
       });
@@ -196,7 +196,7 @@ var RSKYBOX = (function (r, $) {
 
     // Members
     membersBeforeShow: function () {
-      r.log.debug('membersBeforeShow');
+      r.log.debug('entering', 'MainController.membersBeforeShow');
       r.members = new r.Members();
       r.members.setAppUrl(r.session.params.id);
       r.membersView = new r.MembersView({
@@ -206,14 +206,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     membersShow: function () {
-      r.log.debug('membersShow');
+      r.log.debug('entering', 'MainController.membersShow');
       r.members.fetch();
     },
 
 
     // Member
     memberBeforeShow: function () {
-      r.log.debug('memberBeforeShow');
+      r.log.debug('entering', 'MainController.memberBeforeShow');
       r.member = new r.Member({
         id: r.session.params.id
       });
@@ -225,7 +225,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     memberShow: function () {
-      r.log.debug('memberShow');
+      r.log.debug('entering', 'MainController.memberShow');
       r.member.fetch({
         statusCode: r.statusCodeHandlers()
       });
@@ -234,7 +234,7 @@ var RSKYBOX = (function (r, $) {
 
     // New Member
     newMemberBeforeShow: function () {
-      r.log.debug('newMemberBeforeShow');
+      r.log.debug('entering', 'MainController.newMemberBeforeShow');
       r.newMember = new r.Member();
       r.newMember.setAppUrl(r.session.params.id);
       r.newMemberView = new r.NewMemberView({
@@ -244,14 +244,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     newMemberShow: function () {
-      r.log.debug('newMemberShow');
+      r.log.debug('entering', 'MainController.newMemberShow');
       r.newMemberView.render();
     },
 
 
     // Endusers
     endusersBeforeShow: function () {
-      r.log.debug('endusersBeforeShow');
+      r.log.debug('entering', 'MainController.endusersBeforeShow');
       r.endusers = new r.Endusers();
       r.endusers.setAppUrl(r.session.params.id);
       r.endusersView = new r.EndusersView({
@@ -261,14 +261,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     endusersShow: function () {
-      r.log.debug('endusersShow');
+      r.log.debug('entering', 'MainController.endusersShow');
       r.endusers.fetch();
     },
 
 
     // Enduser
     enduserBeforeShow: function () {
-      r.log.debug('enduserBeforeShow');
+      r.log.debug('entering', 'MainController.enduserBeforeShow');
       r.enduser = new r.Enduser({
         id: r.session.params.id
       });
@@ -280,7 +280,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     enduserShow: function () {
-      r.log.debug('enduserShow');
+      r.log.debug('entering', 'MainController.enduserShow');
       r.enduser.fetch({
         statusCode: r.statusCodeHandlers()
       });
@@ -289,44 +289,44 @@ var RSKYBOX = (function (r, $) {
 
     // Session Setup
     setupSession: function (eventType, matchObj, ui, page, evt) {
-      r.log.debug('setupSession');
+      r.log.debug('entering', 'MainController.setupSession');
       r.session = {};
       r.session.params = r.router.getParams(location.hash);
     },
   };
 
   r.router = new $.mobile.Router([
-    { '.*':             { handler: 'setupSession', events: 'bs' } },
-    { '#applications':  { handler: 'applicationsBeforeShow', events: 'bs' } },
-    { '#applications':  { handler: 'applicationsShow', events: 's' } },
-    { '#application[?]id=.*':   { handler: 'applicationBeforeShow', events: 'bs' } },
-    { '#application[?]id=.*':   { handler: 'applicationShow', events: 's' } },
-    { '#settings':      { handler: 'settingsBeforeShow', events: 'bs' } },
-    { '#settings':      { handler: 'settingsShow', events: 's' } },
-    { '#newApp':        { handler: 'newAppBeforeShow', events: 'bs' } },
-    { '#newApp':        { handler: 'newAppShow', events: 's' } },
-    { '#feedbackList':  { handler: 'feedbackListBeforeShow', events: 'bs' } },
-    { '#feedbackList':  { handler: 'feedbackListShow', events: 's' } },
-    { '#feedback[?]id=.*':      { handler: 'feedbackBeforeShow', events: 'bs' } },
-    { '#feedback[?]id=.*':      { handler: 'feedbackShow', events: 's' } },
-    { '#logs':          { handler: 'logsBeforeShow', events: 'bs' } },
-    { '#logs':          { handler: 'logsShow', events: 's' } },
-    { '#log[?]id=.*':   { handler: 'logBeforeShow', events: 'bs' } },
-    { '#log[?]id=.*':   { handler: 'logShow', events: 's' } },
-    { '#crashes':       { handler: 'crashesBeforeShow', events: 'bs' } },
-    { '#crashes':       { handler: 'crashesShow', events: 's' } },
-    { '#crash[?]id=.*': { handler: 'crashBeforeShow', events: 'bs' } },
-    { '#crash[?]id=.*': { handler: 'crashShow', events: 's' } },
-    { '#members':       { handler: 'membersBeforeShow', events: 'bs' } },
-    { '#members':       { handler: 'membersShow', events: 's' } },
-    { '#member[?]id=.*':        { handler: 'memberBeforeShow', events: 'bs' } },
-    { '#member[?]id=.*':        { handler: 'memberShow', events: 's' } },
-    { '#newMember':     { handler: 'newMemberBeforeShow', events: 'bs' } },
-    { '#newMember':     { handler: 'newMemberShow', events: 's' } },
-    { '#endusers':      { handler: 'endusersBeforeShow', events: 'bs' } },
-    { '#endusers':      { handler: 'endusersShow', events: 's' } },
-    { '#enduser[?]id=.*':       { handler: 'enduserBeforeShow', events: 'bs' } },
-    { '#enduser[?]id=.*':       { handler: 'enduserShow', events: 's' } },
+    { '.*':                   { handler: 'setupSession',            events: 'bs' } },
+    { '#applications':        { handler: 'applicationsBeforeShow',  events: 'bs' } },
+    { '#applications':        { handler: 'applicationsShow',        events: 's'  } },
+    { '#application[?]id=.*': { handler: 'applicationBeforeShow',   events: 'bs' } },
+    { '#application[?]id=.*': { handler: 'applicationShow',         events: 's'  } },
+    { '#settings':            { handler: 'settingsBeforeShow',      events: 'bs' } },
+    { '#settings':            { handler: 'settingsShow',            events: 's'  } },
+    { '#newApp':              { handler: 'newAppBeforeShow',        events: 'bs' } },
+    { '#newApp':              { handler: 'newAppShow',              events: 's'  } },
+    { '#feedbackList':        { handler: 'feedbackListBeforeShow',  events: 'bs' } },
+    { '#feedbackList':        { handler: 'feedbackListShow',        events: 's'  } },
+    { '#feedback[?]id=.*':    { handler: 'feedbackBeforeShow',      events: 'bs' } },
+    { '#feedback[?]id=.*':    { handler: 'feedbackShow',            events: 's'  } },
+    { '#logs':                { handler: 'logsBeforeShow',          events: 'bs' } },
+    { '#logs':                { handler: 'logsShow',                events: 's'  } },
+    { '#log[?]id=.*':         { handler: 'logBeforeShow',           events: 'bs' } },
+    { '#log[?]id=.*':         { handler: 'logShow',                 events: 's'  } },
+    { '#crashes':             { handler: 'crashesBeforeShow',       events: 'bs' } },
+    { '#crashes':             { handler: 'crashesShow',             events: 's'  } },
+    { '#crash[?]id=.*':       { handler: 'crashBeforeShow',         events: 'bs' } },
+    { '#crash[?]id=.*':       { handler: 'crashShow',               events: 's'  } },
+    { '#members':             { handler: 'membersBeforeShow',       events: 'bs' } },
+    { '#members':             { handler: 'membersShow',             events: 's'  } },
+    { '#member[?]id=.*':      { handler: 'memberBeforeShow',        events: 'bs' } },
+    { '#member[?]id=.*':      { handler: 'memberShow',              events: 's'  } },
+    { '#newMember':           { handler: 'newMemberBeforeShow',     events: 'bs' } },
+    { '#newMember':           { handler: 'newMemberShow',           events: 's'  } },
+    { '#endusers':            { handler: 'endusersBeforeShow',      events: 'bs' } },
+    { '#endusers':            { handler: 'endusersShow',            events: 's'  } },
+    { '#enduser[?]id=.*':     { handler: 'enduserBeforeShow',       events: 'bs' } },
+    { '#enduser[?]id=.*':     { handler: 'enduserShow',             events: 's'  } },
   ], r.controller);
 
 

@@ -14,19 +14,17 @@ var RSKYBOX = (function (r, $) {
       this.setUrl();
     },
 
-    // We define parse and return nothing, because we don't need the model modifed after
-    // a successful save.
     parse: function (response) {
-      r.log.debug('Signup.parse');
+      r.log.debug('model not needed after successful save', 'Signup.parse');
     },
 
     validate: function (attrs) {
       if (r.isValidEmailAddress(attrs.emailAddress)) {
-        r.log.debug('Signup: emailAddress is valid.');
+        r.log.debug('valid emailAddress', 'Signup.validate');
         return;
       }
       if (r.isValidPhoneNumber(attrs.phoneNumber) && attrs.mobileCarrierId) {
-        r.log.debug('Signup: phone credentials are valid.');
+        r.log.debug('valid phone credentials', 'Signup.validate');
         return;
       }
       return 'A valid email address -OR- valid phone number and mobile carrier is required.';

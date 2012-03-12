@@ -16,7 +16,7 @@ var RSKYBOX = (function (r, $) {
           r.changePage('applications');
         },
         error: function (model, response) {
-          r.log.debug('no current user', 'signup.controller.isLoggedIn');
+          r.log.debug('no current user', 'SignupController.isLoggedIn');
         }
       });
     },
@@ -24,6 +24,7 @@ var RSKYBOX = (function (r, $) {
 
     // Signup
     signupBeforeShow: function () {
+      r.log.debug('entering', 'SignupController.signupBeforeShow');
       r.signup = new r.Signup();
       r.signupView = new r.SignupView({
         el: $('#signupForm'),
@@ -32,12 +33,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     signupShow: function () {
+      r.log.debug('entering', 'SignupController.signupShow');
       r.signupView.render();
     },
 
 
     // Login
     loginBeforeShow: function () {
+      r.log.debug('entering', 'SignupController.loginBeforeShow');
       r.login = new r.Login();
       r.loginView = new r.LoginView({
         el: $('#loginForm'),
@@ -49,7 +52,7 @@ var RSKYBOX = (function (r, $) {
 
     // Confirm New User
     confirmNewUserBeforeShow: function () {
-      r.log.debug('entering', 'confirmNewUserBeforeShow');
+      r.log.debug('entering', 'SignupController.confirmNewUserBeforeShow');
       r.confirm = new r.Confirm({
         emailAddress: r.session.params.emailAddress,
         phoneNumber: r.session.params.phoneNumber,
@@ -66,7 +69,7 @@ var RSKYBOX = (function (r, $) {
 
     // Confirm Existing User
     confirmExistingUserBeforeShow: function () {
-      r.log.debug('entering', 'confirmExistingUserBeforeShow');
+      r.log.debug('entering', 'SignupController.confirmExistingUserBeforeShow');
       r.confirm = new r.Confirm({
         emailAddress: r.session.params.emailAddress,
         phoneNumber: r.session.params.phoneNumber,
@@ -114,19 +117,18 @@ var RSKYBOX = (function (r, $) {
 
 
   r.router = new $.mobile.Router([
-    { '.*':        { handler: 'isLoggedIn', events: 'bc' } },
-    { '.*':        { handler: 'setupSession', events: 'bs' } },
-    { '#signup':   { handler: 'signupBeforeShow', events: 'bs' } },
-    { '#signup':   { handler: 'signupShow', events: 's' } },
+    { '.*':      { handler: 'isLoggedIn',       events: 'bc' } },
+    { '.*':      { handler: 'setupSession',     events: 'bs' } },
+    { '#signup': { handler: 'signupBeforeShow', events: 'bs' } },
+    { '#signup': { handler: 'signupShow',       events: 's'  } },
+    { '#login':  { handler: 'loginBeforeShow',  events: 'bs' } },
 
     // these routes only match when preregistration is present
-    { '#confirm(?=.*preregistration=true)':  { handler: 'confirmNewUserBeforeShow', events: 'bs' } },
+    { '#confirm(?=.*preregistration=true)':   { handler: 'confirmNewUserBeforeShow',      events: 'bs' } },
     { '#confirm(?=.*preregistration=false)':  { handler: 'confirmExistingUserBeforeShow', events: 'bs' } },
 
     // this route only matches when memberConfirmation is present
-    { '#confirm(?=.*memberConfirmation)':  { handler: 'confirmMemberBeforeShow', events: 'bs' } },
-
-    { '#login':    { handler: 'loginBeforeShow', events: 'bs' } },
+    { '#confirm(?=.*memberConfirmation)':     { handler: 'confirmMemberBeforeShow',       events: 'bs' } },
   ], r.controller);
 
 

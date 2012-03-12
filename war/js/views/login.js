@@ -39,19 +39,19 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.debug('Login.success');
+      r.log.debug('entering', 'Login.success');
       r.setCookie(model.token);
       r.changePage('applications');
     },
 
     error: function (model, response) {
-      r.log.debug('LoginView.error');
+      r.log.debug('entering', 'LoginView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.warning(response, this.$el);    // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('LoginView.apiError');
+      r.log.debug('entering', 'LoginView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
