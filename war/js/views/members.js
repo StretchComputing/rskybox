@@ -38,23 +38,18 @@ var RSKYBOX = (function (r, $) {
   });
 
   r.MembersView = r.JqmPageBaseView.extend({
-    events: {
-      'click .newMember': 'newMember',
-    },
-
     initialize: function () {
       _.bindAll(this, 'addMemberEntry');
       this.collection.bind('reset', this.render, this);
       this.template = _.template($('#noMembersTemplate').html());
     },
 
-    newMember: function () {
-      $.mobile.changePage('#newMember?id=' + r.session.params.id);
-    },
-
     render: function () {
-      var list;
+      var appId, list;
 
+      appId = r.session.params.id;
+      this.$el.find('.back').attr('href', '#application?id=' + appId);
+      this.$el.find('.new').attr('href', '#newMember?appId=' + appId);
       this.getContent().empty();
       if (this.collection.length <= 0) {
         this.getContent().html(this.template());
