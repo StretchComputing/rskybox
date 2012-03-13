@@ -77,7 +77,9 @@ var RSKYBOX = (function (r, $) {
         serverLevel = this.logLevels.error;
 
       if (localLevel >= this.logLevels[level]) {
-        console.log(level.toUpperCase() + ' ' + message + (logName ? ' \t(' + logName + ')' : ''));
+        console.log(
+          (level === 'error' ? '***** ' : '') + level.toUpperCase() + ' ' + message + (logName ? ' \t(' + logName + ')' : '')
+        );
       }
 
       if (this.get('appId') && (serverLevel >= this.logLevels[level])) {

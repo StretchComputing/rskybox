@@ -49,7 +49,7 @@ var RSKYBOX = (function (r, $) {
 
       appId = r.session.params.id;
       this.$el.find('.back').attr('href', '#application?id=' + appId);
-      this.$el.find('.new').attr('href', '#newMember?appId=' + appId);
+      this.$el.find('.new').attr('href', '#newMember?id=' + appId);
       this.getContent().empty();
       if (this.collection.length <= 0) {
         this.getContent().html(this.template());
@@ -82,6 +82,9 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
+      var appId = r.session.params.appId;
+
+      this.$el.find('.back').attr('href', '#members?id=' + appId);
       this.getContent().html(this.template(this.model.getMock()));
       this.getContent().trigger('create');
       return this;
