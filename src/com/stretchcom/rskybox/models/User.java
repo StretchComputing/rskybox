@@ -80,7 +80,6 @@ public class User {
 	private String password;
 	private String passwordResetQuestion;
 	private String passwordResetAnswer;
-	private String phoneNumberConfirmationCode;
 	private Text photoBase64;
 	private Text thumbNailBase64;
 	private Boolean isSmsConfirmed = false;
@@ -90,7 +89,16 @@ public class User {
 	private Boolean isSuperAdmin = false;
 	
 	@Transient
+	private String mobileCarrierId;
+
+	@Transient
 	private Boolean wasMembershipConfirmed = false;
+
+	@Transient
+	private Boolean emailAddressConfirmationSent = false;
+
+	@Transient
+	private Boolean phoneNumberConfirmationSent = false;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -213,14 +221,6 @@ public class User {
 		this.passwordResetAnswer = passwordResetAnswer;
 	}
 
-	public String getPhoneNumberConfirmationCode() {
-		return phoneNumberConfirmationCode;
-	}
-
-	public void setPhoneNumberConfirmationCode(String phoneNumberConfirmationCode) {
-		this.phoneNumberConfirmationCode = phoneNumberConfirmationCode;
-	}
-
 	public Text getPhotoBase64() {
 		return photoBase64;
 	}
@@ -267,6 +267,30 @@ public class User {
 
 	public void setSmsConfirmationCode(String smsConfirmationCode) {
 		this.smsConfirmationCode = smsConfirmationCode;
+	}
+
+	public Boolean getEmailAddressConfirmationSent() {
+		return emailAddressConfirmationSent;
+	}
+
+	public void setEmailAddressConfirmationSent(Boolean emailAddressConfirmationSent) {
+		this.emailAddressConfirmationSent = emailAddressConfirmationSent;
+	}
+
+	public Boolean getPhoneNumberConfirmationSent() {
+		return phoneNumberConfirmationSent;
+	}
+
+	public void setPhoneNumberConfirmationSent(Boolean phoneNumberConfirmationSent) {
+		this.phoneNumberConfirmationSent = phoneNumberConfirmationSent;
+	}
+	
+	public String getMobileCarrierId() {
+		return mobileCarrierId;
+	}
+
+	public void setMobileCarrierId(String mobileCarrierId) {
+		this.mobileCarrierId = mobileCarrierId;
 	}
 
 	// Sends a notification (if appropriate) to all active members of the specified application
@@ -491,7 +515,7 @@ public class User {
 	}
 	
 	// returns User entity if found; null otherwise
-	public static User getUser(EntityManager em, String theEmailAddress, String theEncryptedPassword) {
+	public static User getUser(EntityManager em, String theEmailAddress, String theEncryptedPassword) throws NonUniqueResultException {
         User user = null;
         try {
         	if(theEncryptedPassword != null) {
@@ -507,10 +531,11 @@ public class User {
         	}
     		log.info("user with email address = " + theEmailAddress + " found");
 		} catch (NoResultException e) {
-			// not an error is user not found
+			// not an error if user not found
 			log.info("user with email address = " + theEmailAddress + " NOT found");
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more google account users have same emailAddress");
+			throw e;
 		}
         
         return user;
@@ -537,7 +562,7 @@ public class User {
 	}
 	
 	// returns User entity if found; null otherwise
-	public static User getUserWithPhoneNumber(EntityManager em, String thePhoneNumber, String theEncryptedPassword) {
+	public static User getUserWithPhoneNumber(EntityManager em, String thePhoneNumber, String theEncryptedPassword) throws NonUniqueResultException {
         User user = null;
         try {
         	if(theEncryptedPassword != null) {
@@ -556,6 +581,7 @@ public class User {
 			log.info("user with phoneNumber = " + thePhoneNumber + " NOT found");
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same phoneNumber (and maybe password)");
+			throw e;
 		}
         
         return user;

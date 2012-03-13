@@ -24,6 +24,7 @@ public class ApiStatusCode {
 	public static final String USER_NOT_AUTHORIZED_TO_DELETE_MEMBER_WITH_SPECIFIED_ROLE = "217";
 	public static final String USER_NOT_AUTHORIZED = "218";
 	public static final String APP_OWNER_CANNOT_BE_DELETED = "219";
+	public static final String EMAIL_ADDRESS_AND_PHONE_NUMBER_MATCH_SEPARATE_USERS = "220";
 	
 	public static final String FEEDBACK_ID_REQUIRED = "300";
 	public static final String CRASH_DETECT_ID_REQUIRED = "301";
@@ -41,6 +42,8 @@ public class ApiStatusCode {
 	public static final String ROLE_IS_REQUIRED = "314";
 	public static final String LOG_NAME_IS_REQUIRED = "315";
 	public static final String MODE_IS_REQUIRED = "316";
+	public static final String EMAIL_ADDRESS_CONFIRMATION_CODE_IS_REQUIRED = "317";
+	public static final String PHONE_NUMBER_CONFIRMATION_CODE_IS_REQUIRED = "318";
 	
 	public static final String INVALID_STATUS_PARAMETER = "400";
 	public static final String INVALID_RECORDED_DATE_PARAMETER = "401";
@@ -59,6 +62,10 @@ public class ApiStatusCode {
 	public static final String INVALID_TIMESTAMP_PARAMETER = "414";
 	public static final String INVALID_DURATION_PARAMETER = "415";
 	public static final String INVALID_MODE = "416";
+	public static final String INVALID_EMAIL_ADDRESS_CONFIRMATION_CODE = "417";
+	public static final String INVALID_PHONE_NUMBER_CONFIRMATION_CODE = "418";
+	public static final String EMAIL_ADDRESS_DOES_NOT_MATCH_ORIGINAL = "419";
+	public static final String PHONE_NUMBER_DOES_NOT_MATCH_ORIGINAL = "420";
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 	public static final String NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID = "501";

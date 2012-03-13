@@ -280,6 +280,7 @@ public class UsersResource extends ServerResource {
         EntityManager em = EMF.get().createEntityManager();
 
         User user = null;
+        User userCache = new User();
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
         em.getTransaction().begin();
@@ -289,22 +290,14 @@ public class UsersResource extends ServerResource {
             Boolean isUpdate = false;
             String token = null;
             String authHeader = null;
-            String phoneNumber = null;
-            String emailAddress = null;
             String carrierDomainName = null;
             
-            // TODO add email validation
-            if (json.has("emailAddress")) {
-            	emailAddress = json.getString("emailAddress").toLowerCase();
-            }
-            
-            if (json.has("phoneNumber")) {
-            	phoneNumber = json.getString("phoneNumber");
-            	phoneNumber = Utility.extractAllDigits(phoneNumber);
-            }
+            extractUserInfoFromJson(userCache, json);
 
             if (id != null) {
+            	//////////////////////////////////
             	// this is an Update User API call
+            	//////////////////////////////////
                 isUpdate = true;
         		this.setStatus(Status.SUCCESS_OK);
             	
@@ -334,7 +327,7 @@ public class UsersResource extends ServerResource {
 					.getSingleResult();
                 
                 // ***** Maybe all the following code needs to be moved to the Request Authorization API
-                // ***** Not sure if Update should allow these fields to changes.  If so, then a confirmation 
+                // ***** Not sure if Update should allow these fields to change.  If so, then a confirmation 
                 
                 ///////////////////////////////////////////////
                 // mobileCarrierId/smsEmailAddress Update Rules
@@ -353,22 +346,54 @@ public class UsersResource extends ServerResource {
                 		return Utility.apiError(this, ApiStatusCode.NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID);
                 	}
                 }
+                
+                // TODO Next
+                // 1. ?Split confirmUser() into confirmEmail() and confirmPhone()
+                // 2. Create sendConfirmCode() method.
+                // 3. modify Update to call confirm and sendConfirmCode()
+                // 4. modify Create to call confirm and sendConfirmCode()
+                
+                
+                // Create rules for confirmation code call (email cannot already be confirmed in a Create call)
+                // * emailAddress is not null
+                // * emailConfirmationCode is null
+                
+                // Create rules for confirm call:
+                // * emailAddress is not null
+                // * emailConfirmationCode is not null
+
+                // Update rules for confirmation code call:
+                // * emailAddress is not null
+                // * email is not confirmed
+                // * emailConfirmationCode is null
+                
+                // Update rules for confirm call:
+                // * emailAddress is not null
+                // * email is not confirmed
+                // * emailConfirmationCode is not null
 
                 /////////////////////////////
                 // Email Address Update Rules
                 /////////////////////////////
                 //  1. If the email address has been confirmed, it cannot be updated
                 //  2. If a new email address is specified, it cannot already be used by another user
+                //  3. If an email confirmation code is specified, it is saved and a confirmation email will be sent.
                 if(emailAddress != null) {
                     if(user.getIsEmailConfirmed() == null || !user.getIsEmailConfirmed()) {
                     	// check if the email address is really being modified. If so, it can't be in use and confirmed by any other user
                     	if( (user.getEmailAddress() == null) || (user.getEmailAddress() != null && !emailAddress.equals(user.getEmailAddress()))  ) {
+                    		// new email address has been passed in
                     		User existingUser = User.getUser(em, emailAddress, null);
                     		if(existingUser == null) {
                             	user.setEmailAddress(emailAddress);
+                            	// need to send a confirmation, but since the email address changed, use a new confirmation code
+                            	sendconfirmation;
                     		} else {
                         		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_ALREADY_USED);
                     		}
+                    	} else {
+                    		// email address passed in is the same as before, but it has not yet been confirmed
+                    		sendconfirmation;
                     	}
                     } else {
                 		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_CAN_NO_LONGER_BE_MODIFIED);
@@ -398,29 +423,33 @@ public class UsersResource extends ServerResource {
                     }
                 }
             } else {
+            	/////////////////////////////////
             	// this is a Create User API call  
-            	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            	// NOTE: on a create, email address, phone number and SMS email address (derived from the carrier ID cannot be set or modified.
-            	//       Either the (email address) or (phone number and carrier ID) was used to send a confirmation code. The Create User is
-            	//       the following to the confirmation code, so until the registration process completes, these fields cannot be changed.
-            	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                String confirmationCode = null;
-                
-            	if(json.has("confirmationCode")) {
-                    confirmationCode = json.getString("confirmationCode");
-            	} else {
-            		return Utility.apiError(this, ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
-            	}
-                
-                if(emailAddress != null && phoneNumber != null) {
-            		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE);
-                }
+            	/////////////////////////////////
                 
                 if(emailAddress == null && phoneNumber == null) {
             		return Utility.apiError(this, ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
                 }
                 
-                String storedConfirmationCode = null;
+                String emailAddressConfirmationCode = null;
+            	if(json.has("emailConfirmationCode")) {
+            		emailAddressConfirmationCode = json.getString("emailConfirmationCode");
+            	} else {
+            		if(emailAddress != null) {
+                		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_CONFIRMATION_CODE_IS_REQUIRED);
+            		}
+            	}
+                
+                String phoneNumberConfirmationCode = null;
+            	if(json.has("phoneConfirmationCode")) {
+            		phoneNumberConfirmationCode = json.getString("phoneConfirmationCode");
+            	} else {
+            		if(phoneNumber != null) {
+                		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_CONFIRMATION_CODE_IS_REQUIRED);
+            		}
+            	}
+                
+                String storedEmailConfirmationCode = null;
                 if(emailAddress != null) {
                 	user = User.getUser(em, emailAddress, null);
                 	if(user == null) {
@@ -429,10 +458,16 @@ public class UsersResource extends ServerResource {
                 	if(user.getEmailConfirmationCode() == null) {
                 		return Utility.apiError(this, ApiStatusCode.USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION);
                 	} else {
-                		storedConfirmationCode = user.getEmailConfirmationCode();
+                		storedEmailConfirmationCode = user.getEmailConfirmationCode();
+                		if(storedEmailConfirmationCode != null && !storedEmailConfirmationCode.equals(emailAddressConfirmationCode)) {
+                    		return Utility.apiError(this, ApiStatusCode.INVALID_EMAIL_ADDRESS_CONFIRMATION_CODE);
+                        }
                 		user.setIsEmailConfirmed(true);
                 	}
-                 } else {
+                 }
+                
+                String storedSmsConfirmationCode = null;
+                if(phoneNumber != null) {
                 	 user = User.getUserWithPhoneNumber(em, phoneNumber, null);
                 	if(user == null) {
                 		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_NOT_FOUND);
@@ -440,13 +475,12 @@ public class UsersResource extends ServerResource {
                 	if(user.getSmsConfirmationCode() == null) {
                 		return Utility.apiError(this, ApiStatusCode.USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION);
                 	} else {
-                		storedConfirmationCode = user.getSmsConfirmationCode();
+                		storedSmsConfirmationCode = user.getSmsConfirmationCode();
+                		if(storedSmsConfirmationCode != null && !storedSmsConfirmationCode.equals(phoneNumberConfirmationCode)) {
+                    		return Utility.apiError(this, ApiStatusCode.INVALID_PHONE_NUMBER_CONFIRMATION_CODE);
+                        }
                 		user.setIsSmsConfirmed(true);
                 	}
-                }
-                
-                if(confirmationCode != null && !storedConfirmationCode.equals(confirmationCode)) {
-            		return Utility.apiError(this, ApiStatusCode.INVALID_CONFIRMATION_CODE);
                 }
 
             	token = TF.get();
@@ -630,106 +664,32 @@ public class UsersResource extends ServerResource {
         EntityManager em = EMF.get().createEntityManager();
     
         User user = null;
+        User userCache = new User();
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
         em.getTransaction().begin();
         JSONObject jsonReturn = new JSONObject();
-        boolean emailConfirmationSent = false;
         try {
         	JSONObject json = new JsonRepresentation(entity).getJsonObject();
-            String emailAddress = null;
-            String phoneNumber = null;
-            String mobileCarrierId = null;
-            String carrierDomainName = null;
-            
-            // TODO add email validation
-            if (json.has("emailAddress")) {
-            	emailAddress = json.getString("emailAddress").toLowerCase();
-            }
-            
-            if (json.has("phoneNumber")) {
-            	phoneNumber = json.getString("phoneNumber");
-            	phoneNumber = Utility.extractAllDigits(phoneNumber);
-            }
-            
-            // mobileCarrier only relevant if phoneNumber has been provided -- otherwise ignore.
-            if (json.has("mobileCarrierId") && phoneNumber != null && phoneNumber.length() > 0) {
-            	mobileCarrierId = json.getString("mobileCarrierId");
-            	carrierDomainName = MobileCarrier.findEmailDomainName(mobileCarrierId);
-            	if(carrierDomainName == null) {
-            		return Utility.apiError(this, ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
-            	}
-            }
-            
-            if(emailAddress == null && phoneNumber == null) {
-            	return Utility.apiError(this, ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
-            }
-            
-            if(phoneNumber != null && mobileCarrierId == null) {
-            	return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER);
-            }
-            
-            String confirmationCode = TF.getConfirmationCode();
-            String subject = "rSkybox confirmation code";
-            if(emailAddress != null) {
-            	// check if user with this email address already exists
-            	user = User.getUser(em, emailAddress, null);
-            	if(user != null) {
-            		log.info("user found with emailAddress = " + emailAddress);
-            		if(user.getIsEmailConfirmed()) {
-                    	return Utility.apiError(this, ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS);
-            		}
-            	} else {
-                    // if there is no existing user, create one now
-            		log.info("creating new user");
-                    user = new User();
-                    user.setEmailAddress(emailAddress);
-                    user.setSendEmailNotifications(true);
-            	}
-                user.setEmailConfirmationCode(confirmationCode);
-            	log.info("sending email confirmation code = " + confirmationCode + " to " + user.getEmailAddress());
-            	sendUserConfirmationEmail(user, subject);
-            	emailConfirmationSent = true;
-            	
-            	// even though confirmation is through email, phone number field can be set
-            	if(phoneNumber != null && carrierDomainName != null) {
-                    user.setPhoneNumber(phoneNumber);
-                	String smsEmailAddress = user.getPhoneNumber() + carrierDomainName;
-                	user.setSmsEmailAddress(smsEmailAddress);
-            	}
-            } else {
-            	// check if user with this phone number already exists
-            	user = User.getUserWithPhoneNumber(em, phoneNumber, null);
-            	if(user != null) {
-            		log.info("user found with phoneNumber = " + phoneNumber);
-            		if(user.getIsSmsConfirmed() != null && user.getIsSmsConfirmed()) {
-                    	return Utility.apiError(this, ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER);
-            		}
-            	} else {
-                    // if there is no existing user, create one now
-            		log.info("creating new user");
-                    user = new User();
-                    user.setPhoneNumber(phoneNumber);
-                	String smsEmailAddress = user.getPhoneNumber() + carrierDomainName;
-                	user.setSmsEmailAddress(smsEmailAddress);
-                	user.setSendSmsNotifications(true);
-            	}
-            	user.setSmsConfirmationCode(confirmationCode);
-            	log.info("sending SMS confirmation code = " + confirmationCode + " to " + user.getSmsEmailAddress());
-                Emailer.send(user.getSmsEmailAddress(), subject, buildSmsConfirmationMessage(user), Emailer.NO_REPLY);
-            }
+        	
+            extractUserInfoFromJson(userCache, json);
+            sendConfirmCodeValidation(userCache);
+        	user = findUser(userCache, em);
+        	sendEmailAddressConfirmCode(userCache, user);
+        	sendPhoneNumberConfirmCode(userCache, user);
             
             // emailAddress sent in JSON Return if email confirmation sent. phoneNumber sent in JSON Return if phoneNumber confirmation sent.
-            if(emailConfirmationSent) {
-            	jsonReturn.put("emailAddress", emailAddress);
-            } else {
-            	jsonReturn.put("phoneNumber", phoneNumber);
+            if(user.getEmailAddressConfirmationSent()) {
+            	jsonReturn.put("emailAddress", user.getEmailAddress());
             }
-            if (json.has("testApp") && json.getBoolean("testApp")) {
-                jsonReturn.put("confirmationCode", confirmationCode);
+            if(user.getPhoneNumberConfirmationSent()) {
+            	jsonReturn.put("phoneNumber", user.getPhoneNumber());
             }
+            
             em.persist(user);
             em.getTransaction().commit();
+        } catch (ApiException e) {
+        	return Utility.apiError(this, e.getMessage());
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -797,82 +757,23 @@ public class UsersResource extends ServerResource {
         JSONObject jsonReturn = new JSONObject();
 
         User user = null;
+        User userCache = new User();
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
         em.getTransaction().begin();
         try {
-            user = new User();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
-
-            String confirmationCode = null;
-            String emailAddress = null;
-            String phoneNumber = null;
             
-        	if(json.has("confirmationCode")) {
-                confirmationCode = json.getString("confirmationCode");
-        	} else {
-        		return Utility.apiError(this, ApiStatusCode.CONFIRMATION_CODE_IS_REQUIRED);
-        	}
-            
-            // TODO add email validation
-            if (json.has("emailAddress")) {
-            	emailAddress = json.getString("emailAddress").toLowerCase();
-            	if (emailAddress.length() <= 0) {
-            		emailAddress = null;
-            	}
-            }
-            
-            if (json.has("phoneNumber")) {
-            	phoneNumber = json.getString("phoneNumber");
-            	phoneNumber = Utility.extractAllDigits(phoneNumber);
-            	if (phoneNumber.length() <= 0) {
-            		phoneNumber = null;
-            	}
-            }
-            
-            if(emailAddress != null && phoneNumber != null) {
-        		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_PHONE_NUMBER_MUTUALLY_EXCLUSIVE);
-            }
-            
-            if(emailAddress == null && phoneNumber == null) {
-        		return Utility.apiError(this, ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
-            }
-            
-            String storedConfirmationCode = null;
-            if(emailAddress != null) {
-            	user = User.getUser(em, emailAddress, null);
-            	if(user == null) {
-            		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_NOT_FOUND);
-            	}
-            	if(user.getEmailConfirmationCode() == null) {
-            		return Utility.apiError(this, ApiStatusCode.USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION);
-            	} else if(user.getIsEmailConfirmed() != null && user.getIsEmailConfirmed()) {
-            		return Utility.apiError(this, ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS);
-            	} else {
-            		storedConfirmationCode = user.getEmailConfirmationCode();
-            		user.setIsEmailConfirmed(true);
-            	}
-             } else {
-            	 user = User.getUserWithPhoneNumber(em, phoneNumber, null);
-            	if(user == null) {
-            		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_NOT_FOUND);
-            	}
-            	if(user.getSmsConfirmationCode() == null) {
-            		return Utility.apiError(this, ApiStatusCode.USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION);
-            	} else if(user.getIsSmsConfirmed() != null && user.getIsSmsConfirmed()) {
-            		return Utility.apiError(this, ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER);
-            	} else {
-            		storedConfirmationCode = user.getSmsConfirmationCode();
-            		user.setIsSmsConfirmed(true);
-            	}
-            }
-            
-            if(!storedConfirmationCode.equals(confirmationCode)) {
-        		return Utility.apiError(this, ApiStatusCode.INVALID_CONFIRMATION_CODE);
-            }
+            extractUserInfoFromJson(userCache, json);
+            confirmValidation(userCache);
+        	user = findUser(userCache, em);
+        	confirmEmailAddress(userCache, user);
+        	confirmPhoneNumber(userCache, user);
             
             em.persist(user);
             em.getTransaction().commit();
+        } catch (ApiException e) {
+        	return Utility.apiError(this, e.getMessage());
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -975,5 +876,256 @@ public class UsersResource extends ServerResource {
             sb.append("false");
         }
         return sb.toString();
+    }
+    
+    private void extractUserInfoFromJson(User theUserCache, JSONObject theJson) {
+        try {
+            // TODO add email validation
+            if(theJson.has("emailAddress")) {
+            	String emailAddress = theJson.getString("emailAddress").toLowerCase();
+            	if (emailAddress.length() <= 0) {
+            		emailAddress = null;
+            	}
+            	theUserCache.setEmailAddress(emailAddress);
+            }
+            
+            if(theJson.has("phoneNumber")) {
+            	String phoneNumber = theJson.getString("phoneNumber");
+            	phoneNumber = Utility.extractAllDigits(phoneNumber);
+            	if (phoneNumber.length() <= 0) {
+            		phoneNumber = null;
+            	}
+            	theUserCache.setPhoneNumber(phoneNumber);
+            }
+            
+        	if(theJson.has("emailConfirmationCode")) {
+        		theUserCache.setEmailConfirmationCode(theJson.getString("emailConfirmationCode"));
+        	} 
+        	
+        	if(theJson.has("phoneConfirmationCode")) {
+        		theUserCache.setSmsConfirmationCode(theJson.getString("phoneConfirmationCode"));
+        	} 
+        	
+            if (theJson.has("mobileCarrierId")) {
+            	theUserCache.setMobileCarrierId(theJson.getString("mobileCarrierId"));
+            }
+        } catch (JSONException e) {
+            log.severe("userInfoFromJson:exception = " + e.getMessage());
+            e.printStackTrace();
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        } finally {
+        }
+        return;
+    }
+    
+    // Returns the single user that "owns" the email address/phone number. If no existing user, a new "owning" user is created and returned.
+    // Throws ApiException exception if:
+    //  * phone number and email address are associated with two different users
+    //  * email address associated with more than one user
+    //  * phone number associated with more than one user
+    private User findUser(User theUserCache, EntityManager theEm) throws ApiException {
+    	User user = null;
+    	ApiException apiException = null;
+    	
+    	try {
+            if(theUserCache.getEmailAddress() != null) {
+            	user = User.getUser(theEm, theUserCache.getEmailAddress(), null);
+            	if(user != null) {
+            		log.info("user found with emailAddress = " + theUserCache.getEmailAddress());
+                	// there is slight loop hole we have to close. We found the user using the email address, but it is possible there
+            		// is a different user that is using the specified phone number (if one was specified).
+            		if(theUserCache.getPhoneNumber() != null) {
+                		User anotherUser = User.getUserWithPhoneNumber(theEm, theUserCache.getPhoneNumber(), null);
+                		if(anotherUser != null) {
+                			log.info("user " + anotherUser.getLastName() + " is also using the phone number = " + theUserCache.getPhoneNumber());
+                			apiException = new ApiException(ApiStatusCode.EMAIL_ADDRESS_AND_PHONE_NUMBER_MATCH_SEPARATE_USERS);
+            				throw apiException;
+                		}
+            		}
+            		return user;
+            	}
+            }
+            
+            if(theUserCache.getPhoneNumber() != null) {
+            	user = User.getUserWithPhoneNumber(theEm, theUserCache.getPhoneNumber(), null);
+            	if(user != null) {
+            		log.info("user found with phoneNumber = " + theUserCache.getPhoneNumber());
+                	// no loop holes to close here.  If we are here, we know even if an email address was specified, it was not associated with any user.
+            		return user;
+            	}
+            }
+            
+    		log.info("creating new user");
+            user = new User();
+    	} catch (NonUniqueResultException e) {
+			apiException = new ApiException(ApiStatusCode.SERVER_ERROR);
+			throw apiException;
+		}
+        
+        return user;
+	}
+    
+    // Only does confirmation if both the email address/phone number and confirmation code are provided
+    private void confirmEmailAddress(User theUserCache, User theUser) throws ApiException {
+    	ApiException apiException = null;
+    	
+    	if(theUserCache.getEmailAddress() != null && theUserCache.getEmailConfirmationCode() != null) {
+    		if(theUser.getEmailAddress() == null) {
+    			apiException = new ApiException(ApiStatusCode.EMAIL_ADDRESS_NOT_FOUND);
+				throw apiException;
+    		}
+    		
+    		if(!theUser.getEmailAddress().equalsIgnoreCase(theUserCache.getEmailAddress())) {
+    			apiException = new ApiException(ApiStatusCode.EMAIL_ADDRESS_DOES_NOT_MATCH_ORIGINAL);
+				throw apiException;
+    		}
+    		
+    		if(theUser.getIsEmailConfirmed() != null && theUser.getIsEmailConfirmed()) {
+    			apiException = new ApiException(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS);
+				throw apiException;
+        	}
+    		
+            String storedEmailConfirmationCode = theUser.getEmailConfirmationCode();
+    		if(storedEmailConfirmationCode == null) {
+    			apiException = new ApiException(ApiStatusCode.USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION);
+				throw apiException;
+        	}
+    		if(storedEmailConfirmationCode != null && !storedEmailConfirmationCode.equals(theUserCache.getEmailConfirmationCode())) {
+    			apiException = new ApiException(ApiStatusCode.INVALID_EMAIL_ADDRESS_CONFIRMATION_CODE);
+				throw apiException;
+            }
+    		theUser.setIsEmailConfirmed(true);
+    	}
+    }
+    
+    // Only does confirmation if both the email address/phone number and confirmation code are provided
+    private void confirmPhoneNumber(User theUserCache, User theUser) throws ApiException {
+    	ApiException apiException = null;
+        
+    	if(theUserCache.getPhoneNumber() != null && theUserCache.getSmsConfirmationCode() != null) {
+    		if(theUser.getPhoneNumber() == null) {
+    			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_NOT_FOUND);
+				throw apiException;
+    		}
+    		
+    		if(!theUser.getPhoneNumber().equalsIgnoreCase(theUserCache.getPhoneNumber())) {
+    			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_DOES_NOT_MATCH_ORIGINAL);
+				throw apiException;
+    		}
+    		
+    		if(theUser.getIsSmsConfirmed() != null && theUser.getIsSmsConfirmed()) {
+    			apiException = new ApiException(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER);
+				throw apiException;
+        	}
+    		
+            String storedSmsConfirmationCode = theUser.getSmsConfirmationCode();
+    		if(storedSmsConfirmationCode == null) {
+    			apiException = new ApiException(ApiStatusCode.USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION);
+				throw apiException;
+        	}
+    		if(storedSmsConfirmationCode != null && !storedSmsConfirmationCode.equals(theUserCache.getEmailConfirmationCode())) {
+    			apiException = new ApiException(ApiStatusCode.INVALID_PHONE_NUMBER_CONFIRMATION_CODE);
+				throw apiException;
+            }
+    		theUser.setIsSmsConfirmed(true);
+    	}
+    }
+   
+    private void confirmValidation(User theUserCache) throws ApiException {
+    	ApiException apiException = null;
+    	
+        // apply business rules to input parameters
+    	if(theUserCache.getEmailAddress() == null && theUserCache.getPhoneNumber() == null) {
+			apiException = new ApiException(ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
+			throw apiException;
+        }
+    	
+    	if(theUserCache.getEmailAddress() != null && theUserCache.getEmailConfirmationCode() == null) {
+			apiException = new ApiException(ApiStatusCode.EMAIL_ADDRESS_CONFIRMATION_CODE_IS_REQUIRED);
+			throw apiException;
+    	}
+    	if(theUserCache.getPhoneNumber() != null && theUserCache.getSmsConfirmationCode() == null) {
+			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_CONFIRMATION_CODE_IS_REQUIRED);
+			throw apiException;
+    	}
+    }
+    
+    private void sendEmailAddressConfirmCode(User theUserCache, User theUser) throws ApiException {
+    	ApiException apiException = null;
+    	
+    	if(theUserCache.getEmailAddress() != null && theUserCache.getEmailConfirmationCode() == null) {
+    		if(theUser.getIsEmailConfirmed() != null && theUser.getIsEmailConfirmed()) {
+    			apiException = new ApiException(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_EMAIL_ADDRESS);
+				throw apiException;
+    		}
+    		
+    		String emailAddressConfirmationCode = null;
+    		if(theUser.getEmailAddress() != null && theUser.getEmailAddress().equalsIgnoreCase(theUserCache.getEmailAddress())) {
+    			// since email address the same, use the existing confirmation code if it exists
+    			emailAddressConfirmationCode = theUser.getEmailConfirmationCode();
+    		}
+    		if(emailAddressConfirmationCode == null) {
+                emailAddressConfirmationCode = TF.getConfirmationCode();
+    		}
+    		
+            String subject = "rSkybox confirmation code";
+            theUser.setEmailAddress(theUserCache.getEmailAddress());
+            theUser.setSendEmailNotifications(true);
+            theUser.setEmailConfirmationCode(emailAddressConfirmationCode);
+        	log.info("sending email confirmation code = " + emailAddressConfirmationCode + " to " + theUser.getEmailAddress());
+        	sendUserConfirmationEmail(theUser, subject);
+        	theUser.setEmailAddressConfirmationSent(true);
+    	}
+    }
+    
+    
+    private void sendPhoneNumberConfirmCode(User theUserCache, User theUser) throws ApiException {
+    	ApiException apiException = null;
+    	
+    	if(theUserCache.getPhoneNumber() != null && theUserCache.getSmsConfirmationCode() == null) {
+    		if(theUser.getIsSmsConfirmed() != null && theUser.getIsSmsConfirmed()) {
+    			apiException = new ApiException(ApiStatusCode.USER_ALREADY_HAS_CONFIRMED_PHONE_NUMBER);
+				throw apiException;
+    		}
+    		
+    		String phoneNumberConfirmationCode = null;
+    		if(theUser.getPhoneNumber() != null && theUser.getPhoneNumber().equalsIgnoreCase(theUserCache.getPhoneNumber())) {
+    			// since phone number the same, use the existing confirmation code if it exists
+    			phoneNumberConfirmationCode = theUser.getSmsConfirmationCode();
+    		}
+    		if(phoneNumberConfirmationCode == null) {
+    			phoneNumberConfirmationCode = TF.getConfirmationCode();
+    		}
+    		
+        	String carrierDomainName = MobileCarrier.findEmailDomainName(theUserCache.getMobileCarrierId());
+        	if(carrierDomainName == null) {
+    			apiException = new ApiException(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
+				throw apiException;
+        	}
+    		
+            String subject = "rSkybox confirmation code";
+    		theUser.setPhoneNumber(theUserCache.getPhoneNumber());
+        	String smsEmailAddress = theUserCache.getPhoneNumber() + carrierDomainName;
+        	theUser.setSmsEmailAddress(smsEmailAddress);
+        	theUser.setSendSmsNotifications(true);
+            theUser.setSmsConfirmationCode(phoneNumberConfirmationCode);
+        	log.info("sending SMS confirmation code = " + phoneNumberConfirmationCode + " to " + theUser.getSmsEmailAddress());
+            Emailer.send(theUser.getSmsEmailAddress(), subject, buildSmsConfirmationMessage(theUser), Emailer.NO_REPLY);
+            theUser.setPhoneNumberConfirmationSent(true);
+    	}
+    }
+    
+    private void sendConfirmCodeValidation(User theUserCache) throws ApiException {
+    	ApiException apiException = null;
+    	
+        if(theUserCache.getEmailAddress() == null && theUserCache.getPhoneNumber() == null) {
+			apiException = new ApiException(ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
+			throw apiException;
+        }
+        
+        if(theUserCache.getPhoneNumber() != null && theUserCache.getMobileCarrierId() == null) {
+			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER);
+			throw apiException;
+        }
     }
 }
