@@ -322,80 +322,31 @@ public class UsersResource extends ServerResource {
     					return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
     				}
     			}
+    			
+    			// find the user entity specified by the user ID in the Update API call
 	    		user = (User)em.createNamedQuery("User.getByKey")
 					.setParameter("key", key)
 					.getSingleResult();
                 
-                // ***** Maybe all the following code needs to be moved to the Request Authorization API
-                // ***** Not sure if Update should allow these fields to change.  If so, then a confirmation 
-                
-                ///////////////////////////////////////////////
-                // mobileCarrierId/smsEmailAddress Update Rules
-                ///////////////////////////////////////////////
-                //  1. A phone number must have been passed in or already set in the user entity for the mobileCarrierId/smsEmailAddress to be updated
-                if (json.has("mobileCarrierId")) {
-                	if(phoneNumber != null || user.getPhoneNumber() != null) {
-                    	carrierDomainName = MobileCarrier.findEmailDomainName(json.getString("mobileCarrierId"));
-                    	if(carrierDomainName == null) {
-                    		return Utility.apiError(this, ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
-                    	}
-                    	String phoneNumberComponent = phoneNumber == null ? user.getPhoneNumber() : phoneNumber;
-                    	String smsEmailAddress = phoneNumberComponent + carrierDomainName;
-                    	user.setSmsEmailAddress(smsEmailAddress);
-                	} else {
-                		return Utility.apiError(this, ApiStatusCode.NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID);
-                	}
-                }
-                
-                // TODO Next
-                // 1. ?Split confirmUser() into confirmEmail() and confirmPhone()
-                // 2. Create sendConfirmCode() method.
-                // 3. modify Update to call confirm and sendConfirmCode()
-                // 4. modify Create to call confirm and sendConfirmCode()
-                
-                
-                // Create rules for confirmation code call (email cannot already be confirmed in a Create call)
-                // * emailAddress is not null
-                // * emailConfirmationCode is null
-                
-                // Create rules for confirm call:
-                // * emailAddress is not null
-                // * emailConfirmationCode is not null
-
-                // Update rules for confirmation code call:
-                // * emailAddress is not null
-                // * email is not confirmed
-                // * emailConfirmationCode is null
-                
-                // Update rules for confirm call:
-                // * emailAddress is not null
-                // * email is not confirmed
-                // * emailConfirmationCode is not null
+	        	User owningUser = findUser(userCache, em);  // used only to verify that 'user' owns EA/PN if specified
+	            updateValidation(user, userCache, owningUser);
 
                 /////////////////////////////
                 // Email Address Update Rules
                 /////////////////////////////
                 //  1. If the email address has been confirmed, it cannot be updated
-                //  2. If a new email address is specified, it cannot already be used by another user
-                //  3. If an email confirmation code is specified, it is saved and a confirmation email will be sent.
-                if(emailAddress != null) {
+                //  2. If a new email address is specified, it cannot already be used by another user (verified by validation method call above)
+                //  3. If an email confirmation code is specified, a confirmation will be attempted.
+	            //  4. If no email confirmation code is specified, a confirmation code will be sent.
+                if(userCache.getEmailAddress() != null) {
                     if(user.getIsEmailConfirmed() == null || !user.getIsEmailConfirmed()) {
-                    	// check if the email address is really being modified. If so, it can't be in use and confirmed by any other user
-                    	if( (user.getEmailAddress() == null) || (user.getEmailAddress() != null && !emailAddress.equals(user.getEmailAddress()))  ) {
-                    		// new email address has been passed in
-                    		User existingUser = User.getUser(em, emailAddress, null);
-                    		if(existingUser == null) {
-                            	user.setEmailAddress(emailAddress);
-                            	// need to send a confirmation, but since the email address changed, use a new confirmation code
-                            	sendconfirmation;
-                    		} else {
-                        		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_ALREADY_USED);
-                    		}
+                    	if(userCache.getEmailConfirmationCode() != null) {
+                        	confirmEmailAddress(userCache, user);
                     	} else {
-                    		// email address passed in is the same as before, but it has not yet been confirmed
-                    		sendconfirmation;
+                        	sendEmailAddressConfirmCode(userCache, user);
                     	}
                     } else {
+                    	// email has already been confirmed
                 		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_CAN_NO_LONGER_BE_MODIFIED);
                     }
                 }
@@ -404,21 +355,19 @@ public class UsersResource extends ServerResource {
                 // Phone Number Update Rules
                 ////////////////////////////
                 //  1. If the phone number has been confirmed, it cannot be updated
-                //  2. To update, there has to be a carrier ID - either sent as part of the update or already in the user entity
-                //  3. If a new phone number is specified, it cannot already be used by another user
-                if(phoneNumber != null) {
-                    if( (user.getIsSmsConfirmed() == null || !user.getIsSmsConfirmed()) &&
-                    	(carrierDomainName != null || user.getSmsEmailAddress() != null)    ) {
-                    	// check if the phone number is really being modified. If so, it can't be in use and confirmed by any other user
-                    	if( (user.getPhoneNumber() == null) || (user.getPhoneNumber() != null && !phoneNumber.equals(user.getPhoneNumber()))  ) {
-                    		User existingUser = User.getUserWithPhoneNumber(em, phoneNumber, null);
-                    		if(existingUser == null) {
-                            	user.setPhoneNumber(phoneNumber);
-                    		} else {
-                        		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_ALREADY_USED);
-                    		}
+                //  2. To update, there has to be a carrier ID - either sent as part of the update or already in the user entity (checked by validation method)
+                //  3. If a new phone number is specified, it cannot already be used by another user (checked by validation method)
+                //  4. If a phone number confirmation code is specified, a confirmation will be attempted.
+                //  5. If no phone number confirmation code is specified, a confirmation code will be sent. 
+                if(userCache.getPhoneNumber() != null) {
+                    if(user.getIsSmsConfirmed() == null || !user.getIsSmsConfirmed()) {
+                    	if(userCache.getSmsConfirmationCode() != null) {
+                        	confirmPhoneNumber(userCache, user);
+                    	} else {
+                        	sendPhoneNumberConfirmCode(userCache, user);
                     	}
                     } else {
+                    	// phone number has already been confirmed
                 		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_CAN_NO_LONGER_BE_MODIFIED);
                     }
                 }
@@ -426,60 +375,22 @@ public class UsersResource extends ServerResource {
             	/////////////////////////////////
             	// this is a Create User API call  
             	/////////////////////////////////
+	        	user = findUser(userCache, em);  
+	            createValidation(user, userCache);
                 
-                if(emailAddress == null && phoneNumber == null) {
-            		return Utility.apiError(this, ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
-                }
-                
-                String emailAddressConfirmationCode = null;
-            	if(json.has("emailConfirmationCode")) {
-            		emailAddressConfirmationCode = json.getString("emailConfirmationCode");
-            	} else {
-            		if(emailAddress != null) {
-                		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_CONFIRMATION_CODE_IS_REQUIRED);
-            		}
-            	}
-                
-                String phoneNumberConfirmationCode = null;
-            	if(json.has("phoneConfirmationCode")) {
-            		phoneNumberConfirmationCode = json.getString("phoneConfirmationCode");
-            	} else {
-            		if(phoneNumber != null) {
-                		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_CONFIRMATION_CODE_IS_REQUIRED);
-            		}
-            	}
-                
-                String storedEmailConfirmationCode = null;
-                if(emailAddress != null) {
-                	user = User.getUser(em, emailAddress, null);
-                	if(user == null) {
-                		return Utility.apiError(this, ApiStatusCode.EMAIL_ADDRESS_NOT_FOUND);
-                	}
-                	if(user.getEmailConfirmationCode() == null) {
-                		return Utility.apiError(this, ApiStatusCode.USER_EMAIL_ADDRESS_NOT_PENDING_CONFIRMATION);
+                if(userCache.getEmailAddress() != null) {
+                	if(userCache.getEmailConfirmationCode() != null) {
+                    	confirmEmailAddress(userCache, user);
                 	} else {
-                		storedEmailConfirmationCode = user.getEmailConfirmationCode();
-                		if(storedEmailConfirmationCode != null && !storedEmailConfirmationCode.equals(emailAddressConfirmationCode)) {
-                    		return Utility.apiError(this, ApiStatusCode.INVALID_EMAIL_ADDRESS_CONFIRMATION_CODE);
-                        }
-                		user.setIsEmailConfirmed(true);
+                    	sendEmailAddressConfirmCode(userCache, user);
                 	}
                  }
                 
-                String storedSmsConfirmationCode = null;
-                if(phoneNumber != null) {
-                	 user = User.getUserWithPhoneNumber(em, phoneNumber, null);
-                	if(user == null) {
-                		return Utility.apiError(this, ApiStatusCode.PHONE_NUMBER_NOT_FOUND);
-                	}
-                	if(user.getSmsConfirmationCode() == null) {
-                		return Utility.apiError(this, ApiStatusCode.USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION);
+                if(userCache.getPhoneNumber() != null) {
+                	if(userCache.getSmsConfirmationCode() != null) {
+                    	confirmPhoneNumber(userCache, user);
                 	} else {
-                		storedSmsConfirmationCode = user.getSmsConfirmationCode();
-                		if(storedSmsConfirmationCode != null && !storedSmsConfirmationCode.equals(phoneNumberConfirmationCode)) {
-                    		return Utility.apiError(this, ApiStatusCode.INVALID_PHONE_NUMBER_CONFIRMATION_CODE);
-                        }
-                		user.setIsSmsConfirmed(true);
+                    	sendPhoneNumberConfirmCode(userCache, user);
                 	}
                 }
 
@@ -539,6 +450,8 @@ public class UsersResource extends ServerResource {
             	// change being made to user is only for calling getUserJson() below - it's a transient field that never gets persisted anyway
             	user.setWasMembershipConfirmed(membershipConfirmed);
             }
+        } catch (ApiException e) {
+        	return Utility.apiError(this, e.getMessage());
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -966,6 +879,8 @@ public class UsersResource extends ServerResource {
 	}
     
     // Only does confirmation if both the email address/phone number and confirmation code are provided
+    //::WHAT_IF:: On Create API, client code let's user change their email address (rksybox client doesn't allow this) while they
+    //            are submitting their confirmation code. A EMAIL_ADDRESS_DOES_NOT_MATCH_ORIGINAL error will be returned.
     private void confirmEmailAddress(User theUserCache, User theUser) throws ApiException {
     	ApiException apiException = null;
     	
@@ -1050,6 +965,9 @@ public class UsersResource extends ServerResource {
     	}
     }
     
+    //::SIDE_EFFECT:: On create, user fat fingers email address and enters someone else's email. That someone else is in the process of
+    //                signing up for rskybox, but has not confirmed yet. The someone else will receive a second confirmation email with
+    //                the same confirmation code. This same side effect is not possible for update API since user entity validation done.
     private void sendEmailAddressConfirmCode(User theUserCache, User theUser) throws ApiException {
     	ApiException apiException = null;
     	
@@ -1097,7 +1015,13 @@ public class UsersResource extends ServerResource {
     			phoneNumberConfirmationCode = TF.getConfirmationCode();
     		}
     		
-        	String carrierDomainName = MobileCarrier.findEmailDomainName(theUserCache.getMobileCarrierId());
+    		// for Update API, mobileCarrierId can be passed in or already stored in the user. Precedence given to 'passed in'
+    		String mobileCarrierId = theUserCache.getMobileCarrierId();
+    		if(mobileCarrierId == null) {
+    			mobileCarrierId = theUser.getMobileCarrierId();
+    		}
+    		
+        	String carrierDomainName = MobileCarrier.findEmailDomainName(mobileCarrierId);
         	if(carrierDomainName == null) {
     			apiException = new ApiException(ApiStatusCode.INVALID_MOBILE_CARRIER_PARAMETER);
 				throw apiException;
@@ -1123,6 +1047,53 @@ public class UsersResource extends ServerResource {
 			throw apiException;
         }
         
+        if(theUserCache.getPhoneNumber() != null && theUserCache.getMobileCarrierId() == null) {
+			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER);
+			throw apiException;
+        }
+    }
+    
+    private void updateValidation(User theUser, User theUserCache, User theOwningUser) throws ApiException {
+    	ApiException apiException = null;
+    	
+    	// Rule: If the user specified in update API has an email address, then it must match the non-empty 'owning' user retrieved using
+    	//       email address. Owning user can be a new 'empty' user (i.e. no email address or phone number)
+    	if( theUserCache.getEmailAddress() != null && theOwningUser.getEmailAddress() != null && !theUser.getKey().equals(theOwningUser.getKey())  ) {
+			apiException = new ApiException(ApiStatusCode.EMAIL_ADDRESS_ALREADY_USED);
+			throw apiException;
+    	}
+    	
+    	// Rule: If the user specified in update API has an phone number, then it must match the non-empty 'owning' user retrieved using
+    	//       phone number. Owning user can be a new 'empty' user (i.e. no email address or phone number)
+    	if( theUserCache.getPhoneNumber() != null && theOwningUser.getPhoneNumber() != null && !theUser.getKey().equals(theOwningUser.getKey())  ) {
+			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_ALREADY_USED);
+			throw apiException;
+    	}
+		
+        // Rule: If the mobileCarrierId was specified in the update API, then a phone number must also be specified or already set in the user
+        if(theUserCache.getMobileCarrierId() != null) {
+        	if(theUserCache.getPhoneNumber() == null && theUser.getPhoneNumber() == null) {
+    			apiException = new ApiException(ApiStatusCode.NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID);
+    			throw apiException;
+        	}
+        }
+        
+        // Rule: If a phoneNumber was specified in the update API, then a mobileCarrierId must also be specified or already in the user
+        if(theUserCache.getPhoneNumber() != null) {
+        	if(theUserCache.getMobileCarrierId() == null && theUser.getSmsEmailAddress() == null) {
+    			apiException = new ApiException(ApiStatusCode.NO_CARRIER_ID_TO_ASSOCIATE_WITH_PHONE_NUMBER);
+    			throw apiException;
+        	}
+        }
+    }
+    
+    private void createValidation(User theUser, User theUserCache) throws ApiException {
+    	ApiException apiException = null;
+        if(theUserCache.getEmailAddress() == null && theUserCache.getPhoneNumber() == null) {
+			apiException = new ApiException(ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
+			throw apiException;
+        }
+    
         if(theUserCache.getPhoneNumber() != null && theUserCache.getMobileCarrierId() == null) {
 			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER);
 			throw apiException;

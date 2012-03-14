@@ -69,6 +69,7 @@ public class ApiStatusCode {
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 	public static final String NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID = "501";
+	public static final String NO_CARRIER_ID_TO_ASSOCIATE_WITH_PHONE_NUMBER = "502";
 
 	public static final String USER_NOT_FOUND = "600";
 	public static final String FEEDBACK_NOT_FOUND = "601";
