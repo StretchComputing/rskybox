@@ -31,9 +31,11 @@ public class Utility {
     		log.severe("Utility::apiError() illegal parameter");
     	}
     	
+    	log.info("apiError(): apiStatus = " + theApiStatus);
+    	
     	JSONObject json = new JSONObject();
     	try {
-    			resource.setStatus(Status.CLIENT_ERROR_UNPROCESSABLE_ENTITY);
+    		resource.setStatus(Status.CLIENT_ERROR_UNPROCESSABLE_ENTITY);
 			json.put("apiStatus", theApiStatus);
 		} catch (JSONException e) {
 			log.severe("Utility::apiError()  exception = " + e.getMessage());

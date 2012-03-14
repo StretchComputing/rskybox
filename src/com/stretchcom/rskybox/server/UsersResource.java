@@ -598,7 +598,7 @@ public class UsersResource extends ServerResource {
             if(user.getPhoneNumberConfirmationSent()) {
             	jsonReturn.put("phoneNumber", user.getPhoneNumber());
             }
-            
+            log.info("********** send_confirmation_code(): about to persist user with email = " + user.getEmailAddress() + " and phone = " +user.getPhoneNumber());
             em.persist(user);
             em.getTransaction().commit();
         } catch (ApiException e) {
@@ -849,7 +849,7 @@ public class UsersResource extends ServerResource {
             		// is a different user that is using the specified phone number (if one was specified).
             		if(theUserCache.getPhoneNumber() != null) {
                 		User anotherUser = User.getUserWithPhoneNumber(theEm, theUserCache.getPhoneNumber(), null);
-                		if(anotherUser != null) {
+                		if(anotherUser != null && !anotherUser.getKey().equals(user.getKey())) {
                 			log.info("user " + anotherUser.getLastName() + " is also using the phone number = " + theUserCache.getPhoneNumber());
                 			apiException = new ApiException(ApiStatusCode.EMAIL_ADDRESS_AND_PHONE_NUMBER_MATCH_SEPARATE_USERS);
             				throw apiException;
@@ -938,7 +938,7 @@ public class UsersResource extends ServerResource {
     			apiException = new ApiException(ApiStatusCode.USER_PHONE_NUMBER_NOT_PENDING_CONFIRMATION);
 				throw apiException;
         	}
-    		if(storedSmsConfirmationCode != null && !storedSmsConfirmationCode.equals(theUserCache.getEmailConfirmationCode())) {
+    		if(storedSmsConfirmationCode != null && !storedSmsConfirmationCode.equals(theUserCache.getSmsConfirmationCode())) {
     			apiException = new ApiException(ApiStatusCode.INVALID_PHONE_NUMBER_CONFIRMATION_CODE);
 				throw apiException;
             }
@@ -1065,6 +1065,7 @@ public class UsersResource extends ServerResource {
     	
     	// Rule: If the user specified in update API has an phone number, then it must match the non-empty 'owning' user retrieved using
     	//       phone number. Owning user can be a new 'empty' user (i.e. no email address or phone number)
+    	log.info("user key = " + theUser.getKey().toString() + " owning user key = " + theOwningUser.getKey().toString());
     	if( theUserCache.getPhoneNumber() != null && theOwningUser.getPhoneNumber() != null && !theUser.getKey().equals(theOwningUser.getKey())  ) {
 			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_ALREADY_USED);
 			throw apiException;
@@ -1093,10 +1094,13 @@ public class UsersResource extends ServerResource {
 			apiException = new ApiException(ApiStatusCode.EITHER_EMAIL_ADDRESS_OR_PHONE_NUMBER_IS_REQUIRED);
 			throw apiException;
         }
-    
-        if(theUserCache.getPhoneNumber() != null && theUserCache.getMobileCarrierId() == null) {
-			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER);
-			throw apiException;
+        
+        // Rule: If a phoneNumber was specified in the update API, then a mobileCarrierId must also be specified or already in the user
+        if(theUserCache.getPhoneNumber() != null) {
+        	if(theUserCache.getMobileCarrierId() == null && theUser.getSmsEmailAddress() == null) {
+    			apiException = new ApiException(ApiStatusCode.NO_CARRIER_ID_TO_ASSOCIATE_WITH_PHONE_NUMBER);
+    			throw apiException;
+        	}
         }
     }
 }
