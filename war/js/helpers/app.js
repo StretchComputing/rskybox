@@ -142,7 +142,6 @@ var RSKYBOX = (function (r, $) {
   r.log = new r.SkyboxLog({});
   r.log.setAppUrl(rSkybox.appId);
   r.log.set('appId', rSkybox.appId);
-  r.log.exception('test error', 'test');
 
 
   r.setCookie = function (token) {
