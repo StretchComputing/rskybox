@@ -25,10 +25,15 @@ var RSKYBOX = (function (r, $) {
     // Signup
     signupBeforeShow: function () {
       r.log.debug('entering', 'SignupController.signupBeforeShow');
+      if (r.signup) { delete r.signup; }
+      if (r.signupView) {
+        r.signupView.undelegateEvents();
+        delete r.signupView;
+      }
       r.signup = new r.Signup();
       r.signupView = new r.SignupView({
         el: $('#signupForm'),
-        model: r.signup
+        model: r.signup,
       });
     },
 
@@ -41,11 +46,20 @@ var RSKYBOX = (function (r, $) {
     // Login
     loginBeforeShow: function () {
       r.log.debug('entering', 'SignupController.loginBeforeShow');
+      if (r.login) { delete r.login; }
+      if (r.loginView) {
+        r.loginView.undelegateEvents();
+        delete r.loginView;
+      }
       r.login = new r.Login();
       r.loginView = new r.LoginView({
         el: $('#loginForm'),
-        model: r.login
+        model: r.login,
       });
+    },
+
+    loginShow: function () {
+      r.log.debug('entering', 'SignupController.loginShow');
       r.loginView.render();
     },
 
@@ -53,6 +67,11 @@ var RSKYBOX = (function (r, $) {
     // Confirm New User
     confirmNewUserBeforeShow: function () {
       r.log.debug('entering', 'SignupController.confirmNewUserBeforeShow');
+      if (r.confirm) { delete r.confirm; }
+      if (r.confirmNewUserView) {
+        r.confirmNewUserView.undelegateEvents();
+        delete r.confirmNewUserView;
+      }
       r.confirm = new r.Confirm({
         emailAddress: r.session.params.emailAddress,
         phoneNumber: r.session.params.phoneNumber,
@@ -63,13 +82,21 @@ var RSKYBOX = (function (r, $) {
         el: $('#confirmForm'),
         model: r.confirm,
       });
-      r.confirmNewUserView.render();
     },
 
+    confirmNewUserShow: function () {
+      r.log.debug('entering', 'SignupController.confirmNewUserShow');
+      r.confirmNewUserView.render();
+    },
 
     // Confirm Existing User
     confirmExistingUserBeforeShow: function () {
       r.log.debug('entering', 'SignupController.confirmExistingUserBeforeShow');
+      if (r.confirm) { delete r.confirm; }
+      if (r.confirmExistingUserView) {
+        r.confirmExistingUserView.undelegateEvents();
+        delete r.confirmExistingUserView;
+      }
       r.confirm = new r.Confirm({
         emailAddress: r.session.params.emailAddress,
         phoneNumber: r.session.params.phoneNumber,
@@ -83,6 +110,10 @@ var RSKYBOX = (function (r, $) {
         el: $('#confirmForm'),
         model: r.confirm,
       });
+    },
+
+    confirmExistingUserShow: function () {
+      r.log.debug('entering', 'SignupController.confirmExistingUserShow');
       r.confirmExistingUserView.render();
       r.confirmExistingUserView.$el.trigger('submit');
     },
@@ -90,18 +121,29 @@ var RSKYBOX = (function (r, $) {
 
     // Confirm Member
     confirmMemberBeforeShow: function (e) {
-      r.log.debug('entering', 'SingupController.confirmMember');
+      r.log.debug('entering', 'SingupController.confirmMemberBeforeShow');
+      if (r.member) { delete r.member; }
+      if (r.confirmMemberView) {
+        r.confirmMemberView.undelegateEvents();
+        delete r.confirmMemberView;
+      }
       r.member = new r.Member({
-        id: 'confirmation',
         emailAddress: r.session.params.emailAddress,
         confirmationCode: r.session.params.confirmationCode,
         memberConfirmation: r.session.params.memberConfirmation,
       });
+      r.member.apiUrl = '/appMembers/confirmation';
+      r.member.setUrl();
       r.member.setAppUrl(r.session.params.applicationId);
+      r.member.set('id', 'confirmation');
       r.confirmMemberView = new r.ConfirmMemberView({
         el: $('#confirmForm'),
         model: r.member,
       });
+    },
+
+    confirmMemberShow: function (e) {
+      r.log.debug('entering', 'SingupController.confirmMemberShow');
       r.confirmMemberView.render();
       r.confirmMemberView.$el.trigger('submit');
     },
@@ -117,18 +159,22 @@ var RSKYBOX = (function (r, $) {
 
 
   r.router = new $.mobile.Router([
-    { '.*':      { handler: 'isLoggedIn',       events: 'bc' } },
-    { '.*':      { handler: 'setupSession',     events: 'bs' } },
-    { '#signup': { handler: 'signupBeforeShow', events: 'bs' } },
-    { '#signup': { handler: 'signupShow',       events: 's'  } },
-    { '#login':  { handler: 'loginBeforeShow',  events: 'bs' } },
+    { '.*':      { handler: 'isLoggedIn',       events: 'bc'  } },
+    { '.*':      { handler: 'setupSession',     events: 'bs'  } },
+    { '#signup': { handler: 'signupBeforeShow', events: 'bs'  } },
+    { '#signup': { handler: 'signupShow',       events: 's'   } },
+    { '#login':  { handler: 'loginBeforeShow',  events: 'bs'  } },
+    { '#login':  { handler: 'loginShow',        events: 's'   } },
 
     // these routes only match when preregistration is present
-    { '#confirm(?=.*preregistration=true)':   { handler: 'confirmNewUserBeforeShow',      events: 'bs' } },
-    { '#confirm(?=.*preregistration=false)':  { handler: 'confirmExistingUserBeforeShow', events: 'bs' } },
+    { '#confirm(?=.*preregistration=true)':   { handler: 'confirmNewUserBeforeShow',      events: 'bs'  } },
+    { '#confirm(?=.*preregistration=true)':   { handler: 'confirmNewUserShow',            events: 's'   } },
+    { '#confirm(?=.*preregistration=false)':  { handler: 'confirmExistingUserBeforeShow', events: 'bs'  } },
+    { '#confirm(?=.*preregistration=false)':  { handler: 'confirmExistingUserShow',       events: 's'   } },
 
-    // this route only matches when memberConfirmation is present
-    { '#confirm(?=.*memberConfirmation)':     { handler: 'confirmMemberBeforeShow',       events: 'bs' } },
+    // these routes only matches when memberConfirmation is present
+    { '#confirm(?=.*memberConfirmation)':     { handler: 'confirmMemberBeforeShow',       events: 'bs'  } },
+    { '#confirm(?=.*memberConfirmation)':     { handler: 'confirmMemberShow',             events: 's'   } },
   ], r.controller);
 
 

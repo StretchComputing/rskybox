@@ -171,6 +171,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
+      r.log.debug('entering', 'NewApplicationView.render');
       this.$el.html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;
