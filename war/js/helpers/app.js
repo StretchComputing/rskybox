@@ -74,12 +74,15 @@ var RSKYBOX = (function (r, $) {
     base: function (level, message, logName) {
       var
         localLevel = this.logLevels.local,
+        output = '',
         serverLevel = this.logLevels.error;
 
       if (localLevel >= this.logLevels[level]) {
-        console.log(
-          (level === 'error' ? '***** ' : '') + level.toUpperCase() + ' ' + message + (logName ? ' \t(' + logName + ')' : '')
-        );
+        output += this.logLevels[level] <= this.logLevels.error ? '***** ' : '';
+        output += level.toUpperCase() + ' ';
+        output += message;
+        output += logName ? ' \t(' + logName + ')' : '';
+        console.log(output);
       }
 
       if (this.get('appId') && (serverLevel >= this.logLevels[level])) {
@@ -139,6 +142,7 @@ var RSKYBOX = (function (r, $) {
   r.log = new r.SkyboxLog({});
   r.log.setAppUrl(rSkybox.appId);
   r.log.set('appId', rSkybox.appId);
+  r.log.exception('test error', 'test');
 
 
   r.setCookie = function (token) {
