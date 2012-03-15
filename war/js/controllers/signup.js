@@ -74,8 +74,9 @@ var RSKYBOX = (function (r, $) {
       }
       r.confirm = new r.Confirm({
         emailAddress: r.session.params.emailAddress,
+        emailConfirmationCode: r.session.params.emailConfirmationCode,
         phoneNumber: r.session.params.phoneNumber,
-        confirmationCode: r.session.params.confirmationCode,
+        phoneConfirmationCode: r.session.params.phoneConfirmationCode,
         new: true,
       });
       r.confirmNewUserView = new r.ConfirmNewUserView({
@@ -99,8 +100,9 @@ var RSKYBOX = (function (r, $) {
       }
       r.confirm = new r.Confirm({
         emailAddress: r.session.params.emailAddress,
+        emailConfirmationCode: r.session.params.emailConfirmationCode,
         phoneNumber: r.session.params.phoneNumber,
-        confirmationCode: r.session.params.confirmationCode,
+        phoneConfirmationCode: r.session.params.phoneConfirmationCode,
         new: false,
       });
       r.confirm.apiUrl = '/users/confirm';

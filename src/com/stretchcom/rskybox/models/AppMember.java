@@ -337,7 +337,7 @@ public class AppMember {
 	    	urlBuf.append("emailAddress=");
 	    	urlBuf.append(encodedEmailAddress);
 	    	urlBuf.append("&");
-	    	urlBuf.append("emailConfirmationCode=");
+	    	urlBuf.append("confirmationCode=");
 	    	urlBuf.append(encodedConfirmationCode);
 	    	urlBuf.append("&");
 	    	urlBuf.append("memberConfirmation=");

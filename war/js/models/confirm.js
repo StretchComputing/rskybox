@@ -11,8 +11,9 @@ var RSKYBOX = (function (r, $) {
 
     fields: {
       emailAddress: null,
+      emailConfirmationCode: null,
       phoneNumber: null,
-      confirmationCode: null,
+      phoneConfirmationCode: null,
       password: null,
       new: null,
     },
@@ -21,15 +22,37 @@ var RSKYBOX = (function (r, $) {
       var
         PASSWORD_MIN_LEN = 6,
         CONFIRMATION_CODE_LEN = 3,
-        code,
+        emailCode,
         password,
+        phoneCode,
         message = '';
 
-      code = attrs.confirmationCode;
-      if (code && code.length === CONFIRMATION_CODE_LEN) {
-        r.log.debug('valid confirmation code', 'Confirm.validate');
-      } else {
-        message += 'Confirmation code must be exactly 3 characters. ';
+      if (attrs.emailAddress && attrs.emailAddress.length > 0) {
+        emailCode = attrs.emailConfirmationCode;
+        if (emailCode) {
+          if (emailCode.length === CONFIRMATION_CODE_LEN) {
+            r.log.debug('valid email confirmation code', 'Confirm.validate');
+          } else {
+            message += 'Confirmation code must be exactly 3 characters. ';
+          }
+        }
+      }
+
+      // Testing for presence of confirmation code error message.
+      // So this test must follow the previous confirmation code test.
+      if (!message && attrs.phoneNumber && attrs.phoneNumber.length > 0) {
+        phoneCode = attrs.phoneConfirmationCode;
+        if (phoneCode) {
+          if (phoneCode.length === CONFIRMATION_CODE_LEN) {
+            r.log.debug('valid phone confirmation code', 'Confirm.validate');
+          } else {
+            message += 'Confirmation code must be exactly 3 characters. ';
+          }
+        }
+      }
+
+      if (!emailCode && !phoneCode) {
+        message += 'Confirmation code is required. ';
       }
 
       password = attrs.password;

@@ -78,20 +78,24 @@
     <script type="text/template" id="confirmTemplate">
       <ul data-role="listview">
         <li id="emailWrapper" style="display: none" data-role="fieldcontain">
-          <label for="emailAddress">Your email address: </label>
-          <input type="email" name="emailAddress" id="emailAddress" value="<%= emailAddress %>" readonly>
+          <h1>Email Address</h1>
+          <label class="ui-hidden-accessible">Email address: </label>
+          <input type="email" name="emailAddress" value="<%= emailAddress %>" readonly>
+          <label class="ui-hidden-accessible">Email confirmation code:</label>
+          <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%= emailConfirmationCode %>">
         </li>
         <li id="phoneWrapper" style="display: none;" data-role="fieldcontain">
-          <label for="phoneNumber">Your phone number: </label>
-          <input type="tel" name="phoneNumber" id="phoneNumber" value="<%= phoneNumber %>" readonly>
+          <h1>Phone Number</h1>
+          <label class="ui-hidden-accessible">Phone number: </label>
+          <input type="tel" name="phoneNumber" value="<%= phoneNumber %>" readonly>
+          <label class="ui-hidden-accessible">Phone confirmation code:</label>
+          <input name="phoneConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>">
         </li>
-        <li data-role="fieldcontain">
-          <label for="confirmationCode">Please enter your confirmation code:</label>
-          <input name="confirmationCode" id="confirmationCode" placeholder="Confirmation Code" value="<%= confirmationCode %>">
         </li>
         <li id="passwordWrapper" data-role="fieldcontain">
-        <label for="password">Please create a password (min 6 chars):</label>
-          <input name="password" id="password" placeholder="Password" autocorrect="off" autocapitalize="off">
+          <h1>Password</h1>
+          <label class="ui-hidden-accessible">Password (min 6 chars):</label>
+          <input name="password" placeholder="Password" autocorrect="off" autocapitalize="off">
         </li>
         <li data-role="fieldcontain">
           <input type="submit" value="Complete Sign Up">

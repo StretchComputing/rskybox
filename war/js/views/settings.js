@@ -121,7 +121,7 @@ var RSKYBOX = (function (r, $) {
       if (this.model.isConfirmCodeValid(code)) {
         params = {
           emailAddress: this.$('input[name=confirmEmailAddress]').val(),
-          confirmationCode: code,
+          emailConfirmationCode: code,
           preregistration: false,
         };
         r.changePage('confirm', 'signup', params);
@@ -140,7 +140,7 @@ var RSKYBOX = (function (r, $) {
       if (this.model.isConfirmCodeValid(code)) {
         params = {
           phoneNumber: this.$('input[name=confirmPhoneNumber]').val(),
-          confirmationCode: code,
+          phoneConfirmationCode: code,
           preregistration: false,
         };
         r.changePage('confirm', 'signup', params);
@@ -206,9 +206,11 @@ var RSKYBOX = (function (r, $) {
       218: 'User not authorized.',
       303: 'User ID requried.',
       405: 'Email address is already in use.',
+      412: 'Password is too short.',
       413: 'Phone number is already in use.',
       501: 'Phone number and mobile carrier ID must be specified together.',
-      600: 'User not found.'
+      502: 'Mobile carrier selection is missing.',
+      600: 'User not found.',
     }
   });
 
