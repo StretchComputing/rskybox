@@ -1064,11 +1064,13 @@ public class UsersResource extends ServerResource {
     	}
     	
     	// Rule: If the user specified in update API has an phone number, then it must match the non-empty 'owning' user retrieved using
-    	//       phone number. Owning user can be a new 'empty' user (i.e. no email address or phone number)
-    	log.info("user key = " + theUser.getKey().toString() + " owning user key = " + theOwningUser.getKey().toString());
-    	if( theUserCache.getPhoneNumber() != null && theOwningUser.getPhoneNumber() != null && !theUser.getKey().equals(theOwningUser.getKey())  ) {
-			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_ALREADY_USED);
-			throw apiException;
+    	//       phone number. Owning user can be a new 'empty' user (i.e. no key, email address or phone number)
+    	if(theOwningUser.getKey() != null){
+        	log.info("user key = " + theUser.getKey().toString() + " owning user key = " + theOwningUser.getKey().toString());
+        	if( theUserCache.getPhoneNumber() != null && theOwningUser.getPhoneNumber() != null && !theUser.getKey().equals(theOwningUser.getKey())  ) {
+    			apiException = new ApiException(ApiStatusCode.PHONE_NUMBER_ALREADY_USED);
+    			throw apiException;
+        	}
     	}
 		
         // Rule: If the mobileCarrierId was specified in the update API, then a phone number must also be specified or already set in the user
