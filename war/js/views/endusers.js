@@ -61,12 +61,8 @@ var RSKYBOX = (function (r, $) {
 
     error: function (model, response) {
       r.log.debug('EnduserView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response);
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.warning(response);              // This is a validation error.
     },
 
     //  This may not be in use.  Thanks Joe for pointing out my mistakes.
@@ -75,10 +71,9 @@ var RSKYBOX = (function (r, $) {
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('EnduserView: An unknown API error occurred: ' + code);
+        r.log.error('Undefined apiStatus: ' + code, 'EnduserView.apiError');
       }
-
-      r.flash.error(this.apiCodes[code]);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     apiCodes: {

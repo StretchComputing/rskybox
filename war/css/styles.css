@@ -1,6 +1,30 @@
-.flash.error {
-  background: #F9EDBE;
+.flash {
   text-align: center;
-  margin: 1em 0;
+  font-weight: bold;
   padding: .5em;
+  margin: 0 0 15px 0;
+}
+
+.success {
+  color: #48830C;
+  background: #D8F2AF;
+  border: #48830C 2px solid;
+}
+
+.info {
+  color: #064492;
+  background: #AFDEF8;
+  border: #064492 2px solid;
+}
+
+.warning {
+  color: #AA741C;
+  background: #FEEEA0;
+  border: #AA741C 2px solid;
+}
+
+.error {
+  color: #6E2123;
+  background: #FFA9AB;
+  border: #6E2123 2px solid;
 }

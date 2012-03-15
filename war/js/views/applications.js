@@ -89,12 +89,8 @@ var RSKYBOX = (function (r, $) {
 
     error: function (model, response) {
       r.log.debug('ApplicationView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response);
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -102,10 +98,9 @@ var RSKYBOX = (function (r, $) {
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('ApplicationView: An unknown API error occurred: ' + code);
+        r.log.error('Undefined apiStatus: ' + code, 'ApplicationView.apiError');
       }
-
-      r.flash.error(this.apiCodes[code]);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
@@ -116,7 +111,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     apiCodes: {
-      605: 'The application was not found.'
+      605: 'The application was not found.',
     }
   });
 
@@ -161,12 +156,8 @@ var RSKYBOX = (function (r, $) {
 
     error: function (model, response) {
       r.log.debug('NewApplicationView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response, this.$el);
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -174,13 +165,13 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('NewApplicationView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('NewApplicationView: An unknown API error occurred: ' + code);
+        r.log.error('Undefined apiStatus: ' + code, 'NewApplicationView.apiError');
       }
-
-      r.flash.error(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code], this.$el);
     },
 
     render: function () {
+      r.log.debug('entering', 'NewApplicationView.render');
       this.$el.html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;

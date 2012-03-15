@@ -76,7 +76,7 @@ var RSKYBOX = (function (r, $) {
           password: password,
         });
       } else {
-        r.flash.error('Minimum password length is 6 characters.');
+        r.flash.warning('Minimum password length is 6 characters.');
       }
       e.preventDefault();
       return false;
@@ -90,7 +90,7 @@ var RSKYBOX = (function (r, $) {
           emailAddress: email,
         }, true);
       } else {
-        r.flash.error('Valid email address required.');
+        r.flash.warning('Valid email address required.');
       }
       e.preventDefault();
       return false;
@@ -107,7 +107,7 @@ var RSKYBOX = (function (r, $) {
           mobileCarrierId: carrier,
         }, true);
       } else {
-        r.flash.error('Valid phone number and mobile carrier selection required.');
+        r.flash.warning('Valid phone number and mobile carrier selection required.');
       }
       e.preventDefault();
       return false;
@@ -126,7 +126,7 @@ var RSKYBOX = (function (r, $) {
         };
         r.changePage('confirm', 'signup', params);
       } else {
-        r.flash.error('Confirmation code must be 3 characters.');
+        r.flash.warning('Confirmation code must be 3 characters.');
       }
       e.preventDefault();
       return false;
@@ -145,7 +145,7 @@ var RSKYBOX = (function (r, $) {
         };
         r.changePage('confirm', 'signup', params);
       } else {
-        r.flash.error('Confirmation code must be 3 characters.');
+        r.flash.warning('Confirmation code must be 3 characters.');
       }
       e.preventDefault();
       return false;
@@ -160,13 +160,13 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.flash.notice('Changes were saved');
+      r.flash.success('Changes were saved');
     },
 
     error: function (model, response) {
       r.log.debug('entering', 'SettingsView.error');
       if (response.responseText) { return; }  // This is an apiError.
-      r.flash.error(response);                // This is a validation error.
+      r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -176,7 +176,7 @@ var RSKYBOX = (function (r, $) {
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'SettingsView.apiError');
       }
-      r.flash.error(this.apiCodes[code]);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {

@@ -38,23 +38,18 @@ var RSKYBOX = (function (r, $) {
   });
 
   r.MembersView = r.JqmPageBaseView.extend({
-    events: {
-      'click .newMember': 'newMember',
-    },
-
     initialize: function () {
       _.bindAll(this, 'addMemberEntry');
       this.collection.bind('reset', this.render, this);
       this.template = _.template($('#noMembersTemplate').html());
     },
 
-    newMember: function () {
-      $.mobile.changePage('#newMember?id=' + r.session.params.id);
-    },
-
     render: function () {
-      var list;
+      var appId, list;
 
+      appId = r.session.params.id;
+      this.$el.find('.back').attr('href', '#application?id=' + appId);
+      this.$el.find('.new').attr('href', '#newMember?id=' + appId);
       this.getContent().empty();
       if (this.collection.length <= 0) {
         this.getContent().html(this.template());
@@ -87,6 +82,9 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
+      var appId = r.session.params.appId;
+
+      this.$el.find('.back').attr('href', '#members?id=' + appId);
       this.getContent().html(this.template(this.model.getMock()));
       this.getContent().trigger('create');
       return this;
@@ -110,12 +108,8 @@ var RSKYBOX = (function (r, $) {
 
     error: function (model, response) {
       r.log.debug('MemberView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response);
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -123,10 +117,9 @@ var RSKYBOX = (function (r, $) {
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.error('MemberView: An unknown API error occurred: ' + code);
+        r.log.error('Undefined apiStatus: ' + code, 'MemberView.apiError');
       }
-
-      r.flash.error(this.apiCodes[code]);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     apiCodes: {
@@ -180,12 +173,8 @@ var RSKYBOX = (function (r, $) {
 
     error: function (model, response) {
       r.log.debug('NewMemberView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response, this.$el);
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -193,10 +182,9 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('NewMemberView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('NewMemberView: An unknown API error occurred: ' + code);
+        r.log.error('Undefined apiStatus: ' + code, 'NewMemberView.apiError');
       }
-
-      r.flash.error(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code], this.$el);
     },
 
     render: function () {
