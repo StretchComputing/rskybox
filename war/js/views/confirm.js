@@ -195,7 +195,7 @@ var RSKYBOX = (function (r, $) {
       _.bindAll(this, 'apiError', 'success');
       //this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
-      this.template = _.template($('#confirmTemplate').html());
+      this.template = _.template($('#confirmMemberTemplate').html());
     },
 
     events: {
@@ -264,10 +264,6 @@ var RSKYBOX = (function (r, $) {
 
       r.getHeaderDiv().find('h1').text('Confirmation');
       this.$el.html(content);
-      this.$el.find('input[type=submit]').text('Confirm Membership');
-      this.$('#emailWrapper').show();
-      this.$('#phoneWrapper').hide();
-      this.$('#passwordWrapper').hide();
       this.$el.trigger('create');
       return this;
     },
