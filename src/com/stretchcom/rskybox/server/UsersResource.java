@@ -757,7 +757,7 @@ public class UsersResource extends ServerResource {
     	urlBuf.append("emailAddress=");
     	urlBuf.append(Utility.urlEncode(theUser.getEmailAddress()));
     	urlBuf.append("&");
-    	urlBuf.append("confirmationCode=");
+    	urlBuf.append("emailConfirmationCode=");
     	urlBuf.append(Utility.urlEncode(theUser.getEmailConfirmationCode()));
     	urlBuf.append("&");
     	urlBuf.append("preregistration=");
@@ -779,7 +779,7 @@ public class UsersResource extends ServerResource {
         sb.append("phoneNumber=");
         sb.append(Utility.urlEncode(theUser.getPhoneNumber()));
         sb.append("&");
-        sb.append("confirmationCode=");
+        sb.append("phoneConfirmationCode=");
         sb.append(Utility.urlEncode(theUser.getSmsConfirmationCode()));
         sb.append("&");
         sb.append("preregistration=");
