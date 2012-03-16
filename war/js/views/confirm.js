@@ -20,8 +20,9 @@ var RSKYBOX = (function (r, $) {
 
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
+        emailConfirmationCode: this.$("input[name='emailConfirmationCode']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
-        confirmationCode: this.$("input[name='confirmationCode']").val(),
+        phoneConfirmationCode: this.$("input[name='phoneConfirmationCode']").val(),
         password: this.$("input[name='password']").val(),
       });
 
@@ -46,7 +47,7 @@ var RSKYBOX = (function (r, $) {
     error: function (model, response) {
       r.log.debug('entering', 'ConfirmNewUserView.error');
       if (response.responseText) { return; }  // This is an apiError.
-      r.flash.error(response, this.$el);      // This is a validation error.
+      r.flash.warning(response, this.$el);    // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -55,9 +56,10 @@ var RSKYBOX = (function (r, $) {
 
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'ConfirmNewUserView.apiError');
+        this.apiCodes[code] = 'An unknown error occurred. Please try again.';
       }
       this.model.clear({silent: true});
-      r.flash.error(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code], this.$el);
     },
 
     render: function () {
@@ -67,10 +69,8 @@ var RSKYBOX = (function (r, $) {
       this.$el.find('input[type=submit]').text('Complete Signup');
       if (this.model.get('emailAddress')) {
         this.$('#emailWrapper').show();
-        this.$('#phoneWrapper').hide();
       }
       if (this.model.get('phoneNumber')) {
-        this.$('#emailWrapper').hide();
         this.$('#phoneWrapper').show();
       }
       this.$el.trigger('create');
@@ -82,16 +82,20 @@ var RSKYBOX = (function (r, $) {
       205: 'Your phone number has already been confirmed.',
       206: 'Your email address is not registered in the system.',
       207: 'Your phone number is not registered in the system.',
+      220: 'Phone number or email address is already in use by another user.',
       308: 'Either an email address or a phone number is required.',
-      309: 'Confirmation code is required.',
       311: 'Password is required.',
+      317: 'Email confirmation code is required.',
+      318: 'Phone confirmation code is required.',
       403: 'Invalid email address.',
       404: 'Invalid mobile carrier.',
-      411: 'Invalid confirmation code.',
       412: 'Password too short.',
+      417: 'Invalid email confirmation code.',
+      418: 'Invalid phone confirmation code.',
+      501: 'Phone number is missing.',
+      502: 'Mobile carrier selection is missing.',
       607: 'Email address not found.',
       608: 'Phone number not found.',
-      700: 'Email address and phone number are mutually exclusive.',
     }
   });
 
@@ -114,8 +118,9 @@ var RSKYBOX = (function (r, $) {
 
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
+        emailConfirmationCode: this.$("input[name='emailConfirmationCode']").val(),
         phoneNumber: this.$("input[name='phoneNumber']").val(),
-        confirmationCode: this.$("input[name='confirmationCode']").val(),
+        phoneConfirmationCode: this.$("input[name='phoneConfirmationCode']").val(),
       });
 
       if (valid) {
@@ -138,7 +143,7 @@ var RSKYBOX = (function (r, $) {
     error: function (model, response) {
       r.log.debug('entering', 'ConfirmExistingUserView.error');
       if (response.responseText) { return; }  // This is an apiError.
-      r.flash.error(response, this.$el);      // This is a validation error.
+      r.flash.warning(response, this.$el);    // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -149,7 +154,7 @@ var RSKYBOX = (function (r, $) {
         r.log.error('Undefined apiStatus: ' + code, 'ConfirmExistingUserView.apiError');
       }
       this.model.clear({silent: true});
-      r.flash.error(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code], this.$el);
     },
 
     render: function () {
@@ -250,7 +255,7 @@ var RSKYBOX = (function (r, $) {
         break;
       }
       this.model.clear({silent: true});
-      r.flash.error(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code], this.$el);
     },
 
     render: function () {

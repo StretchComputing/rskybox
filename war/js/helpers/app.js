@@ -74,10 +74,15 @@ var RSKYBOX = (function (r, $) {
     base: function (level, message, logName) {
       var
         localLevel = this.logLevels.local,
+        output = '',
         serverLevel = this.logLevels.error;
 
       if (localLevel >= this.logLevels[level]) {
-        console.log(level.toUpperCase() + ' ' + message + (logName ? ' \t(' + logName + ')' : ''));
+        output += this.logLevels[level] <= this.logLevels.error ? '***** ' : '';
+        output += level.toUpperCase() + ' ';
+        output += message;
+        output += logName ? ' \t(' + logName + ')' : '';
+        console.log(output);
       }
 
       if (this.get('appId') && (serverLevel >= this.logLevels[level])) {
@@ -105,28 +110,23 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.local('Skybox.log.error saved');
+      r.log.local('SkyboxLog.success');
     },
 
     errorHandler: function (model, response) {
-      r.log.local('SettingsView.error');
-      if (response.responseText) {
-        // This is an apiError.
-        return;
-      }
-      // This is a validation error.
-      r.flash.error(response);
+      r.log.local('SkyboxLog.error');
+      if (response.responseText) { return; }  // This is an apiError.
+      r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.local('SettingsView.apiError');
+      r.log.local('SkyboxLog.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
-        r.log.local('SettingsView: An unknown API error occurred: ' + code);
+        r.log.local('Undefined apiStatus: ' + code, 'SkyboxLog.apiError');
       }
-
-      r.flash.error(this.apiCodes[code]);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     apiCodes: {
@@ -219,8 +219,16 @@ var RSKYBOX = (function (r, $) {
       $(el).prepend(flash);
     };
 
-    flash.notice = function (message, el) {
-      display('notice', message, el);
+    flash.info = function (message, el) {
+      display('info', message, el);
+    };
+
+    flash.success = function (message, el) {
+      display('success', message, el);
+    };
+
+    flash.warning = function (message, el) {
+      display('warning', message, el);
     };
 
     flash.error = function (message, el) {

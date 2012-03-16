@@ -76,7 +76,7 @@ var RSKYBOX = (function (r, $) {
           password: password,
         });
       } else {
-        r.flash.error('Minimum password length is 6 characters.');
+        r.flash.warning('Minimum password length is 6 characters.');
       }
       e.preventDefault();
       return false;
@@ -90,7 +90,7 @@ var RSKYBOX = (function (r, $) {
           emailAddress: email,
         }, true);
       } else {
-        r.flash.error('Valid email address required.');
+        r.flash.warning('Valid email address required.');
       }
       e.preventDefault();
       return false;
@@ -107,7 +107,7 @@ var RSKYBOX = (function (r, $) {
           mobileCarrierId: carrier,
         }, true);
       } else {
-        r.flash.error('Valid phone number and mobile carrier selection required.');
+        r.flash.warning('Valid phone number and mobile carrier selection required.');
       }
       e.preventDefault();
       return false;
@@ -121,12 +121,12 @@ var RSKYBOX = (function (r, $) {
       if (this.model.isConfirmCodeValid(code)) {
         params = {
           emailAddress: this.$('input[name=confirmEmailAddress]').val(),
-          confirmationCode: code,
+          emailConfirmationCode: code,
           preregistration: false,
         };
         r.changePage('confirm', 'signup', params);
       } else {
-        r.flash.error('Confirmation code must be 3 characters.');
+        r.flash.warning('Confirmation code must be 3 characters.');
       }
       e.preventDefault();
       return false;
@@ -140,12 +140,12 @@ var RSKYBOX = (function (r, $) {
       if (this.model.isConfirmCodeValid(code)) {
         params = {
           phoneNumber: this.$('input[name=confirmPhoneNumber]').val(),
-          confirmationCode: code,
+          phoneConfirmationCode: code,
           preregistration: false,
         };
         r.changePage('confirm', 'signup', params);
       } else {
-        r.flash.error('Confirmation code must be 3 characters.');
+        r.flash.warning('Confirmation code must be 3 characters.');
       }
       e.preventDefault();
       return false;
@@ -160,13 +160,13 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.flash.notice('Changes were saved');
+      r.flash.success('Changes were saved');
     },
 
     error: function (model, response) {
       r.log.debug('entering', 'SettingsView.error');
       if (response.responseText) { return; }  // This is an apiError.
-      r.flash.error(response);                // This is a validation error.
+      r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
@@ -176,7 +176,7 @@ var RSKYBOX = (function (r, $) {
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'SettingsView.apiError');
       }
-      r.flash.error(this.apiCodes[code]);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
@@ -206,9 +206,11 @@ var RSKYBOX = (function (r, $) {
       218: 'User not authorized.',
       303: 'User ID requried.',
       405: 'Email address is already in use.',
+      412: 'Password is too short.',
       413: 'Phone number is already in use.',
       501: 'Phone number and mobile carrier ID must be specified together.',
-      600: 'User not found.'
+      502: 'Mobile carrier selection is missing.',
+      600: 'User not found.',
     }
   });
 

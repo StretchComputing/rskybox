@@ -21,6 +21,7 @@ var RSKYBOX = (function (r, $) {
       url = this.restUrl + this.apiUrl;
       if (this.get('id')) {
         this.urlRoot = url;
+        delete this.url;
       } else {
         this.url = url;
       }

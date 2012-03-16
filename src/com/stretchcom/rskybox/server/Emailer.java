@@ -1,37 +1,12 @@
 package com.stretchcom.rskybox.server;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-
-import org.restlet.data.Reference;
-import org.restlet.data.Status;
-
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.Queue;
-import com.google.appengine.api.taskqueue.TaskOptions.Method;
+import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
-import com.stretchcom.rskybox.models.AppMember;
-import com.stretchcom.rskybox.models.Application;
+import com.google.appengine.api.taskqueue.TaskOptions.Method;
 
 
 public class Emailer {
