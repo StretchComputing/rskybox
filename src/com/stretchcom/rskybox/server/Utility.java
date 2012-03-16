@@ -13,12 +13,10 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.Request;
-import org.restlet.data.CookieSetting;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.ext.servlet.ServletUtils;
 import org.restlet.resource.ServerResource;
-import org.restlet.util.Series;
 
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.User;

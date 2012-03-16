@@ -1,38 +1,19 @@
 package com.stretchcom.rskybox.server;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.logging.Logger;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.restlet.data.Form;
-import org.restlet.data.Parameter;
 import org.restlet.data.Reference;
-import org.restlet.data.Status;
-import org.restlet.ext.json.JsonRepresentation;
-import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
-import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.Notification;
 
 

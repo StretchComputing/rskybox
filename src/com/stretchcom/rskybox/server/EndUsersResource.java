@@ -6,8 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.mail.Message;
-
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -28,12 +26,9 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.EndUser;
-import com.stretchcom.rskybox.models.MobileCarrier;
 import com.stretchcom.rskybox.models.User;
 
 public class EndUsersResource extends ServerResource {
