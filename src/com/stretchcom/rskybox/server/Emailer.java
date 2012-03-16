@@ -26,10 +26,10 @@ import org.restlet.data.Status;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.labs.taskqueue.QueueFactory;
-import com.google.appengine.api.labs.taskqueue.Queue;
-import com.google.appengine.api.labs.taskqueue.TaskOptions;
-import com.google.appengine.api.labs.taskqueue.TaskOptions.Method;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.TaskOptions.Method;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 
@@ -63,7 +63,7 @@ public class Emailer {
 		// method defaults to POST, but decided to be explicit here
 		// PRIORITY TODO need to somehow secure this URL. Book uses web.xml <security-constraint> but not sure why it restricts the
 		//               URL to task queues (I see how it restricts it to admins)
-		TaskOptions taskOptions = TaskOptions.Builder.url("/sendEmailTask")
+		TaskOptions taskOptions = TaskOptions.Builder.withUrl("/sendEmailTask")
 				.method(Method.POST)
 				.param("emailAddress", theEmailAddress)
 				.param("fromEmailAddress", fromEmailAddress)
