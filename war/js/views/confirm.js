@@ -223,6 +223,8 @@ var RSKYBOX = (function (r, $) {
         delete params.memberConfirmation;
         delete params.applicationId;
         params.preregistration = true;
+        params.emailConfirmationCode = params.confirmationCode;
+        delete params.confirmationCode;
         r.changePage('confirm', 'signup', params);
         return;
       }
