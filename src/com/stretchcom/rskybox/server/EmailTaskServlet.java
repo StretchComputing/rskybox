@@ -75,10 +75,10 @@ public class EmailTaskServlet extends HttpServlet {
 		    	// must send the email from Rackspace. 
 		    	if(Utility.doesEmailAddressStartWithPhoneNumber(emailAddress) && !MobileCarrier.usesFromAddress(emailAddress)) {
 		    		// For now, only allow StretchCom folks receive SMS notifications
-		    		if(memberStretchCom(emailAddress)) {
+		    		//if(memberStretchCom(emailAddress)) {
 			    		String httpResponse = EmailToSmsClient.sendMail(subject, message, emailAddress, fromEmailAddress);
 			    		log.info("EmailToSmsClient response = " + httpResponse);
-		    		}
+		    		//}
 		    	} else {
 			        Message msg = new MimeMessage(session);
 			        msg.setFrom(new InternetAddress(fromEmailAddress, fromEmailUser));
