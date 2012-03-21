@@ -144,8 +144,8 @@ var RSKYBOX = (function (r, $) {
   r.log.set('appId', rSkybox.appId);
 
 
-  r.logIn = function (user) {
-    Cookie.set('token', user.token, 9000, '/');
+  r.logIn = function (token) {
+    Cookie.set('token', token, 9000, '/');
     r.changePage('applications');
   };
 

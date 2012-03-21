@@ -40,7 +40,7 @@ var RSKYBOX = (function (r, $) {
 
     success: function (model, response) {
       r.log.debug('entering', 'ConfirmNewUserView.success');
-      r.logIn(model.attributes);
+      r.logIn(model.get('token'));
       // TODO - make sure we go to settings after confirmation
       //r.changePage('settings');
     },

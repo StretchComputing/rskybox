@@ -40,7 +40,7 @@ var RSKYBOX = (function (r, $) {
 
     success: function (model, response) {
       r.log.debug('entering', 'Login.success');
-      r.logIn(model);
+      r.logIn(model.token);
     },
 
     error: function (model, response) {
