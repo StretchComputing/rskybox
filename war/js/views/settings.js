@@ -25,8 +25,7 @@ var RSKYBOX = (function (r, $) {
 
     logout: function (e) {
       r.log.debug('entering', 'SettingsView.logout');
-      r.unsetCookie();
-      r.changePage('root', 'signup');
+      r.logOut();
 
       e.preventDefault();
       return false;

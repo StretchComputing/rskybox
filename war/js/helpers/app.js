@@ -1,6 +1,7 @@
 var RSKYBOX = (function (r, $) {
   'use strict';
 
+
   // **** These must be defined here so they can be used further down in this function. ****
   //
   // General status code handlers.
@@ -9,8 +10,7 @@ var RSKYBOX = (function (r, $) {
     var general = {
       401: function (jqXHR) {
         r.log.debug('401 - unauthorized');
-        r.unsetCookie();
-        r.changePage('root', 'signup');
+        r.logOut();
         // TODO - Add flash message to home page after 401 occurs
       },
       404: function () {
@@ -144,16 +144,18 @@ var RSKYBOX = (function (r, $) {
   r.log.set('appId', rSkybox.appId);
 
 
-  r.setCookie = function (token) {
-    Cookie.set('token', token, 9000, '\/');
+  r.logIn = function (user) {
+    Cookie.set('token', user.token, 9000, '/');
+    r.changePage('applications');
   };
 
-  r.unsetCookie = function () {
-    Cookie.unset('token', '\/');
+  r.logOut = function () {
+    Cookie.unset('token', '/');
+    r.changePage('root', 'signup');
   };
 
-  r.isCookieSet = function () {
-    return !!Cookie.get('\/');
+  r.isLoggedIn = function () {
+    return !!Cookie.get('/');
   };
 
 

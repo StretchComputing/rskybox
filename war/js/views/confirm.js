@@ -40,8 +40,9 @@ var RSKYBOX = (function (r, $) {
 
     success: function (model, response) {
       r.log.debug('entering', 'ConfirmNewUserView.success');
-      r.setCookie(model.get('token'));
-      r.changePage('settings');
+      r.logIn(model.attributes);
+      // TODO - make sure we go to settings after confirmation
+      //r.changePage('settings');
     },
 
     error: function (model, response) {
@@ -273,7 +274,7 @@ var RSKYBOX = (function (r, $) {
     proceed: function (signup) {
       if (signup) {
         r.changePage('root', 'signup');
-      } else if (r.isCookieSet()) {
+      } else if (r.isLoggedIn()) {
         r.changePage('applications');
       } else {
         r.changePage('login', 'signup');
