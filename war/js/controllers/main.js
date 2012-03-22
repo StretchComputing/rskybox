@@ -6,18 +6,16 @@ var RSKYBOX = (function (r, $) {
     // Applications
     applicationsInit: function () {
       r.log.debug('entering', 'MainController.applicationsInit');
-      r.applications = new r.Applications();
       r.applicationsView = new r.ApplicationsView({
-        collection: r.applications
+        collection: r.getApplications(),
       });
     },
 
     applicationsShow: function () {
       r.log.debug('entering', 'MainController.applicationsShow');
       r.applicationsView.setElement($.mobile.activePage);
-      r.applications.fetch({
-        statusCode: r.statusCodeHandlers()
-      });
+      r.getApplications();
+      r.applicationsView.render();
     },
 
 
@@ -26,7 +24,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.applicationInit');
       r.application = new r.Application({});
       r.applicationView = new r.ApplicationView({
-        model: r.application
+        model: r.application,
       });
     },
 
@@ -36,7 +34,7 @@ var RSKYBOX = (function (r, $) {
       r.application.set({id: r.session.params.id}, {silent: true});
       r.application.setUrl();
       r.application.fetch({
-        statusCode: r.statusCodeHandlers()
+        statusCode: r.statusCodeHandlers(),
       });
     },
 
@@ -46,7 +44,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.settingsInit');
       r.currentUser = new r.User({});
       r.settingsView = new r.SettingsView({
-        model: r.currentUser
+        model: r.currentUser,
       });
     },
 
@@ -56,7 +54,7 @@ var RSKYBOX = (function (r, $) {
       r.currentUser.set({id: 'current'});
       r.currentUser.setUrl();
       r.currentUser.fetch({
-        statusCode: r.statusCodeHandlers()
+        statusCode: r.statusCodeHandlers(),
       });
     },
 
@@ -87,7 +85,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.feedbackListInit');
       r.feedbackList = new r.FeedbackList();
       r.feedbackListView = new r.FeedbackListView({
-        collection: r.feedbackList
+        collection: r.feedbackList,
       });
     },
 
@@ -105,7 +103,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.feedbackInit');
       r.feedback = new r.Feedback({});
       r.feedbackView = new r.FeedbackView({
-        model: r.feedback
+        model: r.feedback,
       });
     },
 
@@ -115,7 +113,7 @@ var RSKYBOX = (function (r, $) {
       r.feedback.set({id: r.session.params.id}, {silent: true});
       r.feedback.setAppUrl(r.session.params.appId);
       r.feedback.fetch({
-        statusCode: r.statusCodeHandlers()
+        statusCode: r.statusCodeHandlers(),
       });
     },
 
@@ -125,7 +123,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.logsInit');
       r.logs = new r.Logs();
       r.logsView = new r.LogsView({
-        collection: r.logs
+        collection: r.logs,
       });
     },
 
@@ -143,7 +141,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.logInit');
       r.logCurrent = new r.Log({});
       r.logView = new r.LogView({
-        model: r.logCurrent
+        model: r.logCurrent,
       });
     },
 
@@ -153,7 +151,7 @@ var RSKYBOX = (function (r, $) {
       r.logCurrent.set({id: r.session.params.id}, {silent: true});
       r.logCurrent.setAppUrl(r.session.params.appId);
       r.logCurrent.fetch({
-        statusCode: r.statusCodeHandlers()
+        statusCode: r.statusCodeHandlers(),
       });
     },
 
@@ -163,7 +161,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.crashesInit');
       r.crashes = new r.Crashes();
       r.crashesView = new r.CrashesView({
-        collection: r.crashes
+        collection: r.crashes,
       });
     },
 
@@ -181,7 +179,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.crashInit');
       r.crash = new r.Crash({});
       r.crashView = new r.CrashView({
-        model: r.crash
+        model: r.crash,
       });
     },
 
@@ -191,7 +189,7 @@ var RSKYBOX = (function (r, $) {
       r.crash.set({id: r.session.params.id}, {silent: true});
       r.crash.setAppUrl(r.session.params.appId);
       r.crash.fetch({
-        statusCode: r.statusCodeHandlers()
+        statusCode: r.statusCodeHandlers(),
       });
     },
 
@@ -201,7 +199,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.membersInit');
       r.members = new r.Members();
       r.membersView = new r.MembersView({
-        collection: r.members
+        collection: r.members,
       });
     },
 
@@ -209,7 +207,9 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.membersShow');
       r.membersView.setElement($.mobile.activePage);
       r.members.setAppUrl(r.session.params.id);
-      r.members.fetch();
+      r.members.fetch({
+        statusCode: r.statusCodeHandlers(),
+      });
     },
 
 
@@ -218,7 +218,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.memberInit');
       r.member = new r.Member();
       r.memberView = new r.MemberView({
-        model: r.member
+        model: r.member,
       });
     },
 
@@ -228,7 +228,7 @@ var RSKYBOX = (function (r, $) {
       r.member.set({id: r.session.params.id}, {silent: true});
       r.member.setAppUrl(r.session.params.appId);
       r.member.fetch({
-        statusCode: r.statusCodeHandlers()
+        statusCode: r.statusCodeHandlers(),
       });
     },
 
@@ -260,7 +260,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.endusersInit');
       r.endusers = new r.Endusers();
       r.endusersView = new r.EndusersView({
-        collection: r.endusers
+        collection: r.endusers,
       });
     },
 
@@ -268,7 +268,9 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.endusersShow');
       r.endusersView.setElement($.mobile.activePage);
       r.endusers.setAppUrl(r.session.params.id);
-      r.endusers.fetch();
+      r.endusers.fetch({
+        statusCode: r.statusCodeHandlers(),
+      });
     },
 
 
@@ -277,7 +279,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.enduserInit');
       r.enduser = new r.Enduser({});
       r.enduserView = new r.EnduserView({
-        model: r.enduser
+        model: r.enduser,
       });
     },
 
@@ -287,7 +289,7 @@ var RSKYBOX = (function (r, $) {
       r.enduser.set({id: r.session.params.id}, {silent: true});
       r.enduser.setAppUrl(r.session.params.appId);
       r.enduser.fetch({
-        statusCode: r.statusCodeHandlers()
+        statusCode: r.statusCodeHandlers(),
       });
     },
 
@@ -299,6 +301,7 @@ var RSKYBOX = (function (r, $) {
       r.session.params = r.router.getParams(location.hash);
     },
   };
+
 
   r.router = new $.mobile.Router([
     { '.*':                   { handler: 'setupSession',      events: 'bs'  } },
