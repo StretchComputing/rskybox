@@ -27,12 +27,9 @@ var RSKYBOX = (function (r, $) {
     render: function () {
       var list;
 
-      r.log.debug('entering', 'ApplicationsView.render');
       if (this.collection.length <= 0) {
-        r.log.debug('empty template', 'ApplicationsView.render');
         this.getContent().html(this.template());
       } else {
-        r.log.debug('have apps', 'ApplicationsView.render');
         list = $('<ul>');
         this.collection.each(function (app) {
           this.addAppEntry(list, app);
@@ -40,7 +37,6 @@ var RSKYBOX = (function (r, $) {
         this.getContent().html(list);
         list.listview();
       }
-      r.log.debug('leaving', 'ApplicationsView.render');
       return this;
     },
 
