@@ -2,10 +2,10 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  var session;
+  var applications, session;
 
   session = {
-    interval: 60 * 1000, // Fifteen minutes.
+    interval: 15 * 60 * 1000, // Fifteen minutes.
 
     reset: function () {
       r.log.debug('reset', 'session');
@@ -58,30 +58,56 @@ var RSKYBOX = (function (r, $) {
   };
 
 
-  r.getApplications = function () {
-    var results;
+  r.getApplicationsRef = function () {
+    applications = applications || new r.Applications();
+    return applications;
+  };
 
-    r.applications = r.applications || new r.Applications();
+  r.getApplications = function (callback) {
+    var results;
+    r.log.debug('entering', 'RSKYBOX.getApplications');
+
+    r.getApplicationsRef();
 
     if (session.isFetching('applications')) {
-      return r.applications;
+      r.log.debug('isFetching', 'RSKYBOX.getApplications');
+      return applications;
     }
 
     results = session.getItem('applications');
     if (!results) {
       session.setFetching('applications');
-      r.applications.fetch({
-        success: function () {
-          session.setItem('applications', r.applications);
+      applications.fetch({
+        success: function (collection) {
+          r.log.debug('fetch success', 'RSKYBOX.getApplications');
+          session.setItem('applications', collection);
+          if (callback) { callback(applications); }
+        },
+        error: function () {
+          r.log.error('fetch error', 'RSKYBOX.getApplications');
+          if (callback) { callback(); }
         },
         statusCode: r.statusCodeHandlers(),
       });
     } else {
       r.log.debug('updating from cache', 'RSKYBOX.getApplications');
-      r.applications.reset(results);
+      applications.reset(results);
+      if (callback) { callback(applications); }
     }
 
-    return r.applications;
+    r.log.debug('leaving', 'RSKYBOX.getApplications');
+    return applications;
+  };
+
+  r.getApplication = function (appId, callback) {
+    var app = new r.Application({});
+
+    r.getApplications(function (apps) {
+      app = _.find(apps, function (app) {
+        return app.id === appId;
+      });
+    });
+    return app;
   };
 
 
