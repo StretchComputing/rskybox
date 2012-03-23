@@ -400,7 +400,9 @@
         <li>Role: <%= role %></li>
         <li>Status: <%= status %></li>
       </ul>
-      <button class="delete" data-icon="delete" data-theme="a">Delete Member</button>
+      <% if (admin === 'owner' || admin === 'manager') { %>
+        <button class="delete" data-icon="delete" data-theme="a">Delete Member</button>
+      <% } %>
     </script>
 
     <!-- New Member -->

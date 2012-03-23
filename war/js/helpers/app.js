@@ -63,51 +63,32 @@ var RSKYBOX = (function (r, $) {
     return applications;
   };
 
-  r.getApplications = function (callback) {
-    var results;
+  r.getApplications = function () {
+    var apps, results;
     r.log.debug('entering', 'RSKYBOX.getApplications');
 
-    r.getApplicationsRef();
+    apps = r.getApplicationsRef();
 
     if (session.isFetching('applications')) {
-      r.log.debug('isFetching', 'RSKYBOX.getApplications');
-      return applications;
+      return apps;
     }
 
     results = session.getItem('applications');
     if (!results) {
       session.setFetching('applications');
-      applications.fetch({
+      apps.reset();
+      apps.fetch({
         success: function (collection) {
-          r.log.debug('fetch success', 'RSKYBOX.getApplications');
           session.setItem('applications', collection);
-          if (callback) { callback(applications); }
-        },
-        error: function () {
-          r.log.error('fetch error', 'RSKYBOX.getApplications');
-          if (callback) { callback(); }
         },
         statusCode: r.statusCodeHandlers(),
       });
     } else {
       r.log.debug('updating from cache', 'RSKYBOX.getApplications');
-      applications.reset(results);
-      if (callback) { callback(applications); }
+      apps.reset(results);
     }
 
-    r.log.debug('leaving', 'RSKYBOX.getApplications');
-    return applications;
-  };
-
-  r.getApplication = function (appId, callback) {
-    var app = new r.Application({});
-
-    r.getApplications(function (apps) {
-      app = _.find(apps, function (app) {
-        return app.id === appId;
-      });
-    });
-    return app;
+    return apps;
   };
 
 

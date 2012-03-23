@@ -15,7 +15,8 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.applicationsShow');
       r.applicationsView.setElement($.mobile.activePage);
       r.getApplications();
-      r.applicationsView.render();
+      //r.applicationsView.render();
+      r.log.debug('leaving', 'MainController.applicationsShow');
     },
 
 
@@ -219,6 +220,7 @@ var RSKYBOX = (function (r, $) {
       r.member = new r.Member();
       r.memberView = new r.MemberView({
         model: r.member,
+        collection: r.getApplicationsRef(),
       });
     },
 
@@ -227,7 +229,7 @@ var RSKYBOX = (function (r, $) {
       r.memberView.setElement($.mobile.activePage);
       r.member.set({id: r.session.params.id}, {silent: true});
       r.member.setAppUrl(r.session.params.appId);
-      r.member.set('application', r.getApplication(r.session.params.appId));
+      r.getApplications();
       r.member.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -305,7 +307,7 @@ var RSKYBOX = (function (r, $) {
 
 
   r.router = new $.mobile.Router([
-    { '.*':                   { handler: 'setupSession',      events: 'i'  } },
+    { '.*':                   { handler: 'setupSession',      events: 'bs'  } },
     { '#applications':        { handler: 'applicationsInit',  events: 'i'   } },
     { '#applications':        { handler: 'applicationsShow',  events: 's'   } },
     { '#application[?]id=.*': { handler: 'applicationInit',   events: 'i'   } },

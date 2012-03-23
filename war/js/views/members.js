@@ -76,16 +76,27 @@ var RSKYBOX = (function (r, $) {
     },
 
     initialize: function () {
+      r.log.debug('entering', 'MemberView.initialize');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
+      this.collection.on('reset', this.render, this);
       this.template = _.template($('#memberTemplate').html());
     },
 
     render: function () {
-      var appId = r.session.params.appId;
+      var app, appId = r.session.params.appId, model;
+
+      if (this.model.isNew() || this.collection.isEmpty()) { return this; }
+
+      app = this.collection.find(function (app) {
+        return app.id === appId;
+      });
+      r.log.error('why am I here', 'MemberView.render');
+      r.dump(app);
 
       this.$el.find('.back').attr('href', '#members?id=' + appId);
-      this.getContent().html(this.template(this.model.getMock()));
+      model = _.extend(this.model.getMock(), {admin: app.get('role')});
+      this.getContent().html(this.template(model));
       this.getContent().trigger('create');
       return this;
     },
