@@ -36,7 +36,13 @@ var RSKYBOX = (function (r, $) {
 
     parse: function (response) {
       return response.applications;
-    }
+    },
+
+    findById: function (id) {
+      return this.find(function (app) {
+        return app.id === id;
+      });
+    },
   });
 
 

@@ -397,10 +397,22 @@
         <li>Created: <%= date %></li>
         <li>Email: <%= emailAddress %></li>
         <li>Phone: <%= phoneNumber %></li>
-        <li>Role: <%= role %></li>
+        <% if (role !== 'owner' && (admin === 'owner' || admin === 'manager')) { %>
+          <li data-role="fieldcontain">
+            <label for="role" class="ui-hidden-accessible">Role:</label>
+            Role:
+            <select name="role" class="role">
+              <option value="">Select Role</option>
+              <option value="manager">Manager</option>
+              <option value="member">Member</option>
+            </select>
+          </li>
+        <% } else { %>
+          <li>Role: <%= role %></li>
+        <% } %>
         <li>Status: <%= status %></li>
       </ul>
-      <% if (admin === 'owner' || admin === 'manager') { %>
+      <% if (role !== 'owner' && (admin === 'owner' || admin === 'manager')) { %>
         <button class="delete" data-icon="delete" data-theme="a">Delete Member</button>
       <% } %>
     </script>
@@ -416,18 +428,20 @@
       </div>
     </div>
     <script type="text/template" id="newMemberTemplate">
-      <div>
-        <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
-        <input name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>"></input>
-      </div>
-      <div>
-        <label for="role" class="ui-hidden-accessible">Role:</label>
-        <select name="role">
-          <option value="">Select Role</option>
-          <option value="manager">Manager</option>
-          <option value="member">Member</option>
-        </select>
-      </div>
+      <ul data-role="listview" data-inset="true">
+        <li data-role="fieldcontain">
+          <label for="emailAddress">Email Address:</label>
+          <input name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>"></input>
+        </li>
+        <li data-role="fieldcontain">
+          <label for="role">Role:</label>
+          <select name="role">
+            <option value="">Select Role</option>
+            <option value="manager">Manager</option>
+            <option value="member">Member</option>
+          </select>
+        </li>
+      </ul>
       <input type="submit" value="Save">
     </script>
 

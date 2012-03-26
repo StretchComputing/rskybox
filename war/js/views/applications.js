@@ -59,6 +59,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     // TODO - implement update application attributes form
+    // This submit function isn't used, yet.
     submit: function (e) {
       var valid;
 

@@ -200,6 +200,7 @@ var RSKYBOX = (function (r, $) {
       r.members = new r.Members();
       r.membersView = new r.MembersView({
         collection: r.members,
+        applications: new r.Applications(),
       });
     },
 
@@ -207,6 +208,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.membersShow');
       r.membersView.setElement($.mobile.activePage);
       r.members.setAppUrl(r.session.params.id);
+      r.getApplications(r.membersView.options.applications);
       r.members.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -219,7 +221,7 @@ var RSKYBOX = (function (r, $) {
       r.member = new r.Member();
       r.memberView = new r.MemberView({
         model: r.member,
-        collection: new r.Applications(),
+        applications: new r.Applications(),
       });
     },
 
@@ -228,7 +230,7 @@ var RSKYBOX = (function (r, $) {
       r.memberView.setElement($.mobile.activePage);
       r.member.set({id: r.session.params.id}, {silent: true});
       r.member.setAppUrl(r.session.params.appId);
-      r.getApplications(r.memberView.collection);
+      r.getApplications(r.memberView.options.applications);
       r.member.fetch({
         statusCode: r.statusCodeHandlers(),
       });

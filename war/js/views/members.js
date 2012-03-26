@@ -41,15 +41,23 @@ var RSKYBOX = (function (r, $) {
     initialize: function () {
       _.bindAll(this, 'addMemberEntry');
       this.collection.bind('reset', this.render, this);
+      this.options.applications.bind('reset', this.render, this);
       this.template = _.template($('#noMembersTemplate').html());
     },
 
     render: function () {
-      var appId, list;
+      var app, list;
 
-      appId = r.session.params.id;
-      this.$el.find('.back').attr('href', '#application?id=' + appId);
-      this.$el.find('.new').attr('href', '#newMember?id=' + appId);
+      if (this.collection.isEmpty() || this.options.applications.isEmpty()) { return this; }
+
+      app = this.options.applications.findById(r.session.params.id);
+
+      this.$el.find('.back').attr('href', '#application?id=' + app.id);
+      if (app.role === 'member') {
+        this.$el.find('.new').attr('href', '#').hide();
+      } else {
+        this.$el.find('.new').attr('href', '#newMember?id=' + app.id).show();
+      }
       this.getContent().empty();
       if (this.collection.length <= 0) {
         this.getContent().html(this.template());
@@ -73,28 +81,28 @@ var RSKYBOX = (function (r, $) {
   r.MemberView = r.JqmPageBaseView.extend({
     events: {
       'click .delete': 'deleteMember',
+      'change .role': 'updateRole',
     },
 
     initialize: function () {
-      r.log.debug('entering', 'MemberView.initialize');
+      _.bindAll(this, 'partialSave', 'success', 'apiError');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
-      this.collection.on('reset', this.render, this);
+      this.options.applications.on('reset', this.render, this);
       this.template = _.template($('#memberTemplate').html());
     },
 
     render: function () {
-      var app, appId = r.session.params.appId, model;
+      var app, model;
 
-      if (this.model.isNew() || this.collection.isEmpty()) { return this; }
+      if (!this.model.get('apiStatus') || this.options.applications.isEmpty()) { return this; }
 
-      app = this.collection.find(function (app) {
-        return app.id === appId;
-      });
+      app = this.options.applications.findById(r.session.params.appId);
 
-      this.$el.find('.back').attr('href', '#members?id=' + appId);
+      this.$el.find('.back').attr('href', '#members?id=' + app.id);
       model = _.extend(this.model.getMock(), {admin: app.get('role')});
       this.getContent().html(this.template(model));
+      this.$el.find('.role').val(this.model.get('role'));
       this.getContent().trigger('create');
       return this;
     },
@@ -114,17 +122,39 @@ var RSKYBOX = (function (r, $) {
       return false;
     },
 
+    updateRole: function (e) {
+      r.log.debug('entering', 'MemberView.updateRole');
+      this.partialSave({
+        role: this.$('select[name=role]').val(),
+      });
+      e.preventDefault();
+      return false;
+    },
+
+    partialSave: function (attrs, force) {
+      this.model.partial.save(this.model, attrs, {
+        success: this.success,
+        statusCode: r.statusCodeHandlers(this.apiError),
+        wait: true,
+      }, force);
+    },
+
+    success: function (model, response) {
+      r.flash.success('Changes were saved');
+    },
 
     error: function (model, response) {
-      r.log.debug('MemberView.error');
+      r.log.debug('entering', 'MemberView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('MemberView.apiError');
+      r.log.debug('entering', 'MemberView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
+      r.log.debug('code:' + code, 'MemberView.apiError');
+      r.dump(this.apiCodes);
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'MemberView.apiError');
       }
@@ -132,10 +162,11 @@ var RSKYBOX = (function (r, $) {
     },
 
     apiCodes: {
-      203: 'You are not authorized for this application.',
-      305: 'Application ID required.',
+      201: 'Invalid status.',
+      212: 'You are not authorized for this action.',
+      213: 'You are not authorized for this action.',
       307: 'Member ID required.',
-      605: 'Application was not found',
+      408: 'Invalid role.',
       606: 'Member was not found',
     }
   });
@@ -151,6 +182,12 @@ var RSKYBOX = (function (r, $) {
 
     events: {
       'submit': 'submit'
+    },
+
+    render: function () {
+      this.$el.html(this.template(this.model.getMock()));
+      this.$el.trigger('create');
+      return this;
     },
 
     submit: function (e) {
@@ -196,14 +233,15 @@ var RSKYBOX = (function (r, $) {
       r.flash.warning(this.apiCodes[code], this.$el);
     },
 
-    render: function () {
-      this.$el.html(this.template(this.model.getMock()));
-      this.$el.trigger('create');
-      return this;
-    },
-
     apiCodes: {
-      306: 'A member name is required.'
+      203: 'You are not authorized for this action.',
+      210: 'You are not authorized for this action.',
+      211: 'You are not authorized for this action.',
+      305: 'Application ID required.',
+      313: 'Email address is required.',
+      314: 'Role is required.',
+      407: 'User is already a member.',
+      605: 'Application was not found.',
     }
   });
 
