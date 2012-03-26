@@ -2,10 +2,10 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  var applications, session;
+  var session;
 
   session = {
-    interval: 15 * 60 * 1000, // Fifteen minutes.
+    interval: 0.5 * 60 * 1000, // Fifteen minutes.
 
     reset: function () {
       r.log.debug('reset', 'session');
@@ -58,16 +58,9 @@ var RSKYBOX = (function (r, $) {
   };
 
 
-  r.getApplicationsRef = function () {
-    applications = applications || new r.Applications();
-    return applications;
-  };
-
-  r.getApplications = function () {
-    var apps, results;
+  r.getApplications = function (apps) {
+    var results;
     r.log.debug('entering', 'RSKYBOX.getApplications');
-
-    apps = r.getApplicationsRef();
 
     if (session.isFetching('applications')) {
       return apps;

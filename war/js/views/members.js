@@ -91,8 +91,6 @@ var RSKYBOX = (function (r, $) {
       app = this.collection.find(function (app) {
         return app.id === appId;
       });
-      r.log.error('why am I here', 'MemberView.render');
-      r.dump(app);
 
       this.$el.find('.back').attr('href', '#members?id=' + appId);
       model = _.extend(this.model.getMock(), {admin: app.get('role')});
