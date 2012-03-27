@@ -14,7 +14,7 @@ var RSKYBOX = (function (r, $) {
     applicationsShow: function () {
       r.log.debug('entering', 'MainController.applicationsShow');
       r.applicationsView.setElement($.mobile.activePage);
-      r.getApplications(r.applicationsView.collection);
+      r.session.getCollection(r.session.keys.applications, r.applicationsView.collection);
       r.log.debug('leaving', 'MainController.applicationsShow');
     },
 
@@ -42,20 +42,18 @@ var RSKYBOX = (function (r, $) {
     // Settings
     settingsInit: function () {
       r.log.debug('entering', 'MainController.settingsInit');
-      r.currentUser = new r.User({});
       r.settingsView = new r.SettingsView({
-        model: r.currentUser,
+        model: new r.User(),
       });
     },
 
     settingsShow: function () {
       r.log.debug('entering', 'MainController.settingsShow');
       r.settingsView.setElement($.mobile.activePage);
-      r.currentUser.set({id: 'current'});
-      r.currentUser.setUrl();
-      r.currentUser.fetch({
-        statusCode: r.statusCodeHandlers(),
-      });
+      r.settingsView.model.clear({silent: true});
+      r.settingsView.model.set({id: 'current'});
+      r.settingsView.model.setUrl();
+      r.session.getModel(r.session.keys.currentUser, r.settingsView.model);
     },
 
 
@@ -208,7 +206,7 @@ var RSKYBOX = (function (r, $) {
       r.log.debug('entering', 'MainController.membersShow');
       r.membersView.setElement($.mobile.activePage);
       r.members.setAppUrl(r.session.params.id);
-      r.getApplications(r.membersView.options.applications);
+      r.session.getCollection(r.session.keys.applications, r.membersView.options.applications);
       r.members.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -230,7 +228,7 @@ var RSKYBOX = (function (r, $) {
       r.memberView.setElement($.mobile.activePage);
       r.member.set({id: r.session.params.id}, {silent: true});
       r.member.setAppUrl(r.session.params.appId);
-      r.getApplications(r.memberView.options.applications);
+      r.session.getCollection(r.session.keys.applications, r.memberView.options.applications);
       r.member.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -301,7 +299,7 @@ var RSKYBOX = (function (r, $) {
     // Session Setup
     setupSession: function (eventType, matchObj, ui, page, evt) {
       r.log.debug('entering', 'MainController.setupSession');
-      r.session = {};
+      r.session = r.session || {};
       r.session.params = r.router.getParams(location.hash);
     },
   };

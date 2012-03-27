@@ -5,7 +5,9 @@ var RSKYBOX = (function (r, $) {
   var session;
 
   session = {
-    interval: 0.5 * 60 * 1000, // Fifteen minutes.
+    // TODO - use 15 minute interval for production
+    // interval: 15 * 60 * 1000, // Fifteen minutes.
+    interval: 0.5 * 60 * 1000, // One-half minute for beta/testing.
 
     reset: function () {
       r.log.debug('reset', 'session');
@@ -58,30 +60,62 @@ var RSKYBOX = (function (r, $) {
   };
 
 
-  r.getApplications = function (apps) {
-    var results;
-    r.log.debug('entering', 'RSKYBOX.getApplications');
+  r.session = r.session || {
+    keys: {
+      currentUser: 'currentUser',
+      applications: 'applications',
+    },
 
-    if (session.isFetching('applications')) {
-      return apps;
-    }
+    getModel: function (key, model) {
+      var cache;
+      r.log.debug('entering', 'RSKYBOX.getModel');
 
-    results = session.getItem('applications');
-    if (!results) {
-      session.setFetching('applications');
-      apps.reset();
-      apps.fetch({
-        success: function (collection) {
-          session.setItem('applications', collection);
-        },
-        statusCode: r.statusCodeHandlers(),
-      });
-    } else {
-      r.log.debug('updating from cache', 'RSKYBOX.getApplications');
-      apps.reset(results);
-    }
+      if (session.isFetching(key)) {
+        return model;
+      }
 
-    return apps;
+      cache = session.getItem(key);
+      if (!cache) {
+        session.setFetching(key);
+        model.fetch({
+          success: function (fetched) {
+            session.setItem(key, fetched);
+          },
+          statusCode: r.statusCodeHandlers(),
+        });
+      } else {
+        r.log.debug('cache hit', 'RSKYBOX.getModel');
+        model.set(cache);
+      }
+
+      return model;
+    },
+
+    getCollection: function (key, collection) {
+      var cache;
+      r.log.debug('entering', 'RSKYBOX.getCollection');
+
+      if (session.isFetching(key)) {
+        return collection;
+      }
+
+      cache = session.getItem(key);
+      if (!cache) {
+        session.setFetching(key);
+        collection.reset();
+        collection.fetch({
+          success: function (fetched) {
+            session.setItem(key, fetched);
+          },
+          statusCode: r.statusCodeHandlers(),
+        });
+      } else {
+        r.log.debug('cache hit', 'RSKYBOX.getCollection');
+        collection.reset(cache);
+      }
+
+      return collection;
+    },
   };
 
 
