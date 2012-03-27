@@ -2,9 +2,9 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  var session;
+  var storage;
 
-  session = {
+  storage = {
     // TODO - use 15 minute interval for production
     // interval: 15 * 60 * 1000, // Fifteen minutes.
     interval: 0.5 * 60 * 1000, // One-half minute for beta/testing.
@@ -66,20 +66,24 @@ var RSKYBOX = (function (r, $) {
       applications: 'applications',
     },
 
+    getEntity: function (key) {
+      return storage.getItem(key);
+    },
+
     getModel: function (key, model) {
       var cache;
       r.log.debug('entering', 'RSKYBOX.getModel');
 
-      if (session.isFetching(key)) {
+      if (storage.isFetching(key)) {
         return model;
       }
 
-      cache = session.getItem(key);
+      cache = storage.getItem(key);
       if (!cache) {
-        session.setFetching(key);
+        storage.setFetching(key);
         model.fetch({
           success: function (fetched) {
-            session.setItem(key, fetched);
+            storage.setItem(key, fetched);
           },
           statusCode: r.statusCodeHandlers(),
         });
@@ -95,17 +99,17 @@ var RSKYBOX = (function (r, $) {
       var cache;
       r.log.debug('entering', 'RSKYBOX.getCollection');
 
-      if (session.isFetching(key)) {
+      if (storage.isFetching(key)) {
         return collection;
       }
 
-      cache = session.getItem(key);
+      cache = storage.getItem(key);
       if (!cache) {
-        session.setFetching(key);
+        storage.setFetching(key);
         collection.reset();
         collection.fetch({
           success: function (fetched) {
-            session.setItem(key, fetched);
+            storage.setItem(key, fetched);
           },
           statusCode: r.statusCodeHandlers(),
         });
@@ -119,7 +123,7 @@ var RSKYBOX = (function (r, $) {
   };
 
 
-  session.reset();
+  storage.reset();
 
 
   return r;

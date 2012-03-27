@@ -93,12 +93,33 @@ var RSKYBOX = (function (r, $) {
 
     // Server functionality for the rest of the class below.
     logToServer: function (level, message, logName) {
-      var attrs = {
-        logName: logName || message,
-        logLevel: level,
-        message: message,
-        userName: Cookie.get('token'),
-      };
+      var
+        attrs = {
+          logName: logName || message,
+          logLevel: level,
+          message: message,
+          userName: Cookie.get('token'),
+        },
+        getUserName,
+        user;
+
+      user = r.session.getEntity(r.session.keys.currentUser);
+      if (user) {
+        getUserName = function () {
+          var name = '';
+
+          if (user.firstName) { name += user.firstName + ' '; }
+          if (user.lastName) { name += user.lastName; }
+          if (name) { name += ', '; }
+          if (user.emailAddress) { name += user.emailAddress; }
+          if (user.phoneNumber) { name += ', ' + user.phoneNumber; }
+
+          if (!name) { name = Cookie.get('token'); }
+
+          return name;
+        };
+        attrs.userName = getUserName();
+      }
 
       this.save(attrs, {
         success: this.success,
