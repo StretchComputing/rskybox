@@ -1,0 +1,50 @@
+rSkybox: watch your app from the best seat in the house
+
+What is rSkybox?
+* rSkybox is a quality assurance/user experience tool for mobile application developers
+* rSkybox is a cloud based mobile service that is used to enhance cloud based mobile services
+* rSkybox is a pay per usage service that runs on any mobile phone
+* rSkybox is philosophy that recognizes application problems cannot be prevent, so instead they need to be dealt with quickly, intelligently and competely!
+
+Problem
+The software industry is constantly advancing.  Today, it is possible to deploy a mobile applications to the cloud and instantly make it 
+available to users around the globe. Sounds cool and it is, but with new technologies come new challenges. Here's the 30,000 ft view:
+* high levels of innovation dictate that applications be released early and often
+* the client side code runs in a variety of smart phones that are widely distributed 
+* server side code is deployed to the cloud, not your own servers
+* applications are built on top of existing web services like analytics, geolocation, facebook, search, etc
+
+Translation --  mobile applications are composed of many interconnected pieces that run in many different places where the pieces are constantly changing. 
+
+Conventional Software Wisdom
+* Use agile development processes that bring a high level of clarity to the application being built and also allow you to adapt to constant changes
+* Build the applications as a series of interations.  The argument is complex entities are never built in a single step but rather evolve in a series of steps over time.
+* Leverage automated testing.  Manual testing is too difficult and time consuming to repeat every time a new version of the application is released.
+
+We believe conventional wisdom falls short.
+
+So are we saying developers should abandon all their best practices?  No, these approaches are still key strategies for building quality software. But these approaches fall short because they are based soley on the premise that in order to deliver a quality experience to the user, quality must be ensured before the application is put into the user's hands. Our contention is this 'quality goes in before the name goes on' approach was never really possible and with advent of mobile and cloud technologies, it is even less so.
+
+Here's why:
+* Agile processes are powerful, but the language, diagrams and scenarios are models that describe the application well, but they can never emulate it perfectly. Clarity achived, yes -- perfect emulation, no.
+* Iterating on the application before releasing it will uncover many unexpected issues, but releasing it just another iteration in a series of iterations. And like all the iterations before it, expect to find problems.
+* Automated tests are a powerful way to run and verify every single line of code, but the context the code runs in during testing may be perfect in some regards but usually lacking in others.
+* Finally, conventional wisdom primarily addresses quality by preventing defects.  Not all problems are defects. The cloud based server hosting your app becomes overloaded and begins to respond slowly or not at all.  The Facebook service you are using was upgrade and they (not you) introduced a bug that is preventing some (not all) of your users from logging in. The new iPhone feature that your app calls doesn't work on older iPhones and your app is crashing every time a user invokes that feature.  There are many permutations and combinations of iPhone software and hardware.  It is difficult and expensive to test your app on all of them.  And on the Android platform, it's an order of magnitude worse.
+
+Confused?  Sorry, that's not the intention.  But we've finally have enough background info to explain where rSkybox fits in.
+
+rSkybox recognizes your application will encounter problems -- in fact, it is inevitable.  Given that, here's what rSkybox strives to do:
+* inform you at the early signs of a problem
+* Help you identify the cause of the problem
+* Know with total confidence that you have fixed the problem correctly and completely
+
+So the rSkybox philosophy is this:
+* develop using best practices with the goal of creating an application with zero defects
+* release your application as frequently as the rate of innovation demands
+* problems will occur so expect them and be prepared when they happen
+* don't rely on your users to inform you when they encounter problems because most won't
+* when a problem occurs, resolve it quickly and completely
+* rest in the confidence that your users are enjoying the experience that you had invisioned
+
+Finally, in a sort of 'fight fire with fire' strategy, rSkybox is built using the same mobile/cloud infrastructure that has resulted in the challenges it 
+was designed to mitigate.
