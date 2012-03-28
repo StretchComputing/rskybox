@@ -51,11 +51,16 @@ var RSKYBOX = (function (r, $) {
       _.bindAll(this, 'apiError');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
+      this.collection.on('reset', this.setModel, this);
       this.template = _.template($('#applicationTemplate').html());
     },
 
     events: {
       'submit': 'submit'
+    },
+
+    setModel: function () {
+      this.model.set(this.collection.findById(r.session.params.appId));
     },
 
     // TODO - implement update application attributes form

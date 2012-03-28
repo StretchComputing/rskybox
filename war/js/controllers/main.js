@@ -22,20 +22,16 @@ var RSKYBOX = (function (r, $) {
     // Application
     applicationInit: function () {
       r.log.debug('entering', 'MainController.applicationInit');
-      r.application = new r.Application({});
       r.applicationView = new r.ApplicationView({
-        model: r.application,
+        model: new r.Application(),
+        collection: new r.Applications(),
       });
     },
 
     applicationShow: function () {
       r.log.debug('entering', 'MainController.applicationShow');
       r.applicationView.setElement($.mobile.activePage);
-      r.application.set({id: r.session.params.appId}, {silent: true});
-      r.application.setUrl();
-      r.application.fetch({
-        statusCode: r.statusCodeHandlers(),
-      });
+      r.session.getCollection(r.session.keys.applications, r.applicationView.collection);
     },
 
 
