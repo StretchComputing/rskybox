@@ -151,7 +151,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      $.mobile.changePage('#application?id=' + model.get('applicationId'));
+      r.session.reset();
+      $.mobile.changePage('#application?appId=' + model.get('applicationId'));
     },
 
     error: function (model, response) {
