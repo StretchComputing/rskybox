@@ -31,7 +31,7 @@ var RSKYBOX = (function (r, $) {
     applicationShow: function () {
       r.log.debug('entering', 'MainController.applicationShow');
       r.applicationView.setElement($.mobile.activePage);
-      r.application.set({id: r.session.params.id}, {silent: true});
+      r.application.set({id: r.session.params.appId}, {silent: true});
       r.application.setUrl();
       r.application.fetch({
         statusCode: r.statusCodeHandlers(),
@@ -90,7 +90,7 @@ var RSKYBOX = (function (r, $) {
     feedbackListShow: function () {
       r.log.debug('entering', 'MainController.feedbackListShow');
       r.feedbackListView.setElement($.mobile.activePage);
-      r.feedbackList.setAppUrl(r.session.params.id);
+      r.feedbackList.setAppUrl(r.session.params.appId);
       r.feedbackList.fetch({data: { status: r.session.params.status }});
       r.feedbackListView.renderArchiveButton('#feedbackList');
     },
@@ -128,7 +128,7 @@ var RSKYBOX = (function (r, $) {
     logsShow: function () {
       r.log.debug('entering', 'MainController.logsShow');
       r.logsView.setElement($.mobile.activePage);
-      r.logs.setAppUrl(r.session.params.id);
+      r.logs.setAppUrl(r.session.params.appId);
       r.logs.fetch({data: { status: r.session.params.status }});
       r.logsView.renderArchiveButton('#logs');
     },
@@ -166,7 +166,7 @@ var RSKYBOX = (function (r, $) {
     crashesShow: function () {
       r.log.debug('entering', 'MainController.crashesShow');
       r.crashesView.setElement($.mobile.activePage);
-      r.crashes.setAppUrl(r.session.params.id);
+      r.crashes.setAppUrl(r.session.params.appId);
       r.crashes.fetch({data: { status: r.session.params.status }});
       r.crashesView.renderArchiveButton('#crashes');
     },
@@ -205,7 +205,7 @@ var RSKYBOX = (function (r, $) {
     membersShow: function () {
       r.log.debug('entering', 'MainController.membersShow');
       r.membersView.setElement($.mobile.activePage);
-      r.members.setAppUrl(r.session.params.id);
+      r.members.setAppUrl(r.session.params.appId);
       r.session.getCollection(r.session.keys.applications, r.membersView.options.applications);
       r.members.fetch({
         statusCode: r.statusCodeHandlers(),
@@ -244,7 +244,7 @@ var RSKYBOX = (function (r, $) {
         delete r.newMemberView;
       }
       r.newMember = new r.Member();
-      r.newMember.setAppUrl(r.session.params.id);
+      r.newMember.setAppUrl(r.session.params.appId);
       r.newMemberView = new r.NewMemberView({
         el: $('#newMemberForm'),
         model: r.newMember,
@@ -269,7 +269,7 @@ var RSKYBOX = (function (r, $) {
     endusersShow: function () {
       r.log.debug('entering', 'MainController.endusersShow');
       r.endusersView.setElement($.mobile.activePage);
-      r.endusers.setAppUrl(r.session.params.id);
+      r.endusers.setAppUrl(r.session.params.appId);
       r.endusers.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -306,37 +306,37 @@ var RSKYBOX = (function (r, $) {
 
 
   r.router = new $.mobile.Router([
-    { '.*':                   { handler: 'setupSession',      events: 'bs'  } },
-    { '#applications':        { handler: 'applicationsInit',  events: 'i'   } },
-    { '#applications':        { handler: 'applicationsShow',  events: 's'   } },
-    { '#application[?]id=.*': { handler: 'applicationInit',   events: 'i'   } },
-    { '#application[?]id=.*': { handler: 'applicationShow',   events: 's'   } },
-    { '#settings':            { handler: 'settingsInit',      events: 'i'   } },
-    { '#settings':            { handler: 'settingsShow',      events: 's'   } },
-    { '#newApp':              { handler: 'newAppBeforeShow',  events: 'bs'  } },
-    { '#newApp':              { handler: 'newAppShow',        events: 's'   } },
-    { '#feedbackList':        { handler: 'feedbackListInit',  events: 'i'   } },
-    { '#feedbackList':        { handler: 'feedbackListShow',  events: 's'   } },
-    { '#feedback[?]id=.*':    { handler: 'feedbackInit',      events: 'i'   } },
-    { '#feedback[?]id=.*':    { handler: 'feedbackShow',      events: 's'   } },
-    { '#logs':                { handler: 'logsInit',          events: 'i'   } },
-    { '#logs':                { handler: 'logsShow',          events: 's'   } },
-    { '#log[?]id=.*':         { handler: 'logInit',           events: 'i'   } },
-    { '#log[?]id=.*':         { handler: 'logShow',           events: 's'   } },
-    { '#crashes':             { handler: 'crashesInit',       events: 'i'   } },
-    { '#crashes':             { handler: 'crashesShow',       events: 's'   } },
-    { '#crash[?]id=.*':       { handler: 'crashInit',         events: 'i'   } },
-    { '#crash[?]id=.*':       { handler: 'crashShow',         events: 's'   } },
-    { '#members':             { handler: 'membersInit',       events: 'i'   } },
-    { '#members':             { handler: 'membersShow',       events: 's'   } },
-    { '#member[?]id=.*':      { handler: 'memberInit',        events: 'i'   } },
-    { '#member[?]id=.*':      { handler: 'memberShow',        events: 's'   } },
-    { '#newMember':           { handler: 'newMemberBeforeShow', events: 'bs' } },
-    { '#newMember':           { handler: 'newMemberShow',     events: 's'   } },
-    { '#endusers':            { handler: 'endusersInit',      events: 'i'   } },
-    { '#endusers':            { handler: 'endusersShow',      events: 's'   } },
-    { '#enduser[?]id=.*':     { handler: 'enduserInit',       events: 'i'   } },
-    { '#enduser[?]id=.*':     { handler: 'enduserShow',       events: 's'   } },
+    { '.*':                       { handler: 'setupSession',        events: 'bs'  } },
+    { '#applications':            { handler: 'applicationsInit',    events: 'i'   } },
+    { '#applications':            { handler: 'applicationsShow',    events: 's'   } },
+    { '#application[?]appId=.*':  { handler: 'applicationInit',     events: 'i'   } },
+    { '#application[?]appId=.*':  { handler: 'applicationShow',     events: 's'   } },
+    { '#settings':                { handler: 'settingsInit',        events: 'i'   } },
+    { '#settings':                { handler: 'settingsShow',        events: 's'   } },
+    { '#newApp':                  { handler: 'newAppBeforeShow',    events: 'bs'  } },
+    { '#newApp':                  { handler: 'newAppShow',          events: 's'   } },
+    { '#feedbackList':            { handler: 'feedbackListInit',    events: 'i'   } },
+    { '#feedbackList':            { handler: 'feedbackListShow',    events: 's'   } },
+    { '#feedback[?]id=.*':        { handler: 'feedbackInit',        events: 'i'   } },
+    { '#feedback[?]id=.*':        { handler: 'feedbackShow',        events: 's'   } },
+    { '#logs':                    { handler: 'logsInit',            events: 'i'   } },
+    { '#logs':                    { handler: 'logsShow',            events: 's'   } },
+    { '#log[?]id=.*':             { handler: 'logInit',             events: 'i'   } },
+    { '#log[?]id=.*':             { handler: 'logShow',             events: 's'   } },
+    { '#crashes':                 { handler: 'crashesInit',         events: 'i'   } },
+    { '#crashes':                 { handler: 'crashesShow',         events: 's'   } },
+    { '#crash[?]id=.*':           { handler: 'crashInit',           events: 'i'   } },
+    { '#crash[?]id=.*':           { handler: 'crashShow',           events: 's'   } },
+    { '#members':                 { handler: 'membersInit',         events: 'i'   } },
+    { '#members':                 { handler: 'membersShow',         events: 's'   } },
+    { '#member[?]id=.*':          { handler: 'memberInit',          events: 'i'   } },
+    { '#member[?]id=.*':          { handler: 'memberShow',          events: 's'   } },
+    { '#newMember':               { handler: 'newMemberBeforeShow', events: 'bs'  } },
+    { '#newMember':               { handler: 'newMemberShow',       events: 's'   } },
+    { '#endusers':                { handler: 'endusersInit',        events: 'i'   } },
+    { '#endusers':                { handler: 'endusersShow',        events: 's'   } },
+    { '#enduser[?]id=.*':         { handler: 'enduserInit',         events: 'i'   } },
+    { '#enduser[?]id=.*':         { handler: 'enduserShow',         events: 's'   } },
   ], r.controller);
 
 

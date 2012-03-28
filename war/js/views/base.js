@@ -16,11 +16,11 @@ var RSKYBOX = (function (r, $) {
     renderArchiveButton: function (pageLink) {
       var
         el,
-        hrefTemplate = _.template('<%= pageLink %>?id=<%= id %>&status=<%= status %>'),
+        hrefTemplate = _.template('<%= pageLink %>?appId=<%= appId %>&status=<%= status %>'),
         model = {},
         params = r.session.params;
 
-      model.id = params.id;
+      model.appId = params.appId;
       model.pageLink = pageLink;
       if (params.status === 'archived') {
         model.status = 'new';

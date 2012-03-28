@@ -50,13 +50,13 @@ var RSKYBOX = (function (r, $) {
 
       if (this.collection.isEmpty() || this.options.applications.isEmpty()) { return this; }
 
-      app = this.options.applications.findById(r.session.params.id);
+      app = this.options.applications.findById(r.session.params.appId);
 
-      this.$el.find('.back').attr('href', '#application?id=' + app.id);
+      this.$el.find('.back').attr('href', '#application?appId=' + app.id);
       if (app.role === 'member') {
         this.$el.find('.new').attr('href', '#').hide();
       } else {
-        this.$el.find('.new').attr('href', '#newMember?id=' + app.id).show();
+        this.$el.find('.new').attr('href', '#newMember?appId=' + app.id).show();
       }
       this.getContent().empty();
       if (this.collection.length <= 0) {
