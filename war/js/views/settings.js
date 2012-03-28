@@ -160,6 +160,7 @@ var RSKYBOX = (function (r, $) {
 
     success: function (model, response) {
       r.flash.success('Changes were saved');
+      r.session.reset();
     },
 
     error: function (model, response) {

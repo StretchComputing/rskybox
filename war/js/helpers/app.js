@@ -10,7 +10,7 @@ var RSKYBOX = (function (r, $) {
     interval: 0.5 * 60 * 1000, // One-half minute for beta/testing.
 
     reset: function () {
-      r.log.debug('reset', 'session');
+      r.log.debug('reset', 'storage');
       this.clear();
       sessionStorage.setItem('expires', JSON.stringify(new Date(Date.now() + this.interval)));
     },
@@ -23,7 +23,7 @@ var RSKYBOX = (function (r, $) {
       var expires = Date.parse(JSON.parse(sessionStorage.getItem('expires')));
 
       if (Date.now() > expires) {
-        r.log.debug('session is stale', 'session.isStale');
+        r.log.debug('session is stale', 'storage.isStale');
         this.reset();
         return true;
       }
@@ -31,7 +31,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     setFetching: function (item) {
-      r.log.debug(item, 'session.setFetching');
+      r.log.debug(item, 'storage.setFetching');
       sessionStorage.setItem(item, 'fetching');
     },
 
@@ -40,7 +40,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     setItem: function (item, value) {
-      r.log.debug('entering', 'session.setItem');
+      r.log.debug('entering', 'storage.setItem');
       this.isStale();
       sessionStorage.setItem(item, JSON.stringify(value));
     },
@@ -48,7 +48,7 @@ var RSKYBOX = (function (r, $) {
     getItem: function (item) {
       var results;
 
-      r.log.debug('entering', 'session.getItem');
+      r.log.debug('entering', 'storage.getItem');
       if (this.isStale()) { return false; }
 
       results = JSON.parse(sessionStorage.getItem(item));
@@ -120,10 +120,14 @@ var RSKYBOX = (function (r, $) {
 
       return collection;
     },
+
+    reset: function () {
+      storage.reset();
+    },
   };
 
 
-  storage.reset();
+  r.session.reset();
 
 
   return r;
