@@ -292,10 +292,6 @@ public class AppMembersResource extends ServerResource {
         				if(role.equalsIgnoreCase(AppMember.OWNER_ROLE) || originalRole.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
             				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
         				}
-        				if(!currentUserMember.hasOwnerAuthority()   &&
-        					(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) || originalRole.equalsIgnoreCase(AppMember.MANAGER_ROLE)) ) {
-            				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_UPDATE_MEMBER_WITH_SPECIFIED_ROLE);
-        				}
               		}
         		} else {
             		if(role.equalsIgnoreCase(AppMember.OWNER_ROLE)) {
