@@ -24,7 +24,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     logout: function (e) {
-      r.log.debug('entering', 'SettingsView.logout');
+      r.log.info('entering', 'SettingsView.logout');
       r.logOut();
 
       e.preventDefault();
@@ -32,7 +32,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     saveFirstName: function (e) {
-      r.log.debug('entering', 'SettingsView.saveFirstName');
+      r.log.info('entering', 'SettingsView.saveFirstName');
       this.partialSave({
         firstName: this.$('input[name=firstName]').val()
       });
@@ -41,7 +41,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     saveLastName: function (e) {
-      r.log.debug('entering', 'SettingsView.saveLastName');
+      r.log.info('entering', 'SettingsView.saveLastName');
       this.partialSave({
         lastName: this.$('input[name=lastName]').val()
       });
@@ -50,7 +50,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     sendEmailNotifications: function (e) {
-      r.log.debug('entering', 'SettingsView.sendEmailNotifications');
+      r.log.info('entering', 'SettingsView.sendEmailNotifications');
       this.partialSave({
         sendEmailNotifications: this.$('input[name=sendEmailNotifications]')[0].checked,
       });
@@ -59,7 +59,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     sendSmsNotifications: function (e) {
-      r.log.debug('entering', 'SettingsView.sendSmsNotifications');
+      r.log.info('entering', 'SettingsView.sendSmsNotifications');
       this.partialSave({
         sendSmsNotifications: this.$('input[name=sendSmsNotifications]')[0].checked,
       });
@@ -164,13 +164,13 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('entering', 'SettingsView.error');
+      r.log.info(response, 'SettingsView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('entering', 'SettingsView.apiError');
+      r.log.info(jqXHR.responseText, 'SettingsView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
 
       if (!this.apiCodes[code]) {
@@ -180,7 +180,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      r.log.debug('entering', 'SettingsView.render');
+      r.log.info('entering', 'SettingsView.render');
       var content = this.template(this.model.getMock());
 
       this.getContent().html(content);
@@ -191,7 +191,7 @@ var RSKYBOX = (function (r, $) {
           collection: new r.Carriers()
         });
         this.carriersView.value = this.model.get('mobileCarrierId');
-        this.carriersView.collection.fetch();
+        r.session.getCollection(r.session.keys.mobileCarriers, this.carriersView.collection);
       } else {
         this.carriersView.setElement($('#mobileCarrierId'));
         this.carriersView.value = this.model.get('mobileCarrierId');

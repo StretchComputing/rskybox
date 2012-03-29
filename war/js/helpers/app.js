@@ -10,7 +10,7 @@ var RSKYBOX = (function (r, $) {
     interval: 0.5 * 60 * 1000, // One-half minute for beta/testing.
 
     reset: function () {
-      r.log.debug('reset', 'storage');
+      r.log.info('entering', 'storage.reset');
       this.clear();
       sessionStorage.setItem('expires', JSON.stringify(new Date(Date.now() + this.interval)));
     },
@@ -23,7 +23,7 @@ var RSKYBOX = (function (r, $) {
       var expires = Date.parse(JSON.parse(sessionStorage.getItem('expires')));
 
       if (Date.now() > expires) {
-        r.log.debug('session is stale', 'storage.isStale');
+        r.log.info('session is stale', 'storage.isStale');
         this.reset();
         return true;
       }
@@ -31,7 +31,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     setFetching: function (item) {
-      r.log.debug(item, 'storage.setFetching');
+      r.log.info(item, 'storage.setFetching');
       sessionStorage.setItem(item, 'fetching');
     },
 
@@ -40,7 +40,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     setItem: function (item, value) {
-      r.log.debug('entering', 'storage.setItem');
+      r.log.info(item, 'storage.setItem.entering');
       this.isStale();
       sessionStorage.setItem(item, JSON.stringify(value));
     },
@@ -48,7 +48,7 @@ var RSKYBOX = (function (r, $) {
     getItem: function (item) {
       var results;
 
-      r.log.debug('entering', 'storage.getItem');
+      r.log.info(item, 'storage.getItem.entering');
       if (this.isStale()) { return false; }
 
       results = JSON.parse(sessionStorage.getItem(item));
@@ -62,8 +62,9 @@ var RSKYBOX = (function (r, $) {
 
   r.session = r.session || {
     keys: {
-      currentUser: 'currentUser',
       applications: 'applications',
+      currentUser: 'currentUser',
+      mobileCarriers: 'mobileCarriers',
     },
 
     getEntity: function (key) {
@@ -72,7 +73,7 @@ var RSKYBOX = (function (r, $) {
 
     getModel: function (key, model) {
       var cache;
-      r.log.debug('entering', 'RSKYBOX.getModel');
+      r.log.info(key, 'RSKYBOX.getModel.entering');
 
       if (storage.isFetching(key)) {
         return model;
@@ -88,7 +89,7 @@ var RSKYBOX = (function (r, $) {
           statusCode: r.statusCodeHandlers(),
         });
       } else {
-        r.log.debug('cache hit', 'RSKYBOX.getModel');
+        r.log.info(key, 'RSKYBOX.getModel.cacheHit');
         model.set(cache);
       }
 
@@ -97,7 +98,7 @@ var RSKYBOX = (function (r, $) {
 
     getCollection: function (key, collection) {
       var cache;
-      r.log.debug('entering', 'RSKYBOX.getCollection');
+      r.log.info(key, 'RSKYBOX.getCollection.entering');
 
       if (storage.isFetching(key)) {
         return collection;
@@ -114,7 +115,7 @@ var RSKYBOX = (function (r, $) {
           statusCode: r.statusCodeHandlers(),
         });
       } else {
-        r.log.debug('cache hit', 'RSKYBOX.getCollection');
+        r.log.info(key, 'RSKYBOX.getCollection.cacheHit');
         collection.reset(cache);
       }
 
