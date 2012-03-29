@@ -99,7 +99,7 @@ var RSKYBOX = (function (r, $) {
 
       app = this.options.applications.findById(r.session.params.appId);
 
-      this.$el.find('.back').attr('href', '#members?id=' + app.id);
+      this.$el.find('.back').attr('href', '#members?appId=' + app.id);
       model = _.extend(this.model.getMock(), {admin: app.get('role')});
       this.getContent().html(this.template(model));
       this.$el.find('.role').val(this.model.get('role'));
