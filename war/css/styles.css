@@ -28,3 +28,10 @@
   background: #FFA9AB;
   border: #6E2123 2px solid;
 }
+
+.applicationName {
+  color: white;
+  background-color: #4882B5;
+  text-align: center;
+  padding: .5em;
+}

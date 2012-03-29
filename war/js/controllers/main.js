@@ -5,23 +5,22 @@ var RSKYBOX = (function (r, $) {
   r.controller = {
     // Applications
     applicationsInit: function () {
-      r.log.debug('entering', 'MainController.applicationsInit');
+      r.log.info('entering', 'MainController.applicationsInit');
       r.applicationsView = new r.ApplicationsView({
         collection: new r.Applications(),
       });
     },
 
     applicationsShow: function () {
-      r.log.debug('entering', 'MainController.applicationsShow');
+      r.log.info('entering', 'MainController.applicationsShow');
       r.applicationsView.setElement($.mobile.activePage);
       r.session.getCollection(r.session.keys.applications, r.applicationsView.collection);
-      r.log.debug('leaving', 'MainController.applicationsShow');
     },
 
 
     // Application
     applicationInit: function () {
-      r.log.debug('entering', 'MainController.applicationInit');
+      r.log.info('entering', 'MainController.applicationInit');
       r.applicationView = new r.ApplicationView({
         model: new r.Application(),
         collection: new r.Applications(),
@@ -29,7 +28,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     applicationShow: function () {
-      r.log.debug('entering', 'MainController.applicationShow');
+      r.log.info('entering', 'MainController.applicationShow');
       r.applicationView.setElement($.mobile.activePage);
       r.session.getCollection(r.session.keys.applications, r.applicationView.collection);
     },
@@ -37,14 +36,14 @@ var RSKYBOX = (function (r, $) {
 
     // Settings
     settingsInit: function () {
-      r.log.debug('entering', 'MainController.settingsInit');
+      r.log.info('entering', 'MainController.settingsInit');
       r.settingsView = new r.SettingsView({
         model: new r.User(),
       });
     },
 
     settingsShow: function () {
-      r.log.debug('entering', 'MainController.settingsShow');
+      r.log.info('entering', 'MainController.settingsShow');
       r.settingsView.setElement($.mobile.activePage);
       r.settingsView.model.clear({silent: true});
       r.settingsView.model.set({id: 'current'});
@@ -55,7 +54,7 @@ var RSKYBOX = (function (r, $) {
 
     // New App
     newAppBeforeShow: function () {
-      r.log.debug('entering', 'MainController.newBeforeShow');
+      r.log.info('entering', 'MainController.newBeforeShow');
       if (r.newApp) { delete r.newApp; }
       if (r.newAppView) {
         r.newAppView.undelegateEvents();
@@ -69,24 +68,26 @@ var RSKYBOX = (function (r, $) {
     },
 
     newAppShow: function () {
-      r.log.debug('entering', 'MainController.newAppShow');
+      r.log.info('entering', 'MainController.newAppShow');
       r.newAppView.render();
     },
 
 
     // Feedback List
     feedbackListInit: function () {
-      r.log.debug('entering', 'MainController.feedbackListInit');
+      r.log.info('entering', 'MainController.feedbackListInit');
       r.feedbackList = new r.FeedbackList();
       r.feedbackListView = new r.FeedbackListView({
         collection: r.feedbackList,
+        applications: new r.Applications(),
       });
     },
 
     feedbackListShow: function () {
-      r.log.debug('entering', 'MainController.feedbackListShow');
+      r.log.info('entering', 'MainController.feedbackListShow');
       r.feedbackListView.setElement($.mobile.activePage);
       r.feedbackList.setAppUrl(r.session.params.appId);
+      r.session.getCollection(r.session.keys.applications, r.feedbackListView.options.applications);
       r.feedbackList.fetch({data: { status: r.session.params.status }});
       r.feedbackListView.renderArchiveButton('#feedbackList');
     },
@@ -94,18 +95,20 @@ var RSKYBOX = (function (r, $) {
 
     // Feedback
     feedbackInit: function () {
-      r.log.debug('entering', 'MainController.feedbackInit');
+      r.log.info('entering', 'MainController.feedbackInit');
       r.feedback = new r.Feedback({});
       r.feedbackView = new r.FeedbackView({
         model: r.feedback,
+        applications: new r.Applications(),
       });
     },
 
     feedbackShow: function () {
-      r.log.debug('entering', 'MainController.feedbackShow');
+      r.log.info('entering', 'MainController.feedbackShow');
       r.feedbackView.setElement($.mobile.activePage);
       r.feedback.set({id: r.session.params.id}, {silent: true});
       r.feedback.setAppUrl(r.session.params.appId);
+      r.session.getCollection(r.session.keys.applications, r.feedbackView.options.applications);
       r.feedback.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -114,17 +117,19 @@ var RSKYBOX = (function (r, $) {
 
     // Logs
     logsInit: function () {
-      r.log.debug('entering', 'MainController.logsInit');
+      r.log.info('entering', 'MainController.logsInit');
       r.logs = new r.Logs();
       r.logsView = new r.LogsView({
         collection: r.logs,
+        applications: new r.Applications(),
       });
     },
 
     logsShow: function () {
-      r.log.debug('entering', 'MainController.logsShow');
+      r.log.info('entering', 'MainController.logsShow');
       r.logsView.setElement($.mobile.activePage);
       r.logs.setAppUrl(r.session.params.appId);
+      r.session.getCollection(r.session.keys.applications, r.logsView.options.applications);
       r.logs.fetch({data: { status: r.session.params.status }});
       r.logsView.renderArchiveButton('#logs');
     },
@@ -132,18 +137,20 @@ var RSKYBOX = (function (r, $) {
 
     // Log
     logInit: function () {
-      r.log.debug('entering', 'MainController.logInit');
+      r.log.info('entering', 'MainController.logInit');
       r.logCurrent = new r.Log({});
       r.logView = new r.LogView({
         model: r.logCurrent,
+        applications: new r.Applications(),
       });
     },
 
     logShow: function () {
-      r.log.debug('entering', 'MainController.logShow');
+      r.log.info('entering', 'MainController.logShow');
       r.logView.setElement($.mobile.activePage);
       r.logCurrent.set({id: r.session.params.id}, {silent: true});
       r.logCurrent.setAppUrl(r.session.params.appId);
+      r.session.getCollection(r.session.keys.applications, r.logView.options.applications);
       r.logCurrent.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -152,36 +159,40 @@ var RSKYBOX = (function (r, $) {
 
     // Crashes
     crashesInit: function () {
-      r.log.debug('entering', 'MainController.crashesInit');
+      r.log.info('entering', 'MainController.crashesInit');
       r.crashes = new r.Crashes();
       r.crashesView = new r.CrashesView({
         collection: r.crashes,
+        applications: new r.Applications(),
       });
     },
 
     crashesShow: function () {
-      r.log.debug('entering', 'MainController.crashesShow');
+      r.log.info('entering', 'MainController.crashesShow');
       r.crashesView.setElement($.mobile.activePage);
       r.crashes.setAppUrl(r.session.params.appId);
       r.crashes.fetch({data: { status: r.session.params.status }});
+      r.session.getCollection(r.session.keys.applications, r.crashesView.options.applications);
       r.crashesView.renderArchiveButton('#crashes');
     },
 
 
     // Crash
     crashInit: function () {
-      r.log.debug('entering', 'MainController.crashInit');
+      r.log.info('entering', 'MainController.crashInit');
       r.crash = new r.Crash({});
       r.crashView = new r.CrashView({
         model: r.crash,
+        applications: new r.Applications(),
       });
     },
 
     crashShow: function () {
-      r.log.debug('entering', 'MainController.crashShow');
+      r.log.info('entering', 'MainController.crashShow');
       r.crashView.setElement($.mobile.activePage);
       r.crash.set({id: r.session.params.id}, {silent: true});
       r.crash.setAppUrl(r.session.params.appId);
+      r.session.getCollection(r.session.keys.applications, r.crashView.options.applications);
       r.crash.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -190,7 +201,7 @@ var RSKYBOX = (function (r, $) {
 
     // Members
     membersInit: function () {
-      r.log.debug('entering', 'MainController.membersInit');
+      r.log.info('entering', 'MainController.membersInit');
       r.members = new r.Members();
       r.membersView = new r.MembersView({
         collection: r.members,
@@ -199,7 +210,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     membersShow: function () {
-      r.log.debug('entering', 'MainController.membersShow');
+      r.log.info('entering', 'MainController.membersShow');
       r.membersView.setElement($.mobile.activePage);
       r.members.setAppUrl(r.session.params.appId);
       r.session.getCollection(r.session.keys.applications, r.membersView.options.applications);
@@ -211,7 +222,7 @@ var RSKYBOX = (function (r, $) {
 
     // Member
     memberInit: function () {
-      r.log.debug('entering', 'MainController.memberInit');
+      r.log.info('entering', 'MainController.memberInit');
       r.member = new r.Member();
       r.memberView = new r.MemberView({
         model: r.member,
@@ -220,7 +231,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     memberShow: function () {
-      r.log.debug('entering', 'MainController.memberShow');
+      r.log.info('entering', 'MainController.memberShow');
       r.memberView.setElement($.mobile.activePage);
       r.member.set({id: r.session.params.id}, {silent: true});
       r.member.setAppUrl(r.session.params.appId);
@@ -233,7 +244,7 @@ var RSKYBOX = (function (r, $) {
 
     // New Member
     newMemberBeforeShow: function () {
-      r.log.debug('entering', 'MainController.newMemberBeforeShow');
+      r.log.info('entering', 'MainController.newMemberBeforeShow');
       if (r.newMember) { delete r.newMember; }
       if (r.newMemberView) {
         r.newMemberView.undelegateEvents();
@@ -242,30 +253,34 @@ var RSKYBOX = (function (r, $) {
       r.newMember = new r.Member();
       r.newMember.setAppUrl(r.session.params.appId);
       r.newMemberView = new r.NewMemberView({
-        el: $('#newMemberForm'),
+        el: $.mobile.activePage,
         model: r.newMember,
+        applications: new r.Applications(),
       });
     },
 
     newMemberShow: function () {
-      r.log.debug('entering', 'MainController.newMemberShow');
+      r.log.info('entering', 'MainController.newMemberShow');
+      r.session.getCollection(r.session.keys.applications, r.newMemberView.options.applications);
       r.newMemberView.render();
     },
 
 
     // Endusers
     endusersInit: function () {
-      r.log.debug('entering', 'MainController.endusersInit');
+      r.log.info('entering', 'MainController.endusersInit');
       r.endusers = new r.Endusers();
       r.endusersView = new r.EndusersView({
         collection: r.endusers,
+        applications: new r.Applications(),
       });
     },
 
     endusersShow: function () {
-      r.log.debug('entering', 'MainController.endusersShow');
+      r.log.info('entering', 'MainController.endusersShow');
       r.endusersView.setElement($.mobile.activePage);
       r.endusers.setAppUrl(r.session.params.appId);
+      r.session.getCollection(r.session.keys.applications, r.endusersView.options.applications);
       r.endusers.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -274,18 +289,20 @@ var RSKYBOX = (function (r, $) {
 
     // Enduser
     enduserInit: function () {
-      r.log.debug('entering', 'MainController.enduserInit');
+      r.log.info('entering', 'MainController.enduserInit');
       r.enduser = new r.Enduser({});
       r.enduserView = new r.EnduserView({
         model: r.enduser,
+        applications: new r.Applications(),
       });
     },
 
     enduserShow: function () {
-      r.log.debug('entering', 'MainController.enduserShow');
+      r.log.info('entering', 'MainController.enduserShow');
       r.enduserView.setElement($.mobile.activePage);
       r.enduser.set({id: r.session.params.id}, {silent: true});
       r.enduser.setAppUrl(r.session.params.appId);
+      r.session.getCollection(r.session.keys.applications, r.enduserView.options.applications);
       r.enduser.fetch({
         statusCode: r.statusCodeHandlers(),
       });
@@ -294,7 +311,7 @@ var RSKYBOX = (function (r, $) {
 
     // Session Setup
     setupSession: function (eventType, matchObj, ui, page, evt) {
-      r.log.debug('entering', 'MainController.setupSession');
+      r.log.info('entering', 'MainController.setupSession');
       r.session = r.session || {};
       r.session.params = r.router.getParams(location.hash);
     },

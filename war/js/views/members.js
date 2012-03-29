@@ -123,7 +123,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     updateRole: function (e) {
-      r.log.debug('entering', 'MemberView.updateRole');
+      r.log.info('entering', 'MemberView.updateRole');
       this.partialSave({
         role: this.$('select[name=role]').val(),
       });
@@ -144,16 +144,15 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('entering', 'MemberView.error');
+      r.log.info(response, 'MemberView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('entering', 'MemberView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
+      r.log.info(code, 'MemberView.apiError');
 
-      r.log.debug('code:' + code, 'MemberView.apiError');
       r.dump(this.apiCodes);
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'MemberView.apiError');
@@ -172,7 +171,7 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-  r.NewMemberView = Backbone.View.extend({
+  r.NewMemberView = r.JqmPageBaseView.extend({
     initialize: function () {
       _.bindAll(this, 'apiError');
       this.model.on('change', this.render, this);
@@ -185,14 +184,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.getMock()));
+      this.getContent().html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;
     },
 
     submit: function (e) {
       var valid;
-      r.log.debug('NewMemberView.submit');
+      r.log.info('entering', 'NewMemberView.submit');
 
       valid = this.model.set({
         emailAddress: this.$("input[name='emailAddress']").val(),
@@ -218,14 +217,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('NewMemberView.error');
+      r.log.info(response, 'NewMemberView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
       var code = r.getApiStatus(jqXHR.responseText);
-      r.log.debug('NewMemberView.apiError');
+      r.log.info(code, 'NewMemberView.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'NewMemberView.apiError');

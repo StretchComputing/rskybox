@@ -3,6 +3,14 @@ var RSKYBOX = (function (r, $) {
 
 
   r.JqmPageBaseView = Backbone.View.extend({
+    constructor: function () {
+      r.log.info('entering', 'JqmPageBaseView.constructor');
+      Backbone.View.prototype.constructor.apply(this, arguments);
+      if (this.options && this.options.applications) {
+        this.options.applications.bind('reset', this.updateApplicationName, this);
+      }
+    },
+
     getHeader: function () {
       return this.$el.find(':jqmData(role=header)');
     },
@@ -11,6 +19,16 @@ var RSKYBOX = (function (r, $) {
     },
     getFooter: function () {
       return this.$el.find(':jqmData(role=footer)');
+    },
+
+    updateApplicationName: function () {
+      var app;
+      r.log.info('entering', 'JqmPageBaseView.updateApplicationName');
+
+      if (this.options.applications.isEmpty()) { return; }
+
+      app = this.options.applications.findById(r.session.params.appId);
+      this.$el.find('.applicationName').html(app.get('name'));
     },
 
     renderArchiveButton: function (pageLink) {
