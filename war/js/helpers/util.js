@@ -9,15 +9,15 @@ var RSKYBOX = (function (r, $) {
   r.statusCodeHandlers = function (apiError) {
     var general = {
       401: function (jqXHR) {
-        r.log.debug('401 - unauthorized');
+        r.log.info('401 - unauthorized');
         r.logOut();
         // TODO - Add flash message to home page after 401 occurs
       },
       404: function () {
-        r.log.debug('404 - not found');
+        r.log.error('404 - not found');
       },
       500: function () {
-        r.log.debug('500 - server error');
+        r.log.error('500 - server error');
       }
     };
     if (apiError) {
@@ -210,7 +210,7 @@ var RSKYBOX = (function (r, $) {
     newPage = pages[area].base + pages[area][page];
     if (params) { newPage += r.buildQueryString(params); }
 
-    r.log.debug(newPage, 'RSKYBOX.changePage');
+    r.log.info(newPage, 'RSKYBOX.changePage');
     window.location = newPage;
   };
 
