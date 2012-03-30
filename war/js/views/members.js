@@ -229,7 +229,7 @@ var RSKYBOX = (function (r, $) {
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'NewMemberView.apiError');
       }
-      r.flash.warning(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     apiCodes: {

@@ -3,6 +3,9 @@
   font-weight: bold;
   padding: .5em;
   margin: 0 0 15px 0;
+  position: fixed;
+  width: 100%;
+  z-index: 9002;
 }
 
 .success {

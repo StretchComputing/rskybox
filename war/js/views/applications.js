@@ -68,7 +68,7 @@ var RSKYBOX = (function (r, $) {
     submit: function (e) {
       var valid;
 
-      r.log.debug('ApplicationView.submit');
+      r.log.info('entering', 'ApplicationView.submit');
 
       valid = this.model.set({
         name: this.$("input[name='name']").val(),
@@ -93,14 +93,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('ApplicationView.error');
+      r.log.info(response, 'ApplicationView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('ApplicationView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
+      r.log.info(code, 'ApplicationView.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'ApplicationView.apiError');
@@ -135,7 +135,7 @@ var RSKYBOX = (function (r, $) {
 
     submit: function (e) {
       var valid;
-      r.log.debug('NewApplicationView.submit');
+      r.log.info('entering', 'NewApplicationView.submit');
 
       valid = this.model.set({
         name: this.$("input[name='name']").val(),
@@ -161,23 +161,23 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('NewApplicationView.error');
+      r.log.info(response, 'NewApplicationView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
       var code = r.getApiStatus(jqXHR.responseText);
-      r.log.debug('NewApplicationView.apiError');
+      r.log.info(code, 'NewApplicationView.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'NewApplicationView.apiError');
       }
-      r.flash.warning(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
-      r.log.debug('entering', 'NewApplicationView.render');
+      r.log.info('entering', 'NewApplicationView.render');
       this.$el.html(this.template(this.model.getMock()));
       this.$el.trigger('create');
       return this;

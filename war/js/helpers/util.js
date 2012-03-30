@@ -228,38 +228,36 @@ var RSKYBOX = (function (r, $) {
 
     // type: string indicating type of message; 'error', 'notice', etc.
     // message: message to display
-    // el: the container to display the message within, or undefined to display in main content area
-    display = function (type, message, el) {
-      var flash, selector;
+    // duration: time in seconds to leave flash on screen
+    display = function (type, message, duration) {
+      var flash;
 
-      selector = '.flash.' + type;
-      el = el || r.getContentDiv();
-
-      el.find(selector).remove();
+      $('.flash').remove();
 
       flash = $('<div>', {
         class: 'flash ' + type,
         text: message
-      });
+      }).hide();
 
-      $(el).prepend(flash);
+      $.mobile.activePage.prepend(flash);
+      flash.fadeIn().delay(duration * 1000).fadeOut();
     };
 
-    flash.info = function (message, el) {
-      display('info', message, el);
+    flash.success = function (message, duration) {
+      display('success', message, duration || 3);
     };
 
-    flash.success = function (message, el) {
-      display('success', message, el);
+    flash.info = function (message, duration) {
+      display('info', message, duration || 5);
     };
 
-    flash.warning = function (message, el) {
-      display('warning', message, el);
+    flash.warning = function (message, duration) {
+      display('warning', message, duration || 7);
     };
 
-    flash.error = function (message, el) {
+    flash.error = function (message, duration) {
       message = message || 'An unknown error occurred. Please reload the page to try again.';
-      display('error', message, el);
+      display('error', message, duration || 10);
     };
 
     return flash;

@@ -39,25 +39,25 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.debug('entering', 'Login.success');
+      r.log.info('entering', 'Login.success');
       r.logIn(model.token);
     },
 
     error: function (model, response) {
-      r.log.debug('entering', 'LoginView.error');
+      r.log.info(response, 'LoginView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.warning(response, this.$el);    // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('entering', 'LoginView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
+      r.log.info(code, 'LoginView.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'LoginView.apiError');
       }
       this.model.clear({silent: true});
-      r.flash.warning(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {

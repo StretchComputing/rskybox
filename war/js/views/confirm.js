@@ -15,7 +15,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     submit: function (e) {
-      r.log.debug('entering', 'ConfirmNewUserView.submit');
+      r.log.info('entering', 'ConfirmNewUserView.submit');
       var valid;
 
       valid = this.model.set({
@@ -39,28 +39,28 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.debug('entering', 'ConfirmNewUserView.success');
+      r.log.info('entering', 'ConfirmNewUserView.success');
       r.logIn(model.get('token'));
       // TODO - make sure we go to settings after confirmation
       //r.changePage('settings');
     },
 
     error: function (model, response) {
-      r.log.debug('entering', 'ConfirmNewUserView.error');
+      r.log.info(response, 'ConfirmNewUserView.error');
       if (response.responseText) { return; }  // This is an apiError.
-      r.flash.warning(response, this.$el);    // This is a validation error.
+      r.flash.warning(response);    // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('entering', 'ConfirmNewUserView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
+      r.log.info(code, 'ConfirmNewUserView.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'ConfirmNewUserView.apiError');
         this.apiCodes[code] = 'An unknown error occurred. Please try again.';
       }
       this.model.clear({silent: true});
-      r.flash.warning(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
@@ -114,7 +114,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     submit: function (e) {
-      r.log.debug('entering', 'ConfirmExistingUserView.submit');
+      r.log.info('entering', 'ConfirmExistingUserView.submit');
       var valid;
 
       valid = this.model.set({
@@ -137,25 +137,25 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.debug('entering', 'ConfirmExistingUserView.success');
+      r.log.info('entering', 'ConfirmExistingUserView.success');
       r.changePage('applications');
     },
 
     error: function (model, response) {
-      r.log.debug('entering', 'ConfirmExistingUserView.error');
+      r.log.info(response, 'ConfirmExistingUserView.error');
       if (response.responseText) { return; }  // This is an apiError.
-      r.flash.warning(response, this.$el);    // This is a validation error.
+      r.flash.warning(response);    // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('entering', 'ConfirmExistingUserView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
+      r.log.info(code, 'ConfirmExistingUserView.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'ConfirmExistingUserView.apiError');
       }
       this.model.clear({silent: true});
-      r.flash.warning(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
@@ -194,7 +194,6 @@ var RSKYBOX = (function (r, $) {
   r.ConfirmMemberView = Backbone.View.extend({
     initialize: function () {
       _.bindAll(this, 'apiError', 'success');
-      //this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
       this.template = _.template($('#confirmMemberTemplate').html());
     },
@@ -204,7 +203,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     submit: function (e) {
-      r.log.debug('entering', 'ConfirmMemberView.submit');
+      r.log.info('entering', 'ConfirmMemberView.submit');
       this.model.save(null, {
         success: this.success,
         statusCode: r.statusCodeHandlers(this.apiError),
@@ -215,11 +214,11 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.debug('entering', 'ConfirmMemberView.success');
+      r.log.info('entering', 'ConfirmMemberView.success');
       var params;
 
       if (+model.get('apiStatus') === 215) {
-        r.log.debug('Member is not a registered user.', 'ConfirmMemberView.success');
+        r.log.info('Member is not a registered user.', 'ConfirmMemberView.success');
         params = r.session.params;
         delete params.memberConfirmation;
         delete params.applicationId;
@@ -230,12 +229,12 @@ var RSKYBOX = (function (r, $) {
         return;
       }
 
-      r.log.debug('membership confirmed', 'ConfirmMemberView.success');
+      r.log.info('membership confirmed', 'ConfirmMemberView.success');
       this.proceed();
     },
 
     error: function (model, response) {
-      r.log.debug('entering', 'ConfirmMemberView.error');
+      r.log.info(response, 'ConfirmMemberView.error');
       if (response.responseText) { return; }  // This is an apiError.
 
       // Shouldn't see errors except for apiStatus returns handled above.
@@ -258,11 +257,11 @@ var RSKYBOX = (function (r, $) {
         break;
       }
       this.model.clear({silent: true});
-      r.flash.warning(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
-      r.log.debug('entering', 'ConfirmMemberView.render');
+      r.log.info('entering', 'ConfirmMemberView.render');
       var content = this.template(this.model.getMock());
 
       r.getHeaderDiv().find('h1').text('Confirmation');

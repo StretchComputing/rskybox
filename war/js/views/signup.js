@@ -15,7 +15,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     submit: function (e) {
-      r.log.debug('entering', 'SignupView.submit');
+      r.log.info('entering', 'SignupView.submit');
       var valid;
 
       valid = this.model.set({
@@ -45,24 +45,24 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('entering', 'SignupView.error');
+      r.log.info(response, 'SignupView.error');
       if (response.responseText) { return; }  // This is an apiError.
       r.flash.warning(response, this.$el);    // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('entering', 'SignupView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
+      r.log.info(code, 'SignupView.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'SignupView.apiError');
       }
 
-      r.flash.warning(this.apiCodes[code], this.$el);
+      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
-      r.log.debug('entering', 'SignupView.render');
+      r.log.info('entering', 'SignupView.render');
       var content = this.template(this.model.getMock());
 
       this.$el.html(content);
