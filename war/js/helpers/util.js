@@ -162,6 +162,8 @@ var RSKYBOX = (function (r, $) {
 
   r.log = new r.SkyboxLog({});
   r.log.setAppUrl(rSkybox.appId);
+  // appId will be null if user is not logged in.
+  // This will produce an error log in the console.
   r.log.set('appId', rSkybox.appId);
 
 
