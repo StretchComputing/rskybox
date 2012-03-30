@@ -240,7 +240,7 @@ var RSKYBOX = (function (r, $) {
       }).hide();
 
       $.mobile.activePage.prepend(flash);
-      flash.fadeIn().delay(duration * 1000).fadeOut();
+      flash.fadeIn().delay(duration * 1000).fadeOut(600);
     };
 
     flash.success = function (message, duration) {
