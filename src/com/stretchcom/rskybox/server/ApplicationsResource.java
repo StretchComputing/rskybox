@@ -279,12 +279,8 @@ public class ApplicationsResource extends ServerResource {
         		json.put("id", KeyFactory.keyToString(theApplication.getKey()));
     			
             	Date createdDate = theApplication.getCreatedGmtDate();
-            	// TODO support time zones
             	if(createdDate != null) {
-            		TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		String dateFormat = RskyboxApplication.INFO_DATE_FORMAT;
-            		if(theIsList) {dateFormat = RskyboxApplication.LIST_DATE_FORMAT;}
-            		json.put("date", GMT.convertToLocalDate(createdDate, tz, dateFormat));
+            		json.put("date", GMT.convertToIsoDate(createdDate));
             	}
             	
             	json.put("name", theApplication.getName());

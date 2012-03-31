@@ -246,20 +246,28 @@ public class CrashDetectsResource extends ServerResource {
 				crashDetect.setStackDataBase64(json.getString("stackData"));
 			}
 			
-			// TODO support a time zone passed in
+			Date gmtDetectedDate = null;
 			if(!isUpdate && json.has("date")) {
 				String detectedDateStr = json.getString("date");
-				
-				if(detectedDateStr != null || detectedDateStr.trim().length() != 0) {
-					TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
-					Date gmtDetectedDate = GMT.convertToGmtDate(detectedDateStr, true, tz);
+				if(detectedDateStr != null && detectedDateStr.trim().length() != 0) {
+					// for rTeam backward compatibility
+					// TODO: can remove this code after the rTeam 3.1 release
+					if(!detectedDateStr.endsWith("Z")) {
+						// this is the old format, not ISO 8601
+						TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+						gmtDetectedDate = GMT.convertToGmtDate(detectedDateStr, true, tz);
+					} else {
+						gmtDetectedDate = GMT.stringToIsoDate(detectedDateStr);
+					}
 					if(gmtDetectedDate == null) {
-						log.info("invalid detected date format passed in");
 						return Utility.apiError(this, ApiStatusCode.INVALID_DETECTED_DATE_PARAMETER);
 					}
-					crashDetect.setDetectedGmtDate(gmtDetectedDate);
 				}
+			} else {
+				// default date/time is right now 
+				gmtDetectedDate = new Date();
 			}
+			crashDetect.setDetectedGmtDate(gmtDetectedDate);
 			
 			if(!isUpdate && json.has("instanceUrl")) {
 				crashDetect.setInstanceUrl(json.getString("instanceUrl"));
@@ -278,13 +286,22 @@ public class CrashDetectsResource extends ServerResource {
 					}
 					// TODO support time zone passed in from client
 					if(appActionJsonObj.has("timestamp")) {
+						Date timestamp = null;
 						String timestampStr = appActionJsonObj.getString("timestamp");
-						TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
-						// timestamp format includes seconds and milli-seconds
-						Date timestamp = GMT.convertToGmtDate(timestampStr, true, tz, RskyboxApplication.APP_ACTION_DATE_FORMAT);
+						
+						// for rTeam backward compatibility
+						// TODO: can remove this code after the rTeam 3.1 release
+						if(!timestampStr.endsWith("Z")) {
+							// this is the old format, not ISO 8601
+							TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+							timestamp = GMT.convertToGmtDate(timestampStr, true, tz, RskyboxApplication.APP_ACTION_DATE_FORMAT);
+						} else {
+							timestamp = GMT.stringToIsoDate(timestampStr);
+						}
 						if(timestamp == null) {
 							return Utility.apiError(this, ApiStatusCode.INVALID_TIMESTAMP_PARAMETER);
 						}
+						
 						aa.setTimestamp(timestamp);
 					}
 					if(appActionJsonObj.has("duration")) {
@@ -364,12 +381,8 @@ public class CrashDetectsResource extends ServerResource {
         		json.put("summary", crashDetect.getSummary());
     			
             	Date detectedDate = crashDetect.getDetectedGmtDate();
-            	// TODO support time zones
             	if(detectedDate != null) {
-            		TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		String dateFormat = RskyboxApplication.INFO_DATE_FORMAT;
-            		if(isList) {dateFormat = RskyboxApplication.LIST_DATE_FORMAT;}
-            		json.put("date", GMT.convertToLocalDate(detectedDate, tz, dateFormat));
+            		json.put("date", GMT.convertToIsoDate(detectedDate));
             	}
             	
             	json.put("userName", crashDetect.getUserName());
@@ -378,11 +391,10 @@ public class CrashDetectsResource extends ServerResource {
             	if(!isList) {
                 	JSONArray appActionsJsonArray = new JSONArray();
                 	List<AppAction> appActions = crashDetect.getAppActions();
-                	TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
                 	for(AppAction aa : appActions) {
                 		JSONObject appActionJsonObj = new JSONObject();
                 		appActionJsonObj.put("description", aa.getDescription());
-                		appActionJsonObj.put("timestamp", GMT.convertToLocalDate(aa.getTimestamp(), tz, RskyboxApplication.APP_ACTION_DATE_FORMAT));
+                		appActionJsonObj.put("timestamp", GMT.convertToIsoDate(aa.getTimestamp()));
                 		if(aa.getDuration() != null) appActionJsonObj.put("duration", aa.getDuration());
                 		appActionsJsonArray.put(appActionJsonObj);
                 	}
