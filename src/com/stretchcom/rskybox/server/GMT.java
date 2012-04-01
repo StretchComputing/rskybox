@@ -130,4 +130,11 @@ public class GMT {
 		// convert nowPlusOffset to a Date
 		return newCal.getTime();
 	}
+	
+	public static Date addDaysToDate(Date theDate, int theNumberOfDays) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(theDate);
+		cal.add(Calendar.DATE,theNumberOfDays);
+		return cal.getTime();
+	}
 }

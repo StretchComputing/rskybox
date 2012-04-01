@@ -42,6 +42,12 @@ import com.google.appengine.api.datastore.Text;
     		name="ClientLog.getByApplicationId",
     		query="SELECT cl FROM ClientLog cl WHERE cl.applicationId = :applicationId"
     ),
+	@NamedQuery(
+    		name="ClientLog.getOldActiveThru",
+    		query="SELECT cl FROM ClientLog cl WHERE " + 
+    				"cl.activeThruGmtDate < :currentDate"  + " AND " +
+    				"cl.status = :status"
+      ),
 })
 public class ClientLog {
 	private static final Logger log = Logger.getLogger(ClientLog.class.getName());
@@ -65,6 +71,7 @@ public class ClientLog {
 	private String instanceUrl;
 	private String status;
 	private String applicationId;
+	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -167,6 +174,14 @@ public class ClientLog {
 
 	public void setApplicationId(String applicationId) {
 		this.applicationId = applicationId;
+	}
+
+	public Date getActiveThruGmtDate() {
+		return activeThruGmtDate;
+	}
+
+	public void setActiveThruGmtDate(Date activeThruGmtDate) {
+		this.activeThruGmtDate = activeThruGmtDate;
 	}
 
 	public Boolean createAppActions(List<AppAction> theNewAppActionList) {
