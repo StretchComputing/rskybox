@@ -169,8 +169,7 @@ public class UsersResource extends ServerResource {
             em.remove(user);
             em.getTransaction().commit();
         } catch (NoResultException e) {
-			log.info("User not found");
-			apiStatus = ApiStatusCode.USER_NOT_FOUND;
+        	return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -266,8 +265,7 @@ public class UsersResource extends ServerResource {
 					.getSingleResult();
 			}
 		} catch (NoResultException e) {
-			log.info("User not found");
-			apiStatus = ApiStatusCode.USER_NOT_FOUND;
+			return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -461,8 +459,7 @@ public class UsersResource extends ServerResource {
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         } catch (NoResultException e) {
-			log.info("User not found");
-			apiStatus = ApiStatusCode.USER_NOT_FOUND;
+        	return Utility.apiError(this, ApiStatusCode.USER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);

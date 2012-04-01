@@ -121,8 +121,7 @@ public class EndUsersResource extends ServerResource {
             em.remove(endUser);
             em.getTransaction().commit();
         } catch (NoResultException e) {
-			log.info("End User not found");
-			apiStatus = ApiStatusCode.END_USER_NOT_FOUND;
+        	return Utility.apiError(this, ApiStatusCode.END_USER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more end users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -212,8 +211,7 @@ public class EndUsersResource extends ServerResource {
 				.setParameter("key", key)
 				.getSingleResult();
 		} catch (NoResultException e) {
-			log.info("End User not found");
-			apiStatus = ApiStatusCode.END_USER_NOT_FOUND;
+			return Utility.apiError(this, ApiStatusCode.END_USER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more end users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -312,8 +310,7 @@ public class EndUsersResource extends ServerResource {
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         } catch (NoResultException e) {
-			log.info("End User not found");
-			apiStatus = ApiStatusCode.END_USER_NOT_FOUND;
+        	return Utility.apiError(this, ApiStatusCode.END_USER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more end users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);

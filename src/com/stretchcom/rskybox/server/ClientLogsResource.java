@@ -210,8 +210,7 @@ public class ClientLogsResource extends ServerResource {
 				.setParameter("key", key)
 				.getSingleResult();
 		} catch (NoResultException e) {
-			log.info("Client Log not found");
-			apiStatus = ApiStatusCode.CLIENT_LOG_NOT_FOUND;
+			return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more client logs have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -369,8 +368,7 @@ public class ClientLogsResource extends ServerResource {
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         } catch (NoResultException e) {
-			log.info("Client Log not found");
-			apiStatus = ApiStatusCode.CLIENT_LOG_NOT_FOUND;
+        	return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more client logs have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);

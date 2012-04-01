@@ -199,8 +199,7 @@ public class FeedbackResource extends ServerResource {
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         } catch (NoResultException e) {
-			log.info("Feedback not found");
-			apiStatus = ApiStatusCode.FEEDBACK_NOT_FOUND;
+        	return Utility.apiError(this, ApiStatusCode.FEEDBACK_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more feedbacks have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -246,8 +245,7 @@ public class FeedbackResource extends ServerResource {
 				.setParameter("key", key)
 				.getSingleResult();
 		} catch (NoResultException e) {
-			log.info("Feedback not found");
-			apiStatus = ApiStatusCode.FEEDBACK_NOT_FOUND;
+			return Utility.apiError(this, ApiStatusCode.FEEDBACK_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more feedback have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);

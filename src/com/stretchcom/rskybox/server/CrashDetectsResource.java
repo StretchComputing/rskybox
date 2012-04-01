@@ -191,8 +191,7 @@ public class CrashDetectsResource extends ServerResource {
 				.setParameter("key", key)
 				.getSingleResult();
 		} catch (NoResultException e) {
-			log.info("Crash Detect not found");
-			apiStatus = ApiStatusCode.CRASH_DETECT_NOT_FOUND;
+			return Utility.apiError(this, ApiStatusCode.CRASH_DETECT_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -333,8 +332,7 @@ public class CrashDetectsResource extends ServerResource {
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         } catch (NoResultException e) {
-			log.info("Crash Detect not found");
-			apiStatus = ApiStatusCode.CRASH_DETECT_NOT_FOUND;
+        	return Utility.apiError(this, ApiStatusCode.CRASH_DETECT_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);

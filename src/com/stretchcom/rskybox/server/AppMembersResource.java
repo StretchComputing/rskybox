@@ -162,8 +162,7 @@ public class AppMembersResource extends ServerResource {
             em.remove(appMember);
             em.getTransaction().commit();
         } catch (NoResultException e) {
-			log.info("User not found");
-			apiStatus = ApiStatusCode.APP_MEMBER_NOT_FOUND;
+    		return Utility.apiError(this, ApiStatusCode.APP_MEMBER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -317,8 +316,7 @@ public class AppMembersResource extends ServerResource {
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         } catch (NoResultException e) {
-			log.info("AppMember not found");
-			apiStatus = ApiStatusCode.APP_MEMBER_NOT_FOUND;
+        	return Utility.apiError(this, ApiStatusCode.APP_MEMBER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -364,8 +362,7 @@ public class AppMembersResource extends ServerResource {
 				.setParameter("key", key)
 				.getSingleResult();
 		} catch (NoResultException e) {
-			log.info("AppMember not found");
-			apiStatus = ApiStatusCode.APP_MEMBER_NOT_FOUND;
+			return Utility.apiError(this, ApiStatusCode.APP_MEMBER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more AppMembers have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
@@ -525,8 +522,7 @@ public class AppMembersResource extends ServerResource {
 				}			
 			}
 		} catch (NoResultException e) {
-			log.info("AppMember not found");
-			apiStatus = ApiStatusCode.APP_MEMBER_NOT_FOUND;
+			return Utility.apiError(this, ApiStatusCode.APP_MEMBER_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more AppMembers have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
