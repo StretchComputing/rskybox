@@ -533,14 +533,18 @@ public class UsersResource extends ServerResource {
                 json.put("emailAddress", user.getEmailAddress());
                 json.put("sendEmailNotifications", user.getSendEmailNotifications());
                 json.put("sendSmsNotifications", user.getSendSmsNotifications());
-                json.put("token", user.getToken());
-                json.put("authHeader", user.getAuthHeader());
                 json.put("memberConfirmed", user.getWasMembershipConfirmed());
                 json.put("isEmailConfirmed", user.getIsEmailConfirmed());
                 json.put("isSmsConfirmed", user.getIsSmsConfirmed());
             	json.put("isSuperAdmin", user.getIsSuperAdmin());
+            	
+                // token and authHeader only returned if user is either email or SMS confirmed
+            	if(user.getIsEmailConfirmed() || user.getIsSmsConfirmed()) {
+            		json.put("token", user.getToken());
+                    json.put("authHeader", user.getAuthHeader());
+            	}
 
-                if(isCurrentUser) {
+                 if(isCurrentUser) {
     	        	UserService userService = UserServiceFactory.getUserService();
     	        	json.put("logoutUrl", userService.createLogoutURL(RskyboxApplication.APPLICATION_WELCOME_PAGE));
     	        	
@@ -704,6 +708,9 @@ public class UsersResource extends ServerResource {
         
         try {
         	jsonReturn.put("apiStatus", apiStatus);
+        	
+        	// return the token if the user is confirmed
+        	if(user.getIsEmailConfirmed() || user.getIsSmsConfirmed()) jsonReturn.put("token", user.getToken());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

@@ -46,8 +46,8 @@ import com.stretchcom.rskybox.server.Utility;
     		query="SELECT u FROM User u WHERE u.emailAddress = :emailAddress"
     ),
     @NamedQuery(
-    		name="User.getByEmailAddressAndPassword",
-    		query="SELECT u FROM User u WHERE u.emailAddress = :emailAddress and u.password = :password"
+    		name="User.getByConfirmedEmailAddressAndPassword",
+    		query="SELECT u FROM User u WHERE u.emailAddress = :emailAddress and u.password = :password and u.isEmailConfirmed = TRUE"
     ),
     @NamedQuery(
     		name="User.getByToken",
@@ -58,8 +58,8 @@ import com.stretchcom.rskybox.server.Utility;
     		query="SELECT u FROM User u WHERE u.phoneNumber = :phoneNumber"
     ),
     @NamedQuery(
-    		name="User.getByPhoneNumberAndPassword",
-    		query="SELECT u FROM User u WHERE u.phoneNumber = :phoneNumber and u.password = :password"
+    		name="User.getByConfirmedPhoneNumberAndPassword",
+    		query="SELECT u FROM User u WHERE u.phoneNumber = :phoneNumber and u.password = :password and u.isSmsConfirmed = TRUE"
     ),
 })
 public class User {
@@ -514,13 +514,14 @@ public class User {
 		return apiStatus;
 	}
 	
+	// if theEncryptedPassword specified, then looks for a user with a confirmed emailAddress
 	// returns User entity if found; null otherwise
 	public static User getUser(EntityManager em, String theEmailAddress, String theEncryptedPassword) throws NonUniqueResultException {
         User user = null;
         try {
         	if(theEncryptedPassword != null) {
         		log.info("query user by email address = " + theEmailAddress + " and encrypted password = " + theEncryptedPassword);
-        		user = (User)em.createNamedQuery("User.getByEmailAddressAndPassword")
+        		user = (User)em.createNamedQuery("User.getByConfirmedEmailAddressAndPassword")
         				.setParameter("emailAddress", theEmailAddress.toLowerCase())
         				.setParameter("password", theEncryptedPassword)
         				.getSingleResult();
@@ -561,12 +562,13 @@ public class User {
         return user;
 	}
 	
+	// if theEncryptedPassword specified, then looks for a user with a confirmed phoneNumber
 	// returns User entity if found; null otherwise
 	public static User getUserWithPhoneNumber(EntityManager em, String thePhoneNumber, String theEncryptedPassword) throws NonUniqueResultException {
         User user = null;
         try {
         	if(theEncryptedPassword != null) {
-        		user = (User)em.createNamedQuery("User.getByPhoneNumberAndPassword")
+        		user = (User)em.createNamedQuery("User.getByConfirmedPhoneNumberAndPassword")
         				.setParameter("phoneNumber", thePhoneNumber)
         				.setParameter("password", theEncryptedPassword)
         				.getSingleResult();
