@@ -31,7 +31,7 @@ var RSKYBOX = (function (r, $) {
         emailCode = attrs.emailConfirmationCode;
         if (emailCode) {
           if (emailCode.length === CONFIRMATION_CODE_LEN) {
-            r.log.debug('valid email confirmation code', 'Confirm.validate');
+            r.log.info('valid email confirmation code', 'Confirm.validate');
           } else {
             message += 'Confirmation code must be exactly 3 characters. ';
           }
@@ -44,7 +44,7 @@ var RSKYBOX = (function (r, $) {
         phoneCode = attrs.phoneConfirmationCode;
         if (phoneCode) {
           if (phoneCode.length === CONFIRMATION_CODE_LEN) {
-            r.log.debug('valid phone confirmation code', 'Confirm.validate');
+            r.log.info('valid phone confirmation code', 'Confirm.validate');
           } else {
             message += 'Confirmation code must be exactly 3 characters. ';
           }
@@ -56,9 +56,9 @@ var RSKYBOX = (function (r, $) {
       }
 
       password = attrs.password;
-      r.log.debug(attrs.new, 'Confirm.validate');
+      r.log.info(attrs.new, 'Confirm.validate');
       if (!attrs.new || (password && password.length >= PASSWORD_MIN_LEN)) {
-        r.log.debug('valid password', 'Confirm.validate');
+        r.log.info('valid password', 'Confirm.validate');
       } else {
         message += 'Password must be at least 6 characters. ';
       }

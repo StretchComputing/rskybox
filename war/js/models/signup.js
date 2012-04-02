@@ -15,16 +15,16 @@ var RSKYBOX = (function (r, $) {
     },
 
     parse: function (response) {
-      r.log.debug('model not needed after successful save', 'Signup.parse');
+      r.log.info('model not needed after successful save', 'Signup.parse');
     },
 
     validate: function (attrs) {
       if (r.isValidEmailAddress(attrs.emailAddress)) {
-        r.log.debug('valid emailAddress', 'Signup.validate');
+        r.log.info('valid emailAddress', 'Signup.validate');
         return;
       }
       if (r.isValidPhoneNumber(attrs.phoneNumber) && attrs.mobileCarrierId) {
-        r.log.debug('valid phone credentials', 'Signup.validate');
+        r.log.info('valid phone credentials', 'Signup.validate');
         return;
       }
       return 'A valid email address -OR- valid phone number and mobile carrier is required.';

@@ -46,8 +46,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.info(response, 'ConfirmNewUserView.error');
       if (response.responseText) { return; }  // This is an apiError.
+      r.log.info(response, 'ConfirmNewUserView.error');
       r.flash.warning(response);    // This is a validation error.
     },
 
@@ -142,8 +142,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.info(response, 'ConfirmExistingUserView.error');
       if (response.responseText) { return; }  // This is an apiError.
+      r.log.info(response, 'ConfirmExistingUserView.error');
       r.flash.warning(response);    // This is a validation error.
     },
 
@@ -234,8 +234,10 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.info(response, 'ConfirmMemberView.error');
-      if (response.responseText) { return; }  // This is an apiError.
+      if (response.responseText) {  // This is an apiError.
+        r.log.info(response.responseText, 'ConfirmMemberView.error');
+        return;
+      }
 
       // Shouldn't see errors except for apiStatus returns handled above.
       r.log.error('Unexpected execution: ' + response, 'ConfirmMemberView.error');

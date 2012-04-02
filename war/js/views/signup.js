@@ -45,8 +45,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.info(response, 'SignupView.error');
       if (response.responseText) { return; }  // This is an apiError.
+      r.log.info(response, 'SignupView.error');
       r.flash.warning(response, this.$el);    // This is a validation error.
     },
 

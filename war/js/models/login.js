@@ -28,7 +28,7 @@ var RSKYBOX = (function (r, $) {
       password = attrs.password;
       if ((password && password.length >= PASSWORD_MIN_LEN) &&
           (r.isValidEmailAddress(attrs.emailAddress) || r.isValidPhoneNumber(attrs.phoneNumber))) {
-        r.log.debug('Login: credentials are valid.');
+        r.log.info('credentials are valid', 'Login.validate');
         return;
       }
       return 'A valid email address -OR- valid phone number, -AND- a valid password is required.';

@@ -161,8 +161,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.info(response, 'NewApplicationView.error');
       if (response.responseText) { return; }  // This is an apiError.
+      r.log.info(response, 'NewApplicationView.error');
       r.flash.warning(response);              // This is a validation error.
     },
 

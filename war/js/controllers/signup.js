@@ -16,7 +16,7 @@ var RSKYBOX = (function (r, $) {
           r.changePage('applications');
         },
         error: function (model, response) {
-          r.log.debug('no current user', 'SignupController.isLoggedIn');
+          r.log.info('no current user', 'SignupController.isLoggedIn');
         }
       });
     },
@@ -24,7 +24,7 @@ var RSKYBOX = (function (r, $) {
 
     // Signup
     signupBeforeShow: function () {
-      r.log.debug('entering', 'SignupController.signupBeforeShow');
+      r.log.info('entering', 'SignupController.signupBeforeShow');
       if (r.signup) { delete r.signup; }
       if (r.signupView) {
         r.signupView.undelegateEvents();
@@ -38,14 +38,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     signupShow: function () {
-      r.log.debug('entering', 'SignupController.signupShow');
+      r.log.info('entering', 'SignupController.signupShow');
       r.signupView.render();
     },
 
 
     // Login
     loginBeforeShow: function () {
-      r.log.debug('entering', 'SignupController.loginBeforeShow');
+      r.log.info('entering', 'SignupController.loginBeforeShow');
       if (r.login) { delete r.login; }
       if (r.loginView) {
         r.loginView.undelegateEvents();
@@ -59,14 +59,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     loginShow: function () {
-      r.log.debug('entering', 'SignupController.loginShow');
+      r.log.info('entering', 'SignupController.loginShow');
       r.loginView.render();
     },
 
 
     // Confirm New User
     confirmNewUserBeforeShow: function () {
-      r.log.debug('entering', 'SignupController.confirmNewUserBeforeShow');
+      r.log.info('entering', 'SignupController.confirmNewUserBeforeShow');
       if (r.confirm) { delete r.confirm; }
       if (r.confirmNewUserView) {
         r.confirmNewUserView.undelegateEvents();
@@ -86,13 +86,13 @@ var RSKYBOX = (function (r, $) {
     },
 
     confirmNewUserShow: function () {
-      r.log.debug('entering', 'SignupController.confirmNewUserShow');
+      r.log.info('entering', 'SignupController.confirmNewUserShow');
       r.confirmNewUserView.render();
     },
 
     // Confirm Existing User
     confirmExistingUserBeforeShow: function () {
-      r.log.debug('entering', 'SignupController.confirmExistingUserBeforeShow');
+      r.log.info('entering', 'SignupController.confirmExistingUserBeforeShow');
       if (r.confirm) { delete r.confirm; }
       if (r.confirmExistingUserView) {
         r.confirmExistingUserView.undelegateEvents();
@@ -115,7 +115,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     confirmExistingUserShow: function () {
-      r.log.debug('entering', 'SignupController.confirmExistingUserShow');
+      r.log.info('entering', 'SignupController.confirmExistingUserShow');
       r.confirmExistingUserView.render();
       r.confirmExistingUserView.$el.trigger('submit');
     },
@@ -123,7 +123,7 @@ var RSKYBOX = (function (r, $) {
 
     // Confirm Member
     confirmMemberBeforeShow: function (e) {
-      r.log.debug('entering', 'SingupController.confirmMemberBeforeShow');
+      r.log.info('entering', 'SingupController.confirmMemberBeforeShow');
       if (r.member) { delete r.member; }
       if (r.confirmMemberView) {
         r.confirmMemberView.undelegateEvents();
@@ -145,7 +145,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     confirmMemberShow: function (e) {
-      r.log.debug('entering', 'SingupController.confirmMemberShow');
+      r.log.info('entering', 'SingupController.confirmMemberShow');
       r.confirmMemberView.render();
       r.confirmMemberView.$el.trigger('submit');
     },
@@ -153,7 +153,7 @@ var RSKYBOX = (function (r, $) {
 
     // Session Setup
     setupSession: function (eventType, matchObj, ui, page, evt) {
-      r.log.debug('entering', 'SignupController.setupSession');
+      r.log.info('entering', 'SignupController.setupSession');
       r.session = {};
       r.session.params = r.router.getParams(location.hash);
     },

@@ -66,14 +66,14 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.debug('FeedbackView.error');
       if (response.responseText) { return; }  // This is an apiError.
+      r.log.info(response, 'FeedbackView.error');
       r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.debug('FeedbackView.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
+      r.log.info(code, 'FeedbackView.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.error('Undefined apiStatus: ' + code, 'FeedbackView.apiError');

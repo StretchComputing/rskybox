@@ -123,7 +123,7 @@ var RSKYBOX = (function (r, $) {
       var field, mock = {};
 
       if (!this.fields) {
-        r.log.error('No fields defined for model:');
+        r.log.error('No fields defined for model', 'BaseModel.getMock');
         return;
       }
 

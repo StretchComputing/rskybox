@@ -144,8 +144,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.info(response, 'MemberView.error');
       if (response.responseText) { return; }  // This is an apiError.
+      r.log.info(response, 'MemberView.error');
       r.flash.warning(response);              // This is a validation error.
     },
 
@@ -217,8 +217,8 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (model, response) {
-      r.log.info(response, 'NewMemberView.error');
       if (response.responseText) { return; }  // This is an apiError.
+      r.log.info(response, 'NewMemberView.error');
       r.flash.warning(response);              // This is a validation error.
     },
 
