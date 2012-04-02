@@ -109,8 +109,11 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
+      var mock = this.model.getMock();
+
+      mock.date = r.format.longDate(mock.date);
       this.getHeader().find('h1').html(this.model.get('name'));
-      this.getContent().html(this.template(this.model.getMock()));
+      this.getContent().html(this.template(mock));
       this.getContent().trigger('create');
       return this;
     },

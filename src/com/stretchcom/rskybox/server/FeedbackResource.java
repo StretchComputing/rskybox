@@ -150,20 +150,29 @@ public class FeedbackResource extends ServerResource {
 				feedback.setUserName(json.getString("userName"));
 			}
             
-			// TODO support a time zone passed in
+			Date gmtRecordedDate = null;
 			if(!isUpdate && json.has("date")) {
 				String recordedDateStr = json.getString("date");
 				
-				if(recordedDateStr != null || recordedDateStr.trim().length() != 0) {
-					TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
-					Date gmtRecordedDate = GMT.convertToGmtDate(recordedDateStr, true, tz);
+				if(recordedDateStr != null && recordedDateStr.trim().length() != 0) {
+					// for rTeam backward compatibility
+					// TODO: can remove this code after the rTeam 3.1 release
+					if(!recordedDateStr.endsWith("Z")) {
+						// this is the old format, not ISO 8601
+						TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
+						gmtRecordedDate = GMT.convertToGmtDate(recordedDateStr, true, tz);
+					} else {
+						gmtRecordedDate = GMT.stringToIsoDate(recordedDateStr);
+					}
 					if(gmtRecordedDate == null) {
-						log.info("invalid recorded date format passed in");
 						return Utility.apiError(this, ApiStatusCode.INVALID_RECORDED_DATE_PARAMETER);
 					}
-					feedback.setRecordedGmtDate(gmtRecordedDate);
 				}
+			} else {
+				// default date/time is right now 
+				gmtRecordedDate = new Date();
 			}
+			feedback.setRecordedGmtDate(gmtRecordedDate);
 			
 			if(!isUpdate && json.has("instanceUrl")) {
 				feedback.setInstanceUrl(json.getString("instanceUrl"));
@@ -323,12 +332,8 @@ public class FeedbackResource extends ServerResource {
         		json.put("id", KeyFactory.keyToString(feedback.getKey()));
     			
             	Date recordedDate = feedback.getRecordedGmtDate();
-            	// TODO support time zones
             	if(recordedDate != null) {
-            		TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
-            		String dateFormat = RskyboxApplication.INFO_DATE_FORMAT;
-            		if(isList) {dateFormat = RskyboxApplication.LIST_DATE_FORMAT;}
-            		json.put("date", GMT.convertToLocalDate(recordedDate, tz, dateFormat));
+            		json.put("date", GMT.convertToIsoDate(recordedDate));
             	}
             	
             	json.put("userName", feedback.getUserName());
