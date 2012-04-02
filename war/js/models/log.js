@@ -18,6 +18,11 @@ var RSKYBOX = (function (r, $) {
       status: null,
       appActions: null,
     },
+
+    parse: function (response) {
+      response.date = new Date(response.date);
+      return response;
+    },
   });
 
 

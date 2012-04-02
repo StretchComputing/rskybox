@@ -15,6 +15,11 @@ var RSKYBOX = (function (r, $) {
       confirmationCode: null,  // used during member confirmation only
     },
 
+    parse: function (response) {
+      response.date = new Date(response.date);
+      return response;
+    },
+
     validate: function (attrs) {
       if (r.isValidEmailAddress(attrs.emailAddress) && (attrs.role || attrs.memberConfirmation)) {
         r.log.debug('Member: member is valid.');

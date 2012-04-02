@@ -17,6 +17,11 @@ var RSKYBOX = (function (r, $) {
       this.setUrl();
     },
 
+    parse: function (response) {
+      response.date = new Date(response.date);
+      return response;
+    },
+
     validate: function (attrs) {
       if (attrs.name) {
         return;
