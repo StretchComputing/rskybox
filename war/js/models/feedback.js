@@ -16,7 +16,6 @@ var RSKYBOX = (function (r, $) {
 
     parse: function (response) {
       response.audioUrl = '/audio/' + response.appId + '/' + response.id;
-      response.date = new Date(response.date);
       return response;
     },
   });
