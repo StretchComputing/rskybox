@@ -93,15 +93,17 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      var app, model;
+      var app, mock = this.model.getMock();
+
 
       if (!this.model.get('apiStatus') || this.options.applications.isEmpty()) { return this; }
 
       app = this.options.applications.findById(r.session.params.appId);
 
       this.$el.find('.back').attr('href', '#members?appId=' + app.id);
-      model = _.extend(this.model.getMock(), {admin: app.get('role')});
-      this.getContent().html(this.template(model));
+      mock.date = r.format.longDate(mock.date);
+      mock = _.extend(mock, {admin: app.get('role')});
+      this.getContent().html(this.template(mock));
       this.$el.find('.role').val(this.model.get('role'));
       this.getContent().trigger('create');
       return this;

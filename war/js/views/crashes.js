@@ -11,7 +11,10 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      this.$el.html(this.template(this.model.getMock()));
+      var mock = this.model.getMock();
+
+      mock.date = r.format.longDate(mock.date);
+      this.$el.html(this.template(mock));
       return this;
     }
   });
@@ -58,7 +61,10 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      this.getContent().html(this.template(this.model.getMock()));
+      var mock = this.model.getMock();
+
+      mock.date = r.format.longDate(mock.date);
+      this.getContent().html(this.template(mock));
       this.$el.trigger('create');
       return this;
     },

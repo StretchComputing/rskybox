@@ -2,6 +2,10 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
+  var rSkybox = {
+    appId: Cookie.get('appId'),
+  };
+
   // **** These must be defined here so they can be used further down in this function. ****
   //
   // General status code handlers.
@@ -29,11 +33,6 @@ var RSKYBOX = (function (r, $) {
 
   r.dump = function (object) {
     r.log.debug(JSON.stringify(object));
-  };
-
-
-  var rSkybox = {
-    appId: Cookie.get('appId'),
   };
 
   r.SkyboxLog = r.Log.extend({
@@ -312,6 +311,14 @@ var RSKYBOX = (function (r, $) {
     return (/^[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/).test(emailAddress);
   };
 
+
+  r.format = {
+    longDate: function (isoDate) {
+      var date = new Date(isoDate);
+
+      return date.toDateString() + ', ' + date.toLocaleTimeString();
+    },
+  };
 
   return r;
 }(RSKYBOX || {}, jQuery));
