@@ -313,10 +313,10 @@ var RSKYBOX = (function (r, $) {
 
 
   r.format = {
-    longDate: function (isoDate) {
+    longDate: function (isoDate, showMilliseconds) {
       var date = new Date(isoDate);
 
-      return date.toDateString() + ', ' + date.toLocaleTimeString();
+      return date.toDateString() + ', ' + date.toLocaleTimeString() + (showMilliseconds ? '.' + date.getMilliseconds() : '');
     },
   };
 

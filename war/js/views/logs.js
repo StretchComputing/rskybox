@@ -13,7 +13,7 @@ var RSKYBOX = (function (r, $) {
     render: function () {
       var mock = this.model.getMock();
 
-      mock.date = r.format.longDate(mock.date);
+      mock.date = r.format.longDate(mock.date, true);
       this.$el.html(this.template(mock));
       return this;
     }
@@ -65,7 +65,7 @@ var RSKYBOX = (function (r, $) {
     render: function () {
       var mock = this.model.getMock();
 
-      mock.date = r.format.longDate(mock.date);
+      mock.date = r.format.longDate(mock.date, true);
       this.getContent().html(this.template(mock));
       this.$el.trigger('create');
       return this;
