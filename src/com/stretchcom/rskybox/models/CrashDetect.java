@@ -48,6 +48,10 @@ import com.google.appengine.api.datastore.Text;
     				"cd.activeThruGmtDate < :currentDate"  + " AND " +
     				"cd.status = :status"
       ),
+      @NamedQuery(
+        		name="CrashDetect.getByActiveThruGmtDateIsNull",
+        		query="SELECT cd FROM CrashDetect cd WHERE cd.activeThruGmtDate = NULL"
+        ),
 })
 public class CrashDetect {
 	private static final Logger log = Logger.getLogger(CrashDetect.class.getName());

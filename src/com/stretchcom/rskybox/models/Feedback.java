@@ -45,6 +45,10 @@ import com.google.appengine.api.datastore.Text;
     				"fb.activeThruGmtDate < :currentDate"  + " AND " +
     				"fb.status = :status"
       ),
+      @NamedQuery(
+      		name="Feedback.getByActiveThruGmtDateIsNull",
+      		query="SELECT fb FROM Feedback fb WHERE fb.activeThruGmtDate = NULL"
+      ),
 })
 public class Feedback {
 	public final static String NEW_STATUS = "new";

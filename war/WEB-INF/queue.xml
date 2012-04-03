@@ -4,4 +4,9 @@
     <rate>20000/d</rate>
     <bucket-size>5</bucket-size>
   </queue>
+  <queue>
+    <name>migration</name>
+    <rate>20000/d</rate>
+    <bucket-size>5</bucket-size>
+  </queue>
 </queue-entries>

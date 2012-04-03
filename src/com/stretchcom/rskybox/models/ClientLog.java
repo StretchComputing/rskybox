@@ -48,6 +48,10 @@ import com.google.appengine.api.datastore.Text;
     				"cl.activeThruGmtDate < :currentDate"  + " AND " +
     				"cl.status = :status"
       ),
+      @NamedQuery(
+      		name="ClientLog.getByActiveThruGmtDateIsNull",
+      		query="SELECT cl FROM ClientLog cl WHERE cl.activeThruGmtDate = NULL"
+      ),
 })
 public class ClientLog {
 	private static final Logger log = Logger.getLogger(ClientLog.class.getName());

@@ -55,6 +55,7 @@ public class RskyboxApplication extends Application {
 
         router.attach("/mobileCarriers", MobileCarriersResource.class);
         router.attach("/cron/{job}", CronResource.class);
+        router.attach("/datastore/migration", DatastoreResource.class);
         
         return router;
     }
