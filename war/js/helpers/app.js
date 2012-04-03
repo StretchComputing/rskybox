@@ -5,9 +5,7 @@ var RSKYBOX = (function (r, $) {
   var storage;
 
   storage = {
-    // TODO - use 15 minute interval for production
-    // interval: 15 * 60 * 1000, // Fifteen minutes.
-    interval: 0.5 * 60 * 1000, // One-half minute for beta/testing.
+    interval: 15 * 60 * 1000, // Fifteen minutes.
 
     reset: function () {
       r.log.info('entering', 'storage.reset');
