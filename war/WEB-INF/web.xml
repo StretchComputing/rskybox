@@ -68,6 +68,16 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
     <servlet-name>EmailTaskServlet</servlet-name>
     <url-pattern>/sendEmailTask</url-pattern>
   </servlet-mapping>
+	
+	<servlet>
+		<servlet-name>MigrationTaskServlet</servlet-name>
+		<servlet-class>com.stretchcom.rskybox.server.MigrationTaskServlet</servlet-class>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>MigrationTaskServlet</servlet-name>
+		<url-pattern>/migrationTask</url-pattern>
+	</servlet-mapping>
 
   <security-constraint>
     <web-resource-collection>

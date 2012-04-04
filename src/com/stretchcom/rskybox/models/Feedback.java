@@ -39,6 +39,16 @@ import com.google.appengine.api.datastore.Text;
     		name="Feedback.getByapplicationId",
     		query="SELECT fb FROM Feedback fb WHERE fb.applicationId = :applicationId"
     ),
+	@NamedQuery(
+    		name="Feedback.getOldActiveThru",
+    		query="SELECT fb FROM Feedback fb WHERE " + 
+    				"fb.activeThruGmtDate < :currentDate"  + " AND " +
+    				"fb.status = :status"
+      ),
+      @NamedQuery(
+      		name="Feedback.getByActiveThruGmtDateIsNull",
+      		query="SELECT fb FROM Feedback fb WHERE fb.activeThruGmtDate = NULL"
+      ),
 })
 public class Feedback {
 	public final static String NEW_STATUS = "new";
@@ -51,6 +61,7 @@ public class Feedback {
 	private String instanceUrl;
 	private String status;
 	private String applicationId;
+	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -111,5 +122,13 @@ public class Feedback {
 
 	public void setApplicationId(String applicationId) {
 		this.applicationId = applicationId;
+	}
+
+	public Date getActiveThruGmtDate() {
+		return activeThruGmtDate;
+	}
+
+	public void setActiveThruGmtDate(Date activeThruGmtDate) {
+		this.activeThruGmtDate = activeThruGmtDate;
 	}
 }

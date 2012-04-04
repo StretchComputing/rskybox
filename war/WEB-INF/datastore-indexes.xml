@@ -13,6 +13,12 @@
         <property name="recordedGmtDate" direction="desc"/>
     </datastore-index>
 
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="Feedback" ancestor="false" source="auto">
+        <property name="status" direction="asc"/>
+        <property name="activeThruGmtDate" direction="asc"/>
+    </datastore-index>
+
     <datastore-index kind="CrashDetect" ancestor="false" source="auto">
         <property name="status" direction="asc"/>
         <property name="detectedGmtDate" direction="desc"/>
@@ -24,6 +30,12 @@
         <property name="detectedGmtDate" direction="desc"/>
     </datastore-index>
 
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="CrashDetect" ancestor="false" source="auto">
+        <property name="status" direction="asc"/>
+        <property name="activeThruGmtDate" direction="asc"/>
+    </datastore-index>
+
     <datastore-index kind="ClientLog" ancestor="false" source="auto">
         <property name="status" direction="asc"/>
         <property name="createdGmtDate" direction="desc"/>
@@ -33,6 +45,12 @@
         <property name="applicationId" direction="asc"/>
         <property name="status" direction="asc"/>
         <property name="createdGmtDate" direction="desc"/>
+    </datastore-index>
+
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="ClientLog" ancestor="false" source="auto">
+        <property name="status" direction="asc"/>
+        <property name="activeThruGmtDate" direction="asc"/>
     </datastore-index>
 
 </datastore-indexes>

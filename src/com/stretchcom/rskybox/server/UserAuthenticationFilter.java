@@ -245,6 +245,12 @@ public class UserAuthenticationFilter implements Filter {
     		log.info("Cron API is bypassed");
     		return true;
     	} 
+
+    	// Datastore migration API is bypassed
+    	if(theUrl.toLowerCase().contains("/datastore/migration") && theHttpResponse.getMethod().equalsIgnoreCase("put")) {
+    		log.info("Datastore migration API is bypassed");
+    		return true;
+    	} 
     	
     	
     	return false;
