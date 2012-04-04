@@ -316,7 +316,7 @@ var RSKYBOX = (function (r, $) {
     longDate: function (isoDate, showMilliseconds) {
       var date = new Date(isoDate);
 
-      return window.dateFormat(isoDate, 'ddd, mmm d yyyy, hh:MM:ss.l');
+      return window.dateFormat(isoDate, 'ddd, mmm d yyyy, hh:MM:ss' + (showMilliseconds ? '.l' : ''));
       //return date.toDateString() + ', ' + date.getHourstoTimeString() + (showMilliseconds ? '.' + date.getMilliseconds() : '');
     },
   };
