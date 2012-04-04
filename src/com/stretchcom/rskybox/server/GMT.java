@@ -50,10 +50,10 @@ public class GMT {
 		return df.format(theGmtDate);
 	}
 	
-	// returns ISO 8601 format: yyyy-MM-ddTkk:mm:ss.SSSZ
+	// returns ISO 8601 format: yyyy-MM-ddTHH:mm:ss.SSSZ
 	public static String convertToIsoDate(Date theGmtDate) {
 		if(theGmtDate == null) {return null;}
-		String dateFormat = "yyyy-MM-dd'T'kk:mm:ss.SSS'Z'";
+		String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     	DateFormat df = new SimpleDateFormat(dateFormat);
 		log.info("convertToIsoDate(): local date = " + df.format(theGmtDate));
 		return df.format(theGmtDate);
@@ -97,11 +97,11 @@ public class GMT {
 		}
 	}
 
-	// theDateStr must be in format ISO 8601 format: yyyy-MM-ddTkk:mm:ss.SSSZ
+	// theDateStr must be in format ISO 8601 format: yyyy-MM-ddTHH:mm:ss.SSSZ
 	// No time zone support
 	public static Date stringToIsoDate(String theDateStr) {
 		try {
-			String dateFormat = "yyyy-MM-dd'T'kk:mm:ss.SSS'Z'";
+			String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 			DateFormat df = new SimpleDateFormat(dateFormat);
 			return df.parse(theDateStr);
 		} catch (ParseException e) {
