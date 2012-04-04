@@ -383,7 +383,7 @@ var RSKYBOX = (function (r, $) {
     longDate: function (isoDate, showMilliseconds) {
       var date = new Date(isoDate);
 
-      return date.toDateString() + ', ' + date.toLocaleTimeString() + (showMilliseconds ? '.' + date.getMilliseconds() : '');
+      return window.dateFormat(isoDate, 'ddd, mmm d yyyy, HH:MM:ss' + (showMilliseconds ? '.l' : ''));
     },
   };
 

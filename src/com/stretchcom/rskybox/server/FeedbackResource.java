@@ -81,12 +81,13 @@ public class FeedbackResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
-    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
-    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(this, appIdStatus);
-    	}
+		if(this.applicationId == null) {return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);}
+		Application application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+			return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
     	
-        return save_feedback(entity);
+        return save_feedback(entity, application);
     }
 
     // Handles 'Update Feedback API'
@@ -101,10 +102,10 @@ public class FeedbackResource extends ServerResource {
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(this, ApiStatusCode.FEEDBACK_ID_REQUIRED);
 		}
-        return save_feedback(entity);
+        return save_feedback(entity, null);
     }
 
-    private JsonRepresentation save_feedback(Representation entity) {
+    private JsonRepresentation save_feedback(Representation entity, Application theApplication) {
         EntityManager em = EMF.get().createEntityManager();
 
         Feedback feedback = null;
@@ -193,6 +194,11 @@ public class FeedbackResource extends ServerResource {
 
 				// creating a feedback so default status to 'new'
 				feedback.setStatus(Feedback.NEW_STATUS);
+				
+				// set the activeThruGmtDate for auto archiving
+				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
+				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
+				feedback.setActiveThruGmtDate(activeThruGmtDate);
 			}
 
             em.persist(feedback);

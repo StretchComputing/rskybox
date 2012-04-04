@@ -91,12 +91,13 @@ public class ClientLogsResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
-    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
-    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(this, appIdStatus);
-    	}
+		if(this.applicationId == null) {return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);}
+		Application application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+			return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
     	
-        return save_client_log(entity);
+        return save_client_log(entity, application);
     }
 
     // Handles 'Update Client Log API'
@@ -116,7 +117,7 @@ public class ClientLogsResource extends ServerResource {
     	
     	if(this.id != null) {
     		// Update Client Log API
-            return save_client_log(entity);
+            return save_client_log(entity, null);
     	} else {
     		// Remote Control Client Log API
     		return remote_control(entity);
@@ -219,7 +220,7 @@ public class ClientLogsResource extends ServerResource {
         return new JsonRepresentation(getClientLogJson(clientLog, apiStatus, false));
     }
 
-    private JsonRepresentation save_client_log(Representation entity) {
+    private JsonRepresentation save_client_log(Representation entity, Application theApplication) {
         EntityManager em = EMF.get().createEntityManager();
         JSONObject jsonReturn = new JSONObject();
 
@@ -364,6 +365,14 @@ public class ClientLogsResource extends ServerResource {
             	
 				// Default status to 'new'
 				clientLog.setStatus(CrashDetect.NEW_STATUS);
+				
+				// Default created date is today
+				clientLog.setCreatedGmtDate(new Date());
+				
+				// set the activeThruGmtDate for auto archiving
+				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
+				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
+				clientLog.setActiveThruGmtDate(activeThruGmtDate);
 			}
 			
             em.persist(clientLog);

@@ -82,12 +82,13 @@ public class CrashDetectsResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
-    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
-    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(this, appIdStatus);
-    	}
+		if(this.applicationId == null) {return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);}
+		Application application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+			return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
     	
-        return save_crash_detect(entity);
+        return save_crash_detect(entity, application);
     }
 
     // Handles 'Update Crash Detect API'
@@ -102,7 +103,7 @@ public class CrashDetectsResource extends ServerResource {
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(this, ApiStatusCode.CRASH_DETECT_ID_REQUIRED);
 		}
-        return save_crash_detect(entity);
+        return save_crash_detect(entity, null);
     }
     
     private JsonRepresentation index() {
@@ -200,7 +201,7 @@ public class CrashDetectsResource extends ServerResource {
         return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus, false));
     }
 
-    private JsonRepresentation save_crash_detect(Representation entity) {
+    private JsonRepresentation save_crash_detect(Representation entity, Application theApplication) {
         EntityManager em = EMF.get().createEntityManager();
 
         CrashDetect crashDetect = null;
@@ -334,6 +335,11 @@ public class CrashDetectsResource extends ServerResource {
 				// Default status to 'new'
 				crashDetect.setStatus(CrashDetect.NEW_STATUS);
 				crashDetect.setApplicationId(this.applicationId);
+				
+				// set the activeThruGmtDate for auto archiving
+				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
+				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
+				crashDetect.setActiveThruGmtDate(activeThruGmtDate);
 			}
             
             em.persist(crashDetect);

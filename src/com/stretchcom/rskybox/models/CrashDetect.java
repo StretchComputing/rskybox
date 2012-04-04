@@ -42,6 +42,16 @@ import com.google.appengine.api.datastore.Text;
     		name="CrashDetect.getByApplicationId",
     		query="SELECT cd FROM CrashDetect cd WHERE cd.applicationId = :applicationId"
     ),
+	@NamedQuery(
+    		name="CrashDetect.getOldActiveThru",
+    		query="SELECT cd FROM CrashDetect cd WHERE " + 
+    				"cd.activeThruGmtDate < :currentDate"  + " AND " +
+    				"cd.status = :status"
+      ),
+      @NamedQuery(
+        		name="CrashDetect.getByActiveThruGmtDateIsNull",
+        		query="SELECT cd FROM CrashDetect cd WHERE cd.activeThruGmtDate = NULL"
+        ),
 })
 public class CrashDetect {
 	private static final Logger log = Logger.getLogger(CrashDetect.class.getName());
@@ -58,6 +68,7 @@ public class CrashDetect {
 	private String instanceUrl;
 	private String status;
 	private String applicationId;
+	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -135,6 +146,14 @@ public class CrashDetect {
 
 	public void setApplicationId(String applicationId) {
 		this.applicationId = applicationId;
+	}
+
+	public Date getActiveThruGmtDate() {
+		return activeThruGmtDate;
+	}
+
+	public void setActiveThruGmtDate(Date activeThruGmtDate) {
+		this.activeThruGmtDate = activeThruGmtDate;
 	}
 
 	public Boolean createAppActions(List<AppAction> theNewAppActionList) {

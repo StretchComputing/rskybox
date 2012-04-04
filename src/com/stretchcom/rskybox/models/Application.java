@@ -49,6 +49,9 @@ import com.stretchcom.rskybox.server.EMF;
 })
 public class Application {
     private static final Logger log = Logger.getLogger(Application.class.getName());
+    
+    private static int DAYS_UNTIL_AUTO_ARCHIVE = 7;
+    //private static int DAYS_UNTIL_AUTO_ARCHIVE = -2;  // for local testing
 	
 	private String name;
 	private String organizationId;
@@ -220,5 +223,10 @@ public class Application {
 		}
 		
 		return application;
+	}
+	
+	public int daysUntilAutoArchive() {
+		// TODO allow application configuration to specify this
+		return DAYS_UNTIL_AUTO_ARCHIVE;
 	}
 }

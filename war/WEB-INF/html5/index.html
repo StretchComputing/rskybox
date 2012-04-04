@@ -19,6 +19,7 @@
     <script src="/js/lib/underscore-min.js"></script>
     <script src="/js/lib/backbone-min.js"></script>
     <script src="/js/lib/cookie.js"></script>
+    <script src="/js/lib/date.format.js"></script>
     <script src="/js/models/base.js"></script>
     <script src="/js/models/log.js"></script>
     <script src="/js/helpers/util.js"></script>
@@ -441,7 +442,7 @@
         <ul data-role="listview" data-inset="true">
           <li data-role="fieldcontain">
             <label for="emailAddress">Email Address:</label>
-            <input name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>"></input>
+            <input name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>" autocorrect="off" autocapitalize="off"></input>
           </li>
           <li data-role="fieldcontain">
             <label for="role">Role:</label>
