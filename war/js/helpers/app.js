@@ -2,9 +2,7 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  var storage;
-
-  storage = {
+  var storage = {
     interval: 15 * 60 * 1000, // Fifteen minutes.
 
     reset: function () {

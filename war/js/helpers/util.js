@@ -2,9 +2,34 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  var rSkybox = {
-    appId: Cookie.get('appId'),
-  };
+  var
+    rSkybox = {
+      appId: Cookie.get('appId'),
+    },
+
+    storage = {
+      clear: function () {
+        localStorage.clear();
+      },
+
+      setItem: function (item, value) {
+        r.log.info(item, 'storage.setItem.entering');
+        localStorage.setItem(item, JSON.stringify(value));
+      },
+
+      getItem: function (item) {
+        var results;
+
+        r.log.info(item, 'storage.getItem.entering');
+
+        results = JSON.parse(sessionStorage.getItem(item));
+        if (!results || results === '' || results === 'fetching') {
+          return false;
+        }
+        return results;
+      },
+    };
+
 
   // **** These must be defined here so they can be used further down in this function. ****
   //
@@ -13,9 +38,10 @@ var RSKYBOX = (function (r, $) {
   r.statusCodeHandlers = function (apiError) {
     var general = {
       401: function (jqXHR) {
-        r.log.info('401 - unauthorized');
-        r.logOut();
+        r.log.info('401 - unauthorized', 'statusCodeHandlers');
         // TODO - Add flash message to home page after 401 occurs
+        r.flash.set('warning', 'Login required');
+        r.logOut();
       },
       404: function () {
         r.log.error('404 - not found');
@@ -130,18 +156,18 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.local('SkyboxLog.success');
+      r.log.local('entering', 'SkyboxLog.success');
     },
 
     errorHandler: function (model, response) {
-      r.log.local('SkyboxLog.error');
       if (response.responseText) { return; }  // This is an apiError.
+      r.log.local(response, 'SkyboxLog.error');
       r.flash.warning(response);              // This is a validation error.
     },
 
     apiError: function (jqXHR) {
-      r.log.local('SkyboxLog.apiError');
       var code = r.getApiStatus(jqXHR.responseText);
+      r.log.local(code, 'SkyboxLog.apiError');
 
       if (!this.apiCodes[code]) {
         r.log.local('Undefined apiStatus: ' + code, 'SkyboxLog.apiError');
@@ -158,6 +184,7 @@ var RSKYBOX = (function (r, $) {
       605: 'Application not found.',
     },
   });
+
 
   r.log = new r.SkyboxLog({});
   r.log.setAppUrl(rSkybox.appId);
@@ -222,6 +249,7 @@ var RSKYBOX = (function (r, $) {
     return $.mobile.activePage.find(":jqmData(role='content')");
   };
 
+
   r.flash = (function () {
     var display, flash = {};
 
@@ -257,6 +285,45 @@ var RSKYBOX = (function (r, $) {
     flash.error = function (message, duration) {
       message = message || 'An unknown error occurred. Please reload the page to try again.';
       display('error', message, duration || 10);
+    };
+
+    flash.set = function (type, message, duration) {
+      r.log.info('entering', 'flash.set');
+      var value = { type: type, message: message, };
+
+      if (duration) { value.duration = duration; }
+      storage.setItem('flash', value);
+    };
+
+    flash.check = function () {
+      r.log.info('entering', 'flash.check');
+      var value = storage.getItem('flash');
+
+      if (!value) { return; }
+
+      value = JSON.parse(value);
+      switch (value.type) {
+      case 'success':
+        flash.success(value.message, value.duration);
+        break;
+      case 'info':
+        flash.info(value.message, value.duration);
+        break;
+      case 'warning':
+        flash.warning(value.message, value.duration);
+        break;
+      case 'error':
+        flash.error(value.message, value.duration);
+        break;
+      default:
+        r.log.error('unknown flash type', 'flash.check');
+        break;
+      }
+      display(value.type, value.message, value.duration);
+    };
+
+    flash.clear = function () {
+      localStorage.removeItem('flash');
     };
 
     return flash;
@@ -319,6 +386,7 @@ var RSKYBOX = (function (r, $) {
       return date.toDateString() + ', ' + date.toLocaleTimeString() + (showMilliseconds ? '.' + date.getMilliseconds() : '');
     },
   };
+
 
   return r;
 }(RSKYBOX || {}, jQuery));
