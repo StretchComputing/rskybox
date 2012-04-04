@@ -41,7 +41,6 @@ var RSKYBOX = (function (r, $) {
         r.log.info('401 - unauthorized', 'statusCodeHandlers');
         // TODO - Add flash message to home page after 401 occurs
         r.flash.set('warning', 'Login required');
-        r.log.debug(r.flash.check(), 'statusCodeHandlers');
         r.logOut();
       },
       404: function () {
@@ -204,7 +203,7 @@ var RSKYBOX = (function (r, $) {
   };
 
   r.isLoggedIn = function () {
-    return !!Cookie.get('/');
+    return !!Cookie.get('token');
   };
 
 
@@ -256,17 +255,19 @@ var RSKYBOX = (function (r, $) {
     // message: message to display
     // duration: time in seconds to leave flash on screen
     display = function (type, message, duration) {
-      var flash;
+      var element;
 
       $('.flash').remove();
 
-      flash = $('<div>', {
+      element = $('<div>', {
         class: 'flash ' + type,
         text: message
       }).hide();
 
-      $.mobile.activePage.prepend(flash);
-      flash.fadeIn().delay(duration * 1000).fadeOut(600);
+      $.mobile.activePage.prepend(element);
+      element.fadeIn().delay(duration * 1000).fadeOut(600);
+      r.log.debug(message, 'flash.display');
+      flash.clear();
     };
 
     flash.success = function (message, duration) {

@@ -318,6 +318,16 @@ var RSKYBOX = (function (r, $) {
   };
 
 
+  $(document).bind('pagebeforechange', function (e, data) {
+    if (!r.isLoggedIn()) {
+      r.log.debug('not logged in', 'pagebeforechange');
+      r.flash.set('warning', 'Login required');
+      e.preventDefault();
+      r.changePage('login', 'signup');
+      return;
+    }
+  });
+
   r.router = new $.mobile.Router([
     { '.*':                       { handler: 'setupSession',        events: 'bs'  } },
     { '#applications':            { handler: 'applicationsInit',    events: 'i'   } },

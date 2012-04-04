@@ -9,6 +9,7 @@ var RSKYBOX = (function (r, $) {
       var current;
 
       if (matchObj[0].indexOf('#confirm') === 0) { return; }
+      if (!r.isLoggedIn()) { return; }
 
       current = new r.User({ id: 'current' });
       current.fetch({
