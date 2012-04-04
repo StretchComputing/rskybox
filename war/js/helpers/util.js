@@ -22,7 +22,7 @@ var RSKYBOX = (function (r, $) {
 
         r.log.info(item, 'storage.getItem.entering');
 
-        results = JSON.parse(sessionStorage.getItem(item));
+        results = JSON.parse(localStorage.getItem(item));
         if (!results || results === '' || results === 'fetching') {
           return false;
         }
@@ -41,13 +41,14 @@ var RSKYBOX = (function (r, $) {
         r.log.info('401 - unauthorized', 'statusCodeHandlers');
         // TODO - Add flash message to home page after 401 occurs
         r.flash.set('warning', 'Login required');
+        r.log.debug(r.flash.check(), 'statusCodeHandlers');
         r.logOut();
       },
       404: function () {
-        r.log.error('404 - not found');
+        r.log.error('404 - not found', 'statusCodeHandlers');
       },
       500: function () {
-        r.log.error('500 - server error');
+        r.log.error('500 - server error', 'statusCodeHandlers');
       }
     };
     if (apiError) {
@@ -149,9 +150,6 @@ var RSKYBOX = (function (r, $) {
       this.save(attrs, {
         success: this.success,
         statusCode: r.statusCodeHandlers(this.apiError),
-        headers: {
-          Authorization: rSkybox.authToken,
-        },
       });
     },
 
@@ -202,6 +200,7 @@ var RSKYBOX = (function (r, $) {
   r.logOut = function () {
     Cookie.unset('token', '/');
     r.changePage('root', 'signup');
+    sessionStorage.clear();
   };
 
   r.isLoggedIn = function () {
@@ -301,7 +300,6 @@ var RSKYBOX = (function (r, $) {
 
       if (!value) { return; }
 
-      value = JSON.parse(value);
       switch (value.type) {
       case 'success':
         flash.success(value.message, value.duration);
@@ -319,7 +317,6 @@ var RSKYBOX = (function (r, $) {
         r.log.error('unknown flash type', 'flash.check');
         break;
       }
-      display(value.type, value.message, value.duration);
     };
 
     flash.clear = function () {
