@@ -329,8 +329,9 @@
       <h3>No crashes at this time.</h3>
     </script>
     <script type="text/template" id="crashEntryTemplate">
-      <a href="#crash?id=<%= id %>&appId=<%= appId %>"><%= userName ? userName + ':' : '' %>
-        <%= instanceUrl ? instanceUrl + ', ' : '' %><%= date %></a>
+      <a href="#crash?id=<%= id %>&appId=<%= appId %>">
+        <h3><%= date %></h3>
+        <p><%= userName %></p></a>
     </script>
 
     <div data-role="page" id="crash" data-title="Crash">
