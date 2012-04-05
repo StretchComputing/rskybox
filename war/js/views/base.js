@@ -42,10 +42,10 @@ var RSKYBOX = (function (r, $) {
       model.pageLink = pageLink;
       if (params.status === 'archived') {
         model.status = 'new';
-        model.display = 'Active';
+        model.display = 'Open';
       } else {
         model.status = 'archived';
-        model.display = 'Archives';
+        model.display = 'Closed';
       }
 
       el = this.getHeader().find('.archives');

@@ -198,7 +198,7 @@
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Feedback</h1>
-        <a href="#feedbackList" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Archives</a>
+        <a href="#feedbackList" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Closed</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content">
@@ -234,9 +234,9 @@
           <li>For: <%= instanceUrl %></li>
         <% } %>
         <li>
-          Status: <%= status %>
+          Status: <%= status === 'new' ? 'Open' : 'Closed' %>
           <button class="changeStatus" data-inline="true" data-theme="b">
-            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
+            <%= status === 'new' ? 'Close' : 'Reopen' %>
           </button>
         </li>
       </ul>
@@ -248,7 +248,7 @@
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Logs</h1>
-        <a href="#logs" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Archives</a>
+        <a href="#logs" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Closed</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
@@ -288,9 +288,9 @@
         <li>Log Level: <%= logLevel %></li>
         <li>Message: <%= message %></li>
         <li>
-          Status: <%= status %>
+          Status: <%= status === 'new' ? 'Open' : 'Closed' %>
           <button class="changeStatus" data-inline="true" data-theme="b">
-            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
+            <%= status === 'new' ? 'Close' : 'Reopen' %>
           </button>
         </li>
         <% if (appActions) { %>
@@ -320,7 +320,7 @@
       <div data-role="header">
         <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
         <h1>Crashes</h1>
-        <a href="#crashes" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Archives</a>
+        <a href="#crashes" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Closed</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
@@ -351,9 +351,9 @@
           <li>For: <%= instanceUrl %></li>
         <% } %>
         <li>
-          Status: <%= status %>
+          Status: <%= status === 'new' ? 'Open' : 'Closed' %>
           <button class="changeStatus" data-inline="true" data-theme="b">
-            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
+            <%= status === 'new' ? 'Close' : 'Reopen' %>
           </button>
         </li>
         <li>Summary: <%= summary %></li>
