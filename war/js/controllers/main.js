@@ -23,14 +23,14 @@ var RSKYBOX = (function (r, $) {
       r.log.info('entering', 'MainController.applicationInit');
       r.applicationView = new r.ApplicationView({
         model: new r.Application(),
-        collection: new r.Applications(),
+        applications: new r.Applications(),
       });
     },
 
     applicationShow: function () {
       r.log.info('entering', 'MainController.applicationShow');
       r.applicationView.setElement($.mobile.activePage);
-      r.session.getCollection(r.session.keys.applications, r.applicationView.collection);
+      r.session.getCollection(r.session.keys.applications, r.applicationView.options.applications);
     },
 
 
