@@ -130,7 +130,7 @@ var RSKYBOX = (function (r, $) {
 
     return r;
   } catch (e) {
-    r.log.error(e.stack, 'session.js:session');
+    r.log.exception(e.stack, 'session.js:session');
   }
 }(RSKYBOX || {}, jQuery));
 

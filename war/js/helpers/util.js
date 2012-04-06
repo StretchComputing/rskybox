@@ -52,8 +52,8 @@ var RSKYBOX = (function (r, $) {
         off: 99
       },
 
-      exception: function (message, logName) {
-        this.base('exception', message, logName);
+      exception: function (stack, logName, message) {
+        this.base('exception', message + '\r' + stack, logName);
       },
 
       error: function (message, logName) {
@@ -201,7 +201,7 @@ var RSKYBOX = (function (r, $) {
         },
       };
   } catch (e) {
-    r.log.error(e.stack, 'util.js:vars2');
+    r.log.exception(e.stack, 'util.js:vars2');
   }
 
 
@@ -263,7 +263,7 @@ var RSKYBOX = (function (r, $) {
       return $.mobile.activePage.find(":jqmData(role='content')");
     };
   } catch (e1) {
-    r.log.error(e1.stack, 'util.js:pageHandling');
+    r.log.exception(e1.stack, 'util.js:pageHandling');
   }
 
 
@@ -347,7 +347,7 @@ var RSKYBOX = (function (r, $) {
       return flash;
     }());
   } catch (e2) {
-    r.log.error(e2.stack, 'util.js:flash');
+    r.log.exception(e2.stack, 'util.js:flash');
   }
 
 
@@ -409,7 +409,7 @@ var RSKYBOX = (function (r, $) {
       },
     };
   } catch (e3) {
-    r.log.error(e3.stack, 'util.js:utils');
+    r.log.exception(e3.stack, 'util.js:utils');
   }
 
 
@@ -469,6 +469,6 @@ var RSKYBOX = (function (r, $) {
       hidePageLoadingMessage();
     });
   } catch (e) {
-    RSKYBOX.log.error(e.stack, 'util.js:loadingMessage');
+    RSKYBOX.log.exception(e.stack, 'util.js:loadingMessage');
   }
 }(jQuery));
