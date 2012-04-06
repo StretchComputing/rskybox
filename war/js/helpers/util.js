@@ -1,14 +1,6 @@
 var RSKYBOX = (function (r, $) {
   'use strict';
 
-  try {
-    var rSkybox = {
-      appId: Cookie.get('appId'),
-    };
-  } catch (e) {
-    console.log('***** ', e.toString(), 'util.js:vars');
-  }
-
 
   try {
     // **** These must be defined here so they can be used further down in this function. ****
@@ -108,6 +100,7 @@ var RSKYBOX = (function (r, $) {
             logLevel: level,
             message: message,
             userName: Cookie.get('token'),
+            instanceUrl: location.hash,
           },
           getUserName,
           user;
@@ -168,10 +161,10 @@ var RSKYBOX = (function (r, $) {
 
 
     r.log = new r.SkyboxLog({});
-    r.log.setAppUrl(rSkybox.appId);
+    r.log.setAppUrl(Cookie.get('appId'));
     // appId will be null if user is not logged in.
     // This will produce an error log in the console.
-    r.log.set('appId', rSkybox.appId);
+    r.log.set('appId', Cookie.get('appId'));
   } catch (e2) {
     console.log('***** ', e2.toString(), 'util.js:statusCodeHandlers');
   }
