@@ -28,7 +28,7 @@ var RSKYBOX = (function (r, $) {
       return general;
     };
   } catch (e1) {
-    console.log('***** ', e1.toString(), 'util.js:statusCodeHandlers');
+    console.log('***** ', e1.stack, 'util.js:statusCodeHandlers');
   }
 
 
@@ -166,7 +166,7 @@ var RSKYBOX = (function (r, $) {
     // This will produce an error log in the console.
     r.log.set('appId', Cookie.get('appId'));
   } catch (e2) {
-    console.log('***** ', e2.toString(), 'util.js:statusCodeHandlers');
+    console.log('***** ', e2.stack, 'util.js:statusCodeHandlers');
   }
 
 
@@ -201,7 +201,7 @@ var RSKYBOX = (function (r, $) {
         },
       };
   } catch (e) {
-    r.log.error(e.toString(), 'util.js:vars2');
+    r.log.error(e.stack, 'util.js:vars2');
   }
 
 
@@ -263,7 +263,7 @@ var RSKYBOX = (function (r, $) {
       return $.mobile.activePage.find(":jqmData(role='content')");
     };
   } catch (e1) {
-    r.log.error(e1.toString(), 'util.js:pageHandling');
+    r.log.error(e1.stack, 'util.js:pageHandling');
   }
 
 
@@ -347,7 +347,7 @@ var RSKYBOX = (function (r, $) {
       return flash;
     }());
   } catch (e2) {
-    r.log.error(e2.toString(), 'util.js:flash');
+    r.log.error(e2.stack, 'util.js:flash');
   }
 
 
@@ -409,7 +409,7 @@ var RSKYBOX = (function (r, $) {
       },
     };
   } catch (e3) {
-    r.log.error(e3.toString(), 'util.js:utils');
+    r.log.error(e3.stack, 'util.js:utils');
   }
 
 
@@ -469,6 +469,6 @@ var RSKYBOX = (function (r, $) {
       hidePageLoadingMessage();
     });
   } catch (e) {
-    RSKYBOX.log.error(e.toString(), 'util.js:loadingMessage');
+    RSKYBOX.log.error(e.stack, 'util.js:loadingMessage');
   }
 }(jQuery));
