@@ -345,7 +345,11 @@ public class CrashDetectsResource extends ServerResource {
             em.persist(crashDetect);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications(this.applicationId, Notification.CRASH);
+            if(!isUpdate) {
+            	// TODO is the clientLog key really set by this point?
+            	String theItemId = KeyFactory.keyToString(crashDetect.getKey());
+            	User.sendNotifications(this.applicationId, Notification.CRASH, crashDetect.getSummary(), theItemId);
+            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();

@@ -1,5 +1,6 @@
 package com.stretchcom.rskybox.server;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -7,6 +8,7 @@ import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
+import com.stretchcom.rskybox.models.NotificationDetails;
 
 
 public class Emailer {
@@ -105,15 +107,49 @@ public class Emailer {
     	return sb.toString();
     }
     
-    public static String getNotificationEmailBody(List<String> theApplicationSummaries, String theUrl) {
+    public static String getNotificationEmailBody(List<NotificationDetails> theNotificationDetailsList, String theUrl) {
     	StringBuffer sb = new StringBuffer();
     	buildStandardEmailHeader(sb);
-    	
-    	for(String appSummary : theApplicationSummaries) {
-        	sb.append("<div style='margin-bottom:15px;'>");
-        	sb.append(appSummary);
-        	sb.append("</div>");
-    	}
+
+        // each notificationDetail in the list is for a separate application
+        for(NotificationDetails nd : theNotificationDetailsList) {
+        	sb.append("<div style='margin-bottom:15px;'><a href='" + theUrl + "'>" + nd.getApplicationName() + "</a></div>");
+        	sb.append("<table style='margin-left:15px;'>");
+        	sb.append("<tr>");
+         	String logListUrl = "#logs?appId=" + nd.getApplicationId() + "&status=new";
+        	sb.append("<td><a href='" + logListUrl + "'>log</a></td>");
+        	sb.append("<td>" + nd.getClientLogCount() + "</td>");
+        	sb.append("<td>");
+        	if(nd.getClientLogCount() > 0) {
+            	String logUrl = "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
+            	sb.append("<a href='" + logUrl + "'>" + nd.getClientLogMessage() + "</a>");
+        	}
+        	sb.append("</td>");
+        	sb.append("</tr>");
+        	sb.append("<tr>");
+         	String crashListUrl = "#crashes?appId=" + nd.getApplicationId() + "&status=new";
+        	sb.append("<td><a href='" + crashListUrl + "'>crash</a></td>");
+        	sb.append("<td>" + nd.getCrashCount() + "</td>");
+        	sb.append("<td>");
+        	if(nd.getCrashCount() > 0) {
+            	String crashUrl = "#crash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
+            	sb.append("<a href='" + crashUrl + "'>" + nd.getCrashMessage() + "</a>");
+        	}
+        	sb.append("</td>");
+        	sb.append("</tr>");
+        	sb.append("<tr>");
+         	String feedbackListUrl = "#feedbackList?appId=" + nd.getApplicationId() + "&status=new";
+        	sb.append("<td><a href='" + feedbackListUrl + "'>feedback</a></td>");
+        	sb.append("<td>" + nd.getFeedbackCount() + "</td>");
+        	sb.append("<td>");
+        	if(nd.getFeedbackCount() > 0) {
+            	String feedbackUrl = "#feedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
+            	sb.append("<a href='" + feedbackUrl + "'>" + nd.getFeedbackMessage() + "</a>");
+        	}
+        	sb.append("</td>");
+        	sb.append("</tr>");
+        	sb.append("</table>");
+		}
     	
     	// end of div with background color. This div starts in the email header
     	sb.append("</div>");

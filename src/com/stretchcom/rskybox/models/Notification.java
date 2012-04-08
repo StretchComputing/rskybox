@@ -95,16 +95,31 @@ public class Notification {
 	private List<String> applicationNames;
 	
 	@Basic
-	private List<String> messages;
+	private List<Integer> clientLogCounts;
 	
 	@Basic
-	private List<Integer> clientLogCounts;
+	private List<String> clientLogMessages;
+	
+	@Basic
+	private List<String> clientLogIds;
 	
 	@Basic
 	private List<Integer> crashCounts;
 	
 	@Basic
+	private List<String> crashMessages;
+	
+	@Basic
+	private List<String> crashIds;
+	
+	@Basic
 	private List<Integer> feedbackCounts;
+	
+	@Basic
+	private List<String> feedbackMessages;
+	
+	@Basic
+	private List<String> feedbackIds;
 
 	public String getUserId() {
 		return userId;
@@ -186,14 +201,6 @@ public class Notification {
 			}
 			nd.setApplicationName(applicationName);
 			
-			String message = null;
-			if(this.messages.size() > i) {
-				message = this.messages.get(i).equals("") ? null : this.messages.get(i);
-			} else {
-				log.severe("messages array size corrupt");
-			}
-			nd.setMessage(message);
-			
 			Integer clientLogCount = null;
 			if(this.clientLogCounts.size() > i) {
 				clientLogCount = this.clientLogCounts.get(i);
@@ -201,6 +208,22 @@ public class Notification {
 				log.severe("clientLogCounts array size corrupt");
 			}
 			nd.setClientLogCount(clientLogCount);
+			
+			String clientLogMessage = null;
+			if(this.clientLogMessages.size() > i) {
+				clientLogMessage = this.clientLogMessages.get(i).equals("") ? null : this.clientLogMessages.get(i);
+			} else {
+				log.severe("client log messages array size corrupt");
+			}
+			nd.setClientLogMessage(clientLogMessage);
+			
+			String clientLogId = null;
+			if(this.clientLogIds.size() > i) {
+				clientLogId = this.clientLogIds.get(i).equals("") ? null : this.clientLogIds.get(i);
+			} else {
+				log.severe("clientLogIds array size corrupt");
+			}
+			nd.setClientLogId(clientLogId);
 			
 			Integer crashCount = null;
 			if(this.crashCounts.size() > i) {
@@ -210,6 +233,22 @@ public class Notification {
 			}
 			nd.setCrashCount(crashCount);
 			
+			String crashMessage = null;
+			if(this.crashMessages.size() > i) {
+				crashMessage = this.crashMessages.get(i).equals("") ? null : this.crashMessages.get(i);
+			} else {
+				log.severe("crash messages array size corrupt");
+			}
+			nd.setCrashMessage(crashMessage);
+			
+			String crashId = null;
+			if(this.crashIds.size() > i) {
+				crashId = this.crashIds.get(i).equals("") ? null : this.crashIds.get(i);
+			} else {
+				log.severe("crashIds array size corrupt");
+			}
+			nd.setCrashId(crashId);
+			
 			Integer feedbackCount = null;
 			if(this.feedbackCounts.size() > i) {
 				feedbackCount = this.feedbackCounts.get(i);
@@ -217,6 +256,22 @@ public class Notification {
 				log.severe("feedbackCounts array size corrupt");
 			}
 			nd.setFeedbackCount(feedbackCount);
+			
+			String feedbackMessage = null;
+			if(this.feedbackMessages.size() > i) {
+				feedbackMessage = this.feedbackMessages.get(i).equals("") ? null : this.feedbackMessages.get(i);
+			} else {
+				log.severe("feedback messages array size corrupt");
+			}
+			nd.setFeedbackMessage(feedbackMessage);
+			
+			String feedbackId = null;
+			if(this.feedbackIds.size() > i) {
+				feedbackId = this.feedbackIds.get(i).equals("") ? null : this.feedbackIds.get(i);
+			} else {
+				log.severe("itemIds array size corrupt");
+			}
+			nd.setFeedbackId(feedbackId);
 			
 			notificationDetails.add(nd);
 		}
@@ -257,7 +312,7 @@ public class Notification {
 	}
 	
 	public static void queueNotification(User theUser, String theApplicationId, AppMember theAppMember, String theNotificationType, 
-			                             Boolean theIsEmailActive, Boolean theIsSmsActive) {
+			                             String theMessage, String theItemId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
         EntityManager em = EMF.get().createEntityManager();
         
         String userId = null;
@@ -295,16 +350,21 @@ public class Notification {
         	NotificationDetails notificationDetails = new NotificationDetails();
         	notificationDetails.setApplicationId(theApplicationId);
         	notificationDetails.setApplicationName(theAppMember.getApplicationName());
-        	notificationDetails.setMessage("not used yet");
         	notificationDetails.setCrashCount(0);
         	notificationDetails.setClientLogCount(0);
         	notificationDetails.setFeedbackCount(0);
         	if(theNotificationType.equalsIgnoreCase(Notification.CRASH)) {
         		notificationDetails.setCrashCount(1);
+            	notificationDetails.setCrashMessage(theMessage);
+            	notificationDetails.setCrashId(theItemId);
         	} else if(theNotificationType.equalsIgnoreCase(Notification.CLIENT_LOG)) {
         		notificationDetails.setClientLogCount(1);
+            	notificationDetails.setClientLogMessage(theMessage);
+            	notificationDetails.setClientLogId(theItemId);
         	} else if(theNotificationType.equalsIgnoreCase(Notification.FEEDBACK)) {
         		notificationDetails.setFeedbackCount(1);
+            	notificationDetails.setFeedbackMessage(theMessage);
+            	notificationDetails.setFeedbackId(theItemId);
         	}
         	notification.updateNotificationDetailsList(notificationDetails);
         	
@@ -342,10 +402,15 @@ public class Notification {
 	private void initNotificationDetails() {
 		this.applicationIds = new ArrayList<String>();
 		this.applicationNames = new ArrayList<String>();
-		this.messages = new ArrayList<String>();
 		this.clientLogCounts = new ArrayList<Integer>();
+		this.clientLogMessages = new ArrayList<String>();
+		this.clientLogIds = new ArrayList<String>();
 		this.crashCounts = new ArrayList<Integer>();
+		this.crashMessages = new ArrayList<String>();
+		this.crashIds = new ArrayList<String>();
 		this.feedbackCounts = new ArrayList<Integer>();
+		this.feedbackMessages = new ArrayList<String>();
+		this.feedbackIds = new ArrayList<String>();
 	}
 	
 	private void addNotificationDetails(NotificationDetails nd) {
@@ -358,20 +423,35 @@ public class Notification {
 		String applicationName = nd.getApplicationName() == null ? "" : nd.getApplicationName();
 		this.applicationNames.add(applicationName);
 
-		String message = nd.getMessage() == null ? "" : nd.getMessage();
-		this.messages.add(message);
-
 		// if empty, replace with 0
 		Integer clientLogCount = nd.getClientLogCount() == null ? 0 : nd.getClientLogCount();
 		this.clientLogCounts.add(clientLogCount);
+
+		String clientLogMessage = nd.getClientLogMessage() == null ? "" : nd.getClientLogMessage();
+		this.clientLogMessages.add(clientLogMessage);
+
+		String clientLogId = nd.getClientLogId() == null ? "" : nd.getClientLogId();
+		this.clientLogIds.add(clientLogId);
 
 		// if empty, replace with 0
 		Integer crashCount = nd.getCrashCount() == null ? 0 : nd.getCrashCount();
 		this.crashCounts.add(crashCount);
 
+		String crashMessage = nd.getCrashMessage() == null ? "" : nd.getCrashMessage();
+		this.crashMessages.add(crashMessage);
+
+		String crashId = nd.getCrashId() == null ? "" : nd.getCrashId();
+		this.crashIds.add(crashId);
+
 		// if empty, replace with 0
 		Integer feedbackCount = nd.getFeedbackCount() == null ? 0 : nd.getFeedbackCount();
 		this.feedbackCounts.add(feedbackCount);
+
+		String feedbackMessage = nd.getFeedbackMessage() == null ? "" : nd.getFeedbackMessage();
+		this.feedbackMessages.add(feedbackMessage);
+
+		String feedbackId = nd.getFeedbackId() == null ? "" : nd.getFeedbackId();
+		this.feedbackIds.add(feedbackId);
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -426,6 +506,7 @@ public class Notification {
 		return applicationIdIndex;
 	}
 	
+	// Algorithm: only the first log and ID are persisted for display, the additional ones are discarded.
 	private void updateNotificationDetails(NotificationDetails theNewNotificationDetails, Integer applicationIdIndex) {
 		try {
 			String applicationId = theNewNotificationDetails.getApplicationId() == null ? "" : theNewNotificationDetails.getApplicationId();
@@ -433,9 +514,6 @@ public class Notification {
 			
 			String applicationName = theNewNotificationDetails.getApplicationName() == null ? "" : theNewNotificationDetails.getApplicationName();
 			this.applicationNames.set(applicationIdIndex, applicationName);
-			
-			String message = theNewNotificationDetails.getMessage() == null ? "" : theNewNotificationDetails.getMessage();
-			this.messages.set(applicationIdIndex, message);
 			
 			/////////////////////////////////////////////////////////////////////////////////////
 			// Counts are NOT set, but incremented based on value in notificationDetail passed in
@@ -471,44 +549,7 @@ public class Notification {
         if(this.getEmailAddress() == null) {
         	return null;
         }
-
-        List<String> applicationSummaries = new ArrayList<String>();
-        List<NotificationDetails> notificationDetailsList = this.getNotificationDetailsList();
-        boolean prior = false;
-        for(NotificationDetails nd : notificationDetailsList) {
-            StringBuffer emailAddressBuf = new StringBuffer();
-        	if(emailAddressBuf != null) {
-        		emailAddressBuf.append(nd.getApplicationName());
-        		emailAddressBuf.append("[");
-        		if(nd.getCrashCount() != null) {
-            		emailAddressBuf.append("crash:");
-            		emailAddressBuf.append(nd.getCrashCount());
-            		prior = true;
-        		}
-        		if(nd.getClientLogCount() != null) {
-        			if(prior) {emailAddressBuf.append("|");}
-            		emailAddressBuf.append("clientlog:");
-            		emailAddressBuf.append(nd.getClientLogCount());
-            		prior = true;
-        		}
-        		if(nd.getFeedbackCount() != null) {
-        			if(prior) {emailAddressBuf.append("|");}
-            		emailAddressBuf.append("feedback:");
-            		emailAddressBuf.append(nd.getFeedbackCount());
-        		}
-        		emailAddressBuf.append("]");
-        	}
-            
-    		if(emailAddressBuf.length() > 0) {
-    			applicationSummaries.add(emailAddressBuf.toString());
-    		}
-		}
-        
-        if(applicationSummaries.size() > 0) {
-        	return Emailer.getNotificationEmailBody(applicationSummaries, RskyboxApplication.APPLICATION_BASE_URL);
-        } else {
-        	return null;
-        }
+    	return Emailer.getNotificationEmailBody(this.getNotificationDetailsList(), RskyboxApplication.APPLICATION_BASE_URL);
 	}
 	
 	private String getSmsNotification() {
