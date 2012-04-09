@@ -71,6 +71,7 @@
         <a href="#applications" data-direction="reverse" data-icon="home">Home</a>
         <h1>Application</h1>
       </div>
+      <div class="applicationName"></div>
       <div data-role="content"></div>
     </div>
     <script type="text/template" id="applicationTemplate">
@@ -207,8 +208,9 @@
       <h3>No feedback at this time.</h3>
     </script>
     <script type="text/template" id="feedbackEntryTemplate">
-      <a href="#feedback?id=<%= id %>&appId=<%= appId %>"><%= userName %>:
-        <% if (instanceUrl) { print(instanceUrl + ', '); } %><%= date %></a>
+      <a href="#feedback?id=<%= id %>&appId=<%= appId %>">
+        <h3><%= date %></h3>
+        <p><%= userName %></p></a>
     </script>
 
     <div data-role="page" id="feedback" data-title="Feedback">
@@ -327,8 +329,9 @@
       <h3>No crashes at this time.</h3>
     </script>
     <script type="text/template" id="crashEntryTemplate">
-      <a href="#crash?id=<%= id %>&appId=<%= appId %>"><%= userName ? userName + ':' : '' %>
-        <%= instanceUrl ? instanceUrl + ', ' : '' %><%= date %></a>
+      <a href="#crash?id=<%= id %>&appId=<%= appId %>">
+        <h3><%= date %></h3>
+        <p><%= userName %></p></a>
     </script>
 
     <div data-role="page" id="crash" data-title="Crash">

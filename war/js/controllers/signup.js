@@ -9,6 +9,7 @@ var RSKYBOX = (function (r, $) {
       var current;
 
       if (matchObj[0].indexOf('#confirm') === 0) { return; }
+      if (!r.isLoggedIn()) { return; }
 
       current = new r.User({ id: 'current' });
       current.fetch({
@@ -19,6 +20,14 @@ var RSKYBOX = (function (r, $) {
           r.log.info('no current user', 'SignupController.isLoggedIn');
         }
       });
+    },
+
+
+    // Session Setup
+    setupSession: function () {
+      r.log.info('entering', 'SignupController.setupSession');
+      r.session = {};
+      r.session.params = r.router.getParams(location.hash);
     },
 
 
@@ -122,7 +131,7 @@ var RSKYBOX = (function (r, $) {
 
 
     // Confirm Member
-    confirmMemberBeforeShow: function (e) {
+    confirmMemberBeforeShow: function () {
       r.log.info('entering', 'SingupController.confirmMemberBeforeShow');
       if (r.member) { delete r.member; }
       if (r.confirmMemberView) {
@@ -144,29 +153,28 @@ var RSKYBOX = (function (r, $) {
       });
     },
 
-    confirmMemberShow: function (e) {
+    confirmMemberShow: function () {
       r.log.info('entering', 'SingupController.confirmMemberShow');
       r.confirmMemberView.render();
       r.confirmMemberView.$el.trigger('submit');
     },
 
 
-    // Session Setup
-    setupSession: function (eventType, matchObj, ui, page, evt) {
-      r.log.info('entering', 'SignupController.setupSession');
-      r.session = {};
-      r.session.params = r.router.getParams(location.hash);
-    },
+    flashCheck: function () {
+      r.log.info('entering', 'SignupController.flashCheck');
+      r.flash.check();
+    }
   };
 
 
   r.router = new $.mobile.Router([
-    { '.*':      { handler: 'isLoggedIn',       events: 'bc'  } },
-    { '.*':      { handler: 'setupSession',     events: 'bs'  } },
-    { '#signup': { handler: 'signupBeforeShow', events: 'bs'  } },
-    { '#signup': { handler: 'signupShow',       events: 's'   } },
-    { '#login':  { handler: 'loginBeforeShow',  events: 'bs'  } },
-    { '#login':  { handler: 'loginShow',        events: 's'   } },
+    { '.*':       { handler: 'isLoggedIn',        events: 'bc'  } },
+    { '.*':       { handler: 'setupSession',      events: 'bs'  } },
+    { '.*':       { handler: 'flashCheck',        events: 's'   } },
+    { '#signup':  { handler: 'signupBeforeShow',  events: 'bs'  } },
+    { '#signup':  { handler: 'signupShow',        events: 's'   } },
+    { '#login':   { handler: 'loginBeforeShow',   events: 'bs'  } },
+    { '#login':   { handler: 'loginShow',         events: 's'   } },
 
     // these routes only match when preregistration is present
     { '#confirm(?=.*preregistration=true)':   { handler: 'confirmNewUserBeforeShow',      events: 'bs'  } },

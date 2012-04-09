@@ -51,7 +51,7 @@ var RSKYBOX = (function (r, $) {
       _.bindAll(this, 'apiError');
       this.model.on('change', this.render, this);
       this.model.on('error', this.error, this);
-      this.collection.on('reset', this.setModel, this);
+      this.options.applications.on('reset', this.setModel, this);
       this.template = _.template($('#applicationTemplate').html());
     },
 
@@ -60,7 +60,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     setModel: function () {
-      this.model.set(this.collection.findById(r.session.params.appId));
+      this.model.set(this.options.applications.findById(r.session.params.appId));
     },
 
     // TODO - implement update application attributes form
@@ -112,7 +112,6 @@ var RSKYBOX = (function (r, $) {
       var mock = this.model.getMock();
 
       mock.date = r.format.longDate(mock.date);
-      this.getHeader().find('h1').html(this.model.get('name'));
       this.getContent().html(this.template(mock));
       this.getContent().trigger('create');
       return this;
