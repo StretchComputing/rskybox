@@ -107,43 +107,44 @@ public class Emailer {
     	return sb.toString();
     }
     
-    public static String getNotificationEmailBody(List<NotificationDetails> theNotificationDetailsList, String theUrl) {
+    public static String getNotificationEmailBody(List<NotificationDetails> theNotificationDetailsList, String theRskyboxBaseUrl) {
     	StringBuffer sb = new StringBuffer();
     	buildStandardEmailHeader(sb);
 
         // each notificationDetail in the list is for a separate application
         for(NotificationDetails nd : theNotificationDetailsList) {
-        	sb.append("<div style='margin-bottom:15px;'><a href='" + theUrl + "'>" + nd.getApplicationName() + "</a></div>");
+        	String applicationUrl = theRskyboxBaseUrl + "#application?appId=" + nd.getApplicationId();
+        	sb.append("<div style='margin-bottom:15px;'><a href='" + applicationUrl + "'>" + nd.getApplicationName() + "</a></div>");
         	sb.append("<table style='margin-left:15px;'>");
         	sb.append("<tr>");
-         	String logListUrl = "#logs?appId=" + nd.getApplicationId() + "&status=new";
+         	String logListUrl = theRskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
         	sb.append("<td><a href='" + logListUrl + "'>log</a></td>");
         	sb.append("<td>" + nd.getClientLogCount() + "</td>");
         	sb.append("<td>");
         	if(nd.getClientLogCount() > 0) {
-            	String logUrl = "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
+            	String logUrl = theRskyboxBaseUrl + "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
             	sb.append("<a href='" + logUrl + "'>" + nd.getClientLogMessage() + "</a>");
         	}
         	sb.append("</td>");
         	sb.append("</tr>");
         	sb.append("<tr>");
-         	String crashListUrl = "#crashes?appId=" + nd.getApplicationId() + "&status=new";
+         	String crashListUrl = theRskyboxBaseUrl + "#crashes?appId=" + nd.getApplicationId() + "&status=new";
         	sb.append("<td><a href='" + crashListUrl + "'>crash</a></td>");
         	sb.append("<td>" + nd.getCrashCount() + "</td>");
         	sb.append("<td>");
         	if(nd.getCrashCount() > 0) {
-            	String crashUrl = "#crash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
+            	String crashUrl = theRskyboxBaseUrl + "#crash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
             	sb.append("<a href='" + crashUrl + "'>" + nd.getCrashMessage() + "</a>");
         	}
         	sb.append("</td>");
         	sb.append("</tr>");
         	sb.append("<tr>");
-         	String feedbackListUrl = "#feedbackList?appId=" + nd.getApplicationId() + "&status=new";
+         	String feedbackListUrl = theRskyboxBaseUrl + "#feedbackList?appId=" + nd.getApplicationId() + "&status=new";
         	sb.append("<td><a href='" + feedbackListUrl + "'>feedback</a></td>");
         	sb.append("<td>" + nd.getFeedbackCount() + "</td>");
         	sb.append("<td>");
         	if(nd.getFeedbackCount() > 0) {
-            	String feedbackUrl = "#feedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
+            	String feedbackUrl = theRskyboxBaseUrl + "#feedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
             	sb.append("<a href='" + feedbackUrl + "'>" + nd.getFeedbackMessage() + "</a>");
         	}
         	sb.append("</td>");
@@ -155,12 +156,6 @@ public class Emailer {
     	sb.append("</div>");
     	
     	sb.append("<div style='height:20px;'></div>");
-    	sb.append("<div>");
-    	sb.append("<span style='margin-left:15px; margin-right:10px;'>");
-    	sb.append("<img style='vertical-align:middle;' src='" + RskyboxApplication.APPLICATION_BASE_URL + "images/arrow_right_green_24.png' width='24' height='24' border='0' alt='*'>");
-    	sb.append("</span>");
-    	sb.append("<a href='" + theUrl + "'>Launch rSkybox application</a>");
-    	sb.append("</div>");
     	
     	buildStandardEmailSignature(sb, RskyboxApplication.AUTO_SENDER, null);
     	return sb.toString();

@@ -294,8 +294,10 @@ public class Notification {
 			//////////////////////////////////////////////////
 			// Lists exist, but are empty, so just add to list
 			//////////////////////////////////////////////////
+			log.info("notification array sizes are zero");
 			addNotificationDetails(theNewNotificationDetails);
 		} else {
+			log.info("applicationIds.size = " + this.applicationIds.size());
 			//////////////////////////////////////////////////////////
 			// Lists are non-empty, so must match using application ID
 			//////////////////////////////////////////////////////////
@@ -331,6 +333,7 @@ public class Notification {
             	notification = (Notification)em.createNamedQuery("Notification.getByUserId")
         				.setParameter("userId", userId)
         				.getSingleResult();
+            	log.info("existing notification found in datastore");
         	} catch (NoResultException e) {
     			// this is NOT an error, just the very first time a notification is being sent. Notification will be created just below ...
     		} catch (NonUniqueResultException e) {
@@ -342,6 +345,7 @@ public class Notification {
         	// there is no Notification entity for this user yet, so create it now
         	//////////////////////////////////////////////////////////////////////
         	if(notification == null) {
+        		log.info("new notification instantiated");
         		notification = new Notification();
         		notification.setUserId(userId);
         		notification.setSendGmtDateToFarFuture();  // to start, entity for this user is inactive
@@ -350,9 +354,11 @@ public class Notification {
         	NotificationDetails notificationDetails = new NotificationDetails();
         	notificationDetails.setApplicationId(theApplicationId);
         	notificationDetails.setApplicationName(theAppMember.getApplicationName());
+        	
         	notificationDetails.setCrashCount(0);
         	notificationDetails.setClientLogCount(0);
         	notificationDetails.setFeedbackCount(0);
+
         	if(theNotificationType.equalsIgnoreCase(Notification.CRASH)) {
         		notificationDetails.setCrashCount(1);
             	notificationDetails.setCrashMessage(theMessage);
@@ -414,6 +420,7 @@ public class Notification {
 	}
 	
 	private void addNotificationDetails(NotificationDetails nd) {
+		log.info("addNotificationDetails() entered");
 		////////////////////////////////////////////////////////////////
 		// Convert "normal Java" values to "default" values in Big Table
 		////////////////////////////////////////////////////////////////
@@ -438,9 +445,11 @@ public class Notification {
 		this.crashCounts.add(crashCount);
 
 		String crashMessage = nd.getCrashMessage() == null ? "" : nd.getCrashMessage();
+		log.info("about to add crashMessage = " + crashMessage + " to the crashMessages array");
 		this.crashMessages.add(crashMessage);
 
 		String crashId = nd.getCrashId() == null ? "" : nd.getCrashId();
+		log.info("about to add crashId = " + crashId + " to the crashIds array");
 		this.crashIds.add(crashId);
 
 		// if empty, replace with 0
@@ -508,6 +517,7 @@ public class Notification {
 	
 	// Algorithm: only the first log and ID are persisted for display, the additional ones are discarded.
 	private void updateNotificationDetails(NotificationDetails theNewNotificationDetails, Integer applicationIdIndex) {
+		log.info("updateNotificationDetails() entered");
 		try {
 			String applicationId = theNewNotificationDetails.getApplicationId() == null ? "" : theNewNotificationDetails.getApplicationId();
 			this.applicationIds.set(applicationIdIndex, applicationId);
@@ -515,13 +525,23 @@ public class Notification {
 			String applicationName = theNewNotificationDetails.getApplicationName() == null ? "" : theNewNotificationDetails.getApplicationName();
 			this.applicationNames.set(applicationIdIndex, applicationName);
 			
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// ID and Message Fields updated only for the first entry (that is, when the count is going from zero to one)
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
 			/////////////////////////////////////////////////////////////////////////////////////
 			// Counts are NOT set, but incremented based on value in notificationDetail passed in
 			/////////////////////////////////////////////////////////////////////////////////////
-			
 			Integer newClientLogCount = theNewNotificationDetails.getClientLogCount();
 			if(newClientLogCount > 0) {
 				Integer originalClientLogCount = this.clientLogCounts.get(applicationIdIndex);
+				if(originalClientLogCount == 0) {
+					String clientLogMessage = theNewNotificationDetails.getClientLogMessage() == null ? "" : theNewNotificationDetails.getClientLogMessage();
+					this.clientLogMessages.set(applicationIdIndex, clientLogMessage);
+
+					String clientLogId = theNewNotificationDetails.getClientLogId() == null ? "" : theNewNotificationDetails.getClientLogId();
+					this.clientLogIds.set(applicationIdIndex, clientLogId);
+				}
 				originalClientLogCount++;
 				this.clientLogCounts.set(applicationIdIndex, originalClientLogCount);
 			}
@@ -529,6 +549,13 @@ public class Notification {
 			Integer newCrashCount = theNewNotificationDetails.getCrashCount();
 			if(newCrashCount > 0) {
 				Integer originalCrashCount = this.crashCounts.get(applicationIdIndex);
+				if(originalCrashCount == 0) {
+					String crashMessage = theNewNotificationDetails.getCrashMessage() == null ? "" : theNewNotificationDetails.getCrashMessage();
+					this.crashMessages.set(applicationIdIndex, crashMessage);
+
+					String crashId = theNewNotificationDetails.getCrashId() == null ? "" : theNewNotificationDetails.getCrashId();
+					this.crashIds.set(applicationIdIndex, crashId);
+				}
 				originalCrashCount++;
 				this.crashCounts.set(applicationIdIndex, originalCrashCount);
 			}
@@ -536,6 +563,13 @@ public class Notification {
 			Integer newFeedbackCount = theNewNotificationDetails.getFeedbackCount();
 			if(newFeedbackCount > 0) {
 				Integer originalFeedbackCount = this.feedbackCounts.get(applicationIdIndex);
+				if(originalFeedbackCount == 0) {
+					String feedbackMessage = theNewNotificationDetails.getFeedbackMessage() == null ? "" : theNewNotificationDetails.getFeedbackMessage();
+					this.feedbackMessages.set(applicationIdIndex, feedbackMessage);
+
+					String feedbackId = theNewNotificationDetails.getFeedbackId() == null ? "" : theNewNotificationDetails.getFeedbackId();
+					this.feedbackIds.set(applicationIdIndex, feedbackId);
+				}
 				originalFeedbackCount++;
 				this.feedbackCounts.set(applicationIdIndex, originalFeedbackCount);
 			}
