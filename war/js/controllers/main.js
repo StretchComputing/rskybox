@@ -452,7 +452,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
     } catch (e) {
-      r.log.error(e, 'RSKYBOX.pagebeforechange');
+      r.log.error(e, 'RSKYBOX.main.pagebeforechange');
     }
   });
 
@@ -492,7 +492,7 @@ var RSKYBOX = (function (r, $) {
       { '#enduser[?]id=.*':         { handler: 'enduserShow',         events: 's'   } },
     ], r.controller);
   } catch (e) {
-    r.log.error(e, 'RSKYBOX.router');
+    r.log.error(e, 'RSKYBOX.main.router');
   }
 
 
