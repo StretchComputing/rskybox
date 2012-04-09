@@ -103,7 +103,7 @@ var RSKYBOX = (function (r, $) {
       r.log.info(code, 'ApplicationView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'ApplicationView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'ApplicationView.apiError');
       }
       r.flash.warning(this.apiCodes[code]);
     },
@@ -173,7 +173,7 @@ var RSKYBOX = (function (r, $) {
       r.log.info(code, 'NewApplicationView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'NewApplicationView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'NewApplicationView.apiError');
       }
       r.flash.warning(this.apiCodes[code]);
     },

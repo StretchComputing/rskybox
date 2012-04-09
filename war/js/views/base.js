@@ -62,7 +62,7 @@ var RSKYBOX = (function (r, $) {
         this.model.set('status', 'new');
         break;
       default:
-        r.log.error('Invalid status for: ' + this.model.get('id'), 'View.changeStatus');
+        r.log.warn('Invalid status for: ' + this.model.get('id'), 'View.changeStatus');
         break;
       }
       this.model.save(null, {

@@ -167,7 +167,7 @@ var RSKYBOX = (function (r, $) {
       }
     };
   } catch (e) {
-    r.log.exception(e.stack, 'signup.js:controller');
+    r.log.error(e, 'signup.js:controller');
   }
 
 
@@ -192,7 +192,7 @@ var RSKYBOX = (function (r, $) {
       { '#confirm(?=.*memberConfirmation)':     { handler: 'confirmMemberShow',             events: 's'   } },
     ], r.controller);
   } catch (e1) {
-    r.log.exception(e1.stack, 'signup.js:router');
+    r.log.error(e1, 'signup.js:router');
   }
 
 

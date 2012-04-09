@@ -13,7 +13,7 @@ var RSKYBOX = (function (r, $) {
       var url;
 
       if (!this.apiUrl) {
-        r.log.error('invalid apiUrl', 'r.Base.setUrl');
+        r.log.warn('invalid apiUrl', 'r.Base.setUrl');
         this.url = '';
         return false;
       }
@@ -32,7 +32,7 @@ var RSKYBOX = (function (r, $) {
       var url;
 
       if (!this.apiUrl || !appId) {
-        r.log.error('invalid apiUrl (' + this.apiUrl + ') or appId (' + appId + ')', 'r.Base.setAppUrl');
+        r.log.warn('invalid apiUrl (' + this.apiUrl + ') or appId (' + appId + ')', 'r.Base.setAppUrl');
         this.url = '';
         return false;
       }
@@ -123,7 +123,7 @@ var RSKYBOX = (function (r, $) {
       var field, mock = {};
 
       if (!this.fields) {
-        r.log.error('No fields defined for model', 'BaseModel.getMock');
+        r.log.warn('No fields defined for model', 'BaseModel.getMock');
         return;
       }
 

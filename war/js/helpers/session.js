@@ -8,10 +8,11 @@ var RSKYBOX = (function (r, $) {
     reset: function () {
       try {
         r.log.info('entering', 'storage.reset');
+
         this.clear();
         sessionStorage.setItem('expires', JSON.stringify(new Date(Date.now() + this.interval)));
       } catch (e) {
-        r.log.exception(e, 'storage.reset');
+        r.log.error(e, 'storage.reset');
       }
     },
 
@@ -30,7 +31,7 @@ var RSKYBOX = (function (r, $) {
         }
         return false;
       } catch (e) {
-        r.log.exception(e, 'storage.isStale');
+        r.log.error(e, 'storage.isStale');
       }
     },
 
@@ -66,7 +67,7 @@ var RSKYBOX = (function (r, $) {
         }
         return results;
       } catch (e) {
-        r.log.exception(e, 'storage.getItem');
+        r.log.error(e, 'storage.getItem');
       }
     },
   };
@@ -108,7 +109,7 @@ var RSKYBOX = (function (r, $) {
 
         return model;
       } catch (e) {
-        r.log.exception(e, 'session.getModel');
+        r.log.error(e, 'session.getModel');
       }
     },
 
@@ -138,7 +139,7 @@ var RSKYBOX = (function (r, $) {
 
         return collection;
       } catch (e) {
-        r.log.exception(e, 'session.getCollection');
+        r.log.error(e, 'session.getCollection');
       }
     },
 
@@ -155,7 +156,7 @@ var RSKYBOX = (function (r, $) {
 
     return r;
   } catch (e) {
-    r.log.exception(e, 'RSKYBOX.session.reset');
+    r.log.error(e, 'RSKYBOX.session.reset');
   }
 }(RSKYBOX || {}, jQuery));
 

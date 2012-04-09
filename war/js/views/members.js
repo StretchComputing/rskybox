@@ -157,7 +157,7 @@ var RSKYBOX = (function (r, $) {
 
       r.dump(this.apiCodes);
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'MemberView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'MemberView.apiError');
       }
       r.flash.warning(this.apiCodes[code]);
     },
@@ -229,7 +229,7 @@ var RSKYBOX = (function (r, $) {
       r.log.info(code, 'NewMemberView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'NewMemberView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'NewMemberView.apiError');
       }
       r.flash.warning(this.apiCodes[code]);
     },

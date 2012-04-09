@@ -56,7 +56,7 @@ var RSKYBOX = (function (r, $) {
       r.log.info(code, 'ConfirmNewUserView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'ConfirmNewUserView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'ConfirmNewUserView.apiError');
         this.apiCodes[code] = 'An unknown error occurred. Please try again.';
       }
       this.model.clear({silent: true});
@@ -152,7 +152,7 @@ var RSKYBOX = (function (r, $) {
       r.log.info(code, 'ConfirmExistingUserView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'ConfirmExistingUserView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'ConfirmExistingUserView.apiError');
       }
       this.model.clear({silent: true});
       r.flash.warning(this.apiCodes[code]);
@@ -240,7 +240,7 @@ var RSKYBOX = (function (r, $) {
       }
 
       // Shouldn't see errors except for apiStatus returns handled above.
-      r.log.error('Unexpected execution: ' + response, 'ConfirmMemberView.error');
+      r.log.warn('Unexpected execution: ' + response, 'ConfirmMemberView.error');
     },
 
     apiError: function (jqXHR) {
@@ -251,11 +251,11 @@ var RSKYBOX = (function (r, $) {
         this.proceed();
         return;
       case 606:
-        r.log.error('App Member not found.', 'ConfirmMemberView.apiError');
+        r.log.warn('App Member not found.', 'ConfirmMemberView.apiError');
         this.proceed(true);
         return;
       case undefined:
-        r.log.error('Undefined apiStatus: ' + code, 'ConfirmMemberView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'ConfirmMemberView.apiError');
         break;
       }
       this.model.clear({silent: true});

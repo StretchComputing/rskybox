@@ -82,7 +82,7 @@ var RSKYBOX = (function (r, $) {
       r.log.info(code, 'FeedbackView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'FeedbackView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'FeedbackView.apiError');
       }
 
       r.flash.warning(this.apiCodes[code]);

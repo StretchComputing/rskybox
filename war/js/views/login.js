@@ -54,7 +54,7 @@ var RSKYBOX = (function (r, $) {
       r.log.info(code, 'LoginView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'LoginView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'LoginView.apiError');
       }
       this.model.clear({silent: true});
       r.flash.warning(this.apiCodes[code]);

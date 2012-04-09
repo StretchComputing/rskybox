@@ -174,7 +174,7 @@ var RSKYBOX = (function (r, $) {
       r.log.info(code, 'SettingsView.apiError');
 
       if (!this.apiCodes[code]) {
-        r.log.error('Undefined apiStatus: ' + code, 'SettingsView.apiError');
+        r.log.warn('Undefined apiStatus: ' + code, 'SettingsView.apiError');
       }
       r.flash.warning(this.apiCodes[code]);
     },

@@ -11,7 +11,7 @@ var RSKYBOX = (function (r, $) {
           collection: new r.Applications(),
         });
       } catch (e) {
-        r.log.exception(e, 'MainController.applicationsInit');
+        r.log.error(e, 'MainController.applicationsInit');
       }
     },
 
@@ -332,7 +332,7 @@ var RSKYBOX = (function (r, $) {
         return;
       }
     } catch (e) {
-      r.log.exception(e.stack, 'main.js:pagebeforechange');
+      r.log.error(e, 'pagebeforechange');
     }
   });
 
@@ -372,7 +372,7 @@ var RSKYBOX = (function (r, $) {
       { '#enduser[?]id=.*':         { handler: 'enduserShow',         events: 's'   } },
     ], r.controller);
   } catch (e) {
-    r.log.exception(e.stack, 'main.js:router');
+    r.log.error(e, 'router');
   }
 
 
