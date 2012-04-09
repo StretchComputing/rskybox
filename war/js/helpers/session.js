@@ -17,7 +17,13 @@ var RSKYBOX = (function (r, $) {
     },
 
     clear: function () {
-      sessionStorage.clear();
+      try {
+        r.log.info('entering', 'storage.clear');
+
+        sessionStorage.clear();
+      } catch (e) {
+        r.log.error(e, 'storage.clear');
+      }
     },
 
     isStale: function () {
@@ -36,22 +42,34 @@ var RSKYBOX = (function (r, $) {
     },
 
     setFetching: function (item) {
-      r.log.info(item, 'storage.setFetching');
+      try {
+        r.log.info(item, 'storage.setFetching');
 
-      sessionStorage.setItem(item, 'fetching');
+        sessionStorage.setItem(item, 'fetching');
+      } catch (e) {
+        r.log.error(e, 'storage.setFetching');
+      }
     },
 
     isFetching: function (item) {
-      r.log.info(item, 'storage.isFetching');
+      try {
+        r.log.info(item, 'storage.isFetching');
 
-      return sessionStorage.getItem(item) === 'fetching';
+        return sessionStorage.getItem(item) === 'fetching';
+      } catch (e) {
+        r.log.error(e, 'storage.isFetching');
+      }
     },
 
     setItem: function (item, value) {
-      r.log.info(item, 'storage.setItem');
+      try {
+        r.log.info(item, 'storage.setItem');
 
-      this.isStale();
-      sessionStorage.setItem(item, JSON.stringify(value));
+        this.isStale();
+        sessionStorage.setItem(item, JSON.stringify(value));
+      } catch (e) {
+        r.log.error(e, 'storage.setItem');
+      }
     },
 
     getItem: function (item) {
@@ -81,7 +99,13 @@ var RSKYBOX = (function (r, $) {
     },
 
     getEntity: function (key) {
-      return storage.getItem(key);
+      try {
+        r.log.info(key, 'session.getEntity');
+
+        return storage.getItem(key);
+      } catch (e) {
+        r.log.error(e, 'session.getEntity');
+      }
     },
 
     getModel: function (key, model) {
@@ -144,9 +168,13 @@ var RSKYBOX = (function (r, $) {
     },
 
     reset: function () {
-      r.log.info('entering', 'session.reset');
+      try {
+        r.log.info('entering', 'session.reset');
 
-      storage.reset();
+        storage.reset();
+      } catch (e) {
+        r.log.error(e, 'session.reset');
+      }
     },
   };
 

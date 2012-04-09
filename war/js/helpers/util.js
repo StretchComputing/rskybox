@@ -10,7 +10,8 @@ var RSKYBOX = (function (r, $) {
     var general = {
       401: function (jqXHR) {
         try {
-          r.log.info('401 - unauthorized', 'RSKYBOX.statusCodeHandlers');
+          // TODO - log to localStorage
+          console.info('401 - unauthorized', 'RSKYBOX.statusCodeHandlers');
           // TODO - Add flash message to home page after 401 occurs
           r.flash.set('warning', 'Login required');
           r.logOut();
@@ -21,22 +22,31 @@ var RSKYBOX = (function (r, $) {
       },
       404: function () {
         // TODO - display a 404 page
-        r.log.warn('404 - not found', 'RSKYBOX.statusCodeHandlers');
+        // TODO - log to localStorage
+        console.warn('404 - not found', 'RSKYBOX.statusCodeHandlers');
       },
       500: function () {
         // TODO - display a 500 page
-        r.log.warn('500 - server error', 'RSKYBOX.statusCodeHandlers');
+        // TODO - log to localStorage
+        console.warn('500 - server error', 'RSKYBOX.statusCodeHandlers');
       }
     };
-    if (apiError) {
-      $.extend(general, { 422: apiError });
+
+    try {
+      if (apiError) {
+        $.extend(general, { 422: apiError });
+      }
+      return general;
+    } catch (e) {
+      // TODO - log to localStorage
+      console.error(e, 'RSKYBOX.statusCodeHandlers');
     }
-    return general;
   };
 
 
   r.dump = function (object) {
-    r.log.debug(JSON.stringify(object));
+    // TODO - log to localStorage
+    console.dir(object);
   };
 
   r.SkyboxLog = r.Log.extend({
@@ -169,23 +179,37 @@ var RSKYBOX = (function (r, $) {
     },
 
     success: function (model, response) {
-      r.log.local('entering', 'SkyboxLog.success');
+      console.info('entering', 'SkyboxLog.success');
     },
 
     errorHandler: function (model, response) {
-      if (response.responseText) { return; }  // This is an apiError.
-      r.log.local(response, 'SkyboxLog.errorHandler');
-      r.flash.warning(response);              // This is a validation error.
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+
+        // TODO - log to localStorage
+        console.warn(response, 'SkyboxLog.errorHandler');
+        r.flash.warning(response);              // This is a validation error.
+      } catch (e) {
+        // TODO - log to localStorage
+        console.error(e, 'SkyboxLog.errorHandler');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = r.getApiStatus(jqXHR.responseText);
-      r.log.local(code, 'SkyboxLog.apiError');
+      try {
+        var code = r.getApiStatus(jqXHR.responseText);
+        // TODO - log to localStorage
+        console.info(code, 'SkyboxLog.apiError');
 
-      if (!this.apiCodes[code]) {
-        r.log.local('Undefined apiStatus: ' + code, 'SkyboxLog.apiError');
+        if (!this.apiCodes[code]) {
+          // TODO - log to localStorage
+          console.info('Undefined apiStatus: ' + code, 'SkyboxLog.apiError');
+        }
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        // TODO - log to localStorage
+        console.error(e, 'SkyboxLog.apiError');
       }
-      r.flash.warning(this.apiCodes[code]);
     },
 
     apiCodes: {
