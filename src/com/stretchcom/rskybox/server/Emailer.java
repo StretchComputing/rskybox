@@ -115,7 +115,7 @@ public class Emailer {
         for(NotificationDetails nd : theNotificationDetailsList) {
         	String applicationUrl = theRskyboxBaseUrl + "#application?appId=" + nd.getApplicationId();
         	sb.append("<div style='margin-bottom:15px;'><a href='" + applicationUrl + "'>" + nd.getApplicationName() + "</a></div>");
-        	sb.append("<table style='margin-left:15px;'>");
+        	sb.append("<table style='margin-left:15px; border: 1px solid black;'>");
         	sb.append("<tr>");
          	String logListUrl = theRskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
         	sb.append("<td><a href='" + logListUrl + "'>log</a></td>");
@@ -166,7 +166,7 @@ public class Emailer {
     	sb.append("<head></head>");
     	sb.append("<body>");
     	
-    	sb.append("<div><img src='" + RskyboxApplication.APPLICATION_BASE_URL + "images/rskyboxEmailLogo.png' width='160' height='106' border='0' alt='rSkybox Logo'></div>");
+    	sb.append("<div><img src='" + RskyboxApplication.APPLICATION_BASE_URL + "images/rskyboxEmailLogo.png' width='80' height='53' border='0' alt='rSkybox Logo'></div>");
     	sb.append("<div style='height:5px;'></div>");
     	
     	sb.append("<div style='padding:20px; border-radius:10px; -o-border-radius:10px; -icab-border-radius:10px; -khtml-border-radius:10px; ");
