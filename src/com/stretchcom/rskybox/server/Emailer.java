@@ -108,19 +108,21 @@ public class Emailer {
     }
     
     public static String getNotificationEmailBody(List<NotificationDetails> theNotificationDetailsList, String theRskyboxBaseUrl) {
+    	theRskyboxBaseUrl += "html5";
     	StringBuffer sb = new StringBuffer();
     	buildStandardEmailHeader(sb);
 
         // each notificationDetail in the list is for a separate application
+    	int rowIndex = 0;
         for(NotificationDetails nd : theNotificationDetailsList) {
         	String applicationUrl = theRskyboxBaseUrl + "#application?appId=" + nd.getApplicationId();
         	sb.append("<div style='margin-bottom:15px;'><a href='" + applicationUrl + "'>" + nd.getApplicationName() + "</a></div>");
         	sb.append("<table style='margin-left:15px; border: 1px solid black;'>");
         	sb.append("<tr>");
          	String logListUrl = theRskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
-        	sb.append("<td><a href='" + logListUrl + "'>log</a></td>");
-        	sb.append("<td>" + nd.getClientLogCount() + "</td>");
-        	sb.append("<td>");
+        	sb.append("<td style='background-color:#FFFFFF;'><a href='" + logListUrl + "'>log</a></td>");
+        	sb.append("<td style='background-color:#FFFFFF; width:25px;'>" + nd.getClientLogCount() + "</td>");
+        	sb.append("<td style='background-color:#FFFFFF;'>");
         	if(nd.getClientLogCount() > 0) {
             	String logUrl = theRskyboxBaseUrl + "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
             	sb.append("<a href='" + logUrl + "'>" + nd.getClientLogMessage() + "</a>");
@@ -129,9 +131,9 @@ public class Emailer {
         	sb.append("</tr>");
         	sb.append("<tr>");
          	String crashListUrl = theRskyboxBaseUrl + "#crashes?appId=" + nd.getApplicationId() + "&status=new";
-        	sb.append("<td><a href='" + crashListUrl + "'>crash</a></td>");
-        	sb.append("<td>" + nd.getCrashCount() + "</td>");
-        	sb.append("<td>");
+        	sb.append("<td style=''><a href='" + crashListUrl + "'>crash</a></td>");
+        	sb.append("<td style='width:25px;'>" + nd.getCrashCount() + "</td>");
+        	sb.append("<td style=''>");
         	if(nd.getCrashCount() > 0) {
             	String crashUrl = theRskyboxBaseUrl + "#crash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
             	sb.append("<a href='" + crashUrl + "'>" + nd.getCrashMessage() + "</a>");
@@ -140,9 +142,9 @@ public class Emailer {
         	sb.append("</tr>");
         	sb.append("<tr>");
          	String feedbackListUrl = theRskyboxBaseUrl + "#feedbackList?appId=" + nd.getApplicationId() + "&status=new";
-        	sb.append("<td><a href='" + feedbackListUrl + "'>feedback</a></td>");
-        	sb.append("<td>" + nd.getFeedbackCount() + "</td>");
-        	sb.append("<td>");
+        	sb.append("<td style='background-color:#FFFFFF;'><a href='" + feedbackListUrl + "'>feedback</a></td>");
+        	sb.append("<td style='background-color:#FFFFFF; width:25px;'>" + nd.getFeedbackCount() + "</td>");
+        	sb.append("<td style='background-color:#FFFFFF;'>");
         	if(nd.getFeedbackCount() > 0) {
             	String feedbackUrl = theRskyboxBaseUrl + "#feedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
             	sb.append("<a href='" + feedbackUrl + "'>" + nd.getFeedbackMessage() + "</a>");
@@ -150,12 +152,14 @@ public class Emailer {
         	sb.append("</td>");
         	sb.append("</tr>");
         	sb.append("</table>");
+        	
+        	rowIndex++;
 		}
     	
     	// end of div with background color. This div starts in the email header
     	sb.append("</div>");
     	
-    	sb.append("<div style='height:20px;'></div>");
+    	sb.append("<div style='height:1px;'></div>");
     	
     	buildStandardEmailSignature(sb, RskyboxApplication.AUTO_SENDER, null);
     	return sb.toString();
