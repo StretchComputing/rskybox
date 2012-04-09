@@ -10,20 +10,22 @@ var RSKYBOX = (function (r, $) {
     var general = {
       401: function (jqXHR) {
         try {
-          r.log.info('401 - unauthorized', 'statusCodeHandlers');
+          r.log.info('401 - unauthorized', 'RSKYBOX.statusCodeHandlers');
           // TODO - Add flash message to home page after 401 occurs
           r.flash.set('warning', 'Login required');
           r.logOut();
         } catch (e) {
           // TODO - log to localStorage
-          console.log(e.stack, 'statusCodeHandlers.general.401:util.js');
+          console.log(e.stack, 'RSKYBOX.statusCodeHandlers:general:401');
         }
       },
       404: function () {
-        r.log.error('404 - not found', 'statusCodeHandlers');
+        // TODO - display a 404 page
+        r.log.error('404 - not found', 'RSKYBOX.statusCodeHandlers');
       },
       500: function () {
-        r.log.error('500 - server error', 'statusCodeHandlers');
+        // TODO - display a 500 page
+        r.log.error('500 - server error', 'RSKYBOX.statusCodeHandlers');
       }
     };
     if (apiError) {
@@ -95,7 +97,7 @@ var RSKYBOX = (function (r, $) {
         }
       } catch (e) {
         // TODO - log to localStorage
-        console.log(e.stack, 'rSkyboxLog.base:util.js');
+        console.log(e.stack, 'rSkyboxLog.base');
       }
     },
 
@@ -138,7 +140,7 @@ var RSKYBOX = (function (r, $) {
         });
       } catch (e) {
         // TODO - log to localStorage
-        console.log(e.stack, 'rSkyboxLog.logToServer:util.js');
+        console.log(e.stack, 'rSkyboxLog.logToServer');
       }
     },
 
@@ -148,7 +150,7 @@ var RSKYBOX = (function (r, $) {
 
     errorHandler: function (model, response) {
       if (response.responseText) { return; }  // This is an apiError.
-      r.log.local(response, 'SkyboxLog.error');
+      r.log.local(response, 'SkyboxLog.errorHandler');
       r.flash.warning(response);              // This is a validation error.
     },
 
@@ -181,7 +183,7 @@ var RSKYBOX = (function (r, $) {
     r.log.set('appId', Cookie.get('appId'));
   } catch (e) {
     // TODO - log to localStorage
-    console.log(e.stack, 'logsetup:util.js');
+    console.log(e.stack, 'RSKYBOX.logsetup');
   }
 
 
@@ -200,38 +202,60 @@ var RSKYBOX = (function (r, $) {
       },
 
       setItem: function (item, value) {
-        r.log.info(item, 'storage.setItem.entering');
+        r.log.info(item, 'storage.setItem');
+
         localStorage.setItem(item, JSON.stringify(value));
       },
 
       getItem: function (item) {
-        var results;
+        try {
+          var results;
+          r.log.info(item, 'storage.getItem');
 
-        r.log.info(item, 'storage.getItem.entering');
-
-        results = JSON.parse(localStorage.getItem(item));
-        if (!results || results === '' || results === 'fetching') {
-          return false;
+          results = JSON.parse(localStorage.getItem(item));
+          if (!results || results === '' || results === 'fetching') {
+            return false;
+          }
+          return results;
+        } catch (e) {
+          r.log.exception(e, 'storage.getItem');
         }
-        return results;
       },
     };
 
 
   // Handle logging in and logging out.
   r.logIn = function (token) {
-    Cookie.set('token', token, 9000, '/');
-    r.changePage('applications');
+    try {
+      r.log.info('entering', 'RSKYBOX.logIn');
+
+      Cookie.set('token', token, 9000, '/');
+      r.changePage('applications');
+    } catch (e) {
+      r.log.exception(e, 'RSKYBOX.logIn');
+    }
   };
 
   r.logOut = function () {
-    Cookie.unset('token', '/');
-    r.changePage('root', 'signup');
-    sessionStorage.clear();
+    try {
+      r.log.info('entering', 'RSKYBOX.logOut');
+
+      Cookie.unset('token', '/');
+      r.changePage('root', 'signup');
+      sessionStorage.clear();
+    } catch (e) {
+      r.log.exception(e, 'RSKYBOX.logOut');
+    }
   };
 
   r.isLoggedIn = function () {
-    return !!Cookie.get('token');
+    try {
+      r.log.info('entering', 'RSKYBOX.isLoggedIn');
+
+      return !!Cookie.get('token');
+    } catch (e) {
+      r.log.exception(e, 'RSKYBOX.isLoggedIn');
+    }
   };
 
 
@@ -239,6 +263,7 @@ var RSKYBOX = (function (r, $) {
   r.changePage = function (page, area, params) {
     try {
       var newPage, pages, query;
+      r.log.info('entering', 'RSKYBOX.changePage');
 
       if (!page) { page = ''; }
       if (!area) { area = 'app'; }
@@ -266,17 +291,25 @@ var RSKYBOX = (function (r, $) {
       r.log.info(newPage, 'RSKYBOX.changePage');
       window.location = newPage;
     } catch (e) {
-      r.log.exception(e, 'changePage:util.js');
+      r.log.exception(e, 'RSKYBOX.changePage');
     }
   };
 
 
   r.getHeaderDiv = function () {
-    return $.mobile.activePage.find(":jqmData(role='header')");
+    try {
+      return $.mobile.activePage.find(":jqmData(role='header')");
+    } catch (e) {
+      r.log.exception(e, 'RSKYBOX.getHeaderDiv');
+    }
   };
 
   r.getContentDiv = function () {
-    return $.mobile.activePage.find(":jqmData(role='content')");
+    try {
+      return $.mobile.activePage.find(":jqmData(role='content')");
+    } catch (e) {
+      r.log.exception(e, 'RSKYBOX.getContentDiv');
+    }
   };
 
 
@@ -302,7 +335,7 @@ var RSKYBOX = (function (r, $) {
         r.log.debug(message, 'flash.display');
         flash.clear();
       } catch (e) {
-        r.log.exception(e, 'flash.display:util.js');
+        r.log.exception(e, 'flash.display');
       }
     };
 
@@ -325,13 +358,13 @@ var RSKYBOX = (function (r, $) {
 
     flash.set = function (type, message, duration) {
       try {
-        r.log.info('entering', 'flash.set');
         var value = { type: type, message: message, };
+        r.log.info('entering', 'flash.set');
 
         if (duration) { value.duration = duration; }
         storage.setItem('flash', value);
       } catch (e) {
-        r.log.exception(e, 'flash.set:util.js');
+        r.log.exception(e, 'flash.set');
       }
     };
 
@@ -360,12 +393,16 @@ var RSKYBOX = (function (r, $) {
           break;
         }
       } catch (e) {
-        r.log.exception(e, 'flash.check:util.js');
+        r.log.exception(e, 'flash.check');
       }
     };
 
     flash.clear = function () {
-      localStorage.removeItem('flash');
+      try {
+        localStorage.removeItem('flash');
+      } catch (e) {
+        r.log.exception(e, 'flash.clear');
+      }
     };
 
     return flash;
@@ -387,26 +424,38 @@ var RSKYBOX = (function (r, $) {
 
       return query;
     } catch (e) {
-      r.log.exception(e, 'buildQueryString:util.js');
+      r.log.exception(e, 'RSKYBOX.buildQueryString');
     }
   };
 
 
   // Pull the apiStatus value out of an HTTP error response.
   r.getApiStatus = function (responseText) {
-    return JSON.parse(responseText).apiStatus;
+    try {
+      return JSON.parse(responseText).apiStatus;
+    } catch (e) {
+      r.log.exception(e, 'RSKYBOX.getApiStatus');
+    }
   };
 
 
   // Simple RegEx to ensure a valid phone number format.
   r.isValidPhoneNumber = function (phoneNumber) {
-    return (/^\(?([0-9]{3})\)?[\-. ]?([0-9]{3})[\-. ]?([0-9]{4})$/).test(phoneNumber);
+    try {
+      return (/^\(?([0-9]{3})\)?[\-. ]?([0-9]{3})[\-. ]?([0-9]{4})$/).test(phoneNumber);
+    } catch (e) {
+      r.log.exception(e, 'RSKYBOX.isValidPhoneNumber');
+    }
   };
 
 
   // Simple RegEx to ensure a valid email address format.
   r.isValidEmailAddress = function (emailAddress) {
-    return (/^[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/).test(emailAddress);
+    try {
+      return (/^[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+(?:\.[a-z0-9!#$%&'*+\/=?\^_`{|}~\-]+)*@(?:[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9\-]*[a-z0-9])?$/).test(emailAddress);
+    } catch (e) {
+      r.log.exception(e, 'RSKYBOX.isValidEmailAddress');
+    }
   };
 
 
@@ -417,7 +466,7 @@ var RSKYBOX = (function (r, $) {
 
         return window.dateFormat(isoDate, 'ddd, mmm d yyyy, HH:MM:ss' + (showMilliseconds ? '.l' : ''));
       } catch (e) {
-        r.log.exception(e, 'format.longDate:util.js');
+        r.log.exception(e, 'format.longDate');
       }
     },
   };
@@ -446,11 +495,13 @@ var RSKYBOX = (function (r, $) {
         pageLoadCount += 1;
         break;
       default:
-        console.log('pageLoadingCount called with inappropriate operator.');
+      // TODO - log to localStorage
+        console.log('inappropriate operator', 'pageLoad');
       }
       return pageLoadCount;
     } catch (e) {
-      RSKYBOX.log.exception(e, 'pageLoad:util.js');
+      // TODO - log to localStorage
+      console.log(e, 'pageLoad');
     }
   };
 
@@ -476,7 +527,7 @@ var RSKYBOX = (function (r, $) {
       showPageLoadingMessage();
     } catch (e) {
       // TODO - log to localStorage
-      console.log(e.stack, 'ajaxSend:util.js');
+      console.log(e.stack, 'ajaxSend');
     }
   });
 
@@ -489,7 +540,7 @@ var RSKYBOX = (function (r, $) {
       hidePageLoadingMessage();
     } catch (e) {
       // TODO - log to localStorage
-      console.log(e.stack, 'ajaxComplete:util.js');
+      console.log(e.stack, 'ajaxComplete');
     }
   });
 }(jQuery));

@@ -11,6 +11,7 @@ var RSKYBOX = (function (r, $) {
           collection: new r.Applications(),
         });
       } catch (e) {
+        r.log.exception(e, 'MainController.applicationsInit');
       }
     },
 
