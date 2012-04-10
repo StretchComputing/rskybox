@@ -4,70 +4,99 @@ var RSKYBOX = (function (r, $) {
 
   r.JqmPageBaseView = Backbone.View.extend({
     constructor: function () {
-      r.log.info('entering', 'JqmPageBaseView.constructor');
-      Backbone.View.prototype.constructor.apply(this, arguments);
-      if (this.options && this.options.applications) {
-        this.options.applications.bind('reset', this.updateApplicationName, this);
+      try {
+        r.log.info('entering', 'JqmPageBaseView.constructor');
+
+        Backbone.View.prototype.constructor.apply(this, arguments);
+        if (this.options && this.options.applications) {
+          this.options.applications.bind('reset', this.updateApplicationName, this);
+        }
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.constructor');
       }
     },
 
     getHeader: function () {
-      return this.$el.find(':jqmData(role=header)');
+      try {
+        return this.$el.find(':jqmData(role=header)');
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.getHeader');
+      }
     },
     getContent: function () {
-      return this.$el.find(':jqmData(role=content)');
+      try {
+        return this.$el.find(':jqmData(role=content)');
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.getContent');
+      }
     },
     getFooter: function () {
-      return this.$el.find(':jqmData(role=footer)');
+      try {
+        return this.$el.find(':jqmData(role=footer)');
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView');
+      }
     },
 
     updateApplicationName: function () {
-      var app;
-      r.log.info('entering', 'JqmPageBaseView.updateApplicationName');
+      try {
+        var app;
+        r.log.info('entering', 'JqmPageBaseView.updateApplicationName');
 
-      if (this.options.applications.isEmpty()) { return; }
+        if (this.options.applications.isEmpty()) { return; }
 
-      app = this.options.applications.findById(r.session.params.appId);
-      this.$el.find('.applicationName').html(app.get('name'));
+        app = this.options.applications.findById(r.session.params.appId);
+        this.$el.find('.applicationName').html(app.get('name'));
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.updateApplicationName');
+      }
     },
 
     renderArchiveButton: function (pageLink) {
-      var
-        el,
-        hrefTemplate = _.template('<%= pageLink %>?appId=<%= appId %>&status=<%= status %>'),
-        model = {},
-        params = r.session.params;
+      try {
+        var
+          el,
+          hrefTemplate = _.template('<%= pageLink %>?appId=<%= appId %>&status=<%= status %>'),
+          model = {},
+          params = r.session.params;
 
-      model.appId = params.appId;
-      model.pageLink = pageLink;
-      if (params.status === 'archived') {
-        model.status = 'new';
-        model.display = 'Active';
-      } else {
-        model.status = 'archived';
-        model.display = 'Archives';
+        model.appId = params.appId;
+        model.pageLink = pageLink;
+        if (params.status === 'archived') {
+          model.status = 'new';
+          model.display = 'Active';
+        } else {
+          model.status = 'archived';
+          model.display = 'Archives';
+        }
+
+        el = this.getHeader().find('.archives');
+        el.attr('href', hrefTemplate(model));
+        el.find('.ui-btn-text').text(model.display);
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.renderArchiveButton');
       }
-
-      el = this.getHeader().find('.archives');
-      el.attr('href', hrefTemplate(model));
-      el.find('.ui-btn-text').text(model.display);
     },
 
     changeStatus: function () {
-      switch (this.model.get('status')) {
-      case 'new':
-        this.model.set('status', 'archived');
-        break;
-      case 'archived':
-        this.model.set('status', 'new');
-        break;
-      default:
-        r.log.warn('Invalid status for: ' + this.model.get('id'), 'View.changeStatus');
-        break;
+      try {
+        switch (this.model.get('status')) {
+        case 'new':
+          this.model.set('status', 'archived');
+          break;
+        case 'archived':
+          this.model.set('status', 'new');
+          break;
+        default:
+          r.log.warn('Invalid status for: ' + this.model.get('id'), 'View.changeStatus');
+          break;
+        }
+        this.model.save(null, {
+          statusCode: r.statusCodeHandlers(this.apiError),
+        });
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.changeStatus');
       }
-      this.model.save(null, {
-        statusCode: r.statusCodeHandlers(this.apiError),
-      });
     },
   });
 
