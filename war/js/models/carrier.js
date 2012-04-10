@@ -11,11 +11,19 @@ var RSKYBOX = (function (r, $) {
     apiUrl: '/mobileCarriers',
 
     initialize: function () {
-      this.setUrl();
+      try {
+        this.setUrl();
+      } catch (e) {
+        r.log.error(e, 'Carriers.initialize');
+      }
     },
 
     parse: function (response) {
-      return response.mobileCarriers;
+      try {
+        return response.mobileCarriers;
+      } catch (e) {
+        r.log.error(e, 'Carriers.parse');
+      }
     }
   });
 
