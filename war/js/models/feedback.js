@@ -15,8 +15,12 @@ var RSKYBOX = (function (r, $) {
     },
 
     parse: function (response) {
-      response.audioUrl = '/audio/' + response.appId + '/' + response.id;
-      return response;
+      try {
+        response.audioUrl = '/audio/' + response.appId + '/' + response.id;
+        return response;
+      } catch (e) {
+        r.log.error(e, 'Feedback.parse');
+      }
     },
   });
 
@@ -26,7 +30,11 @@ var RSKYBOX = (function (r, $) {
     apiUrl: '/feedback',
 
     parse: function (response) {
-      return response.feedback;
+      try {
+        return response.feedback;
+      } catch (e) {
+        r.log.error(e, 'FeedbackList.parse');
+      }
     }
   });
 
