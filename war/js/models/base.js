@@ -10,40 +10,48 @@ var RSKYBOX = (function (r, $) {
     // Sets the model's URL using a base REST url and the API url.
     // If there is an ID, set the urlRoot for use outside of a collection.
     setUrl: function () {
-      var url;
+      try {
+        var url;
 
-      if (!this.apiUrl) {
-        r.log.warn('invalid apiUrl', 'r.Base.setUrl');
-        this.url = '';
-        return false;
-      }
+        if (!this.apiUrl) {
+          r.log.warn('invalid apiUrl', 'r.Base.setUrl');
+          this.url = '';
+          return false;
+        }
 
-      url = this.restUrl + this.apiUrl;
-      if (this.get('id')) {
-        this.urlRoot = url;
-        delete this.url;
-      } else {
-        this.url = url;
+        url = this.restUrl + this.apiUrl;
+        if (this.get('id')) {
+          this.urlRoot = url;
+          delete this.url;
+        } else {
+          this.url = url;
+        }
+        return true;
+      } catch (e) {
+        r.log.error(e, 'Model:Base.setUrl');
       }
-      return true;
     },
 
     setAppUrl: function (appId) {
-      var url;
+      try {
+        var url;
 
-      if (!this.apiUrl || !appId) {
-        r.log.warn('invalid apiUrl (' + this.apiUrl + ') or appId (' + appId + ')', 'r.Base.setAppUrl');
-        this.url = '';
-        return false;
-      }
+        if (!this.apiUrl || !appId) {
+          r.log.warn('invalid apiUrl (' + this.apiUrl + ') or appId (' + appId + ')', 'r.Base.setAppUrl');
+          this.url = '';
+          return false;
+        }
 
-      url = this.restUrl + this.appUrl + appId + this.apiUrl;
-      if (this.get('id')) {
-        this.urlRoot = url;
-      } else {
-        this.url = url;
+        url = this.restUrl + this.appUrl + appId + this.apiUrl;
+        if (this.get('id')) {
+          this.urlRoot = url;
+        } else {
+          this.url = url;
+        }
+        return true;
+      } catch (e) {
+        r.log.error(e, 'Model:Base.setAppUrl');
       }
-      return true;
     },
   };
 
@@ -72,7 +80,11 @@ var RSKYBOX = (function (r, $) {
         };
 
         partial.any = function () {
-          return Object.keys(fields).length > 0;
+          try {
+            return Object.keys(fields).length > 0;
+          } catch (e) {
+            r.log.error(e, 'BaseModel.constructor.partial.any');
+          }
         };
 
         // model: the model that's being saved
@@ -80,25 +92,28 @@ var RSKYBOX = (function (r, $) {
         // options: backbone save options, including ajax handlers
         // force: whether or not to proceed with update even if no changes were made
         partial.save = function (model, attrs, options, force) {
-          var proceed = false;
+          try {
+            var proceed = false;
 
-          // Set the fields that have changed.
-          Object.keys(attrs).forEach(function (key) {
-            if (force || model.get(key) !== attrs[key]) {
-              partial.setField(key);
-              proceed = true;
+            // Set the fields that have changed.
+            Object.keys(attrs).forEach(function (key) {
+              if (force || model.get(key) !== attrs[key]) {
+                partial.setField(key);
+                proceed = true;
+              }
+            });
+
+            if (proceed) {
+              model.save(attrs, options);
             }
-          });
-
-          if (proceed) {
-            model.save(attrs, options);
+            partial.clear();
+          } catch (e) {
+            r.log.error(e, 'BaseModel.constructor.partial.save');
           }
-          partial.clear();
         };
 
         return partial;
       }());
-
     },
 
     // Unsets all attributes that are undefined, null, '', or 0 in prepartion
@@ -107,50 +122,66 @@ var RSKYBOX = (function (r, $) {
     // !!! This function should be used with caution !!!
     //
     prepareNewModel: function () {
-      if (this.isNew()) {
-        Object.keys(this.attributes).forEach(function (key) {
-          if (!this.get(key)) {
-            this.unset(key, {silent: true});
-          }
-        }, this);
+      try {
+        if (this.isNew()) {
+          Object.keys(this.attributes).forEach(function (key) {
+            if (!this.get(key)) {
+              this.unset(key, {silent: true});
+            }
+          }, this);
+        }
+        return this;
+      } catch (e) {
+        r.log.error(e, 'BaseModel.prepareNewModel');
       }
-      return this;
     },
 
     // Gets a mock object for use in HTML forms. Set up a 'fields' attribute in the model
     // that has all the form/model fields in order to use this method.
     getMock: function () {
-      var field, mock = {};
+      try {
+        var field, mock = {};
 
-      if (!this.fields) {
-        r.log.warn('No fields defined for model', 'BaseModel.getMock');
-        return;
+        if (!this.fields) {
+          r.log.warn('No fields defined for model', 'BaseModel.getMock');
+          return;
+        }
+
+        Object.keys(this.fields).forEach(function (field) {
+          mock[field] = this.get(field) || null;
+        }, this);
+        return mock;
+      } catch (e) {
+        r.log.error(e, 'BaseModel.getMock');
       }
-
-      Object.keys(this.fields).forEach(function (field) {
-        mock[field] = this.get(field) || null;
-      }, this);
-      return mock;
     },
 
     isFieldBeingUpdated: function (field) {
-      return field && (!this.partial.any() || this.partial.getFields()[field]);
+      try {
+        return field && (!this.partial.any() || this.partial.getFields()[field]);
+      } catch (e) {
+        r.log.error(e, 'BaseModel.isFieldBeingUpdated');
+      }
     },
 
     // Partial updates work because we intercept toJSON when we want to work with
     // a subset of fields from the model.
     toJSON: function () {
-      var json = {};
+      try {
+        var json = {};
 
-      if (this.partial.any()) {
-        Object.keys(this.partial.getFields()).forEach(function (field) {
-          json[field] = this.get(field);
-        }, this);
-        return json;
+        if (this.partial.any()) {
+          Object.keys(this.partial.getFields()).forEach(function (field) {
+            json[field] = this.get(field);
+          }, this);
+          return json;
+        }
+
+        // This is the exact line from backbone's toJSON method.
+        return _.clone(this.attributes);
+      } catch (e) {
+        r.log.error(e, 'BaseModel.toJSON');
       }
-
-      // This is the exact line from backbone's toJSON method.
-      return _.clone(this.attributes);
     },
   });
 
