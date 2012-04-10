@@ -3,10 +3,14 @@ var RSKYBOX = (function (r, $) {
 
 
   r.Login = r.BaseModel.extend({
-    apiUrl: '\/users\/token',
+    apiUrl: '/users/token',
 
     initialize: function () {
-      this.setUrl();
+      try {
+        this.setUrl();
+      } catch (e) {
+        r.log.error(e, 'Login.initialize');
+      }
     },
 
     fields: {
@@ -16,22 +20,30 @@ var RSKYBOX = (function (r, $) {
     },
 
     getQueryObject: function () {
-      return {
-        userName: this.get('emailAddress') || this.get('phoneNumber') || '',
-        password: this.get('password')
-      };
+      try {
+        return {
+          userName: this.get('emailAddress') || this.get('phoneNumber') || '',
+          password: this.get('password')
+        };
+      } catch (e) {
+        r.log.error(e, 'Login.getQueryObject');
+      }
     },
 
     validate: function (attrs) {
-      var password, PASSWORD_MIN_LEN = 6;
+      try {
+        var password, PASSWORD_MIN_LEN = 6;
 
-      password = attrs.password;
-      if ((password && password.length >= PASSWORD_MIN_LEN) &&
-          (r.isValidEmailAddress(attrs.emailAddress) || r.isValidPhoneNumber(attrs.phoneNumber))) {
-        r.log.info('credentials are valid', 'Login.validate');
-        return;
+        password = attrs.password;
+        if ((password && password.length >= PASSWORD_MIN_LEN) &&
+            (r.isValidEmailAddress(attrs.emailAddress) || r.isValidPhoneNumber(attrs.phoneNumber))) {
+          r.log.info('credentials are valid', 'Login.validate');
+          return;
+        }
+        return 'A valid email address -OR- valid phone number, -AND- a valid password is required.';
+      } catch (e) {
+        r.log.error(e, 'Login.validate');
       }
-      return 'A valid email address -OR- valid phone number, -AND- a valid password is required.';
     }
   });
 
