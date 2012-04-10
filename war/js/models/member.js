@@ -16,11 +16,15 @@ var RSKYBOX = (function (r, $) {
     },
 
     validate: function (attrs) {
-      if (r.isValidEmailAddress(attrs.emailAddress) && (attrs.role || attrs.memberConfirmation)) {
-        r.log.info('member is valid', 'Member.validate');
-        return;
+      try {
+        if (r.isValidEmailAddress(attrs.emailAddress) && (attrs.role || attrs.memberConfirmation)) {
+          r.log.info('member is valid', 'Member.validate');
+          return;
+        }
+        return 'A valid email address and selected role are required.';
+      } catch (e) {
+        r.log.error(e, 'Members.validate');
       }
-      return 'A valid email address and selected role are required.';
     }
   });
 
@@ -30,7 +34,11 @@ var RSKYBOX = (function (r, $) {
     apiUrl: '/appMembers',
 
     parse: function (response) {
-      return response.appMembers;
+      try {
+        return response.appMembers;
+      } catch (e) {
+        r.log.error(e, 'Members.parse');
+      }
     }
   });
 
