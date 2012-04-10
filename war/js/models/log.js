@@ -26,7 +26,11 @@ var RSKYBOX = (function (r, $) {
     apiUrl: '/clientLogs',
 
     parse: function (response) {
-      return response.clientLogs;
+      try {
+        return response.clientLogs;
+      } catch (e) {
+        r.log.error(e, 'Logs.parse');
+      }
     }
   });
 
