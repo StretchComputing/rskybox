@@ -14,14 +14,22 @@ var RSKYBOX = (function (r, $) {
     },
 
     initialize: function () {
-      this.setUrl();
+      try {
+        this.setUrl();
+      } catch (e) {
+        r.log.error(e, 'Application.initialize');
+      }
     },
 
     validate: function (attrs) {
-      if (attrs.name) {
-        return;
+      try {
+        if (attrs.name) {
+          return;
+        }
+        return 'A name is required for your application.';
+      } catch (e) {
+        r.log.error(e, 'Application.validate');
       }
-      return 'A name is required for your application.';
     }
   });
 
@@ -31,17 +39,29 @@ var RSKYBOX = (function (r, $) {
     apiUrl: '/applications',
 
     initialize: function () {
-      this.setUrl();
+      try {
+        this.setUrl();
+      } catch (e) {
+        r.log.error(e, 'Applications.initialize');
+      }
     },
 
     parse: function (response) {
-      return response.applications;
+      try {
+        return response.applications;
+      } catch (e) {
+        r.log.error(e, 'Applications.parse');
+      }
     },
 
     findById: function (id) {
-      return this.find(function (app) {
-        return app.id === id;
-      });
+      try {
+        return this.find(function (app) {
+          return app.id === id;
+        });
+      } catch (e) {
+        r.log.error(e, 'Applications.findById');
+      }
     },
   });
 
