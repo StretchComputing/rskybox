@@ -21,27 +21,47 @@ var RSKYBOX = (function (r, $) {
     },
 
     initialize: function () {
-      this.setUrl();
+      try {
+        this.setUrl();
+      } catch (e) {
+        r.log.error(e, 'User.initialize');
+      }
     },
 
     isConfirmCodeValid: function (code) {
-      var CODE_LEN = 3;
+      try {
+        var CODE_LEN = 3;
 
-      return code && code.length === CODE_LEN;
+        return code && code.length === CODE_LEN;
+      } catch (e) {
+        r.log.error(e, 'User.isConfirmCodeValid');
+      }
     },
 
     isPasswordValid: function (password) {
-      var PASSWORD_MIN_LEN = 6;
+      try {
+        var PASSWORD_MIN_LEN = 6;
 
-      return password && password.length >= PASSWORD_MIN_LEN;
+        return password && password.length >= PASSWORD_MIN_LEN;
+      } catch (e) {
+        r.log.error(e, 'User.isPasswordValid');
+      }
     },
 
     isPhoneValid: function (phone, carrier) {
-      return r.isValidPhoneNumber(phone) && carrier;
+      try {
+        return r.isValidPhoneNumber(phone) && carrier;
+      } catch (e) {
+        r.log.error(e, 'User.isPhoneValid');
+      }
     },
 
     isEmailValid: function (email) {
-      return r.isValidEmailAddress(email);
+      try {
+        return r.isValidEmailAddress(email);
+      } catch (e) {
+        r.log.error(e, 'User.isEmailValid');
+      }
     },
   });
 
