@@ -622,9 +622,53 @@ public class Notification {
         // include a link to the rSkybox application
         if(smsEmailAddressBuf.length() > 0) {
         	smsEmailAddressBuf.append(" ");
-        	smsEmailAddressBuf.append(RskyboxApplication.APPLICATION_BASE_URL);
+        	smsEmailAddressBuf.append(getMostSpecificUrl());
         }
         
         return smsEmailAddressBuf.toString();
+	}
+	
+	private String getMostSpecificUrl() {
+        String url = "";
+        // Algorithm: link provided "zooms" in to be as specific as possible without over zooming
+        if(this.getNotificationDetailsList().size() > 1) {
+            // if more than one application, link is to rSkybox
+            url = RskyboxApplication.APPLICATION_BASE_URL;
+        } else {
+        	String rskyboxBaseUrl = RskyboxApplication.APPLICATION_BASE_URL + "html5";
+        	NotificationDetails nd = this.getNotificationDetailsList().get(0);
+        	
+        	// for now, default it to the application url
+        	url = rskyboxBaseUrl + "#application?appId=" + nd.getApplicationId();
+        	
+        	if(nd.getCrashCount() > 0  && (nd.getClientLogCount() == 0 && nd.getFeedbackCount() == 0)) {
+        		if(nd.getCrashCount() == 1) {
+        			// only one crash, link all the way down to the crash detail page
+        			url = rskyboxBaseUrl + "#crash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
+        		} else {
+        			// multiple crashes so link to the crash list
+        			url = rskyboxBaseUrl + "#crashes?appId=" + nd.getApplicationId() + "&status=new";
+        		}
+        	} else if(nd.getClientLogCount() > 0  && (nd.getCrashCount() == 0 && nd.getFeedbackCount() == 0)) {
+        		if(nd.getClientLogCount() == 1) {
+        			// only one clientLog, link all the way down to the clientLog detail page
+        			url = rskyboxBaseUrl + "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
+        		} else {
+        			// multiple crashes so link to the clientLog list
+        			url = rskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
+        		}
+        	} else if(nd.getFeedbackCount() > 0  && (nd.getClientLogCount() == 0 && nd.getCrashCount() == 0)) {
+        		if(nd.getFeedbackCount() == 1) {
+        			// only one feedback, link all the way down to the feedback detail page
+        			url = rskyboxBaseUrl + "#feedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
+        		} else {
+        			// multiple crashes so link to the feedback list
+        			url = rskyboxBaseUrl + "#feedbackList?appId=" + nd.getApplicationId() + "&status=new";
+        		}
+        	}
+        }
+    	
+    	log.info("SMS URL = " + url);
+        return url;
 	}
 }
