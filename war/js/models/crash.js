@@ -22,7 +22,11 @@ var RSKYBOX = (function (r, $) {
     apiUrl: '/crashDetects',
 
     parse: function (response) {
-      return response.crashDetects;
+      try {
+        return response.crashDetects;
+      } catch (e) {
+        r.log.error(e, 'Crashes.parse');
+      }
     }
   });
 

@@ -20,7 +20,11 @@ var RSKYBOX = (function (r, $) {
     apiUrl: '/endUsers',
 
     parse: function (response) {
-      return response.endUsers;
+      try {
+        return response.endUsers;
+      } catch (e) {
+        r.log.error(e, 'Endusers.parse');
+      }
     }
   });
 
