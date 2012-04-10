@@ -46,7 +46,7 @@ var RSKYBOX = (function (r, $) {
 
   r.dump = function (object) {
     // TODO - log to localStorage
-    console.dir(object);
+    console.log(JSON.stringify(object));
   };
 
   r.SkyboxLog = r.Log.extend({
@@ -68,7 +68,7 @@ var RSKYBOX = (function (r, $) {
       // TODO - change to crashDetect call.
       // TODO - include environment information in summary
       // TODO - include error name in summary
-      this.base('error', e.stack, name);
+      this.base('error', e, name);
     },
 
     warn: function (message, name) {
@@ -106,13 +106,18 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+    // message is an Error object for 'error' level
     logLocal: function (level, message, name) {
       try {
-        var output = message + (name ? ' \t(' + name + ')' : '');
+        var output;
+
+        if (level !== 'error') {
+          output = message + (name ? ' \t(' + name + ')' : '');
+        }
 
         switch (level) {
         case 'error':
-          console.error(output);
+          console.error(name, message.stack);
           break;
         case 'warn':
           console.warn(output);
@@ -137,18 +142,25 @@ var RSKYBOX = (function (r, $) {
     },
 
     // Server functionality for the rest of the class below.
+    // message is an Error object for 'error' level
     logToServer: function (level, message, name) {
       try {
+        r.log.debug(name);
         var
           attrs = {
-            name: name || message,
+            instanceUrl: location.hash,
+            logName: name || message,
             logLevel: level,
             message: message,
             userName: Cookie.get('token'),
-            instanceUrl: location.hash,
           },
           getUserName,
           user;
+
+        if (level === 'error') {
+          attrs.message = 'see stackBackTrace';
+          attrs.stackBackTrace = message.stack.split('\n');
+        }
 
         user = r.session && r.session.getEntity(r.session.keys.currentUser);
         if (user) {
@@ -380,7 +392,7 @@ var RSKYBOX = (function (r, $) {
 
         $.mobile.activePage.prepend(element);
         element.fadeIn().delay(duration * 1000).fadeOut(600);
-        r.log.debug(message, 'flash.display');
+        r.log.info(message, 'flash.display');
         flash.clear();
       } catch (e) {
         r.log.error(e, 'flash.display');
