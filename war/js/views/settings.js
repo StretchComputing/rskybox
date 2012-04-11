@@ -17,187 +17,251 @@ var RSKYBOX = (function (r, $) {
     },
 
     initialize: function () {
-      _.bindAll(this, 'partialSave', 'success', 'apiError');
-      this.model.on('change', this.render, this);
-      this.model.on('error', this.error, this);
-      this.template = _.template($('#settingsTemplate').html());
+      try {
+        _.bindAll(this, 'partialSave', 'success', 'apiError');
+        this.model.on('change', this.render, this);
+        this.model.on('error', this.error, this);
+        this.template = _.template($('#settingsTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'SettingsView.initialize');
+      }
     },
 
-    logout: function (e) {
-      r.log.info('entering', 'SettingsView.logout');
-      r.logOut();
+    logout: function (evt) {
+      try {
+        r.log.info('entering', 'SettingsView.logout');
+        r.logOut();
 
-      e.preventDefault();
-      return false;
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.logout');
+      }
     },
 
-    saveFirstName: function (e) {
-      r.log.info('entering', 'SettingsView.saveFirstName');
-      this.partialSave({
-        firstName: this.$('input[name=firstName]').val()
-      });
-      e.preventDefault();
-      return false;
-    },
-
-    saveLastName: function (e) {
-      r.log.info('entering', 'SettingsView.saveLastName');
-      this.partialSave({
-        lastName: this.$('input[name=lastName]').val()
-      });
-      e.preventDefault();
-      return false;
-    },
-
-    sendEmailNotifications: function (e) {
-      r.log.info('entering', 'SettingsView.sendEmailNotifications');
-      this.partialSave({
-        sendEmailNotifications: this.$('input[name=sendEmailNotifications]')[0].checked,
-      });
-      e.preventDefault();
-      return false;
-    },
-
-    sendSmsNotifications: function (e) {
-      r.log.info('entering', 'SettingsView.sendSmsNotifications');
-      this.partialSave({
-        sendSmsNotifications: this.$('input[name=sendSmsNotifications]')[0].checked,
-      });
-      e.preventDefault();
-      return false;
-    },
-
-    savePassword: function (e) {
-      var password = this.$('input[name=password]').val();
-
-      if (this.model.isPasswordValid(password)) {
+    saveFirstName: function (evt) {
+      try {
+        r.log.info('entering', 'SettingsView.saveFirstName');
         this.partialSave({
-          password: password,
+          firstName: this.$('input[name=firstName]').val()
         });
-      } else {
-        r.flash.warning('Minimum password length is 6 characters.');
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.saveFirstName');
       }
-      e.preventDefault();
-      return false;
     },
 
-    requestEmailConfirmation: function (e) {
-      var email = this.$('input[name=emailAddress]').val();
-
-      if (this.model.isEmailValid(email)) {
+    saveLastName: function (evt) {
+      try {
+        r.log.info('entering', 'SettingsView.saveLastName');
         this.partialSave({
-          emailAddress: email,
-        }, true);
-      } else {
-        r.flash.warning('Valid email address required.');
+          lastName: this.$('input[name=lastName]').val()
+        });
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.saveLastName');
       }
-      e.preventDefault();
-      return false;
     },
 
-    requestSmsConfirmation: function (e) {
-      var
-        phone = this.$('input[name=phoneNumber]').val(),
-        carrier = this.$('select[name=mobileCarrierId]').val();
-
-      if (this.model.isPhoneValid(phone, carrier)) {
+    sendEmailNotifications: function (evt) {
+      try {
+        r.log.info('entering', 'SettingsView.sendEmailNotifications');
         this.partialSave({
-          phoneNumber: phone,
-          mobileCarrierId: carrier,
-        }, true);
-      } else {
-        r.flash.warning('Valid phone number and mobile carrier selection required.');
+          sendEmailNotifications: this.$('input[name=sendEmailNotifications]')[0].checked,
+        });
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.sendEmailNotifications');
       }
-      e.preventDefault();
-      return false;
     },
 
-    confirmEmail: function (e) {
-      var
-        code = this.$('input[name=emailConfirmationCode]').val(),
-        params;
-
-      if (this.model.isConfirmCodeValid(code)) {
-        params = {
-          emailAddress: this.$('input[name=confirmEmailAddress]').val(),
-          emailConfirmationCode: code,
-          preregistration: false,
-        };
-        r.changePage('confirm', 'signup', params);
-      } else {
-        r.flash.warning('Confirmation code must be 3 characters.');
+    sendSmsNotifications: function (evt) {
+      try {
+        r.log.info('entering', 'SettingsView.sendSmsNotifications');
+        this.partialSave({
+          sendSmsNotifications: this.$('input[name=sendSmsNotifications]')[0].checked,
+        });
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.sendSmsNotifications');
       }
-      e.preventDefault();
-      return false;
     },
 
-    confirmPhone: function (e) {
-      var
-        code = this.$('input[name=phoneNumberConfirmationCode]').val(),
-        params;
+    savePassword: function (evt) {
+      try {
+        var password = this.$('input[name=password]').val();
 
-      if (this.model.isConfirmCodeValid(code)) {
-        params = {
-          phoneNumber: this.$('input[name=confirmPhoneNumber]').val(),
-          phoneConfirmationCode: code,
-          preregistration: false,
-        };
-        r.changePage('confirm', 'signup', params);
-      } else {
-        r.flash.warning('Confirmation code must be 3 characters.');
+        if (this.model.isPasswordValid(password)) {
+          this.partialSave({
+            password: password,
+          });
+        } else {
+          r.flash.warning('Minimum password length is 6 characters.');
+        }
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.savePassword');
       }
-      e.preventDefault();
+    },
+
+    requestEmailConfirmation: function (evt) {
+      try {
+        var email = this.$('input[name=emailAddress]').val();
+
+        if (this.model.isEmailValid(email)) {
+          this.partialSave({
+            emailAddress: email,
+          }, true);
+        } else {
+          r.flash.warning('Valid email address required.');
+        }
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.requestEmailConfirmation');
+      }
+    },
+
+    requestSmsConfirmation: function (evt) {
+      try {
+        var
+          phone = this.$('input[name=phoneNumber]').val(),
+          carrier = this.$('select[name=mobileCarrierId]').val();
+
+        if (this.model.isPhoneValid(phone, carrier)) {
+          this.partialSave({
+            phoneNumber: phone,
+            mobileCarrierId: carrier,
+          }, true);
+        } else {
+          r.flash.warning('Valid phone number and mobile carrier selection required.');
+        }
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.requestSmsConfirmation');
+      }
+    },
+
+    confirmEmail: function (evt) {
+      try {
+        var
+          code = this.$('input[name=emailConfirmationCode]').val(),
+          params;
+
+        if (this.model.isConfirmCodeValid(code)) {
+          params = {
+            emailAddress: this.$('input[name=confirmEmailAddress]').val(),
+            emailConfirmationCode: code,
+            preregistration: false,
+          };
+          r.changePage('confirm', 'signup', params);
+        } else {
+          r.flash.warning('Confirmation code must be 3 characters.');
+        }
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.confirmEmail');
+      }
+    },
+
+    confirmPhone: function (evt) {
+      try {
+        var
+          code = this.$('input[name=phoneNumberConfirmationCode]').val(),
+          params;
+
+        if (this.model.isConfirmCodeValid(code)) {
+          params = {
+            phoneNumber: this.$('input[name=confirmPhoneNumber]').val(),
+            phoneConfirmationCode: code,
+            preregistration: false,
+          };
+          r.changePage('confirm', 'signup', params);
+        } else {
+          r.flash.warning('Confirmation code must be 3 characters.');
+        }
+        evt.preventDefault();
       return false;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.confirmPhone');
+      }
     },
 
     partialSave: function (attrs, force) {
-      this.model.partial.save(this.model, attrs, {
-        success: this.success,
-        statusCode: r.statusCodeHandlers(this.apiError),
-        wait: true,
-      }, force);
+      try {
+        this.model.partial.save(this.model, attrs, {
+          success: this.success,
+          statusCode: r.statusCodeHandlers(this.apiError),
+          wait: true,
+        }, force);
+      } catch (e) {
+        r.log.error(e, 'SettingsView.partialSave');
+      }
     },
 
     success: function (model, response) {
-      r.flash.success('Changes were saved');
-      r.session.reset();
+      try {
+        r.flash.success('Changes were saved');
+        r.session.reset();
+      } catch (e) {
+        r.log.error(e, 'SettingsView.success');
+      }
     },
 
     error: function (model, response) {
-      if (response.responseText) { return; }  // This is an apiError.
-      r.log.info(response, 'SettingsView.error');
-      r.flash.warning(response);              // This is a validation error.
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+        r.log.info(response, 'SettingsView.error');
+        r.flash.warning(response);              // This is a validation error.
+      } catch (e) {
+        r.log.error(e, 'SettingsView.error');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = r.getApiStatus(jqXHR.responseText);
-      r.log.info(code, 'SettingsView.apiError');
+      try {
+        var code = r.getApiStatus(jqXHR.responseText);
+        r.log.info(code, 'SettingsView.apiError');
 
-      if (!this.apiCodes[code]) {
-        r.log.warn('Undefined apiStatus: ' + code, 'SettingsView.apiError');
+        if (!this.apiCodes[code]) {
+          r.log.warn('Undefined apiStatus: ' + code, 'SettingsView.apiError');
+        }
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'SettingsView.apiError');
       }
-      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
-      r.log.info('entering', 'SettingsView.render');
-      var content = this.template(this.model.getMock());
+      try {
+        r.log.info('entering', 'SettingsView.render');
+        var content = this.template(this.model.getMock());
 
-      this.getContent().html(content);
-      this.$el.trigger('create');
-      if (!this.carriersView) {
-        this.carriersView = new r.CarriersView({
-          el: $('#mobileCarrierId'),
-          collection: new r.Carriers()
-        });
-        this.carriersView.value = this.model.get('mobileCarrierId');
-        r.session.getCollection(r.session.keys.mobileCarriers, this.carriersView.collection);
-      } else {
-        this.carriersView.setElement($('#mobileCarrierId'));
-        this.carriersView.value = this.model.get('mobileCarrierId');
-        this.carriersView.render();
+        this.getContent().html(content);
+        this.$el.trigger('create');
+        if (!this.carriersView) {
+          this.carriersView = new r.CarriersView({
+            el: $('#mobileCarrierId'),
+            collection: new r.Carriers()
+          });
+          this.carriersView.value = this.model.get('mobileCarrierId');
+          r.session.getCollection(r.session.keys.mobileCarriers, this.carriersView.collection);
+        } else {
+          this.carriersView.setElement($('#mobileCarrierId'));
+          this.carriersView.value = this.model.get('mobileCarrierId');
+          this.carriersView.render();
+        }
+        return this;
+      } catch (e) {
+        r.log.error(e, 'SettingsView.render');
       }
-      return this;
     },
 
     apiCodes: {
