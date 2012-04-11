@@ -6,74 +6,94 @@ var RSKYBOX = (function (r, $) {
     tagName: 'li',
 
     initialize: function () {
-      _.bindAll(this, 'render');
-      this.template = _.template($('#memberEntryTemplate').html());
+      try {
+        _.bindAll(this, 'render');
+        this.template = _.template($('#memberEntryTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'MemberEntryView.initialize');
+      }
     },
 
     render: function () {
-      var
-        display = '',
-        mock = this.model.getMock();
+      try {
+        var
+          display = '',
+          mock = this.model.getMock();
 
-      if (mock.emailAddress) {
-        display += mock.emailAddress;
-      } else if (mock.phoneNumber) {
-        display += mock.phoneNumber;
-      }
-      switch (mock.role) {
-      case 'owner':
-        display += ' $$';
-        break;
-      case 'manager':
-        display += ' *';
-        break;
-      default:
-        break;
-      }
+        if (mock.emailAddress) {
+          display += mock.emailAddress;
+        } else if (mock.phoneNumber) {
+          display += mock.phoneNumber;
+        }
+        switch (mock.role) {
+        case 'owner':
+          display += ' $$';
+          break;
+        case 'manager':
+          display += ' *';
+          break;
+        default:
+          break;
+        }
 
-      mock.display = display;
-      this.$el.html(this.template(mock));
-      return this;
+        mock.display = display;
+        this.$el.html(this.template(mock));
+        return this;
+      } catch (e) {
+        r.log.error(e, 'MemberEntryView.render');
+      }
     }
   });
 
   r.MembersView = r.JqmPageBaseView.extend({
     initialize: function () {
-      _.bindAll(this, 'addMemberEntry');
-      this.collection.bind('reset', this.render, this);
-      this.options.applications.bind('reset', this.render, this);
-      this.template = _.template($('#noMembersTemplate').html());
+      try {
+        _.bindAll(this, 'addMemberEntry');
+        this.collection.bind('reset', this.render, this);
+        this.options.applications.bind('reset', this.render, this);
+        this.template = _.template($('#noMembersTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'MembersView.initialize');
+      }
     },
 
     render: function () {
-      var app, list;
+      try {
+        var app, list;
 
-      if (this.collection.isEmpty() || this.options.applications.isEmpty()) { return this; }
+        if (this.collection.isEmpty() || this.options.applications.isEmpty()) { return this; }
 
-      app = this.options.applications.findById(r.session.params.appId);
+        app = this.options.applications.findById(r.session.params.appId);
 
-      this.$el.find('.back').attr('href', '#application?appId=' + app.id);
-      if (app.role === 'member') {
-        this.$el.find('.new').attr('href', '#').hide();
-      } else {
-        this.$el.find('.new').attr('href', '#newMember?appId=' + app.id).show();
+        this.$el.find('.back').attr('href', '#application?appId=' + app.id);
+        if (app.role === 'member') {
+          this.$el.find('.new').attr('href', '#').hide();
+        } else {
+          this.$el.find('.new').attr('href', '#newMember?appId=' + app.id).show();
+        }
+        this.getContent().empty();
+        if (this.collection.length <= 0) {
+          this.getContent().html(this.template());
+        } else {
+          list = $('<ul>');
+          this.collection.each(function (member) {
+            this.addMemberEntry(list, member);
+          }, this);
+          this.getContent().html(list);
+          list.listview();
+        }
+        return this;
+      } catch (e) {
+        r.log.error(e, 'MembersView.render');
       }
-      this.getContent().empty();
-      if (this.collection.length <= 0) {
-        this.getContent().html(this.template());
-      } else {
-        list = $('<ul>');
-        this.collection.each(function (member) {
-          this.addMemberEntry(list, member);
-        }, this);
-        this.getContent().html(list);
-        list.listview();
-      }
-      return this;
     },
 
     addMemberEntry: function (list, member) {
-      list.append(new r.MemberEntryView({ model: member }).render().el);
+      try {
+        list.append(new r.MemberEntryView({ model: member }).render().el);
+      } catch (e) {
+        r.log.error(e, 'MembersView.addMemberEntry');
+      }
     }
   });
 
@@ -85,81 +105,113 @@ var RSKYBOX = (function (r, $) {
     },
 
     initialize: function () {
-      _.bindAll(this, 'partialSave', 'success', 'apiError');
-      this.model.on('change', this.render, this);
-      this.model.on('error', this.error, this);
-      this.options.applications.on('reset', this.render, this);
-      this.template = _.template($('#memberTemplate').html());
+      try {
+        _.bindAll(this, 'partialSave', 'success', 'apiError');
+        this.model.on('change', this.render, this);
+        this.model.on('error', this.error, this);
+        this.options.applications.on('reset', this.render, this);
+        this.template = _.template($('#memberTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'MemberView.initialize');
+      }
     },
 
     render: function () {
-      var app, mock = this.model.getMock();
+      try {
+        var app, mock = this.model.getMock();
 
 
-      if (!this.model.get('apiStatus') || this.options.applications.isEmpty()) { return this; }
+        if (!this.model.get('apiStatus') || this.options.applications.isEmpty()) { return this; }
 
-      app = this.options.applications.findById(r.session.params.appId);
+        app = this.options.applications.findById(r.session.params.appId);
 
-      this.$el.find('.back').attr('href', '#members?appId=' + app.id);
-      mock.date = r.format.longDate(mock.date);
-      mock = _.extend(mock, {admin: app.get('role')});
-      this.getContent().html(this.template(mock));
-      this.$el.find('.role').val(this.model.get('role'));
-      this.getContent().trigger('create');
-      return this;
-    },
-
-    deleteMember: function (e) {
-      if (!confirm('Are you sure you want to delete this member?.')) {
-        return;
+        this.$el.find('.back').attr('href', '#members?appId=' + app.id);
+        mock.date = r.format.longDate(mock.date);
+        mock = _.extend(mock, {admin: app.get('role')});
+        this.getContent().html(this.template(mock));
+        this.$el.find('.role').val(this.model.get('role'));
+        this.getContent().trigger('create');
+        return this;
+      } catch (e) {
+        r.log.error(e, 'MemberView.render');
       }
-      this.model.destroy({
-        success: function () {
-          history.back();
-        },
-        statusCode: r.statusCodeHandlers(this.apiError)
-      });
-
-      e.preventDefault();
-      return false;
     },
 
-    updateRole: function (e) {
-      r.log.info('entering', 'MemberView.updateRole');
-      this.partialSave({
-        role: this.$('select[name=role]').val(),
-      });
-      e.preventDefault();
-      return false;
+    deleteMember: function (evt) {
+      try {
+        if (!confirm('Are you sure you want to delete this member?.')) {
+          return;
+        }
+        this.model.destroy({
+          success: function () {
+            history.back();
+          },
+          statusCode: r.statusCodeHandlers(this.apiError)
+        });
+
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'MemberView.deleteMember');
+      }
+    },
+
+    updateRole: function (evt) {
+      try {
+        r.log.info('entering', 'MemberView.updateRole');
+        this.partialSave({
+          role: this.$('select[name=role]').val(),
+        });
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'MemberView.updateRole');
+      }
     },
 
     partialSave: function (attrs, force) {
-      this.model.partial.save(this.model, attrs, {
-        success: this.success,
-        statusCode: r.statusCodeHandlers(this.apiError),
-        wait: true,
-      }, force);
+      try {
+        this.model.partial.save(this.model, attrs, {
+          success: this.success,
+          statusCode: r.statusCodeHandlers(this.apiError),
+          wait: true,
+        }, force);
+      } catch (e) {
+        r.log.error(e, 'MemberView.partialSave');
+      }
     },
 
     success: function (model, response) {
-      r.flash.success('Changes were saved');
+      try {
+        r.flash.success('Changes were saved');
+      } catch (e) {
+        r.log.error(e, 'MemberView.success');
+      }
     },
 
     error: function (model, response) {
-      if (response.responseText) { return; }  // This is an apiError.
-      r.log.info(response, 'MemberView.error');
-      r.flash.warning(response);              // This is a validation error.
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+        r.log.info(response, 'MemberView.error');
+        r.flash.warning(response);              // This is a validation error.
+      } catch (e) {
+        r.log.error(e, 'MemberView.error');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = r.getApiStatus(jqXHR.responseText);
-      r.log.info(code, 'MemberView.apiError');
+      try {
+        var code = r.getApiStatus(jqXHR.responseText);
+        r.log.info(code, 'MemberView.apiError');
 
-      r.dump(this.apiCodes);
-      if (!this.apiCodes[code]) {
-        r.log.warn('Undefined apiStatus: ' + code, 'MemberView.apiError');
+        r.dump(this.apiCodes);
+        if (!this.apiCodes[code]) {
+          r.log.warn('Undefined apiStatus: ' + code, 'MemberView.apiError');
+        }
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'MemberView.apiError');
       }
-      r.flash.warning(this.apiCodes[code]);
     },
 
     apiCodes: {
@@ -175,10 +227,14 @@ var RSKYBOX = (function (r, $) {
 
   r.NewMemberView = r.JqmPageBaseView.extend({
     initialize: function () {
-      _.bindAll(this, 'apiError');
-      this.model.on('change', this.render, this);
-      this.model.on('error', this.error, this);
-      this.template = _.template($('#newMemberTemplate').html());
+      try {
+        _.bindAll(this, 'apiError');
+        this.model.on('change', this.render, this);
+        this.model.on('error', this.error, this);
+        this.template = _.template($('#newMemberTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'NewMemberView.initialize');
+      }
     },
 
     events: {
@@ -186,52 +242,72 @@ var RSKYBOX = (function (r, $) {
     },
 
     render: function () {
-      this.getContent().html(this.template(this.model.getMock()));
-      this.$el.trigger('create');
-      return this;
+      try {
+        this.getContent().html(this.template(this.model.getMock()));
+        this.$el.trigger('create');
+        return this;
+      } catch (e) {
+        r.log.error(e, 'NewMemberView.render');
+      }
     },
 
-    submit: function (e) {
-      var valid;
-      r.log.info('entering', 'NewMemberView.submit');
+    submit: function (evt) {
+      try {
+        var valid;
+        r.log.info('entering', 'NewMemberView.submit');
 
-      valid = this.model.set({
-        emailAddress: this.$("input[name='emailAddress']").val(),
-        role: this.$("select[name='role']").val(),
-      });
-
-      if (valid) {
-        this.model.prepareNewModel();
-
-        this.model.save(null, {
-          success: this.success,
-          statusCode: r.statusCodeHandlers(this.apiError)
+        valid = this.model.set({
+          emailAddress: this.$("input[name='emailAddress']").val(),
+          role: this.$("select[name='role']").val(),
         });
-      }
 
-      e.preventDefault();
-      return false;
+        if (valid) {
+          this.model.prepareNewModel();
+
+          this.model.save(null, {
+            success: this.success,
+            statusCode: r.statusCodeHandlers(this.apiError)
+          });
+        }
+
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'NewMemberView.submit');
+      }
     },
 
     success: function (model, response) {
-      var url = '#member?id=' + model.get('id') + '&appId=' + model.get('appId');
-      $.mobile.changePage(url);
+      try {
+        var url = '#member?id=' + model.get('id') + '&appId=' + model.get('appId');
+        $.mobile.changePage(url);
+      } catch (e) {
+        r.log.error(e, 'NewMemberView.success');
+      }
     },
 
     error: function (model, response) {
-      if (response.responseText) { return; }  // This is an apiError.
-      r.log.info(response, 'NewMemberView.error');
-      r.flash.warning(response);              // This is a validation error.
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+        r.log.info(response, 'NewMemberView.error');
+        r.flash.warning(response);              // This is a validation error.
+      } catch (e) {
+        r.log.error(e, 'NewMemberView.error');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = r.getApiStatus(jqXHR.responseText);
-      r.log.info(code, 'NewMemberView.apiError');
+      try {
+        var code = r.getApiStatus(jqXHR.responseText);
+        r.log.info(code, 'NewMemberView.apiError');
 
-      if (!this.apiCodes[code]) {
-        r.log.warn('Undefined apiStatus: ' + code, 'NewMemberView.apiError');
+        if (!this.apiCodes[code]) {
+          r.log.warn('Undefined apiStatus: ' + code, 'NewMemberView.apiError');
+        }
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'NewMemberView.apiError');
       }
-      r.flash.warning(this.apiCodes[code]);
     },
 
     apiCodes: {
