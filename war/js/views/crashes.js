@@ -6,45 +6,65 @@ var RSKYBOX = (function (r, $) {
     tagName: 'li',
 
     initialize: function () {
-      _.bindAll(this, 'render');
-      this.template = _.template($('#crashEntryTemplate').html());
+      try {
+        _.bindAll(this, 'render');
+        this.template = _.template($('#crashEntryTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'CrashEntryView.initialize');
+      }
     },
 
     render: function () {
-      var mock = this.model.getMock();
+      try {
+        var mock = this.model.getMock();
 
-      mock.date = r.format.longDate(mock.date);
-      this.$el.html(this.template(mock));
-      return this;
+        mock.date = r.format.longDate(mock.date);
+        this.$el.html(this.template(mock));
+        return this;
+      } catch (e) {
+        r.log.error(e, 'CrashEntryView.render');
+      }
     }
   });
 
 
   r.CrashesView = r.JqmPageBaseView.extend({
     initialize: function () {
-      this.collection.bind('reset', this.render, this);
-      this.template = _.template($('#noCrashesTemplate').html());
+      try {
+        this.collection.bind('reset', this.render, this);
+        this.template = _.template($('#noCrashesTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'CrashesView.');
+      }
     },
 
     render: function () {
-      var list;
+      try {
+        var list;
 
-      this.getContent().empty();
-      if (this.collection.length <= 0) {
-        this.getContent().html(this.template());
-      } else {
-        list = $('<ul>');
-        this.collection.each(function (crash) {
-          this.addCrashEntry(list, crash);
-        }, this);
-        this.getContent().html(list);
-        list.listview();
+        this.getContent().empty();
+        if (this.collection.length <= 0) {
+          this.getContent().html(this.template());
+        } else {
+          list = $('<ul>');
+          this.collection.each(function (crash) {
+            this.addCrashEntry(list, crash);
+          }, this);
+          this.getContent().html(list);
+          list.listview();
+        }
+        return this;
+      } catch (e) {
+        r.log.error(e, 'CrashesView.');
       }
-      return this;
     },
 
     addCrashEntry: function (list, crash) {
-      list.append(new r.CrashEntryView({ model: crash }).render().el);
+      try {
+        list.append(new r.CrashEntryView({ model: crash }).render().el);
+      } catch (e) {
+        r.log.error(e, 'CrashesView.');
+      }
     }
   });
 
@@ -55,34 +75,50 @@ var RSKYBOX = (function (r, $) {
     },
 
     initialize: function () {
-      this.model.on('change', this.render, this);
-      this.model.on('error', this.error, this);
-      this.template = _.template($('#crashTemplate').html());
+      try {
+        this.model.on('change', this.render, this);
+        this.model.on('error', this.error, this);
+        this.template = _.template($('#crashTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'CrashView.');
+      }
     },
 
     render: function () {
-      var mock = this.model.getMock();
+      try {
+        var mock = this.model.getMock();
 
-      mock.date = r.format.longDate(mock.date);
-      this.getContent().html(this.template(mock));
-      this.$el.trigger('create');
-      return this;
+        mock.date = r.format.longDate(mock.date);
+        this.getContent().html(this.template(mock));
+        this.$el.trigger('create');
+        return this;
+      } catch (e) {
+        r.log.error(e, 'CrashView.');
+      }
     },
 
     error: function (model, response) {
-      if (response.responseText) { return; }  // This is an apiError.
-      r.log.info(response, 'CrashView.error');
-      r.flash.warning(response);              // This is a validation error.
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+        r.log.info(response, 'CrashView.error');
+        r.flash.warning(response);              // This is a validation error.
+      } catch (e) {
+        r.log.error(e, 'CrashView.');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = r.getApiStatus(jqXHR.responseText);
-      r.log.info(code, 'CrashView.apiError');
+      try {
+        var code = r.getApiStatus(jqXHR.responseText);
+        r.log.info(code, 'CrashView.apiError');
 
-      if (!this.apiCodes[code]) {
-        r.log.warn('Undefined apiStatus: ' + code, 'CrashView.apiError');
+        if (!this.apiCodes[code]) {
+          r.log.warn('Undefined apiStatus: ' + code, 'CrashView.apiError');
+        }
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'CrashView.');
       }
-      r.flash.warning(this.apiCodes[code]);
     },
 
     apiCodes: {
