@@ -4,82 +4,106 @@ var RSKYBOX = (function (r, $) {
 
   r.SignupView = Backbone.View.extend({
     initialize: function () {
-      _.bindAll(this, 'apiError');
-      this.model.on('change', this.render, this);
-      this.model.on('error', this.error, this);
-      this.template = _.template($('#signupTemplate').html());
+      try {
+        _.bindAll(this, 'apiError');
+        this.model.on('change', this.render, this);
+        this.model.on('error', this.error, this);
+        this.template = _.template($('#signupTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'SignupView.initialize');
+      }
     },
 
     events: {
       'submit': 'submit'
     },
 
-    submit: function (e) {
-      r.log.info('entering', 'SignupView.submit');
-      var valid;
+    submit: function (evt) {
+      try {
+        r.log.info('entering', 'SignupView.submit');
+        var valid;
 
-      valid = this.model.set({
-        emailAddress: this.$("input[name='emailAddress']").val(),
-        phoneNumber: this.$("input[name='phoneNumber']").val(),
-        mobileCarrierId: this.$("select[name='mobileCarrierId']").val()
-      });
-
-      if (valid) {
-        this.model.prepareNewModel();
-
-        this.model.save(null, {
-          success: this.success,
-          statusCode: r.statusCodeHandlers(this.apiError)
+        valid = this.model.set({
+          emailAddress: this.$("input[name='emailAddress']").val(),
+          phoneNumber: this.$("input[name='phoneNumber']").val(),
+          mobileCarrierId: this.$("select[name='mobileCarrierId']").val()
         });
-      }
 
-      e.preventDefault();
-      return false;
+        if (valid) {
+          this.model.prepareNewModel();
+
+          this.model.save(null, {
+            success: this.success,
+            statusCode: r.statusCodeHandlers(this.apiError)
+          });
+        }
+
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'SignupView.submit');
+      }
     },
 
     success: function (model, response) {
-      var params = model.toJSON();
+      try {
+        var params = model.toJSON();
 
-      params.preregistration = true;
-      $.mobile.changePage('#confirm' + r.buildQueryString(params));
+        params.preregistration = true;
+        $.mobile.changePage('#confirm' + r.buildQueryString(params));
+      } catch (e) {
+        r.log.error(e, 'SignupView.success');
+      }
     },
 
     error: function (model, response) {
-      if (response.responseText) { return; }  // This is an apiError.
-      r.log.info(response, 'SignupView.error');
-      r.flash.warning(response);    // This is a validation error.
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+        r.log.info(response, 'SignupView.error');
+        r.flash.warning(response);    // This is a validation error.
+      } catch (e) {
+        r.log.error(e, 'SignupView.error');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = r.getApiStatus(jqXHR.responseText);
-      r.log.info(code, 'SignupView.apiError');
+      try {
+        var code = r.getApiStatus(jqXHR.responseText);
+        r.log.info(code, 'SignupView.apiError');
 
-      if (!this.apiCodes[code]) {
-        r.log.warn('Undefined apiStatus: ' + code, 'SignupView.apiError');
+        if (!this.apiCodes[code]) {
+          r.log.warn('Undefined apiStatus: ' + code, 'SignupView.apiError');
+        }
+
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'SignupView.apiError');
       }
-
-      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
-      r.log.info('entering', 'SignupView.render');
-      var content = this.template(this.model.getMock());
+      try {
+        var content = this.template(this.model.getMock());
+        r.log.info('entering', 'SignupView.render');
 
-      this.$el.html(content);
-      this.$el.trigger('create');
-      if (!this.carriersView) {
-        this.carriersView = new r.CarriersView({
-          el: $('#mobileCarrierId'),
-          collection: new r.Carriers()
-        });
-        this.carriersView.value = this.model.get('mobileCarrierId');
-        this.carriersView.collection.fetch();
-      } else {
-        this.carriersView.setElement($('#mobileCarrierId'));
-        this.carriersView.value = this.model.get('mobileCarrierId');
-        this.carriersView.render();
+        this.$el.html(content);
+        this.$el.trigger('create');
+        if (!this.carriersView) {
+          this.carriersView = new r.CarriersView({
+            el: $('#mobileCarrierId'),
+            collection: new r.Carriers()
+          });
+          this.carriersView.value = this.model.get('mobileCarrierId');
+          this.carriersView.collection.fetch();
+        } else {
+          this.carriersView.setElement($('#mobileCarrierId'));
+          this.carriersView.value = this.model.get('mobileCarrierId');
+          this.carriersView.render();
+        }
+        return this;
+      } catch (e) {
+        r.log.error(e, 'SignupView.render');
       }
-      return this;
     },
 
     apiCodes: {
