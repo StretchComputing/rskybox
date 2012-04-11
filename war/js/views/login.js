@@ -4,68 +4,93 @@ var RSKYBOX = (function (r, $) {
 
   r.LoginView = Backbone.View.extend({
     initialize: function () {
-      _.bindAll(this, 'apiError');
-      this.model.on('change', this.render, this);
-      this.model.on('error', this.error, this);
-      this.template = _.template($('#loginTemplate').html());
+      try {
+        _.bindAll(this, 'apiError');
+        this.model.on('change', this.render, this);
+        this.model.on('error', this.error, this);
+        this.template = _.template($('#loginTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'LoginView.initialize');
+      }
     },
 
     events: {
       'submit': 'submit'
     },
 
-    submit: function (e) {
-      var valid;
+    submit: function (evt) {
+      try {
+        var valid;
 
-      valid = this.model.set({
-        emailAddress: this.$("input[name='emailAddress']").val(),
-        phoneNumber: this.$("input[name='phoneNumber']").val(),
-        password: this.$("input[name='password']").val()
-      });
-
-      if (valid) {
-        this.model.prepareNewModel();
-
-        $.ajax({
-          url: this.model.url,
-          dataType: 'json',
-          data: this.model.getQueryObject(),
-          success: this.success,
-          statusCode: r.statusCodeHandlers(this.apiError)
+        valid = this.model.set({
+          emailAddress: this.$("input[name='emailAddress']").val(),
+          phoneNumber: this.$("input[name='phoneNumber']").val(),
+          password: this.$("input[name='password']").val()
         });
+
+        if (valid) {
+          this.model.prepareNewModel();
+
+          $.ajax({
+            url: this.model.url,
+            dataType: 'json',
+            data: this.model.getQueryObject(),
+            success: this.success,
+            statusCode: r.statusCodeHandlers(this.apiError)
+          });
+        }
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'LoginView.submit');
       }
-      e.preventDefault();
-      return false;
     },
 
     success: function (model, response) {
-      r.log.info('entering', 'Login.success');
-      r.logIn(model.token);
+      try {
+        r.log.info('entering', 'Login.success');
+        r.logIn(model.token);
+      } catch (e) {
+        r.log.error(e, 'LoginView.success');
+      }
     },
 
     error: function (model, response) {
-      if (response.responseText) { return; }  // This is an apiError.
-      r.log.info(response, 'LoginView.error');
-      r.flash.warning(response);    // This is a validation error.
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+        r.log.info(response, 'LoginView.error');
+        r.flash.warning(response);    // This is a validation error.
+      } catch (e) {
+        r.log.error(e, 'LoginView.error');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = r.getApiStatus(jqXHR.responseText);
-      r.log.info(code, 'LoginView.apiError');
+      try {
+        var code = r.getApiStatus(jqXHR.responseText);
+        r.log.info(code, 'LoginView.apiError');
 
-      if (!this.apiCodes[code]) {
-        r.log.warn('Undefined apiStatus: ' + code, 'LoginView.apiError');
+        if (!this.apiCodes[code]) {
+          r.log.warn('Undefined apiStatus: ' + code, 'LoginView.apiError');
+        }
+        this.model.clear({silent: true});
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'LoginView.apiError');
       }
-      this.model.clear({silent: true});
-      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
-      var content = this.template(this.model.getMock());
-      $(this.el).empty();
-      $(this.el).html(content);
-      $(this.el).trigger('create');
-      return this;
+      try {
+        var content = this.template(this.model.getMock());
+
+        $(this.el).empty();
+        $(this.el).html(content);
+        $(this.el).trigger('create');
+        return this;
+      } catch (e) {
+        r.log.error(e, 'LoginView.render');
+      }
     },
 
     apiCodes: {
