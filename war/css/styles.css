@@ -38,3 +38,8 @@
   text-align: center;
   padding: .5em;
 }
+
+.long-lines {
+  white-space: pre-line;
+  overflow: auto;
+}

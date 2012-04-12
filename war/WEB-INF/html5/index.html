@@ -283,7 +283,7 @@
         </li>
         <li>User: <%= userName %></li>
         <% if (instanceUrl) { %>
-          <li>For: <%= instanceUrl %></li>
+          <li class="long-lines">For: <%= instanceUrl %></li>
         <% } %>
         <li>Log Level: <%= logLevel %></li>
         <li>Message: <%= message %></li>
@@ -310,7 +310,10 @@
             <% }); %>
           </li>
         <% } %>
-        <li>Stack Back Trace:<br><%= stackBackTrace %></li>
+        <li class="long-lines">
+          Stack Back Trace:<br>
+          <%= stackBackTrace %>
+        </li>
       </ul>
     </script>
 
@@ -349,7 +352,7 @@
           <li>User: <%= userName %></li>
         <% } %>
         <% if (instanceUrl) { %>
-          <li>For: <%= instanceUrl %></li>
+          <li class="long-lines">For: <%= instanceUrl %></li>
         <% } %>
         <li>
           Status: <%= status %>
