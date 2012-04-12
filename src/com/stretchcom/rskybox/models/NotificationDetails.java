@@ -18,11 +18,16 @@ public class NotificationDetails {
     
 	private String applicationId;
 	private String applicationName;
-	private String message;
 	private Integer clientLogCount;
+	private String clientLogMessage;
+	private String clientLogId;
 	private Integer crashCount;
+	private String crashMessage;
+	private String crashId;
 	private Integer feedbackCount;
-
+	private String feedbackMessage;
+	private String feedbackId;
+	
 	public String getApplicationId() {
 		return applicationId;
 	}
@@ -37,13 +42,6 @@ public class NotificationDetails {
 		this.applicationName = applicationName;
 	}
 	
-	public String getMessage() {
-		return message;
-	}
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	
 	public Integer getClientLogCount() {
 		return clientLogCount;
 	}
@@ -51,6 +49,20 @@ public class NotificationDetails {
 		this.clientLogCount = clientLogCount;
 	}
 	
+	public String getClientLogMessage() {
+		return clientLogMessage;
+	}
+	public void setClientLogMessage(String clientLogMessage) {
+		this.clientLogMessage = clientLogMessage;
+	}
+
+	public String getClientLogId() {
+		return clientLogId;
+	}
+	public void setClientLogId(String clientLogId) {
+		this.clientLogId = clientLogId;
+	}
+
 	public Integer getCrashCount() {
 		return crashCount;
 	}
@@ -58,10 +70,38 @@ public class NotificationDetails {
 		this.crashCount = crashCount;
 	}
 	
+	public String getCrashMessage() {
+		return crashMessage;
+	}
+	public void setCrashMessage(String crashMessage) {
+		this.crashMessage = crashMessage;
+	}
+
+	public String getCrashId() {
+		return crashId;
+	}
+	public void setCrashId(String crashId) {
+		this.crashId = crashId;
+	}
+
 	public Integer getFeedbackCount() {
 		return feedbackCount;
 	}
 	public void setFeedbackCount(Integer feedbackCount) {
 		this.feedbackCount = feedbackCount;
+	}
+
+	public String getFeedbackMessage() {
+		return feedbackMessage;
+	}
+	public void setFeedbackMessage(String feedbackMessage) {
+		this.feedbackMessage = feedbackMessage;
+	}
+
+	public String getFeedbackId() {
+		return feedbackId;
+	}
+	public void setFeedbackId(String feedbackId) {
+		this.feedbackId = feedbackId;
 	}
 }

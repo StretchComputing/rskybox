@@ -204,7 +204,11 @@ public class FeedbackResource extends ServerResource {
             em.persist(feedback);
             em.getTransaction().commit();
             
-            if(!isUpdate) User.sendNotifications(this.applicationId, Notification.FEEDBACK);
+            if(!isUpdate) {
+            	// TODO is the clientLog key really set by this point?
+            	String theItemId = KeyFactory.keyToString(feedback.getKey());
+            	User.sendNotifications(this.applicationId, Notification.FEEDBACK, feedback.getUserName(), theItemId);
+            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
