@@ -96,6 +96,13 @@ public class ClientLogsResource extends ServerResource {
 		if(application == null) {
 			return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
 		}
+		
+		Form headers = (Form) getResponseAttributes().get("org.restlet.http.headers");
+		if (headers == null) {
+			headers = new Form();
+			getResponseAttributes().put("org.restlet.http.headers", headers);
+		}
+		headers.add("Access-Control-Allow-Origin", "*");
     	
         return save_client_log(entity, application);
     }
