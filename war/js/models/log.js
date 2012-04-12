@@ -20,8 +20,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     parse: function (response) {
-      // TODO - remove logLevel check after stack format change by Nick
-      if (response.logLevel !== 'exception' && response.stackBackTrace) {
+      if (response.stackBackTrace && response.stackBackTrace.match(/^\[.*\]$/)) {
         response.stackBackTrace = JSON.parse(response.stackBackTrace);
       }
       return response;

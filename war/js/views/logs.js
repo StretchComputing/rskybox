@@ -91,7 +91,7 @@ var RSKYBOX = (function (r, $) {
         var mock = this.model.getMock();
 
         mock.date = r.format.longDate(mock.date, true);
-        if (mock.stackBackTrace && mock.stackBackTrace.length > 1) {
+        if (Array.isArray(mock.stackBackTrace)) {
           mock.stackBackTrace = mock.stackBackTrace.join('<br>');
         }
         this.getContent().html(this.template(mock));
