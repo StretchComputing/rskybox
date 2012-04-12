@@ -95,16 +95,31 @@ public class Notification {
 	private List<String> applicationNames;
 	
 	@Basic
-	private List<String> messages;
+	private List<Integer> clientLogCounts;
 	
 	@Basic
-	private List<Integer> clientLogCounts;
+	private List<String> clientLogMessages;
+	
+	@Basic
+	private List<String> clientLogIds;
 	
 	@Basic
 	private List<Integer> crashCounts;
 	
 	@Basic
+	private List<String> crashMessages;
+	
+	@Basic
+	private List<String> crashIds;
+	
+	@Basic
 	private List<Integer> feedbackCounts;
+	
+	@Basic
+	private List<String> feedbackMessages;
+	
+	@Basic
+	private List<String> feedbackIds;
 
 	public String getUserId() {
 		return userId;
@@ -186,14 +201,6 @@ public class Notification {
 			}
 			nd.setApplicationName(applicationName);
 			
-			String message = null;
-			if(this.messages.size() > i) {
-				message = this.messages.get(i).equals("") ? null : this.messages.get(i);
-			} else {
-				log.severe("messages array size corrupt");
-			}
-			nd.setMessage(message);
-			
 			Integer clientLogCount = null;
 			if(this.clientLogCounts.size() > i) {
 				clientLogCount = this.clientLogCounts.get(i);
@@ -201,6 +208,22 @@ public class Notification {
 				log.severe("clientLogCounts array size corrupt");
 			}
 			nd.setClientLogCount(clientLogCount);
+			
+			String clientLogMessage = null;
+			if(this.clientLogMessages.size() > i) {
+				clientLogMessage = this.clientLogMessages.get(i).equals("") ? null : this.clientLogMessages.get(i);
+			} else {
+				log.severe("client log messages array size corrupt");
+			}
+			nd.setClientLogMessage(clientLogMessage);
+			
+			String clientLogId = null;
+			if(this.clientLogIds.size() > i) {
+				clientLogId = this.clientLogIds.get(i).equals("") ? null : this.clientLogIds.get(i);
+			} else {
+				log.severe("clientLogIds array size corrupt");
+			}
+			nd.setClientLogId(clientLogId);
 			
 			Integer crashCount = null;
 			if(this.crashCounts.size() > i) {
@@ -210,6 +233,22 @@ public class Notification {
 			}
 			nd.setCrashCount(crashCount);
 			
+			String crashMessage = null;
+			if(this.crashMessages.size() > i) {
+				crashMessage = this.crashMessages.get(i).equals("") ? null : this.crashMessages.get(i);
+			} else {
+				log.severe("crash messages array size corrupt");
+			}
+			nd.setCrashMessage(crashMessage);
+			
+			String crashId = null;
+			if(this.crashIds.size() > i) {
+				crashId = this.crashIds.get(i).equals("") ? null : this.crashIds.get(i);
+			} else {
+				log.severe("crashIds array size corrupt");
+			}
+			nd.setCrashId(crashId);
+			
 			Integer feedbackCount = null;
 			if(this.feedbackCounts.size() > i) {
 				feedbackCount = this.feedbackCounts.get(i);
@@ -217,6 +256,22 @@ public class Notification {
 				log.severe("feedbackCounts array size corrupt");
 			}
 			nd.setFeedbackCount(feedbackCount);
+			
+			String feedbackMessage = null;
+			if(this.feedbackMessages.size() > i) {
+				feedbackMessage = this.feedbackMessages.get(i).equals("") ? null : this.feedbackMessages.get(i);
+			} else {
+				log.severe("feedback messages array size corrupt");
+			}
+			nd.setFeedbackMessage(feedbackMessage);
+			
+			String feedbackId = null;
+			if(this.feedbackIds.size() > i) {
+				feedbackId = this.feedbackIds.get(i).equals("") ? null : this.feedbackIds.get(i);
+			} else {
+				log.severe("itemIds array size corrupt");
+			}
+			nd.setFeedbackId(feedbackId);
 			
 			notificationDetails.add(nd);
 		}
@@ -239,8 +294,10 @@ public class Notification {
 			//////////////////////////////////////////////////
 			// Lists exist, but are empty, so just add to list
 			//////////////////////////////////////////////////
+			log.info("notification array sizes are zero");
 			addNotificationDetails(theNewNotificationDetails);
 		} else {
+			log.info("applicationIds.size = " + this.applicationIds.size());
 			//////////////////////////////////////////////////////////
 			// Lists are non-empty, so must match using application ID
 			//////////////////////////////////////////////////////////
@@ -257,7 +314,7 @@ public class Notification {
 	}
 	
 	public static void queueNotification(User theUser, String theApplicationId, AppMember theAppMember, String theNotificationType, 
-			                             Boolean theIsEmailActive, Boolean theIsSmsActive) {
+			                             String theMessage, String theItemId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
         EntityManager em = EMF.get().createEntityManager();
         
         String userId = null;
@@ -276,6 +333,7 @@ public class Notification {
             	notification = (Notification)em.createNamedQuery("Notification.getByUserId")
         				.setParameter("userId", userId)
         				.getSingleResult();
+            	log.info("existing notification found in datastore");
         	} catch (NoResultException e) {
     			// this is NOT an error, just the very first time a notification is being sent. Notification will be created just below ...
     		} catch (NonUniqueResultException e) {
@@ -287,6 +345,7 @@ public class Notification {
         	// there is no Notification entity for this user yet, so create it now
         	//////////////////////////////////////////////////////////////////////
         	if(notification == null) {
+        		log.info("new notification instantiated");
         		notification = new Notification();
         		notification.setUserId(userId);
         		notification.setSendGmtDateToFarFuture();  // to start, entity for this user is inactive
@@ -295,16 +354,23 @@ public class Notification {
         	NotificationDetails notificationDetails = new NotificationDetails();
         	notificationDetails.setApplicationId(theApplicationId);
         	notificationDetails.setApplicationName(theAppMember.getApplicationName());
-        	notificationDetails.setMessage("not used yet");
+        	
         	notificationDetails.setCrashCount(0);
         	notificationDetails.setClientLogCount(0);
         	notificationDetails.setFeedbackCount(0);
+
         	if(theNotificationType.equalsIgnoreCase(Notification.CRASH)) {
         		notificationDetails.setCrashCount(1);
+            	notificationDetails.setCrashMessage(theMessage);
+            	notificationDetails.setCrashId(theItemId);
         	} else if(theNotificationType.equalsIgnoreCase(Notification.CLIENT_LOG)) {
         		notificationDetails.setClientLogCount(1);
+            	notificationDetails.setClientLogMessage(theMessage);
+            	notificationDetails.setClientLogId(theItemId);
         	} else if(theNotificationType.equalsIgnoreCase(Notification.FEEDBACK)) {
         		notificationDetails.setFeedbackCount(1);
+            	notificationDetails.setFeedbackMessage(theMessage);
+            	notificationDetails.setFeedbackId(theItemId);
         	}
         	notification.updateNotificationDetailsList(notificationDetails);
         	
@@ -342,13 +408,19 @@ public class Notification {
 	private void initNotificationDetails() {
 		this.applicationIds = new ArrayList<String>();
 		this.applicationNames = new ArrayList<String>();
-		this.messages = new ArrayList<String>();
 		this.clientLogCounts = new ArrayList<Integer>();
+		this.clientLogMessages = new ArrayList<String>();
+		this.clientLogIds = new ArrayList<String>();
 		this.crashCounts = new ArrayList<Integer>();
+		this.crashMessages = new ArrayList<String>();
+		this.crashIds = new ArrayList<String>();
 		this.feedbackCounts = new ArrayList<Integer>();
+		this.feedbackMessages = new ArrayList<String>();
+		this.feedbackIds = new ArrayList<String>();
 	}
 	
 	private void addNotificationDetails(NotificationDetails nd) {
+		log.info("addNotificationDetails() entered");
 		////////////////////////////////////////////////////////////////
 		// Convert "normal Java" values to "default" values in Big Table
 		////////////////////////////////////////////////////////////////
@@ -358,20 +430,37 @@ public class Notification {
 		String applicationName = nd.getApplicationName() == null ? "" : nd.getApplicationName();
 		this.applicationNames.add(applicationName);
 
-		String message = nd.getMessage() == null ? "" : nd.getMessage();
-		this.messages.add(message);
-
 		// if empty, replace with 0
 		Integer clientLogCount = nd.getClientLogCount() == null ? 0 : nd.getClientLogCount();
 		this.clientLogCounts.add(clientLogCount);
+
+		String clientLogMessage = nd.getClientLogMessage() == null ? "" : nd.getClientLogMessage();
+		this.clientLogMessages.add(clientLogMessage);
+
+		String clientLogId = nd.getClientLogId() == null ? "" : nd.getClientLogId();
+		this.clientLogIds.add(clientLogId);
 
 		// if empty, replace with 0
 		Integer crashCount = nd.getCrashCount() == null ? 0 : nd.getCrashCount();
 		this.crashCounts.add(crashCount);
 
+		String crashMessage = nd.getCrashMessage() == null ? "" : nd.getCrashMessage();
+		log.info("about to add crashMessage = " + crashMessage + " to the crashMessages array");
+		this.crashMessages.add(crashMessage);
+
+		String crashId = nd.getCrashId() == null ? "" : nd.getCrashId();
+		log.info("about to add crashId = " + crashId + " to the crashIds array");
+		this.crashIds.add(crashId);
+
 		// if empty, replace with 0
 		Integer feedbackCount = nd.getFeedbackCount() == null ? 0 : nd.getFeedbackCount();
 		this.feedbackCounts.add(feedbackCount);
+
+		String feedbackMessage = nd.getFeedbackMessage() == null ? "" : nd.getFeedbackMessage();
+		this.feedbackMessages.add(feedbackMessage);
+
+		String feedbackId = nd.getFeedbackId() == null ? "" : nd.getFeedbackId();
+		this.feedbackIds.add(feedbackId);
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -426,7 +515,9 @@ public class Notification {
 		return applicationIdIndex;
 	}
 	
+	// Algorithm: only the first log and ID are persisted for display, the additional ones are discarded.
 	private void updateNotificationDetails(NotificationDetails theNewNotificationDetails, Integer applicationIdIndex) {
+		log.info("updateNotificationDetails() entered");
 		try {
 			String applicationId = theNewNotificationDetails.getApplicationId() == null ? "" : theNewNotificationDetails.getApplicationId();
 			this.applicationIds.set(applicationIdIndex, applicationId);
@@ -434,16 +525,23 @@ public class Notification {
 			String applicationName = theNewNotificationDetails.getApplicationName() == null ? "" : theNewNotificationDetails.getApplicationName();
 			this.applicationNames.set(applicationIdIndex, applicationName);
 			
-			String message = theNewNotificationDetails.getMessage() == null ? "" : theNewNotificationDetails.getMessage();
-			this.messages.set(applicationIdIndex, message);
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// ID and Message Fields updated only for the first entry (that is, when the count is going from zero to one)
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
 			/////////////////////////////////////////////////////////////////////////////////////
 			// Counts are NOT set, but incremented based on value in notificationDetail passed in
 			/////////////////////////////////////////////////////////////////////////////////////
-			
 			Integer newClientLogCount = theNewNotificationDetails.getClientLogCount();
 			if(newClientLogCount > 0) {
 				Integer originalClientLogCount = this.clientLogCounts.get(applicationIdIndex);
+				if(originalClientLogCount == 0) {
+					String clientLogMessage = theNewNotificationDetails.getClientLogMessage() == null ? "" : theNewNotificationDetails.getClientLogMessage();
+					this.clientLogMessages.set(applicationIdIndex, clientLogMessage);
+
+					String clientLogId = theNewNotificationDetails.getClientLogId() == null ? "" : theNewNotificationDetails.getClientLogId();
+					this.clientLogIds.set(applicationIdIndex, clientLogId);
+				}
 				originalClientLogCount++;
 				this.clientLogCounts.set(applicationIdIndex, originalClientLogCount);
 			}
@@ -451,6 +549,13 @@ public class Notification {
 			Integer newCrashCount = theNewNotificationDetails.getCrashCount();
 			if(newCrashCount > 0) {
 				Integer originalCrashCount = this.crashCounts.get(applicationIdIndex);
+				if(originalCrashCount == 0) {
+					String crashMessage = theNewNotificationDetails.getCrashMessage() == null ? "" : theNewNotificationDetails.getCrashMessage();
+					this.crashMessages.set(applicationIdIndex, crashMessage);
+
+					String crashId = theNewNotificationDetails.getCrashId() == null ? "" : theNewNotificationDetails.getCrashId();
+					this.crashIds.set(applicationIdIndex, crashId);
+				}
 				originalCrashCount++;
 				this.crashCounts.set(applicationIdIndex, originalCrashCount);
 			}
@@ -458,6 +563,13 @@ public class Notification {
 			Integer newFeedbackCount = theNewNotificationDetails.getFeedbackCount();
 			if(newFeedbackCount > 0) {
 				Integer originalFeedbackCount = this.feedbackCounts.get(applicationIdIndex);
+				if(originalFeedbackCount == 0) {
+					String feedbackMessage = theNewNotificationDetails.getFeedbackMessage() == null ? "" : theNewNotificationDetails.getFeedbackMessage();
+					this.feedbackMessages.set(applicationIdIndex, feedbackMessage);
+
+					String feedbackId = theNewNotificationDetails.getFeedbackId() == null ? "" : theNewNotificationDetails.getFeedbackId();
+					this.feedbackIds.set(applicationIdIndex, feedbackId);
+				}
 				originalFeedbackCount++;
 				this.feedbackCounts.set(applicationIdIndex, originalFeedbackCount);
 			}
@@ -471,44 +583,7 @@ public class Notification {
         if(this.getEmailAddress() == null) {
         	return null;
         }
-
-        List<String> applicationSummaries = new ArrayList<String>();
-        List<NotificationDetails> notificationDetailsList = this.getNotificationDetailsList();
-        boolean prior = false;
-        for(NotificationDetails nd : notificationDetailsList) {
-            StringBuffer emailAddressBuf = new StringBuffer();
-        	if(emailAddressBuf != null) {
-        		emailAddressBuf.append(nd.getApplicationName());
-        		emailAddressBuf.append("[");
-        		if(nd.getCrashCount() != null) {
-            		emailAddressBuf.append("crash:");
-            		emailAddressBuf.append(nd.getCrashCount());
-            		prior = true;
-        		}
-        		if(nd.getClientLogCount() != null) {
-        			if(prior) {emailAddressBuf.append("|");}
-            		emailAddressBuf.append("clientlog:");
-            		emailAddressBuf.append(nd.getClientLogCount());
-            		prior = true;
-        		}
-        		if(nd.getFeedbackCount() != null) {
-        			if(prior) {emailAddressBuf.append("|");}
-            		emailAddressBuf.append("feedback:");
-            		emailAddressBuf.append(nd.getFeedbackCount());
-        		}
-        		emailAddressBuf.append("]");
-        	}
-            
-    		if(emailAddressBuf.length() > 0) {
-    			applicationSummaries.add(emailAddressBuf.toString());
-    		}
-		}
-        
-        if(applicationSummaries.size() > 0) {
-        	return Emailer.getNotificationEmailBody(applicationSummaries, RskyboxApplication.APPLICATION_BASE_URL);
-        } else {
-        	return null;
-        }
+    	return Emailer.getNotificationEmailBody(this.getNotificationDetailsList(), RskyboxApplication.APPLICATION_BASE_URL);
 	}
 	
 	private String getSmsNotification() {
@@ -547,9 +622,53 @@ public class Notification {
         // include a link to the rSkybox application
         if(smsEmailAddressBuf.length() > 0) {
         	smsEmailAddressBuf.append(" ");
-        	smsEmailAddressBuf.append(RskyboxApplication.APPLICATION_BASE_URL);
+        	smsEmailAddressBuf.append(getMostSpecificUrl());
         }
         
         return smsEmailAddressBuf.toString();
+	}
+	
+	private String getMostSpecificUrl() {
+        String url = "";
+        // Algorithm: link provided "zooms" in to be as specific as possible without over zooming
+        if(this.getNotificationDetailsList().size() > 1) {
+            // if more than one application, link is to rSkybox
+            url = RskyboxApplication.APPLICATION_BASE_URL;
+        } else {
+        	String rskyboxBaseUrl = RskyboxApplication.APPLICATION_BASE_URL + "html5";
+        	NotificationDetails nd = this.getNotificationDetailsList().get(0);
+        	
+        	// for now, default it to the application url
+        	url = rskyboxBaseUrl + "#application?appId=" + nd.getApplicationId();
+        	
+        	if(nd.getCrashCount() > 0  && (nd.getClientLogCount() == 0 && nd.getFeedbackCount() == 0)) {
+        		if(nd.getCrashCount() == 1) {
+        			// only one crash, link all the way down to the crash detail page
+        			url = rskyboxBaseUrl + "#crash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
+        		} else {
+        			// multiple crashes so link to the crash list
+        			url = rskyboxBaseUrl + "#crashes?appId=" + nd.getApplicationId() + "&status=new";
+        		}
+        	} else if(nd.getClientLogCount() > 0  && (nd.getCrashCount() == 0 && nd.getFeedbackCount() == 0)) {
+        		if(nd.getClientLogCount() == 1) {
+        			// only one clientLog, link all the way down to the clientLog detail page
+        			url = rskyboxBaseUrl + "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
+        		} else {
+        			// multiple crashes so link to the clientLog list
+        			url = rskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
+        		}
+        	} else if(nd.getFeedbackCount() > 0  && (nd.getClientLogCount() == 0 && nd.getCrashCount() == 0)) {
+        		if(nd.getFeedbackCount() == 1) {
+        			// only one feedback, link all the way down to the feedback detail page
+        			url = rskyboxBaseUrl + "#feedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
+        		} else {
+        			// multiple crashes so link to the feedback list
+        			url = rskyboxBaseUrl + "#feedbackList?appId=" + nd.getApplicationId() + "&status=new";
+        		}
+        	}
+        }
+    	
+    	log.info("SMS URL = " + url);
+        return url;
 	}
 }

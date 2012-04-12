@@ -386,7 +386,9 @@ public class ClientLogsResource extends ServerResource {
             em.getTransaction().commit();
             
             if(!isUpdate) {
-            	User.sendNotifications(this.applicationId, Notification.CLIENT_LOG);
+            	// TODO is the clientLog key really set by this point?
+            	String theItemId = KeyFactory.keyToString(clientLog.getKey());
+            	User.sendNotifications(this.applicationId, Notification.CLIENT_LOG, clientLog.getLogName(), theItemId);
             	
             	ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
             	// if there is no clientLogRemoteControl, then mode must defaults to ACTIVE

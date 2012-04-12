@@ -46,7 +46,6 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'SignupController.signupBeforeShow');
 
-        if (r.signup) { delete r.signup; }
         if (r.signupView) {
           r.signupView.undelegateEvents();
           delete r.signupView;
@@ -54,7 +53,7 @@ var RSKYBOX = (function (r, $) {
         r.signup = new r.Signup();
         r.signupView = new r.SignupView({
           el: $('#signupForm'),
-          model: r.signup,
+          model: new r.Signup(),
         });
       } catch (e) {
         r.log.error(e, 'SignupController.signupBeforeShow');
@@ -77,15 +76,13 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'SignupController.loginBeforeShow');
 
-        if (r.login) { delete r.login; }
         if (r.loginView) {
           r.loginView.undelegateEvents();
           delete r.loginView;
         }
-        r.login = new r.Login();
         r.loginView = new r.LoginView({
           el: $('#loginForm'),
-          model: r.login,
+          model: new r.Login(),
         });
       } catch (e) {
         r.log.error(e, 'SignupController.loginBeforeShow');
@@ -108,21 +105,19 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'SignupController.confirmNewUserBeforeShow');
 
-        if (r.confirm) { delete r.confirm; }
         if (r.confirmNewUserView) {
           r.confirmNewUserView.undelegateEvents();
           delete r.confirmNewUserView;
         }
-        r.confirm = new r.Confirm({
-          emailAddress: r.session.params.emailAddress,
-          emailConfirmationCode: r.session.params.emailConfirmationCode,
-          phoneNumber: r.session.params.phoneNumber,
-          phoneConfirmationCode: r.session.params.phoneConfirmationCode,
-          new: true,
-        });
         r.confirmNewUserView = new r.ConfirmNewUserView({
           el: $('#confirmForm'),
-          model: r.confirm,
+          model: new r.Confirm({
+            emailAddress: r.session.params.emailAddress,
+            emailConfirmationCode: r.session.params.emailConfirmationCode,
+            phoneNumber: r.session.params.phoneNumber,
+            phoneConfirmationCode: r.session.params.phoneConfirmationCode,
+            new: true,
+          }),
         });
       } catch (e) {
         r.log.error(e, 'SignupController.confirmNewUserBeforeShow');
@@ -144,25 +139,23 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'SignupController.confirmExistingUserBeforeShow');
 
-        if (r.confirm) { delete r.confirm; }
         if (r.confirmExistingUserView) {
           r.confirmExistingUserView.undelegateEvents();
           delete r.confirmExistingUserView;
         }
-        r.confirm = new r.Confirm({
-          emailAddress: r.session.params.emailAddress,
-          emailConfirmationCode: r.session.params.emailConfirmationCode,
-          phoneNumber: r.session.params.phoneNumber,
-          phoneConfirmationCode: r.session.params.phoneConfirmationCode,
-          new: false,
-        });
-        r.confirm.apiUrl = '/users/confirm';
-        r.confirm.setUrl();
-        r.confirm.set('id', 'confirm');
         r.confirmExistingUserView = new r.ConfirmExistingUserView({
           el: $('#confirmForm'),
-          model: r.confirm,
+          model: new r.Confirm({
+            emailAddress: r.session.params.emailAddress,
+            emailConfirmationCode: r.session.params.emailConfirmationCode,
+            phoneNumber: r.session.params.phoneNumber,
+            phoneConfirmationCode: r.session.params.phoneConfirmationCode,
+            new: false,
+          }),
         });
+        r.confirmExistingUserView.model.apiUrl = '/users/confirm';
+        r.confirmExistingUserView.model.setUrl();
+        r.confirmExistingUserView.model.set({'id': 'confirm'}, {silent: true});
       } catch (e) {
         r.log.error(e, 'SignupController.confirmExistingUserBeforeShow');
       }
@@ -190,19 +183,18 @@ var RSKYBOX = (function (r, $) {
           r.confirmMemberView.undelegateEvents();
           delete r.confirmMemberView;
         }
-        r.member = new r.Member({
-          emailAddress: r.session.params.emailAddress,
-          confirmationCode: r.session.params.confirmationCode,
-          memberConfirmation: r.session.params.memberConfirmation,
-        });
-        r.member.apiUrl = '/appMembers/confirmation';
-        r.member.setUrl();
-        r.member.setAppUrl(r.session.params.applicationId);
-        r.member.set('id', 'confirmation');
         r.confirmMemberView = new r.ConfirmMemberView({
           el: $('#confirmForm'),
-          model: r.member,
+          model: new r.Member({
+            emailAddress: r.session.params.emailAddress,
+            confirmationCode: r.session.params.confirmationCode,
+            memberConfirmation: r.session.params.memberConfirmation,
+          }),
         });
+        r.confirmMemberView.apiUrl = '/appMembers/confirmation';
+        r.confirmMemberView.setUrl();
+        r.confirmMemberView.setAppUrl(r.session.params.applicationId);
+        r.confirmMemberView.set({id: 'confirmation'}, {silent: true});
       } catch (e) {
         r.log.error(e, 'SignupController.confirmMemberBeforeShow');
       }
