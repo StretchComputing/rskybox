@@ -65,7 +65,6 @@ var RSKYBOX = (function (r, $) {
     },
 
     error: function (e, name) {
-      // TODO - change to crashDetect call.
       // TODO - include environment information in summary
       // TODO - include error name in summary
       this.base('error', e, name);
@@ -145,7 +144,6 @@ var RSKYBOX = (function (r, $) {
     // message is an Error object for 'error' level
     logToServer: function (level, message, name) {
       try {
-        r.log.debug(name);
         var
           attrs = {
             instanceUrl: location.hash,
