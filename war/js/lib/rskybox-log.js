@@ -3,8 +3,6 @@ var RSKYBOX = (function (r, $) {
 
 
   var
-    urlRoot = 'https://rskybox-stretchcom.appspot.com/rest/v1/applications/<appId>/clientLogs',
-
     logLevels = {
       error: 5,
       warn: 10,
@@ -30,9 +28,17 @@ var RSKYBOX = (function (r, $) {
       }()),
     },
 
+    getUrl = function () {
+      try {
+        return 'https://rskybox-stretchcom.appspot.com/rest/v1/applications/' + settings.appId + '/clientLogs';
+      } catch (e) {
+        console.error(e, 'RSKYBOX.log.getUrl');
+      }
+    },
+
     isValid = function () {
       try {
-        var valid = false;
+        var valid = true;
 
         return valid;
       } catch (e) {
@@ -77,26 +83,26 @@ var RSKYBOX = (function (r, $) {
 
     // message is an Error object for 'error' level
     server = function (level, message, name) {
+      if (!isValid()) { throw new Error('log setup is invalid'); }
       try {
-        if (!isValid) { return; }
 
         var
           attrs = {
-            instanceUrl: location.hash,
+            instanceUrl: settings.instanceUrl,
             logName: name || message,
             logLevel: level,
             message: message,
-            userName: Cookie.get('token'),
-          },
-          getUserName,
-          user;
+            userName: settings.userName,
+          };
 
         if (level === 'error') {
           attrs.message = 'see stackBackTrace';
           attrs.stackBackTrace = message.stack.split('\n');
         }
 
-        this.save(attrs, {
+        $.ajax({
+          type: 'POST',
+          url: getUrl(),
           error: settings.error,
           success: settings.success,
           statusCode: settings.statusCode,
@@ -172,7 +178,7 @@ var RSKYBOX = (function (r, $) {
           localLevel = logLevels.local,
           serverLevel = logLevels.error;
 
-        if (this.get('appId') && (serverLevel >= logLevels[level])) {
+        if (settings.appId && (serverLevel >= logLevels[level])) {
           server(level, message, name);
         }
 

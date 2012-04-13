@@ -2,8 +2,6 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-
-
   r.dump = function (object) {
     try {
       // TODO - log to localStorage
@@ -14,46 +12,45 @@ var RSKYBOX = (function (r, $) {
   };
 
 
-  try {
-    var
-      apiError = function (jqXHR) {
+  var
+    apiError = function (jqXHR) {
+      try {
+        var
+          apiCodes = r.log.getApiCodes(),
+          code = r.getApiStatus(jqXHR.responseText);
 
-        try {
-          var
-            apiCodes = r.log.getApiCodes(),
-            code = r.getApiStatus(jqXHR.responseText);
+        // TODO - log to localStorage
+        console.info(code, 'RSKYBOX.log.apiError');
 
+        if (!apiCodes[code]) {
           // TODO - log to localStorage
-          console.info(code, 'SkyboxLog.apiError');
-
-          if (!apiCodes[code]) {
-            // TODO - log to localStorage
-            console.info('Undefined apiStatus: ' + code, 'SkyboxLog.apiError');
-          }
-          r.flash.warning(apiCodes[code]);
-        } catch (e) {
-          // TODO - log to localStorage
-          console.error(e, 'SkyboxLog.apiError');
+          console.info('Undefined apiStatus: ' + code, 'SkyboxLog.apiError');
         }
-      },
+        r.flash.warning(apiCodes[code]);
+      } catch (e) {
+        // TODO - log to localStorage
+        console.error(e, 'RSKYBOX.log.apiError');
+      }
+    },
 
-      error = function (model, response) {
-        try {
-          if (response.responseText) { return; }  // This is an apiError.
+    error = function (model, response) {
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
 
-          // TODO - log to localStorage
-          console.warn(response, 'SkyboxLog.errorHandler');
-          r.flash.warning(response);              // This is a validation error.
-        } catch (e) {
-          // TODO - log to localStorage
-          console.error(e, 'SkyboxLog.errorHandler');
-        }
-      },
+        // TODO - log to localStorage
+        console.warn(response, 'RSKYBOX.log.error');
+        r.flash.warning(response);              // This is a validation error.
+      } catch (e) {
+        // TODO - log to localStorage
+        console.error(e, 'RSKYBOX.log.error');
+      }
+    },
 
-      getSummary = function () {
-      },
+    getSummary = function () {
+    },
 
-      getUserName = function () {
+    getUserName = function () {
+      try {
         var
           name = '',
           user = r.session && r.session.getEntity(r.session.keys.currentUser);
@@ -67,29 +64,41 @@ var RSKYBOX = (function (r, $) {
         if (!name) { name = Cookie.get('token'); }
 
         return name;
-      },
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.getUserName');
+      }
+    },
 
-      logLevels = r.log.getLogLevels(),
+    logLevels = r.log.getLogLevels(),
 
-      success = function (model, response) {
-        console.info('entering', 'SkyboxLog.success');
-      };
+    success = function (model, response) {
+      console.info('entering', 'SkyboxLog.success');
+    };
 
-    // appId will be null if user is not logged in.
-    // This will produce an error log in the console.
-    r.log.intitialize({
-      appId: Cookie.get('appId'),
-      token: Cookie.get('token'),
-      userName: getUserName(),
-      success: success,
-      error: error,
-      statusCode: r.statusCodeHandlers(apiError),
-      summary: getSummary(),
-    });
-  } catch (e) {
-    // TODO - log to localStorage
-    console.error(e, 'RSKYBOX.logsetup');
-  }
+  // appId will be null if user is not logged in.
+  // This will produce an error log in the console.
+  $(function () {
+    try {
+      var settings = {};
+
+      settings.appId = Cookie.get('appId');
+      settings.token = Cookie.get('token');
+      settings.userName = getUserName();
+      settings.summary = getSummary();
+      settings.instanceUrl = location.hash;
+      settings.success = success;
+      settings.error = error;
+      settings.statusCode = r.statusCodeHandlers(apiError);
+
+      r.log.initialize(settings);
+
+      // TODO - remove following line
+      r.log.error(new Error(), 'test error');
+    } catch (e) {
+      // TODO - log to localStorage
+      console.error(e, 'RSKYBOX.log.initialize');
+    }
+  });
 
 
   return r;
