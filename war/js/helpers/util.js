@@ -2,243 +2,90 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  // **** These must be defined here so they can be used further down in this function. ****
-  //
-  // General status code handlers.
-  // apiError: optional handler for API errors
-  r.statusCodeHandlers = function (apiError) {
-    var general = {
-      401: function (jqXHR) {
-        try {
-          // TODO - log to localStorage
-          console.info('401 - unauthorized', 'RSKYBOX.statusCodeHandlers');
-          // TODO - Add flash message to home page after 401 occurs
-          r.flash.set('warning', 'Login required');
-          r.logOut();
-        } catch (e) {
-          // TODO - log to localStorage
-          console.warn(e, 'RSKYBOX.statusCodeHandlers:general:401');
-        }
-      },
-      404: function () {
-        // TODO - display a 404 page
-        // TODO - log to localStorage
-        console.warn('404 - not found', 'RSKYBOX.statusCodeHandlers');
-      },
-      500: function () {
-        // TODO - display a 500 page
-        // TODO - log to localStorage
-        console.warn('500 - server error', 'RSKYBOX.statusCodeHandlers');
-      }
-    };
 
+
+  r.dump = function (object) {
     try {
-      if (apiError) {
-        $.extend(general, { 422: apiError });
-      }
-      return general;
-    } catch (e) {
       // TODO - log to localStorage
-      console.error(e, 'RSKYBOX.statusCodeHandlers');
+      console.log(JSON.stringify(object));
+    } catch (e) {
+      console.error(e, 'RSKYBOX.dump');
     }
   };
 
 
-  r.dump = function (object) {
-    // TODO - log to localStorage
-    console.log(JSON.stringify(object));
-  };
-
-  r.SkyboxLog = r.Log.extend({
-    initialize: function () {
-      _.bindAll(this, 'success', 'apiError');
-      this.on('error', this.errorHandler, this);
-    },
-
-    logLevels: {
-      error: 5,
-      warn: 10,
-      info: 25,
-      debug: 50,
-      local: 75,
-      off: 99
-    },
-
-    error: function (e, name) {
-      // TODO - include environment information in summary
-      // TODO - include error name in summary
-      this.base('error', e, name);
-    },
-
-    warn: function (message, name) {
-      this.base('warn', message, name);
-    },
-
-    info: function (message, name) {
-      this.base('info', message, name);
-    },
-
-    debug: function (message, name) {
-      this.base('debug', message, name);
-    },
-
-    local: function (message, name) {
-      this.base('local', message, name);
-    },
-
-    base: function (level, message, name) {
-      try {
-        var
-          localLevel = this.logLevels.local,
-          serverLevel = this.logLevels.error;
-
-        if (this.get('appId') && (serverLevel >= this.logLevels[level])) {
-          this.logToServer(level, message, name);
-        }
-
-        if (localLevel >= this.logLevels[level]) {
-          this.logLocal(level, message, name);
-        }
-      } catch (e) {
-        // TODO - log to localStorage
-        console.error(e, 'rSkyboxLog.base');
-      }
-    },
-
-    // message is an Error object for 'error' level
-    logLocal: function (level, message, name) {
-      try {
-        var output;
-
-        if (level !== 'error') {
-          output = message + (name ? ' \t(' + name + ')' : '');
-        }
-
-        switch (level) {
-        case 'error':
-          console.error(name, message.stack);
-          break;
-        case 'warn':
-          console.warn(output);
-          break;
-        case 'info':
-          console.info(output);
-          break;
-        case 'debug':
-          console.debug('DEBUG ' + output);
-          break;
-        case 'local':
-          console.log('LOCAL ' + output);
-          break;
-        default:
-          console.log(output);
-          break;
-        }
-      } catch (e) {
-        // TODO - log to localStorage
-        console.error(e, 'rSkyboxLog.logLocal');
-      }
-    },
-
-    // Server functionality for the rest of the class below.
-    // message is an Error object for 'error' level
-    logToServer: function (level, message, name) {
-      try {
-        var
-          attrs = {
-            instanceUrl: location.hash,
-            logName: name || message,
-            logLevel: level,
-            message: message,
-            userName: Cookie.get('token'),
-          },
-          getUserName,
-          user;
-
-        if (level === 'error') {
-          attrs.message = 'see stackBackTrace';
-          attrs.stackBackTrace = message.stack.split('\n');
-        }
-
-        user = r.session && r.session.getEntity(r.session.keys.currentUser);
-        if (user) {
-          getUserName = function () {
-            var name = '';
-
-            if (user.firstName) { name += user.firstName + ' '; }
-            if (user.lastName) { name += user.lastName; }
-            if (name) { name += ', '; }
-            if (user.emailAddress) { name += user.emailAddress; }
-            if (user.phoneNumber) { name += ', ' + user.phoneNumber; }
-
-            if (!name) { name = Cookie.get('token'); }
-
-            return name;
-          };
-          attrs.userName = getUserName();
-        }
-
-        this.save(attrs, {
-          success: this.success,
-          statusCode: r.statusCodeHandlers(this.apiError),
-        });
-      } catch (e) {
-        // TODO - log to localStorage
-        console.error(e, 'rSkyboxLog.logToServer');
-      }
-    },
-
-    success: function (model, response) {
-      console.info('entering', 'SkyboxLog.success');
-    },
-
-    errorHandler: function (model, response) {
-      try {
-        if (response.responseText) { return; }  // This is an apiError.
-
-        // TODO - log to localStorage
-        console.warn(response, 'SkyboxLog.errorHandler');
-        r.flash.warning(response);              // This is a validation error.
-      } catch (e) {
-        // TODO - log to localStorage
-        console.error(e, 'SkyboxLog.errorHandler');
-      }
-    },
-
-    apiError: function (jqXHR) {
-      try {
-        var code = r.getApiStatus(jqXHR.responseText);
-        // TODO - log to localStorage
-        console.info(code, 'SkyboxLog.apiError');
-
-        if (!this.apiCodes[code]) {
-          // TODO - log to localStorage
-          console.info('Undefined apiStatus: ' + code, 'SkyboxLog.apiError');
-        }
-        r.flash.warning(this.apiCodes[code]);
-      } catch (e) {
-        // TODO - log to localStorage
-        console.error(e, 'SkyboxLog.apiError');
-      }
-    },
-
-    apiCodes: {
-      202: 'Invalid log level.',
-      305: 'Application ID required.',
-      315: 'Log name is required.',
-      414: 'Invalid timestamp parameter.',
-      415: 'Invalid duration parameter.',
-      605: 'Application not found.',
-    },
-  });
-
-
   try {
-    r.log = new r.SkyboxLog({});
-    r.log.setAppUrl(Cookie.get('appId'));
+    var
+      apiError = function (jqXHR) {
+
+        try {
+          var
+            apiCodes = r.log.getApiCodes(),
+            code = r.getApiStatus(jqXHR.responseText);
+
+          // TODO - log to localStorage
+          console.info(code, 'SkyboxLog.apiError');
+
+          if (!apiCodes[code]) {
+            // TODO - log to localStorage
+            console.info('Undefined apiStatus: ' + code, 'SkyboxLog.apiError');
+          }
+          r.flash.warning(apiCodes[code]);
+        } catch (e) {
+          // TODO - log to localStorage
+          console.error(e, 'SkyboxLog.apiError');
+        }
+      },
+
+      error = function (model, response) {
+        try {
+          if (response.responseText) { return; }  // This is an apiError.
+
+          // TODO - log to localStorage
+          console.warn(response, 'SkyboxLog.errorHandler');
+          r.flash.warning(response);              // This is a validation error.
+        } catch (e) {
+          // TODO - log to localStorage
+          console.error(e, 'SkyboxLog.errorHandler');
+        }
+      },
+
+      getSummary = function () {
+      },
+
+      getUserName = function () {
+        var
+          name = '',
+          user = r.session && r.session.getEntity(r.session.keys.currentUser);
+
+        if (user.firstName) { name += user.firstName + ' '; }
+        if (user.lastName) { name += user.lastName; }
+        if (name) { name += ', '; }
+        if (user.emailAddress) { name += user.emailAddress; }
+        if (user.phoneNumber) { name += ', ' + user.phoneNumber; }
+
+        if (!name) { name = Cookie.get('token'); }
+
+        return name;
+      },
+
+      logLevels = r.log.getLogLevels(),
+
+      success = function (model, response) {
+        console.info('entering', 'SkyboxLog.success');
+      };
+
     // appId will be null if user is not logged in.
     // This will produce an error log in the console.
-    r.log.set('appId', Cookie.get('appId'));
+    r.log.intitialize({
+      appId: Cookie.get('appId'),
+      token: Cookie.get('token'),
+      userName: getUserName(),
+      success: success,
+      error: error,
+      statusCode: r.statusCodeHandlers(apiError),
+      summary: getSummary(),
+    });
   } catch (e) {
     // TODO - log to localStorage
     console.error(e, 'RSKYBOX.logsetup');
@@ -280,6 +127,46 @@ var RSKYBOX = (function (r, $) {
         }
       },
     };
+
+
+  // General status code handlers.
+  // apiError: optional handler for API errors
+  r.statusCodeHandlers = function (apiError) {
+    var general = {
+      401: function (jqXHR) {
+        try {
+          // TODO - log to localStorage
+          console.info('401 - unauthorized', 'RSKYBOX.statusCodeHandlers');
+          // TODO - Add flash message to home page after 401 occurs
+          r.flash.set('warning', 'Login required');
+          r.logOut();
+        } catch (e) {
+          // TODO - log to localStorage
+          console.warn(e, 'RSKYBOX.statusCodeHandlers:general:401');
+        }
+      },
+      404: function () {
+        // TODO - display a 404 page
+        // TODO - log to localStorage
+        console.warn('404 - not found', 'RSKYBOX.statusCodeHandlers');
+      },
+      500: function () {
+        // TODO - display a 500 page
+        // TODO - log to localStorage
+        console.warn('500 - server error', 'RSKYBOX.statusCodeHandlers');
+      }
+    };
+
+    try {
+      if (apiError) {
+        $.extend(general, { 422: apiError });
+      }
+      return general;
+    } catch (e) {
+      // TODO - log to localStorage
+      console.error(e, 'RSKYBOX.statusCodeHandlers');
+    }
+  };
 
 
   // Handle logging in and logging out.
