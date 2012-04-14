@@ -287,7 +287,6 @@ public class UsersResource extends ServerResource {
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
             String token = null;
-            String authHeader = null;
             String carrierDomainName = null;
             
             extractUserInfoFromJson(userCache, json);
@@ -394,12 +393,7 @@ public class UsersResource extends ServerResource {
 
             	token = TF.get();
             	user.setToken(token);
-
-                // format: Basic rSkyboxLogin:<token_value> where rSkyboxLogin:<token_value> portion is base64 encoded
-            	String phrase = "rSkyboxLogin:" + token;
-            	String phraseBase64 = Base64.encodeBase64String(phrase.getBytes("ISO-8859-1"));
-            	authHeader = "Basic " + phraseBase64;
-            	user.setAuthHeader(authHeader);
+            	user.setAuthHeader(Utility.getRskyboxAuthHeader(token));
             }
             
 			if(json.has("password")) {

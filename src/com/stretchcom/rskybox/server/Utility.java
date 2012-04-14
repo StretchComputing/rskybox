@@ -142,4 +142,17 @@ public class Utility {
     	newCookie.setMaxAge(theCookieAgeInMilliSeconds);
     	theHttpResponse.addCookie(newCookie);
     }
+    
+    public static String getRskyboxAuthHeader(String theToken) {
+        // format: Basic rSkyboxLogin:<token_value> where rSkyboxLogin:<token_value> portion is base64 encoded
+    	String phrase = "rSkyboxLogin:" + theToken;
+    	String phraseBase64 = null;
+		try {
+			phraseBase64 = Base64.encodeBase64String(phrase.getBytes("ISO-8859-1"));
+		} catch (UnsupportedEncodingException e) {
+			log.severe("UnsupportedEncodingException::getRskyboxAuthHeader");
+			return null;
+		}
+    	return "Basic " + phraseBase64;
+    }
 }
