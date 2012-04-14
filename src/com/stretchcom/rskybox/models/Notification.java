@@ -639,10 +639,20 @@ public class Notification {
 			sb.append(" app: ");
 			if(nd.getCrashCount() > 0  && (nd.getClientLogCount() == 0 && nd.getFeedbackCount() == 0)) {
 				sb.append(nd.getCrashCount());
-				sb.append(" new crashes");
+				sb.append(" new ");
+				if(nd.getCrashCount() > 1) {
+					sb.append("crashes");
+				} else {
+					sb.append("crash");
+				}
 			} else if(nd.getClientLogCount() > 0  && (nd.getCrashCount() == 0 && nd.getFeedbackCount() == 0)) {
 				sb.append(nd.getClientLogCount());
-				sb.append(" new logs");
+				sb.append(" new ");
+				if(nd.getClientLogCount() > 1) {
+					sb.append("logs");
+				} else {
+					sb.append("log");
+				}
 			} else if(nd.getFeedbackCount() > 0  && (nd.getClientLogCount() == 0 && nd.getCrashCount() == 0)) {
 				sb.append(nd.getFeedbackCount());
 				sb.append(" new feedback");
