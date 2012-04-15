@@ -14,6 +14,7 @@ import javax.persistence.NonUniqueResultException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONString;
 import org.restlet.data.Form;
 import org.restlet.data.Parameter;
 import org.restlet.data.Reference;
@@ -278,7 +279,15 @@ public class ClientLogsResource extends ServerResource {
 			}
 			
 			if(!isUpdate && json.has("stackBackTrace")) {
-				clientLog.setStackBackTrace(json.getString("stackBackTrace"));
+				List<String> stackBackTraces = new ArrayList<String>();
+	        	JSONArray stackBackTracesJsonArray = json.getJSONArray("stackBackTrace");
+				int arraySize = stackBackTracesJsonArray.length();
+				log.info("stackBackTraces json array length = " + arraySize);
+				for(int i=0; i<arraySize; i++) {
+					String stackBackTrace = stackBackTracesJsonArray.getString(i);
+					stackBackTraces.add(stackBackTrace);
+				}
+				clientLog.setStackBackTraces(stackBackTraces);
 			}
 			
 			if(!isUpdate && json.has("userName")) {
@@ -491,9 +500,30 @@ public class ClientLogsResource extends ServerResource {
             	json.put("logLevel", clientLog.getLogLevel());
             	json.put("logName", clientLog.getLogName());
             	json.put("message", clientLog.getMessage());
-            	json.put("stackBackTrace", clientLog.getStackBackTrace());
             	json.put("summary", clientLog.getSummary());
             	
+            	JSONArray stackBackTracesJsonArray = new JSONArray();
+            	List<String> stackBackTraces = clientLog.getStackBackTraces();
+            	
+            	//////////////////////////////////////////////////
+            	// TODO - remove support of stackBackTrace string
+            	//////////////////////////////////////////////////
+            	if(stackBackTraces == null || stackBackTraces.size() == 0) {
+        			log.info("returning legacy stackBackTrace");
+            		stackBackTraces = new ArrayList<String>();
+            		String stackBackTrace = clientLog.getStackBackTrace();
+            		if(stackBackTrace != null && stackBackTrace.length() > 0) {
+                		stackBackTraces.add(stackBackTrace);
+            		}
+            	}
+            	//////////////////////////////////////////////////
+
+            	for(String sbt: stackBackTraces) {
+            		stackBackTracesJsonArray.put(sbt);
+            	}
+            	log.info("stackBackTraces # of parts = " + stackBackTraces.size());
+            	json.put("stackBackTrace", stackBackTracesJsonArray);
+                	
                 ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
                 // if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
                 String logMode = ClientLogRemoteControl.ACITVE_MODE;
