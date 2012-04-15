@@ -289,6 +289,10 @@ public class ClientLogsResource extends ServerResource {
 				clientLog.setInstanceUrl(json.getString("instanceUrl"));
 			}
 			
+			if(!isUpdate && json.has("summary")) {
+				clientLog.setSummary(json.getString("summary"));
+			}
+			
 			if(!isUpdate) {
 				Date createdDate = null;
 				if(json.has("date")) {
@@ -381,7 +385,11 @@ public class ClientLogsResource extends ServerResource {
             if(!isUpdate) {
             	// TODO is the clientLog key really set by this point?
             	String theItemId = KeyFactory.keyToString(clientLog.getKey());
-            	User.sendNotifications(this.applicationId, Notification.CLIENT_LOG, clientLog.getLogName(), theItemId);
+            	String message = clientLog.getLogName();
+            	if(clientLog.getSummary() != null && clientLog.getSummary().length() > 0) {
+            		message += " " + clientLog.getSummary();
+            	}
+            	User.sendNotifications(this.applicationId, Notification.CLIENT_LOG, message, theItemId);
             	
             	ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
             	// if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
@@ -484,7 +492,8 @@ public class ClientLogsResource extends ServerResource {
             	json.put("logName", clientLog.getLogName());
             	json.put("message", clientLog.getMessage());
             	json.put("stackBackTrace", clientLog.getStackBackTrace());
-                	
+            	json.put("summary", clientLog.getSummary());
+            	
                 ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
                 // if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
                 String logMode = ClientLogRemoteControl.ACITVE_MODE;

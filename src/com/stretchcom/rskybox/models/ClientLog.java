@@ -76,6 +76,7 @@ public class ClientLog {
 	private String status;
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
+	private String summary;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -186,6 +187,14 @@ public class ClientLog {
 
 	public void setActiveThruGmtDate(Date activeThruGmtDate) {
 		this.activeThruGmtDate = activeThruGmtDate;
+	}
+
+    public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
 	}
 
 	public Boolean createAppActions(List<AppAction> theNewAppActionList) {
