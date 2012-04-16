@@ -369,7 +369,7 @@
             <% var on = false; %>
             <% appActions.forEach(function(action) { %>
               <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
-                <%= action.timestamp %>
+                <%= RSKYBOX.format.timeOnly(action.timestamp) %>
                 <% if (action.duration) { %>
                   - <%= action.duration %>ms
                 <% } %>

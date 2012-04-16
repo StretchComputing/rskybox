@@ -415,7 +415,7 @@ var RSKYBOX = (function (r, $) {
       try {
         var date = new Date(isoDate);
 
-        return window.dateFormat(isoDate, 'ddd, mmm d yyyy, HH:MM:ss' + (showMilliseconds ? '.l' : ''));
+        return window.dateFormat(date, 'ddd, mmm d yyyy, HH:MM:ss' + (showMilliseconds ? '.l' : ''));
       } catch (e) {
         r.log.error(e, 'format.longDate');
       }
@@ -424,7 +424,7 @@ var RSKYBOX = (function (r, $) {
       try {
         var date = new Date(isoDate);
 
-        return window.dateFormat(isoDate, 'HH:MM:ss.l');
+        return window.dateFormat(date, 'HH:MM:ss.l');
       } catch (e) {
         r.log.error(e, 'format.timeOnly');
       }
