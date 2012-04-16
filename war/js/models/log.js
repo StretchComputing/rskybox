@@ -18,13 +18,6 @@ var RSKYBOX = (function (r, $) {
       status: null,
       appActions: null,
     },
-
-    parse: function (response) {
-      if (response.stackBackTrace && response.stackBackTrace.match(/^\[.*\]$/)) {
-        response.stackBackTrace = JSON.parse(response.stackBackTrace);
-      }
-      return response;
-    },
   });
 
 

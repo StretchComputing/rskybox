@@ -198,6 +198,7 @@ public class ClientLog {
 
 	public void setSummary(String summary) {
 		this.summary = summary;
+	}
     	
 	public List<String> getStackBackTraces() {
 		return stackBackTraces;
