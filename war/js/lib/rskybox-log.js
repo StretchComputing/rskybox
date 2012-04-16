@@ -30,7 +30,8 @@ var RSKYBOX = (function (r, $) {
 
     getUrl = function () {
       try {
-        return 'https://rskybox-stretchcom.appspot.com/rest/v1/applications/' + settings.appId + '/clientLogs';
+        //return 'https://rskybox-stretchcom.appspot.com/rest/v1/applications/' + settings.appId + '/clientLogs';
+        return '/rest/v1/applications/' + settings.appId + '/clientLogs';
       } catch (e) {
         console.error(e, 'RSKYBOX.log.getUrl');
       }
@@ -102,6 +103,7 @@ var RSKYBOX = (function (r, $) {
 
         $.ajax({
           type: 'POST',
+          data: JSON.stringify(attrs),
           url: getUrl(),
           error: settings.error,
           success: settings.success,
