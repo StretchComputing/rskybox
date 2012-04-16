@@ -18,11 +18,6 @@ var RSKYBOX = (function (r, $) {
       status: null,
       appActions: null,
     },
-
-    parse: function (response) {
-      response.stackBackTrace = JSON.parse(response.stackBackTrace);
-      return response;
-    },
   });
 
 
