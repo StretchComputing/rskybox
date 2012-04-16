@@ -301,7 +301,7 @@
             <% var on = false; %>
             <% appActions.forEach(function(action) { %>
               <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
-                <%= RSKYBOX.format.timeOnly(action.timestamp) %>
+                <%= RSKYBOX.format.compactDate(action.timestamp) %>
                 <% if (action.duration) { %>
                   - <%= action.duration %>ms
                 <% } %>
@@ -369,7 +369,7 @@
             <% var on = false; %>
             <% appActions.forEach(function(action) { %>
               <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
-                <%= RSKYBOX.format.timeOnly(action.timestamp) %>
+                <%= RSKYBOX.format.compactDate(action.timestamp) %>
                 <% if (action.duration) { %>
                   - <%= action.duration %>ms
                 <% } %>

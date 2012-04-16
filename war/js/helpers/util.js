@@ -420,6 +420,15 @@ var RSKYBOX = (function (r, $) {
         r.log.error(e, 'format.longDate');
       }
     },
+    compactDate: function (isoDate) {
+      try {
+        var date = new Date(isoDate);
+
+        return window.dateFormat(date, 'yyyy/mm/dd HH:MM:ss.l');
+      } catch (e) {
+        r.log.error(e, 'format.timeOnly');
+      }
+    },
     timeOnly: function (isoDate) {
       try {
         var date = new Date(isoDate);
