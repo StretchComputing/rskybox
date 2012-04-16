@@ -68,7 +68,6 @@ public class ClientLog {
 	private String logLevel;
 	private String logName;
 	private String message;
-	// TODO support time zone and GMT for dates
 	private Date createdGmtDate;
 	private String userName;
 	private Text stackBackTrace;  // deprecated on 4/14/2012. Supported for legacy data in datastore. Replaces by array stackBackTraces below.
@@ -198,6 +197,7 @@ public class ClientLog {
 
 	public void setSummary(String summary) {
 		this.summary = summary;
+	}
     	
 	public List<String> getStackBackTraces() {
 		return stackBackTraces;
