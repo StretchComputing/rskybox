@@ -20,9 +20,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     parse: function (response) {
-      if (response.stackBackTrace && response.stackBackTrace.match(/^\[.*\]$/)) {
-        response.stackBackTrace = JSON.parse(response.stackBackTrace);
-      }
+      response.stackBackTrace = JSON.parse(response.stackBackTrace);
       return response;
     },
   });
