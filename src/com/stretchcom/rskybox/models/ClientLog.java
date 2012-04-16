@@ -76,6 +76,7 @@ public class ClientLog {
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
 	private String summary;
+	private Integer number;  // sequential number auto assigned to incidents with scope of the application
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -197,6 +198,14 @@ public class ClientLog {
 
 	public void setSummary(String summary) {
 		this.summary = summary;
+	}
+
+	public Integer getNumber() {
+		return number;
+	}
+
+	public void setNumber(Integer number) {
+		this.number = number;
 	}
     	
 	public List<String> getStackBackTraces() {

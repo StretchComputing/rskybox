@@ -69,6 +69,7 @@ public class CrashDetect {
 	private String status;
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
+	private Integer number;  // sequential number auto assigned to incidents with scope of the application
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -154,6 +155,14 @@ public class CrashDetect {
 
 	public void setActiveThruGmtDate(Date activeThruGmtDate) {
 		this.activeThruGmtDate = activeThruGmtDate;
+	}
+
+	public Integer getNumber() {
+		return number;
+	}
+
+	public void setNumber(Integer number) {
+		this.number = number;
 	}
 
 	public Boolean createAppActions(List<AppAction> theNewAppActionList) {
