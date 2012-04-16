@@ -253,6 +253,15 @@ public class UserAuthenticationFilter implements Filter {
     		return true;
     	} 
     	
+    	/////////////////
+    	// OPTIONS Bypass
+    	/////////////////
+    	// allow all options method calls
+    	if(theHttpResponse.getMethod().equalsIgnoreCase("options")) {
+    		log.info("OPTIONS method bypassed");
+    		return true;
+    	}
+    	
     	
     	return false;
     }
