@@ -82,7 +82,7 @@ var RSKYBOX = (function (r, $) {
       var settings = {};
 
       settings.appId = Cookie.get('appId');
-      settings.token = Cookie.get('token');
+      settings.authHeader = 'Basic ' + Cookie.get('authHeader');
       settings.userName = getUserName();
       settings.summary = getSummary();
       settings.instanceUrl = location.hash;
@@ -92,7 +92,7 @@ var RSKYBOX = (function (r, $) {
 
       r.log.initialize(settings);
       // TODO - remove this line
-      r.log.error(new Error(), 'test error');
+      //r.log.error(new Error(), 'test error');
     } catch (e) {
       // TODO - log to localStorage
       console.error(e, 'RSKYBOX.log.initialize');

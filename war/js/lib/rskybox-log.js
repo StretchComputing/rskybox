@@ -14,7 +14,7 @@ var RSKYBOX = (function (r, $) {
 
     settings = {
       appId: undefined,
-      token: undefined,
+      authHeader: undefined,
       serverLevel: logLevels.error,
       localLevel: logLevels.local,
       summary: (function () {
@@ -108,6 +108,9 @@ var RSKYBOX = (function (r, $) {
           error: settings.error,
           success: settings.success,
           statusCode: settings.statusCode,
+          headers: {
+            Authorization: settings.authHeader,
+          },
           //crossDomain: true,
         });
       } catch (e) {

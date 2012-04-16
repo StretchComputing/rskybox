@@ -137,7 +137,7 @@ public class Utility {
 	
     public static void setCookie(HttpServletResponse theHttpResponse, String theCookieName, String theCookieValue, int theCookieAgeInMilliSeconds){
     	String cookieValue = theCookieValue == null ? "" : theCookieValue;
-    	Cookie newCookie = new Cookie(theCookieName, theCookieValue);
+    	Cookie newCookie = new Cookie(theCookieName, cookieValue);
     	newCookie.setPath("/html5");
     	newCookie.setMaxAge(theCookieAgeInMilliSeconds);
     	theHttpResponse.addCookie(newCookie);
@@ -153,6 +153,6 @@ public class Utility {
 			log.severe("UnsupportedEncodingException::getRskyboxAuthHeader");
 			return null;
 		}
-    	return "Basic " + phraseBase64;
+    	return phraseBase64;
     }
 }
