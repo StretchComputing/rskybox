@@ -13,6 +13,7 @@ var RSKYBOX = (function (r, $) {
       userName: null,
       instanceUrl: null,
       logLevel: null,
+      summary: null,
       message: null,
       stackBackTrace: null,
       status: null,

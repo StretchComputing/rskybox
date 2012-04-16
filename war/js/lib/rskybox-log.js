@@ -30,8 +30,8 @@ var RSKYBOX = (function (r, $) {
 
     getUrl = function () {
       try {
-        //return 'https://rskybox-stretchcom.appspot.com/rest/v1/applications/' + settings.appId + '/clientLogs';
-        return '/rest/v1/applications/' + settings.appId + '/clientLogs';
+        return 'https://rskybox-stretchcom.appspot.com/rest/v1/applications/' + settings.appId + '/clientLogs';
+        //return '/rest/v1/applications/' + settings.appId + '/clientLogs';
       } catch (e) {
         console.error(e, 'RSKYBOX.log.getUrl');
       }
@@ -108,6 +108,7 @@ var RSKYBOX = (function (r, $) {
           error: settings.error,
           success: settings.success,
           statusCode: settings.statusCode,
+          //crossDomain: true,
         });
       } catch (e) {
         // TODO - log to localStorage

@@ -276,6 +276,7 @@
       <ul data-role="listview" data-inset="true">
         <li>Log Name: <%= logName %></li>
         <li>Created: <%= date %></li>
+        <li>Summary: <%= summary %></li>
         <li>
           Mode: <%= logMode %>
           <button class="mode" data-inline="true">
@@ -300,7 +301,7 @@
             <% var on = false; %>
             <% appActions.forEach(function(action) { %>
               <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
-                <%= action.timestamp %>
+                <%= RSKYBOX.format.timeOnly(action.timestamp) %>
                 <% if (action.duration) { %>
                   - <%= action.duration %>ms
                 <% } %>

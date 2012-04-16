@@ -91,8 +91,7 @@ var RSKYBOX = (function (r, $) {
       settings.statusCode = r.statusCodeHandlers(apiError);
 
       r.log.initialize(settings);
-
-      // TODO - remove following line
+      // TODO - remove this line
       r.log.error(new Error(), 'test error');
     } catch (e) {
       // TODO - log to localStorage
@@ -421,6 +420,15 @@ var RSKYBOX = (function (r, $) {
         return window.dateFormat(isoDate, 'ddd, mmm d yyyy, HH:MM:ss' + (showMilliseconds ? '.l' : ''));
       } catch (e) {
         r.log.error(e, 'format.longDate');
+      }
+    },
+    timeOnly: function (isoDate) {
+      try {
+        var date = new Date(isoDate);
+
+        return window.dateFormat(isoDate, 'HH:MM:ss.l');
+      } catch (e) {
+        r.log.error(e, 'format.timeOnly');
       }
     },
   };
