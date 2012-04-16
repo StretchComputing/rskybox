@@ -27,10 +27,11 @@ public class UserAuthenticationFilter implements Filter {
     private static final String HTML_DIR = "/WEB-INF";
     private static final String TOKEN_COOKIE_NAME = "token";
     private static final String RSKYBOX_APP_ID_COOKIE_NAME = "appId";
+    private static final String RSKYBOX_AUTH_HEADER_COOKIE_NAME = "authHeader";
 
     private static final Logger log = Logger.getLogger(UserAuthenticationFilter.class.getName());
     
-    private Boolean tokenCookieFound = false;
+    private String tokenCookie = null;
     private FilterConfig filterConfig;
 
     @Override
@@ -97,7 +98,7 @@ public class UserAuthenticationFilter implements Filter {
     			}
     			
         		// if this is an rSkybox end user, then need to send rSkybox AppId back via a token
-        		setRskyboxAppIdTokenIfAppropirate(httpRequest, httpResponse);
+        		setRskyboxTokensIfAppropirate(httpRequest, httpResponse);
     		} else {
     			log.info("request is NOT authentic");
     			sendErrorResponse(thisURL, httpResponse);
@@ -269,7 +270,7 @@ public class UserAuthenticationFilter implements Filter {
         String token = extractCookie(httpRequest, TOKEN_COOKIE_NAME);
         if(token != null){
 		    log.info("getToken is returning the Cookie token");
-		    this.tokenCookieFound = true;
+		    this.tokenCookie = token;
         	return token;
         }
 		
@@ -333,22 +334,29 @@ public class UserAuthenticationFilter implements Filter {
         return url.toString();
     } 
     
-    private void setRskyboxAppIdTokenIfAppropirate(HttpServletRequest theHttpRequest, HttpServletResponse theHttpResponse) {
+    private void setRskyboxTokensIfAppropirate(HttpServletRequest theHttpRequest, HttpServletResponse theHttpResponse) {
     	// only set the rSkybox App ID token if this is an authorized end user or rSkybox (i.e. cookie token found)
-    	log.info("setRskyboxAppIdTokenIfAppropirate() entered, tokenCookieFound = " + this.tokenCookieFound);
-    	if(!this.tokenCookieFound) {return;}
+    	log.info("setRskyboxTokensIfAppropirate() entered, tokenCookie = " + this.tokenCookie);
+    	if(this.tokenCookie == null) {return;}
     	
-    	String appId = extractCookie(theHttpRequest, RSKYBOX_APP_ID_COOKIE_NAME);
-    	if(appId == null) {
-    		String cookieValue = null;
+    	String appIdCookieValue = extractCookie(theHttpRequest, RSKYBOX_APP_ID_COOKIE_NAME);
+    	if(appIdCookieValue == null) {
     		if(SystemProperty.environment.value() == SystemProperty.Environment.Value.Development) {
-        		cookieValue = this.filterConfig.getServletContext().getInitParameter("dev.rskybox.appid");
+    			appIdCookieValue = this.filterConfig.getServletContext().getInitParameter("dev.rskybox.appid");
     		} else {
-        		cookieValue = this.filterConfig.getServletContext().getInitParameter("prod.rskybox.appid");
+    			appIdCookieValue = this.filterConfig.getServletContext().getInitParameter("prod.rskybox.appid");
     		}
-    		log.info("***** cookieValue = " + cookieValue);
+    		log.info("***** appIdCookieValue = " + appIdCookieValue);
     		// cookie not set so we need to set it with age of one year
-    		Utility.setCookie(theHttpResponse, RSKYBOX_APP_ID_COOKIE_NAME, cookieValue, 31557600);
+    		Utility.setCookie(theHttpResponse, RSKYBOX_APP_ID_COOKIE_NAME, appIdCookieValue, 31557600);
+    	}
+    	
+    	String authHeaderCookieValue = extractCookie(theHttpRequest, RSKYBOX_AUTH_HEADER_COOKIE_NAME);
+    	if(authHeaderCookieValue == null) {
+    		authHeaderCookieValue = Utility.getRskyboxAuthHeader(this.tokenCookie);
+    		log.info("***** authHeaderCookieValue = " + authHeaderCookieValue);
+    		// cookie not set so we need to set it with age of one year
+    		Utility.setCookie(theHttpResponse, RSKYBOX_AUTH_HEADER_COOKIE_NAME, authHeaderCookieValue, 31557600);
     	}
     }
     
