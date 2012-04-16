@@ -71,11 +71,12 @@ public class ClientLog {
 	// TODO support time zone and GMT for dates
 	private Date createdGmtDate;
 	private String userName;
-	private Text stackBackTrace;
+	private Text stackBackTrace;  // deprecated on 4/14/2012. Supported for legacy data in datastore. Replaces by array stackBackTraces below.
 	private String instanceUrl;
 	private String status;
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
+	private String summary;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -89,9 +90,12 @@ public class ClientLog {
 	
 	@Basic
 	private List<Integer> appActionDurations;
+	
+	@Basic
+	private List<String> stackBackTraces;
 
 
-    public Key getKey() {
+	public Key getKey() {
         return key;
     }
 
@@ -186,6 +190,21 @@ public class ClientLog {
 
 	public void setActiveThruGmtDate(Date activeThruGmtDate) {
 		this.activeThruGmtDate = activeThruGmtDate;
+	}
+
+    public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
+    	
+	public List<String> getStackBackTraces() {
+		return stackBackTraces;
+	}
+
+	public void setStackBackTraces(List<String> stackBackTraces) {
+		this.stackBackTraces = stackBackTraces;
 	}
 
 	public Boolean createAppActions(List<AppAction> theNewAppActionList) {

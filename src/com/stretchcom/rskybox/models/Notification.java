@@ -481,7 +481,7 @@ public class Notification {
 		// SMS email address is only set in notification if user is configured to send SMS notifications
 		if(emailNotification != null) {
         	log.info("sending email to " + this.getEmailAddress());
-        	Emailer.send(this.getEmailAddress(), "rSkybox", emailNotification, Emailer.NO_REPLY);
+        	Emailer.send(this.getEmailAddress(), getEmailSubject(), emailNotification, Emailer.NO_REPLY);
         }
         if(smsNotification != null) {
         	log.info("sending SMS to " + this.getSmsEmailAddress());
@@ -626,6 +626,41 @@ public class Notification {
         }
         
         return smsEmailAddressBuf.toString();
+	}
+	
+	private String getEmailSubject() {
+		StringBuffer sb = new StringBuffer();
+		if(this.getNotificationDetailsList().size() > 1) {
+			sb.append("new incident");
+		}
+		else {
+			NotificationDetails nd = this.getNotificationDetailsList().get(0);
+			sb.append(nd.getApplicationName());
+			sb.append(" app: ");
+			if(nd.getCrashCount() > 0  && (nd.getClientLogCount() == 0 && nd.getFeedbackCount() == 0)) {
+				sb.append(nd.getCrashCount());
+				sb.append(" new ");
+				if(nd.getCrashCount() > 1) {
+					sb.append("crashes");
+				} else {
+					sb.append("crash");
+				}
+			} else if(nd.getClientLogCount() > 0  && (nd.getCrashCount() == 0 && nd.getFeedbackCount() == 0)) {
+				sb.append(nd.getClientLogCount());
+				sb.append(" new ");
+				if(nd.getClientLogCount() > 1) {
+					sb.append("logs");
+				} else {
+					sb.append("log");
+				}
+			} else if(nd.getFeedbackCount() > 0  && (nd.getClientLogCount() == 0 && nd.getCrashCount() == 0)) {
+				sb.append(nd.getFeedbackCount());
+				sb.append(" new feedback");
+			} else {
+				sb.append("new incident");
+			}
+		}
+		return sb.toString();
 	}
 	
 	private String getMostSpecificUrl() {

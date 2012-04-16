@@ -197,6 +197,13 @@ public class Emailer {
     	}
     	sb.append("</div>");
     	
+    	String settingsUrl = RskyboxApplication.APPLICATION_BASE_URL + "html5" + "#settings";
+    	sb.append("<div style='margin-top:10px; font-size:10px;'>");
+    	sb.append("(modify your ");
+    	sb.append("<a href='" + settingsUrl + "'>settings</a>");
+    	sb.append(")");
+    	sb.append("</div>");
+    	
     	sb.append("</body>");
     	sb.append("</html>");
     }
