@@ -91,8 +91,6 @@ var RSKYBOX = (function (r, $) {
       settings.statusCode = r.statusCodeHandlers(apiError);
 
       r.log.initialize(settings);
-      // TODO - remove this line
-      //r.log.error(new Error(), 'test error');
     } catch (e) {
       // TODO - log to localStorage
       console.error(e, 'RSKYBOX.log.initialize');

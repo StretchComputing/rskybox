@@ -111,7 +111,6 @@ var RSKYBOX = (function (r, $) {
           headers: {
             Authorization: settings.authHeader,
           },
-          //crossDomain: true,
         });
       } catch (e) {
         // TODO - log to localStorage

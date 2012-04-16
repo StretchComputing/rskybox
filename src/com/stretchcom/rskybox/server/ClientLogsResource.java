@@ -14,7 +14,6 @@ import javax.persistence.NonUniqueResultException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONString;
 import org.restlet.data.Form;
 import org.restlet.data.Parameter;
 import org.restlet.data.Reference;
@@ -23,6 +22,7 @@ import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.Variant;
 import org.restlet.resource.Get;
+import org.restlet.resource.Options;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
@@ -88,6 +88,20 @@ public class ClientLogsResource extends ServerResource {
         }
     }
 
+    // Handles 'Client Log OPTIONS'
+    @Options("json")
+    public JsonRepresentation options(Representation entity) {
+		Form headers = (Form) getResponseAttributes().get("org.restlet.http.headers");
+		if (headers == null) {
+			headers = new Form();
+			getResponseAttributes().put("org.restlet.http.headers", headers);
+		}
+		headers.add("Access-Control-Allow-Origin", "*");
+		headers.add("Access-Control-Allow-Methods", "OPTIONS, POST");
+		headers.add("Access-Control-Allow-Headers", "Authorization");
+    		return new JsonRepresentation(new JSONObject());
+    }
+
     // Handles 'Create Client Log API'
     @Post("json")
     public JsonRepresentation post(Representation entity) {
@@ -98,13 +112,6 @@ public class ClientLogsResource extends ServerResource {
 			return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
 		}
 		
-		Form headers = (Form) getResponseAttributes().get("org.restlet.http.headers");
-		if (headers == null) {
-			headers = new Form();
-			getResponseAttributes().put("org.restlet.http.headers", headers);
-		}
-		headers.add("Access-Control-Allow-Origin", "*");
-    	
         return save_client_log(entity, application);
     }
 
