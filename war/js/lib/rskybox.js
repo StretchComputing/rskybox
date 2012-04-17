@@ -21,6 +21,8 @@ var RSKYBOX = (function (r, $) {
       605: 'Application not found.',
     },
 
+
+    // The URL for the REST call to create an rSkybox log.
     getUrl = function () {
       try {
         //return 'https://rskybox-stretchcom.appspot.com/rest/v1/applications/' + settings.appId + '/clientLogs';
@@ -30,13 +32,19 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
-    // message is an Error object for 'error' level
+
+    // Log information at the console object provided.
     local = function (console, level, message, name) {
       try {
         var output;
 
+        // Not defining the console turns off console logging.
+        // Set the console object in the r.log.getConsole() method.
         if (!console) { return; }
 
+        // Error level calls usually have an error object in the message parameter.
+        // If message is not a string, assume it's an error object. (If it's not
+        // stack should be undefined and shouldn't cause a problem.)
         if (typeof message === 'string') {
           output = message + (name ? ' \t(' + name + ')' : '');
         } else {
@@ -45,7 +53,7 @@ var RSKYBOX = (function (r, $) {
 
         switch (level) {
         case 'error':
-          console.error(name, message.stack);
+          console.error(output);
           break;
         case 'warn':
           console.warn(output);
@@ -68,11 +76,15 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+
+    // Log to localStorage to queue up logs when logging to the server is not available.
     cache = function (level, message, name) {
       // TODO - need functionality to log to localStorage
       local(r.log.getConsole(), level, message, name);
     },
 
+
+    // Make sure we have valid attributes for logging to the server.
     isValid = function (attrs) {
       try {
         var console = r.log.getConsole();
@@ -108,8 +120,8 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
-    // message is an Error object for 'error' level
-    // TODO - log to localStorage when it's not possible to log to the server
+
+    // Create a new log on the rSkybox service.
     server = function (level, message, name) {
       try {
         var
@@ -124,11 +136,14 @@ var RSKYBOX = (function (r, $) {
             instanceUrl: r.log.getInstanceUrl(),
           };
 
-        if (level === 'error') {
+        // Error level logs generall have an Error object as the message.
+        // We'll just make sure it's not a string.
+        if (level === 'error' && typeof attrs.message !== 'string') {
           attrs.message = 'see stackBackTrace';
           attrs.stackBackTrace = message.stack.split('\n');
         }
 
+        // Ensure attrs are valid for making an Ajax call.
         if (!isValid(attrs)) { return; }
 
         $.ajax({
@@ -147,6 +162,8 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+
+    // Traffic cop for determining where logs should go.
     base = function (level, message, name) {
       try {
         if (r.log.getApplicationId() && (r.log.getServerLevel() >= logLevels[level])) {
@@ -164,16 +181,9 @@ var RSKYBOX = (function (r, $) {
 
 
   r.log = {
-    isValid: function () {
-      return isValid();
-    },
-
+    // Access to the apiCodes if the client app wants to user our messages.
     getApiCodes: function () {
       return apiCodes;
-    },
-
-    getLevels: function () {
-      return logLevels;
     },
 
     error: function (e, name) {
@@ -200,4 +210,3 @@ var RSKYBOX = (function (r, $) {
 
   return r;
 }(RSKYBOX || {}, jQuery));
-

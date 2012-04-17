@@ -11,6 +11,8 @@ var RSKYBOX = (function (r, $) {
       return window.console;
     },
 
+
+    // Your rSkybox application ID.
     getApplicationId: function () {
       try {
         return Cookie.get('appId');
@@ -19,6 +21,8 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+
+    // Your rSkybox authentication token.
     getAuthHeader: function () {
       try {
         return 'Basic ' + Cookie.get('authHeader');
@@ -27,6 +31,8 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+
+    // Track information about who experience the issue here.
     getUserName: function () {
       try {
         var
@@ -48,6 +54,8 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    // Set the url of the current page, or use the field for some other type of
+    // information you want to track.
     getInstanceUrl: function () {
       try {
         return location.hash;
@@ -57,6 +65,7 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    // A good place to put information about the user's environment.
     getSummary: function () {
       try {
         return 'temp summary';
