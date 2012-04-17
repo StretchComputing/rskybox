@@ -89,7 +89,7 @@ var RSKYBOX = (function (r, $) {
 
 
     // A callback function to respond to success returned by the REST/Ajax call.
-    successHandler: function (model, response) {
+    successHandler: function (data, status, jqXHR) {
       try {
         r.log.info('entering', 'RSKYBOX.log.successHandler');
       } catch (e) {
@@ -99,11 +99,10 @@ var RSKYBOX = (function (r, $) {
 
 
     // A callback function to respond to errors returned by the REST/Ajax call.
-    errorHandler: function (model, response) {
+    errorHandler: function (jqXHR, textStatus, errorThrown) {
       try {
-        if (response.responseText) { return; }  // This is an apiError.
-        r.log.warn(response, 'RSKYBOX.log.error');
-        r.flash.warning(response);              // This is a validation error.
+        if (jqXHR.responseText) { return; }  // This is an apiError.
+        r.log.warn(textStatus, 'RSKYBOX.log.errorHandler');
       } catch (e) {
         r.log.error(e, 'RSKYBOX.log.errorHandler');
       }

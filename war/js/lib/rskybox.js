@@ -30,23 +30,17 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
-    isValid = function () {
-      try {
-        var valid = true;
-
-        return valid;
-      } catch (e) {
-        r.log.error(e, 'RSKYBOX..log.isValid');
-      }
-    },
-
     // message is an Error object for 'error' level
     local = function (console, level, message, name) {
       try {
         var output;
 
-        if (level !== 'error') {
+        if (!console) { return; }
+
+        if (typeof message === 'string') {
           output = message + (name ? ' \t(' + name + ')' : '');
+        } else {
+          output = (name ? name + ' \t' : '') + message.stack;
         }
 
         switch (level) {
@@ -74,19 +68,60 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+    cache = function (level, message, name) {
+      // TODO - need functionality to log to localStorage
+      local(r.log.getConsole(), level, message, name);
+    },
+
+    isValid = function (attrs) {
+      try {
+        var console = r.log.getConsole();
+
+        if (!attrs) {
+          local(console, 'error', 'attrs not defined', 'RSKYBOX.log.isValid');
+          return false;
+        }
+        if (!attrs.appId) {
+          local(console, 'error', 'appId not specified', 'RSKYBOX.log.isValid');
+          return false;
+        }
+        if (!attrs.authHeader) {
+          local(console, 'error', 'authHeader not specified', 'RSKYBOX.log.isValid');
+          return false;
+        }
+        if (!attrs.logLevel) {
+          local(console, 'error', 'logLevel not specified', 'RSKYBOX.log.isValid');
+          return false;
+        }
+        if (!attrs.logName) {
+          local(console, 'error', 'logName not specified', 'RSKYBOX.log.isValid');
+          return false;
+        }
+        if (!attrs.message) {
+          local(console, 'error', 'message not specified', 'RSKYBOX.log.isValid');
+          return false;
+        }
+
+        return true;
+      } catch (e) {
+        cache('error', e, 'RSKYBOX.log.isValid');
+      }
+    },
+
     // message is an Error object for 'error' level
     // TODO - log to localStorage when it's not possible to log to the server
     server = function (level, message, name) {
-      if (!isValid()) { throw new Error('log setup is invalid'); }
-
       try {
         var
           attrs = {
-            instanceUrl: r.log.getInstanceUrl(),
+            appId: r.log.getApplicationId(),
+            authHeader: r.log.getAuthHeader(),
             logName: name || message,
             logLevel: level,
             message: message,
             userName: r.log.getUserName(),
+            summary: r.log.getSummary(),
+            instanceUrl: r.log.getInstanceUrl(),
           };
 
         if (level === 'error') {
@@ -94,19 +129,21 @@ var RSKYBOX = (function (r, $) {
           attrs.stackBackTrace = message.stack.split('\n');
         }
 
+        if (!isValid(attrs)) { return; }
+
         $.ajax({
           type: 'POST',
           data: JSON.stringify(attrs),
           url: getUrl(),
-          error: r.log.errorHandler(),
-          success: r.log.successHandler(),
-          statusCode: r.log.statusCondeHandlers(),
+          error: r.log.errorHandler,
+          success: r.log.successHandler,
+          statusCode: r.log.statusCodeHandlers,
           headers: {
             Authorization: r.log.getAuthHeader(),
           },
         });
       } catch (e) {
-        r.log.error(e, 'rSkyboxLog.logToServer');
+        local(r.log.getConsole(), 'error', e, 'RSKYBOX.log.server');
       }
     },
 
@@ -116,7 +153,7 @@ var RSKYBOX = (function (r, $) {
           server(level, message, name);
         }
 
-        if (r.log.getConsole() && r.log.getLocalLevel() >= logLevels[level]) {
+        if (r.log.getLocalLevel() >= logLevels[level]) {
           local(r.log.getConsole(), level, message, name);
         }
       } catch (e) {
@@ -163,3 +200,4 @@ var RSKYBOX = (function (r, $) {
 
   return r;
 }(RSKYBOX || {}, jQuery));
+
