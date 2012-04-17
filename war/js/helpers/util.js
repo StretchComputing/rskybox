@@ -2,111 +2,6 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.dump = function (object) {
-    try {
-      // TODO - log to localStorage
-      console.log(JSON.stringify(object));
-    } catch (e) {
-      console.error(e, 'RSKYBOX.dump');
-    }
-  };
-
-
-  var
-    apiError = function (jqXHR) {
-      try {
-        var
-          apiCodes = r.log.getApiCodes(),
-          code = r.getApiStatus(jqXHR.responseText);
-
-        // TODO - log to localStorage
-        console.info(code, 'RSKYBOX.log.apiError');
-
-        if (!apiCodes[code]) {
-          // TODO - log to localStorage
-          console.info('Undefined apiStatus: ' + code, 'SkyboxLog.apiError');
-        }
-        r.flash.warning(apiCodes[code]);
-      } catch (e) {
-        // TODO - log to localStorage
-        console.error(e, 'RSKYBOX.log.apiError');
-      }
-    },
-
-    error = function (model, response) {
-      try {
-        if (response.responseText) { return; }  // This is an apiError.
-
-        // TODO - log to localStorage
-        console.warn(response, 'RSKYBOX.log.error');
-        r.flash.warning(response);              // This is a validation error.
-      } catch (e) {
-        // TODO - log to localStorage
-        console.error(e, 'RSKYBOX.log.error');
-      }
-    },
-
-    getSummary = function () {
-    },
-
-    getUserName = function () {
-      try {
-        var
-          name = '',
-          user = r.session && r.session.getEntity(r.session.keys.currentUser);
-
-        if (user.firstName) { name += user.firstName + ' '; }
-        if (user.lastName) { name += user.lastName; }
-        if (name) { name += ', '; }
-        if (user.emailAddress) { name += user.emailAddress; }
-        if (user.phoneNumber) { name += ', ' + user.phoneNumber; }
-
-        if (!name) { name = Cookie.get('token'); }
-
-        return name;
-      } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getUserName');
-      }
-    },
-
-    logLevels = r.log.getLogLevels(),
-
-    success = function (model, response) {
-      console.info('entering', 'SkyboxLog.success');
-    };
-
-  // appId will be null if user is not logged in.
-  // This will produce an error log in the console.
-  $(function () {
-    try {
-      var settings = {};
-
-      settings.appId = Cookie.get('appId');
-      settings.authHeader = 'Basic ' + Cookie.get('authHeader');
-      settings.userName = getUserName();
-      settings.summary = getSummary();
-      settings.instanceUrl = location.hash;
-      settings.success = success;
-      settings.error = error;
-      settings.statusCode = r.statusCodeHandlers(apiError);
-
-      r.log.initialize(settings);
-    } catch (e) {
-      // TODO - log to localStorage
-      console.error(e, 'RSKYBOX.log.initialize');
-    }
-  });
-
-
-  return r;
-}(RSKYBOX || {}, jQuery));
-
-
-
-var RSKYBOX = (function (r, $) {
-  'use strict';
-
-
   var storage = {
       clear: function () {
         localStorage.clear();
@@ -135,31 +30,36 @@ var RSKYBOX = (function (r, $) {
     };
 
 
+  r.dump = function (object) {
+    try {
+      r.log.local(JSON.stringify(object));
+    } catch (e) {
+      r.log.error(e, 'RSKYBOX.dump');
+    }
+  };
+
+
   // General status code handlers.
   // apiError: optional handler for API errors
   r.statusCodeHandlers = function (apiError) {
     var general = {
       401: function (jqXHR) {
         try {
-          // TODO - log to localStorage
-          console.info('401 - unauthorized', 'RSKYBOX.statusCodeHandlers');
+          r.log.info('401 - unauthorized', 'RSKYBOX.statusCodeHandlers');
           // TODO - Add flash message to home page after 401 occurs
           r.flash.set('warning', 'Login required');
           r.logOut();
         } catch (e) {
-          // TODO - log to localStorage
-          console.warn(e, 'RSKYBOX.statusCodeHandlers:general:401');
+          r.log.warn(e, 'RSKYBOX.statusCodeHandlers:general:401');
         }
       },
       404: function () {
         // TODO - display a 404 page
-        // TODO - log to localStorage
-        console.warn('404 - not found', 'RSKYBOX.statusCodeHandlers');
+        r.log.warn('404 - not found', 'RSKYBOX.statusCodeHandlers');
       },
       500: function () {
         // TODO - display a 500 page
-        // TODO - log to localStorage
-        console.warn('500 - server error', 'RSKYBOX.statusCodeHandlers');
+        r.log.warn('500 - server error', 'RSKYBOX.statusCodeHandlers');
       }
     };
 
@@ -169,8 +69,7 @@ var RSKYBOX = (function (r, $) {
       }
       return general;
     } catch (e) {
-      // TODO - log to localStorage
-      console.error(e, 'RSKYBOX.statusCodeHandlers');
+      r.log.error(e, 'RSKYBOX.statusCodeHandlers');
     }
   };
 
@@ -464,13 +363,11 @@ var RSKYBOX = (function (r, $) {
         pageLoadCount += 1;
         break;
       default:
-      // TODO - log to localStorage
-        console.warn('inappropriate operator', 'pageLoad');
+        RSKYBOX.log.warn('inappropriate operator', 'pageLoad');
       }
       return pageLoadCount;
     } catch (e) {
-      // TODO - log to localStorage
-      console.error(e, 'pageLoad');
+      RSKYBOX.log.error(e, 'pageLoad');
     }
   };
 
@@ -495,8 +392,7 @@ var RSKYBOX = (function (r, $) {
       RSKYBOX.log.local(settings.url, 'ajaxSend');
       showPageLoadingMessage();
     } catch (e) {
-      // TODO - log to localStorage
-      console.error(e, 'ajaxSend');
+      RSKYBOX.log.error(e, 'ajaxSend');
     }
   });
 
@@ -508,8 +404,7 @@ var RSKYBOX = (function (r, $) {
       RSKYBOX.log.local(settings.url, 'ajaxComplete');
       hidePageLoadingMessage();
     } catch (e) {
-      // TODO - log to localStorage
-      console.warn(e, 'ajaxComplete');
+      RSKYBOX.log.warn(e, 'ajaxComplete');
     }
   });
 }(jQuery));

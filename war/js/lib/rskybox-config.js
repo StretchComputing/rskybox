@@ -1,0 +1,139 @@
+var RSKYBOX = (function (r, $) {
+  'use strict';
+
+
+  // Make sure we have an object to work with.
+  $.extend(r.log, {
+    // A function that returns the object to use for logging locally.
+    // Must support the following methods: error(), warn(), info(), debug(), log().
+    // Return nothing or undefined to turn off local logging.
+    getConsole: function () {
+      return window.console;
+    },
+
+    getApplicationId: function () {
+      try {
+        return Cookie.get('appId');
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.getApplicationId');
+      }
+    },
+
+    getAuthHeader: function () {
+      try {
+        return 'Basic ' + Cookie.get('authHeader');
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.getAuthHeader');
+      }
+    },
+
+    getUserName: function () {
+      try {
+        var
+          name = '',
+          user = r.session && r.session.getEntity(r.session.keys.currentUser);
+
+        if (user.firstName) { name += user.firstName + ' '; }
+        if (user.lastName) { name += user.lastName; }
+        if (name) { name += ', '; }
+        if (user.emailAddress) { name += user.emailAddress; }
+        if (user.phoneNumber) { name += ', ' + user.phoneNumber; }
+
+        if (!name) { name = Cookie.get('token'); }
+
+        return name;
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.getUserName');
+      }
+    },
+
+
+    getInstanceUrl: function () {
+      try {
+        return location.hash;
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.getInstanceUrl');
+      }
+    },
+
+
+    getSummary: function () {
+      try {
+        return 'temp summary';
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.getSummary');
+      }
+    },
+
+
+    // The highest log level to use for logging to the server.
+    // Levels in increasing value are: error, warn, info, debug, local, off.
+    getServerLevel: function () {
+      try {
+        return r.log.getLevels().error;
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.getServerLevel');
+      }
+    },
+
+
+    // The highest log level to use for logging to the local console.
+    // Levels in increasing value are: error, warn, info, debug, local, off.
+    getLocalLevel: function () {
+      try {
+        return r.log.getLevels().local;
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.getLocalLevel');
+      }
+    },
+
+
+    // A callback function to respond to success returned by the REST/Ajax call.
+    successHandler: function (model, response) {
+      try {
+        r.log.info('entering', 'RSKYBOX.log.successHandler');
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.getSuccessHandler');
+      }
+    },
+
+
+    // A callback function to respond to errors returned by the REST/Ajax call.
+    errorHandler: function (model, response) {
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+        r.log.warn(response, 'RSKYBOX.log.error');
+        r.flash.warning(response);              // This is a validation error.
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.errorHandler');
+      }
+    },
+
+
+    // A callback function to respond to API errors returned by the REST/Ajax call.
+    apiErrorHandler: function (jqXHR) {
+      try {
+        var
+          apiCodes = r.log.getApiCodes(),
+          code = r.getApiStatus(jqXHR.responseText);
+
+        r.log.info(code, 'RSKYBOX.log.apiErrorHandler');
+
+        if (!apiCodes[code]) {
+          r.log.info('Undefined apiStatus: ' + code, 'RSKYBOX.log.apiErrorHandler');
+        }
+        r.flash.warning(apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'RSKYBOX.log.apiErrorHandler');
+      }
+    },
+
+
+    // A callback function that will respond to various HTTP status codes.
+    // API errors are returned HTTP code 422.
+    statusCodeHandlers: r.statusCodeHandlers(r.log.apiErrorHandler),
+  });
+
+
+  return r;
+}(RSKYBOX || {}, jQuery));
