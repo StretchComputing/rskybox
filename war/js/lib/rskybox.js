@@ -186,6 +186,8 @@ var RSKYBOX = (function (r, $) {
       return apiCodes;
     },
 
+    // Externalized logging methods for client app use.
+
     error: function (e, name) {
       base('error', e, name);
     },
