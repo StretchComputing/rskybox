@@ -59,6 +59,7 @@ public class Application {
 	private Date createdGmtDate;
 	private Date versionUpdatedGmtDate;
 	private String token;
+	private Integer nextIncidentNumber = 1;
 
 	@Transient
 	private String memberRole; // used internally on the server to return user role with list of user's applications
@@ -123,6 +124,14 @@ public class Application {
 
 	public void setOrganizationId(String organizationId) {
 		this.organizationId = organizationId;
+	}
+
+	public Integer getNextIncidentNumber() {
+		return nextIncidentNumber;
+	}
+
+	public void setNextIncidentNumber(Integer nextIncidentNumber) {
+		this.nextIncidentNumber = nextIncidentNumber;
 	}
 
 	public static String verifyApplicationId(String theApplicationId) {
@@ -229,4 +238,43 @@ public class Application {
 		// TODO allow application configuration to specify this
 		return DAYS_UNTIL_AUTO_ARCHIVE;
 	}
+	
+	// returns the next Incident number in sequence if successful; null otherwise
+	public static Integer getAndIncrementIncidentNumber(String theApplicationId) {
+        EntityManager em = EMF.get().createEntityManager();
+        Integer nextIncidentNumber = null;
+        Integer incidentNumber = null;
+        
+        em.getTransaction().begin();
+        try {
+			Key appKey = null;
+			try {
+				appKey = KeyFactory.stringToKey(theApplicationId);
+			} catch (Exception e) {
+				log.severe("could not convert application ID into a key");
+				return null;
+			}
+					
+			Application application = (Application)em.createNamedQuery("Application.getByKey")
+				.setParameter("key", appKey)
+				.getSingleResult();
+			incidentNumber = application.getNextIncidentNumber();
+			nextIncidentNumber = incidentNumber++;
+			application.setNextIncidentNumber(nextIncidentNumber);
+			em.persist(application);
+			em.getTransaction().commit();
+		} catch (NoResultException e) {
+			log.severe("application ID not found");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more applications have same key");
+		} finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
+		
+		return incidentNumber;
+	}
+	
 }

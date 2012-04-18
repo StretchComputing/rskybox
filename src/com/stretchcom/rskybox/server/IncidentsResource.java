@@ -380,6 +380,9 @@ public class IncidentsResource extends ServerResource {
 				// Default severity
 				incident.setSeverity(Incident.LOW_SEVERITY);
 				
+				// Assign application unique incident number
+				incident.setNumber(Application.getAndIncrementIncidentNumber(this.applicationId));
+				
 				// set the activeThruGmtDate for auto closing
 				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
@@ -401,9 +404,8 @@ public class IncidentsResource extends ServerResource {
                 	User.sendNotifications(this.applicationId, Notification.SEVERITY, severityMsg, theItemId);
             	}
             }
-        	// ** I AM HERE **
-            // return full incident details for both create and update APIs
-            // ***************
+        	
+            jsonReturn.put("incident", getIncidentJson(incident, apiStatus, false));
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -433,6 +435,9 @@ public class IncidentsResource extends ServerResource {
 	    }
 	    return new JsonRepresentation(jsonReturn);
     }
+    
+    // ** I AM HERE **
+    //jpw;
     
     private JsonRepresentation remote_control(Representation entity) {
         JSONObject jsonReturn = new JSONObject();
@@ -473,80 +478,46 @@ public class IncidentsResource extends ServerResource {
 	    return new JsonRepresentation(jsonReturn);
     }
     
-    private JSONObject getClientLogJson(ClientLog clientLog, Boolean isList) {
-    	return getClientLogJson(clientLog, null, isList);
+    private JSONObject getIncidentJson(Incident incident, Boolean isList) {
+    	return getIncidentJson(incident, null, isList);
     }
 
-    private JSONObject getClientLogJson(ClientLog clientLog, String theApiStatus, Boolean isList) {
+    private JSONObject getIncidentJson(Incident incident, String theApiStatus, Boolean isList) {
         JSONObject json = new JSONObject();
 
         try {
         	if(theApiStatus != null) {
         		json.put("apiStatus", theApiStatus);
         	}
-        	if(clientLog != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
-        		json.put("id", KeyFactory.keyToString(clientLog.getKey()));
+        	if(incident != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
+        		json.put("id", KeyFactory.keyToString(incident.getKey()));
+        		json.put("number", incident.getNumber());
+            	json.put("status", incident.getStatus());
+            	json.put("severity", incident.getSeverity());
+            	json.put("name", incident.getEventName());
     			
-            	Date createdDate = clientLog.getCreatedGmtDate();
+            	Date createdDate = incident.getCreatedGmtDate();
             	if(createdDate != null) {
-            		json.put("date", GMT.convertToIsoDate(createdDate));
+            		json.put("createdDate", GMT.convertToIsoDate(createdDate));
             	}
-            	json.put("userName", clientLog.getUserName());
-            	json.put("instanceUrl", clientLog.getInstanceUrl());
-            	json.put("logLevel", clientLog.getLogLevel());
-            	json.put("logName", clientLog.getLogName());
-            	json.put("message", clientLog.getMessage());
-            	json.put("summary", clientLog.getSummary());
-            	
-            	JSONArray stackBackTracesJsonArray = new JSONArray();
-            	List<String> stackBackTraces = clientLog.getStackBackTraces();
-            	
-            	//////////////////////////////////////////////////
-            	// TODO - remove support of stackBackTrace string
-            	//////////////////////////////////////////////////
-            	if(stackBackTraces == null || stackBackTraces.size() == 0) {
-        			log.info("returning legacy stackBackTrace");
-            		stackBackTraces = new ArrayList<String>();
-            		String stackBackTrace = clientLog.getStackBackTrace();
-            		if(stackBackTrace != null && stackBackTrace.length() > 0) {
-                		stackBackTraces.add(stackBackTrace);
-            		}
-            	}
-            	//////////////////////////////////////////////////
-
-            	for(String sbt: stackBackTraces) {
-            		stackBackTracesJsonArray.put(sbt);
-            	}
-            	log.info("stackBackTraces # of parts = " + stackBackTraces.size());
-            	json.put("stackBackTrace", stackBackTracesJsonArray);
-                	
-                ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
-                // if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
-                String logMode = ClientLogRemoteControl.ACITVE_MODE;
-                if(clrc != null) {logMode = clrc.getMode();}
-                json.put("logMode", logMode);
-            	
-            	if(!isList) {
-                	JSONArray appActionsJsonArray = new JSONArray();
-                	List<AppAction> appActions = clientLog.getAppActions();
-                	for(AppAction aa : appActions) {
-                		JSONObject appActionJsonObj = new JSONObject();
-                		appActionJsonObj.put("description", aa.getDescription());
-                		appActionJsonObj.put("timestamp", GMT.convertToIsoDate(aa.getTimestamp()));
-                		if(aa.getDuration() != null) appActionJsonObj.put("duration", aa.getDuration());
-                		appActionsJsonArray.put(appActionJsonObj);
-                	}
-                	if(appActions.size() > 0) {json.put("appActions", appActionsJsonArray);}
+            	Date lastUpdatedDate = incident.getLastUpdatedGmtDate();
+            	if(lastUpdatedDate != null) {
+            		json.put("lastUpdatedDate", GMT.convertToIsoDate(lastUpdatedDate));
             	}
             	
-            	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
-            	String status = clientLog.getStatus();
-            	if(status == null || status.length() == 0) {status = "new";}
-            	json.put("status", status);
-            	json.put("appId", clientLog.getApplicationId());
+            	JSONArray tagsJsonArray = new JSONArray();
+            	List<String> tags = incident.getTags();
+            	for(String tag: tags) {
+            		tagsJsonArray.put(tag);
+            	}
+            	log.info("# of tags = " + tags.size());
+            	json.put("tags", tagsJsonArray);
+            	
+            	json.put("eventCount", incident.getEventCount());
+            	json.put("message", incident.getMessage());
         	}
         } catch (JSONException e) {
-        	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
+        	log.severe("IncidentsResrouce::getIncidentJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;

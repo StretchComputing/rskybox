@@ -169,7 +169,7 @@ public class Incident {
 		return number;
 	}
 
-	public void setLogLevel(Integer number) {
+	public void setNumber(Integer number) {
 		this.number = number;
 	}
 	
