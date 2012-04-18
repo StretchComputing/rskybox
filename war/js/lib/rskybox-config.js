@@ -17,7 +17,7 @@ var RSKYBOX = (function (r, $) {
       try {
         return Cookie.get('appId');
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getApplicationId');
+        window.console.error(e, 'RSKYBOX.log.getApplicationId');
       }
     },
 
@@ -27,7 +27,7 @@ var RSKYBOX = (function (r, $) {
       try {
         return 'Basic ' + Cookie.get('authHeader');
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getAuthHeader');
+        window.console.error(e, 'RSKYBOX.log.getAuthHeader');
       }
     },
 
@@ -49,7 +49,7 @@ var RSKYBOX = (function (r, $) {
 
         return name;
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getUserName');
+        window.console.error(e, 'RSKYBOX.log.getUserName');
       }
     },
 
@@ -60,7 +60,7 @@ var RSKYBOX = (function (r, $) {
       try {
         return location.hash;
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getInstanceUrl');
+        window.console.error(e, 'RSKYBOX.log.getInstanceUrl');
       }
     },
 
@@ -70,7 +70,7 @@ var RSKYBOX = (function (r, $) {
       try {
         return 'temp summary';
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getSummary');
+        window.console.error(e, 'RSKYBOX.log.getSummary');
       }
     },
 
@@ -81,7 +81,7 @@ var RSKYBOX = (function (r, $) {
       try {
         return r.log.getLevels().error;
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getServerLevel');
+        window.console.error(e, 'RSKYBOX.log.getServerLevel');
       }
     },
 
@@ -92,7 +92,7 @@ var RSKYBOX = (function (r, $) {
       try {
         return r.log.getLevels().local;
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getLocalLevel');
+        window.console.error(e, 'RSKYBOX.log.getLocalLevel');
       }
     },
 
@@ -102,7 +102,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'RSKYBOX.log.successHandler');
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getSuccessHandler');
+        window.console.error(e, 'RSKYBOX.log.getSuccessHandler');
       }
     },
 
@@ -113,13 +113,14 @@ var RSKYBOX = (function (r, $) {
         if (jqXHR.responseText) { return; }  // This is an apiError.
         r.log.warn(textStatus, 'RSKYBOX.log.errorHandler');
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.errorHandler');
+        window.console.error(e, 'RSKYBOX.log.errorHandler');
       }
     },
 
 
-    // A callback function to respond to API errors returned by the REST/Ajax call.
-    apiErrorHandler: function (jqXHR) {
+    // A callback function that will respond to various HTTP status codes.
+    // API errors are returned HTTP code 422.
+    statusCodeHandlers: r.statusCodeHandlers(function (jqXHR) {
       try {
         var
           apiCodes = r.log.getApiCodes(),
@@ -132,14 +133,9 @@ var RSKYBOX = (function (r, $) {
         }
         r.flash.warning(apiCodes[code]);
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.apiErrorHandler');
+        window.console.error(e, 'RSKYBOX.log.apiErrorHandler');
       }
-    },
-
-
-    // A callback function that will respond to various HTTP status codes.
-    // API errors are returned HTTP code 422.
-    statusCodeHandlers: r.statusCodeHandlers(r.log.apiErrorHandler),
+    }),
   });
 
 

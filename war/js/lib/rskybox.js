@@ -28,7 +28,7 @@ var RSKYBOX = (function (r, $) {
         //return 'https://rskybox-stretchcom.appspot.com/rest/v1/applications/' + settings.appId + '/clientLogs';
         return '/rest/v1/applications/' + r.log.getApplicationId() + '/clientLogs';
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.getUrl');
+        window.console.error(e, 'RSKYBOX.log.getUrl');
       }
     },
 
@@ -72,7 +72,7 @@ var RSKYBOX = (function (r, $) {
           break;
         }
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.local');
+        window.console.error(e, 'RSKYBOX.log.local');
       }
     },
 
@@ -116,7 +116,7 @@ var RSKYBOX = (function (r, $) {
 
         return true;
       } catch (e) {
-        cache('error', e, 'RSKYBOX.log.isValid');
+        window.console.error(e, 'RSKYBOX.log.isValid');
       }
     },
 
@@ -158,7 +158,7 @@ var RSKYBOX = (function (r, $) {
           },
         });
       } catch (e) {
-        local(r.log.getConsole(), 'error', e, 'RSKYBOX.log.server');
+        window.console.error(e, 'RSKYBOX.log.server');
       }
     },
 
@@ -174,7 +174,7 @@ var RSKYBOX = (function (r, $) {
           local(r.log.getConsole(), level, message, name);
         }
       } catch (e) {
-        r.log.error(e, 'RSKYBOX.log.base');
+        window.console.error(e, 'RSKYBOX.log.base');
       }
     };
   // end var definitions
@@ -184,6 +184,11 @@ var RSKYBOX = (function (r, $) {
     // Access to the apiCodes if the client app wants to user our messages.
     getApiCodes: function () {
       return apiCodes;
+    },
+
+    // Access to the log levels allowing the client to set server/local levels.
+    getLevels: function () {
+      return logLevels;
     },
 
     // Externalized logging methods for client app use.
