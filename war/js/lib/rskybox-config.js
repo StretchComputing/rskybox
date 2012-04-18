@@ -68,7 +68,7 @@ var RSKYBOX = (function (r, $) {
     // A good place to put information about the user's environment.
     getSummary: function () {
       try {
-        return 'temp summary';
+        return navigator.appVersion;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.log.getSummary');
       }
