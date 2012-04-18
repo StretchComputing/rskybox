@@ -100,7 +100,7 @@ var RSKYBOX = (function (r, $) {
     // A callback function to respond to success returned by the REST/Ajax call.
     successHandler: function (data, status, jqXHR) {
       try {
-        r.log.info('entering', 'RSKYBOX.log.successHandler');
+        window.console.info('entering', 'RSKYBOX.log.successHandler');
       } catch (e) {
         window.console.error(e, 'RSKYBOX.log.getSuccessHandler');
       }
@@ -111,7 +111,7 @@ var RSKYBOX = (function (r, $) {
     errorHandler: function (jqXHR, textStatus, errorThrown) {
       try {
         if (jqXHR.responseText) { return; }  // This is an apiError.
-        r.log.warn(textStatus, 'RSKYBOX.log.errorHandler');
+        window.console.warn(textStatus, 'RSKYBOX.log.errorHandler');
       } catch (e) {
         window.console.error(e, 'RSKYBOX.log.errorHandler');
       }
@@ -126,10 +126,10 @@ var RSKYBOX = (function (r, $) {
           apiCodes = r.log.getApiCodes(),
           code = r.getApiStatus(jqXHR.responseText);
 
-        r.log.info(code, 'RSKYBOX.log.apiErrorHandler');
+        window.console.info(code, 'RSKYBOX.log.apiErrorHandler');
 
         if (!apiCodes[code]) {
-          r.log.info('Undefined apiStatus: ' + code, 'RSKYBOX.log.apiErrorHandler');
+          window.console.info('Undefined apiStatus: ' + code, 'RSKYBOX.log.apiErrorHandler');
         }
         r.flash.warning(apiCodes[code]);
       } catch (e) {
