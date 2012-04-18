@@ -25,6 +25,12 @@ import com.google.appengine.api.datastore.Key;
     		query="SELECT i FROM Incident i WHERE i.applicationId = :applicationId ORDER BY i.lastUpdatedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="Incident.getAllWithApplicationIdAndTag",
+    		query="SELECT i FROM Incident i WHERE " +
+    		"i.applicationId = :applicationId" + " AND" +
+    		"i.tags = :tag ORDER BY i.lastUpdatedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="Incident.getByStatus",
     		query="SELECT i FROM Incident i WHERE i.status = :status  ORDER BY i.lastUpdatedGmtDate DESC"
     ),
@@ -69,6 +75,7 @@ public class Incident {
 	public final static Integer HIGH_SEVERITY = 8;
 	public final static Integer MEDIUM_SEVERITY = 5;
 	public final static Integer LOW_SEVERITY = 3;
+	public final static Integer MINIMUM_SEVERITY = 1;
 	
 	public final static String CRASH_TAG = "crash";
 	public final static String LOG_TAG = "log";
@@ -82,6 +89,7 @@ public class Incident {
 	private Integer eventCount;
 	private Integer severity;
 	private Date lastUpdatedGmtDate;
+	private Date createdGmtDate;
 	private String endUser;
 	private String status;
 	private String applicationId;
@@ -89,6 +97,8 @@ public class Incident {
 	private Boolean inStatsOnlyMode;
 	private Boolean wasAutoClosed;
 	private String remoteControlMode;
+	private String summary;
+	private String message;
 
 	///////////////////////////////////////
 	// place holder for future properties
@@ -131,6 +141,14 @@ public class Incident {
 		this.lastUpdatedGmtDate = lastUpdatedGmtDate;
 	}
 
+	public Date getCreatedGmtDate() {
+		return createdGmtDate;
+	}
+
+	public void setCreatedGmtDate(Date createdGmtDate) {
+		this.createdGmtDate = createdGmtDate;
+	}
+
 	public String getEndUser() {
 		return endUser;
 	}
@@ -145,11 +163,6 @@ public class Incident {
 
 	public void setStatus(String status) {
 		this.status = status;
-	}
-	
-	public Boolean isStatusValid(String theStatus) {
-		if(theStatus.equals(Incident.OPEN_STATUS) || theStatus.equals(Incident.CLOSED_STATUS)) return true;
-		return false;
 	}
 	
 	public Integer getNumber() {
@@ -223,6 +236,22 @@ public class Incident {
 	public void setRemoteControlMode(String remoteControlMode) {
 		this.remoteControlMode = remoteControlMode;
 	}
+	
+	public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
+	
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
 
 	public Boolean addToTags(List<String> theNewTagList) {
 		if(theNewTagList == null || theNewTagList.size() == 0) {
@@ -236,5 +265,34 @@ public class Incident {
 		}
 		
 		return true;
+	}
+	
+	public static Boolean isStatusValid(String theStatus) {
+		if(theStatus.equalsIgnoreCase(Incident.OPEN_STATUS) || theStatus.equalsIgnoreCase(Incident.CLOSED_STATUS)) return true;
+		return false;
+	}
+	
+	public static Boolean isSeverityValid(Integer theSeverity) {
+		if(theSeverity >= Incident.MINIMUM_SEVERITY && theSeverity <= Incident.CRITICAL_SEVERITY) return true;
+		return false;
+	}
+	
+	public static Boolean isWellKnownTagValid(String theTag) {
+		if(theTag.equalsIgnoreCase(Incident.CRASH_TAG) || theTag.equalsIgnoreCase(Incident.LOG_TAG) || theTag.equalsIgnoreCase(Incident.FEEDBACK_TAG)) return true;
+		return false;
+	}
+	
+	public static Integer getWellKnownTagCount(List<String> theTags) {
+		// must contain exactly one well known tag
+		int crashCount = 0;
+		int logCount = 0;
+		int feedbackCount = 0;
+		for(String tag : theTags) {
+			if(tag.equalsIgnoreCase(Incident.CRASH_TAG)) {crashCount++;}
+			else if(tag.equalsIgnoreCase(Incident.LOG_TAG)) {logCount++;}
+			else if(tag.equalsIgnoreCase(Incident.FEEDBACK_TAG)) {feedbackCount++;}
+		}
+		int totalCount = crashCount + logCount + feedbackCount;
+		return totalCount;
 	}
 }

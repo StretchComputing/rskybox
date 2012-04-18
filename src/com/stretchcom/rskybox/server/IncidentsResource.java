@@ -36,6 +36,7 @@ import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.ClientLogRemoteControl;
 import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
@@ -44,7 +45,7 @@ public class IncidentsResource extends ServerResource {
 	private String id;
 	private String tag;
 	private String applicationId;
-    private String listStatus;
+    private String incidentStatus;
     private String remoteControl;
 
     @Override
@@ -58,9 +59,9 @@ public class IncidentsResource extends ServerResource {
 		for (Parameter parameter : form) {
 			log.info("parameter " + parameter.getName() + " = " + parameter.getValue());
 			if(parameter.getName().equals("status"))  {
-				this.listStatus = (String)parameter.getValue().toLowerCase();
-				this.listStatus = Reference.decode(this.listStatus);
-				log.info("IncidentResource() - decoded status = " + this.listStatus);
+				this.incidentStatus = (String)parameter.getValue().toLowerCase();
+				this.incidentStatus = Reference.decode(this.incidentStatus);
+				log.info("IncidentResource() - decoded status = " + this.incidentStatus);
 			} else if(parameter.getName().equals("tag"))  {
 				this.tag = (String)parameter.getValue().toLowerCase();
 				this.tag = Reference.decode(this.tag);
@@ -136,7 +137,7 @@ public class IncidentsResource extends ServerResource {
         
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
-		List<ClientLog> clientLogs = null;
+		List<Incident> incidents = null;
     	User currentUser = Utility.getCurrentUser(getRequest());
         try {
         	//////////////////////
@@ -150,31 +151,54 @@ public class IncidentsResource extends ServerResource {
             List<User> users = new ArrayList<User>();
             JSONArray ja = new JSONArray();
             
-			if(this.listStatus != null) {
-			    if(this.listStatus.equalsIgnoreCase(ClientLog.NEW_STATUS) || this.listStatus.equalsIgnoreCase(ClientLog.ARCHIVED_STATUS)){
-			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
-							.setParameter("status", this.listStatus)
-							.setParameter("applicationId", this.applicationId)
-							.getResultList();
-			    } else if(this.listStatus.equalsIgnoreCase(ClientLog.ALL_STATUS)) {
-			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationId")
+            /////////////////////////
+            // Valid input parameters
+            /////////////////////////
+            if(this.incidentStatus != null) {
+				if(Incident.isStatusValid(this.incidentStatus)) {
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
+				}
+			} else {
+				// default is to retrieve 
+				this.incidentStatus = Incident.OPEN_STATUS;
+			}
+            if(this.tag != null) {
+				if(Incident.isWellKnownTagValid(this.tag)) {
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_TAGS_PARAMETER);
+				}
+			}
+            
+			if(this.tag == null) {
+			    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
+			    	incidents= (List<Incident>)em.createNamedQuery("Incident.getAllWithApplicationId")
 			    			.setParameter("applicationId", this.applicationId)
 			    			.getResultList();
 			    } else {
-			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
-			    }
+			    	incidents= (List<Incident>)em.createNamedQuery("Incident.getByStatusAndApplicationId")
+							.setParameter("status", this.incidentStatus)
+							.setParameter("applicationId", this.applicationId)
+							.getResultList();
+			    } 
 			} else {
-				// by default, only get 'new' clientLogs
-				clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
-						.setParameter("status", ClientLog.NEW_STATUS)
-						.setParameter("applicationId", this.applicationId)
-						.getResultList();
+				// by default, only get 'open' incidents
+			    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
+			    	incidents= (List<Incident>)em.createNamedQuery("Incident.getAllWithApplicationIdAndTag")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.setParameter("tag", this.tag)
+			    			.getResultList();
+			    } else {
+			    	incidents= (List<Incident>)em.createNamedQuery("Incident.getByStatusAndApplicationIdAndTag")
+							.setParameter("status", this.incidentStatus)
+							.setParameter("applicationId", this.applicationId)
+							.setParameter("tag", this.tag)
+							.getResultList();
+			    } 
 			}
             
-            for (ClientLog cl : clientLogs) {
-                ja.put(getClientLogJson(cl, true));
+            for (Incident i : incidents) {
+                ja.put(getIncidentJson(i, true));
             }
-            json.put("clientLogs", ja);
+            json.put("incidents", ja);
             json.put("apiStatus", apiStatus);
         } catch (JSONException e) {
             log.severe("exception = " + e.getMessage());
@@ -190,7 +214,7 @@ public class IncidentsResource extends ServerResource {
 
 		String apiStatus = ApiStatusCode.SUCCESS;
 		this.setStatus(Status.SUCCESS_OK);
-		ClientLog clientLog = null;
+		Incident incident = null;
     	User currentUser = Utility.getCurrentUser(getRequest());
 		try {
         	//////////////////////
@@ -202,7 +226,7 @@ public class IncidentsResource extends ServerResource {
         	}
 
 			if (this.id == null || this.id.length() == 0) {
-				return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
+				return Utility.apiError(this, ApiStatusCode.INCIDENT_ID_REQUIRED);
 			}
 			
             Key key;
@@ -210,34 +234,36 @@ public class IncidentsResource extends ServerResource {
 				key = KeyFactory.stringToKey(this.id);
 			} catch (Exception e) {
 				log.info("ID provided cannot be converted to a Key");
-				return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_NOT_FOUND);
+				return Utility.apiError(this, ApiStatusCode.INCIDENT_NOT_FOUND);
 			}
-    		clientLog = (ClientLog)em.createNamedQuery("ClientLog.getByKey")
+    		incident = (Incident)em.createNamedQuery("Incident.getByKey")
 				.setParameter("key", key)
 				.getSingleResult();
 		} catch (NoResultException e) {
-			return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_NOT_FOUND);
+			return Utility.apiError(this, ApiStatusCode.INCIDENT_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more client logs have same key");
+			log.severe("should never happen - two or more incidents have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getClientLogJson(clientLog, apiStatus, false));
+        return new JsonRepresentation(getIncidentJson(incident, apiStatus, false));
     }
 
-    private JsonRepresentation save_client_log(Representation entity, Application theApplication) {
+    private JsonRepresentation save_incident(Representation entity, Application theApplication) {
         EntityManager em = EMF.get().createEntityManager();
         JSONObject jsonReturn = new JSONObject();
 
-        ClientLog clientLog = null;
+        Incident incident = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
         try {
-            clientLog = new ClientLog();
+            incident = new Incident();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
+            Boolean severityChanged = false;
+            Integer oldSeverity = null;
             if (id != null) {
             	//////////////////////
             	// Authorization Rules
@@ -251,59 +277,52 @@ public class IncidentsResource extends ServerResource {
     			try {
     				key = KeyFactory.stringToKey(this.id);
     			} catch (Exception e) {
-    				log.info("ID provided cannot be converted to a Key");
-    				return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_NOT_FOUND);
+    				log.info("Incident ID provided cannot be converted to a Key");
+    				return Utility.apiError(this, ApiStatusCode.INCIDENT_NOT_FOUND);
     			}
-                clientLog = (ClientLog) em.createNamedQuery("ClientLog.getByKey").setParameter("key", key).getSingleResult();
+                incident = (Incident)em.createNamedQuery("Incident.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
             }
-
-			if(!isUpdate) {
-	            if(json.has("logLevel")) {
-					String logLevel = json.getString("logLevel").toLowerCase();
-					clientLog.setLogLevel(logLevel);
-					if(!clientLog.isLogLevelValid(logLevel)) {
-						return Utility.apiError(this, ApiStatusCode.INVALID_LOG_LEVEL);
-					}
-				} else {
-					// default to error
-					clientLog.setLogLevel(ClientLog.ERROR_LOG_LEVEL);
+			
+			if(!json.has("tags")) {
+				List<String> tags = new ArrayList<String>();
+	        	JSONArray tagsJsonArray = json.getJSONArray("tags");
+				int arraySize = tagsJsonArray.length();
+				log.info("tags json array length = " + arraySize);
+				for(int i=0; i<arraySize; i++) {
+					String tag = tagsJsonArray.getString(i);
+					tags.add(tag);
 				}
-	            
-	            if(json.has("logName")) {
-	            	clientLog.setLogName(json.getString("logName"));
-	            } else {
-	            	return Utility.apiError(this, ApiStatusCode.LOG_NAME_IS_REQUIRED);
-	            }
+				int wktCount = Incident.getWellKnownTagCount(tags);
+				if(isUpdate) {
+					// well known tags not allowed in an update API call
+					if(wktCount > 0) {
+						return Utility.apiError(this, ApiStatusCode.INVALID_TAGS_PARAMETER);
+					}
+					incident.addToTags(tags);
+				} else {
+					if(wktCount > 1) {
+						return Utility.apiError(this, ApiStatusCode.INVALID_TAGS_PARAMETER);
+					} else if(wktCount == 0) {
+						return Utility.apiError(this, ApiStatusCode.WELL_KNOWN_TAG_REQUIRED);
+					}
+					incident.setTags(tags);
+				}
+			}
+
+            if(!isUpdate && json.has("name")) {
+            	incident.setEventName(json.getString("name"));
+            } else {
+            	return Utility.apiError(this, ApiStatusCode.NAME_REQUIRED);
+            }
+			
+			if(!isUpdate && json.has("summary")) {
+				incident.setSummary(json.getString("summary"));
 			}
 			
 			if(!isUpdate && json.has("message")) {
-				clientLog.setMessage(json.getString("message"));
-			}
-			
-			if(!isUpdate && json.has("stackBackTrace")) {
-				List<String> stackBackTraces = new ArrayList<String>();
-	        	JSONArray stackBackTracesJsonArray = json.getJSONArray("stackBackTrace");
-				int arraySize = stackBackTracesJsonArray.length();
-				log.info("stackBackTraces json array length = " + arraySize);
-				for(int i=0; i<arraySize; i++) {
-					String stackBackTrace = stackBackTracesJsonArray.getString(i);
-					stackBackTraces.add(stackBackTrace);
-				}
-				clientLog.setStackBackTraces(stackBackTraces);
-			}
-			
-			if(!isUpdate && json.has("userName")) {
-				clientLog.setUserName(json.getString("userName"));
-			}
-			
-			if(!isUpdate && json.has("instanceUrl")) {
-				clientLog.setInstanceUrl(json.getString("instanceUrl"));
-			}
-			
-			if(!isUpdate && json.has("summary")) {
-				clientLog.setSummary(json.getString("summary"));
+				incident.setMessage(json.getString("message"));
 			}
 			
 			if(!isUpdate) {
@@ -318,100 +337,73 @@ public class IncidentsResource extends ServerResource {
 					// default date/time is right now 
 					createdDate = new Date();
 				}
-				clientLog.setCreatedGmtDate(createdDate);
-			}
-			
-			if(!isUpdate && json.has("appActions")) {
-				List<AppAction> appActions = new ArrayList<AppAction>();
-	        	JSONArray appActionsJsonArray = json.getJSONArray("appActions");
-				int arraySize = appActionsJsonArray.length();
-				log.info("appAction json array length = " + arraySize);
-				for(int i=0; i<arraySize; i++) {
-					JSONObject appActionJsonObj = appActionsJsonArray.getJSONObject(i);
-					AppAction aa = new AppAction();
-					if(appActionJsonObj.has("description")) {
-						aa.setDescription(appActionJsonObj.getString("description"));
-					}
-					// TODO support time zone passed in from client
-					if(appActionJsonObj.has("timestamp")) {
-						Date timestamp = null;
-						String timestampStr = appActionJsonObj.getString("timestamp");
-						
-						// for rTeam backward compatibility
-						// TODO: can remove this code after the rTeam 3.1 release
-						if(!timestampStr.endsWith("Z")) {
-							// this is the old format, not ISO 8601
-							TimeZone tz = GMT.getTimeZone(RskyboxApplication.DEFAULT_LOCAL_TIME_ZONE);
-							timestamp = GMT.convertToGmtDate(timestampStr, true, tz, RskyboxApplication.APP_ACTION_DATE_FORMAT);
-						} else {
-							timestamp = GMT.stringToIsoDate(timestampStr);
-						}
-						if(timestamp == null) {
-							return Utility.apiError(this, ApiStatusCode.INVALID_TIMESTAMP_PARAMETER);
-						}
-						
-						aa.setTimestamp(timestamp);
-					}
-					if(appActionJsonObj.has("duration")) {
-						String durationStr = appActionJsonObj.getString("duration");
-						Integer duration = null;
-						try {
-							duration = new Integer(durationStr);
-						} catch(NumberFormatException e) {
-							log.info("non-integer durations = " + durationStr);
-							return Utility.apiError(this, ApiStatusCode.INVALID_DURATION_PARAMETER);
-						}
-						aa.setDuration(duration);
-					}
-					appActions.add(aa);
-				}
-				clientLog.createAppActions(appActions);
+				incident.setCreatedGmtDate(createdDate);
 			}
 			
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
-	            	if(clientLog.isStatusValid(status)) {
-	            		clientLog.setStatus(status);
+	            	if(Incident.isStatusValid(status)) {
+	            		incident.setStatus(status);
 	            	} else {
-	            		apiStatus = ApiStatusCode.INVALID_STATUS;
+						return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
+	            	}
+	            }
+			
+	            if(json.has("severity")) {
+	            	String severityStr = json.getString("severity").toLowerCase();
+	            	
+	            	Integer severity;
+					try {
+						severity = new Integer(severityStr);
+					} catch (NumberFormatException e) {
+						return Utility.apiError(this, ApiStatusCode.INVALID_SEVERITY_PARAMETER);
+
+					}
+	            	
+	            	if(Incident.isSeverityValid(severity)) {
+            			oldSeverity = incident.getSeverity();
+	            		if(!oldSeverity.equals(severity)) {
+	            			severityChanged = true;
+	            		}
+	            		incident.setSeverity(severity);
+	            	} else {
+	            		apiStatus = ApiStatusCode.INVALID_SEVERITY_PARAMETER;
 	            	}
 	            }
 			} else {
-				clientLog.setApplicationId(this.applicationId);
+				incident.setApplicationId(this.applicationId);
             	
-				// Default status to 'new'
-				clientLog.setStatus(CrashDetect.NEW_STATUS);
+				// Default status to 'open'
+				incident.setStatus(Incident.OPEN_STATUS);
 				
-				// Default created date is today
-				clientLog.setCreatedGmtDate(new Date());
+				// Default severity
+				incident.setSeverity(Incident.LOW_SEVERITY);
 				
-				// set the activeThruGmtDate for auto archiving
+				// set the activeThruGmtDate for auto closing
 				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
-				clientLog.setActiveThruGmtDate(activeThruGmtDate);
+				incident.setActiveThruGmtDate(activeThruGmtDate);
 			}
 			
-            em.persist(clientLog);
+            em.persist(incident);
             em.getTransaction().commit();
             
             if(!isUpdate) {
-            	// TODO is the clientLog key really set by this point?
-            	String theItemId = KeyFactory.keyToString(clientLog.getKey());
-            	String message = clientLog.getLogName();
-            	if(clientLog.getSummary() != null && clientLog.getSummary().length() > 0) {
-            		message += " " + clientLog.getSummary();
+            	String message = incident.getEventName();
+            	if(incident.getSummary() != null && incident.getSummary().length() > 0) {
+            		message += " " + incident.getSummary();
             	}
-            	User.sendNotifications(this.applicationId, Notification.CLIENT_LOG, message, theItemId);
-            	
-            	ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
-            	// if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
-            	String logStatus = ClientLogRemoteControl.ACITVE_MODE;
-            	if(clrc != null) {
-            		logStatus = clrc.getMode();
+            } else {
+            	if(severityChanged) {
+                	String theItemId = KeyFactory.keyToString(incident.getKey());
+                	String severityMsg = "Severity changed from " + oldSeverity.toString() + " to " + incident.getSeverity().toString();
+                	User.sendNotifications(this.applicationId, Notification.SEVERITY, severityMsg, theItemId);
             	}
-				jsonReturn.put("logStatus", logStatus);
             }
+        	// ** I AM HERE **
+            // return full incident details for both create and update APIs
+            // ***************
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -421,9 +413,9 @@ public class IncidentsResource extends ServerResource {
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         } catch (NoResultException e) {
-        	return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_NOT_FOUND);
+        	return Utility.apiError(this, ApiStatusCode.INCIDENT_NOT_FOUND);
 		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more client logs have same key");
+			log.severe("should never happen - two or more incidents have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} finally {
             if (em.getTransaction().isActive()) {

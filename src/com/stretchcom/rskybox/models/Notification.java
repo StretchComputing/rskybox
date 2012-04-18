@@ -72,6 +72,7 @@ public class Notification {
 	public static final String CRASH = "crash";
 	public static final String CLIENT_LOG = "clientlog";
 	public static final String FEEDBACK = "feedback";
+	public static final String SEVERITY = "severity";
 	
 	public static final int DEFAULT_NOTIFICATION_PERIOD = 5;
 

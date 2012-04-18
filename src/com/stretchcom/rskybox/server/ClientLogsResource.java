@@ -379,9 +379,6 @@ public class ClientLogsResource extends ServerResource {
 				// Default status to 'new'
 				clientLog.setStatus(CrashDetect.NEW_STATUS);
 				
-				// Default created date is today
-				clientLog.setCreatedGmtDate(new Date());
-				
 				// set the activeThruGmtDate for auto archiving
 				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
