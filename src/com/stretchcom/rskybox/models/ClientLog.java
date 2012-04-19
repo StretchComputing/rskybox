@@ -31,6 +31,10 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT cl FROM ClientLog cl WHERE cl.status = :status  ORDER BY cl.createdGmtDate DESC"
     ),
     @NamedQuery(
+    		name="ClientLog.getByIncident",
+    		query="SELECT cl FROM ClientLog cl WHERE cl.incidentId = :incidentId ORDER BY cl.createdGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="ClientLog.getByStatusAndApplicationId",
     		query="SELECT cl FROM ClientLog cl WHERE cl.status = :status and cl.applicationId = :applicationId ORDER BY cl.createdGmtDate DESC"
     ),
@@ -77,6 +81,7 @@ public class ClientLog {
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
 	private String summary;
 	private Integer number;  // sequential number auto assigned to incidents with scope of the application
+	private String incidentId; // foreign key to 'owning' incident
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -214,6 +219,14 @@ public class ClientLog {
 
 	public void setStackBackTraces(List<String> stackBackTraces) {
 		this.stackBackTraces = stackBackTraces;
+	}
+	
+	public String getIncidentId() {
+		return incidentId;
+	}
+
+	public void setIncidentId(String incidentId) {
+		this.incidentId = incidentId;
 	}
 
 	public Boolean createAppActions(List<AppAction> theNewAppActionList) {

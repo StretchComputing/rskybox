@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
@@ -14,7 +13,6 @@ import javax.persistence.NonUniqueResultException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONString;
 import org.restlet.data.Form;
 import org.restlet.data.Parameter;
 import org.restlet.data.Reference;
@@ -30,12 +28,8 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.stretchcom.rskybox.models.AppAction;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
-import com.stretchcom.rskybox.models.ClientLog;
-import com.stretchcom.rskybox.models.ClientLogRemoteControl;
-import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
@@ -436,28 +430,48 @@ public class IncidentsResource extends ServerResource {
 	    return new JsonRepresentation(jsonReturn);
     }
     
-    // ** I AM HERE **
-    //jpw;
-    
     private JsonRepresentation remote_control(Representation entity) {
+        EntityManager em = EMF.get().createEntityManager();
         JSONObject jsonReturn = new JSONObject();
         
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
+    	User currentUser = Utility.getCurrentUser(getRequest());
         try {
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
-            
-            String mode = null;
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
+        	String mode = null;
             if(json.has("mode")) {
             	mode = json.getString("mode");
-            	if(!ClientLogRemoteControl.isModeValid(mode)) {
+            	if(!Incident.isModeValid(mode)) {
             		return Utility.apiError(this, ApiStatusCode.INVALID_MODE);
             	}
             } else {
             	return Utility.apiError(this, ApiStatusCode.MODE_IS_REQUIRED);
             }
-            
-            ClientLogRemoteControl.update(this.applicationId, this.tag, mode);
+
+			if (this.id == null || this.id.length() == 0) {
+				return Utility.apiError(this, ApiStatusCode.INCIDENT_ID_REQUIRED);
+			}
+			
+            Key key;
+			try {
+				key = KeyFactory.stringToKey(this.id);
+			} catch (Exception e) {
+				log.info("ID provided cannot be converted to a Key");
+				return Utility.apiError(this, ApiStatusCode.INCIDENT_NOT_FOUND);
+			}
+    		Incident incident = (Incident)em.createNamedQuery("Incident.getByKey")
+				.setParameter("key", key)
+				.getSingleResult();
+    		incident.setRemoteControlMode(mode);
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -466,7 +480,12 @@ public class IncidentsResource extends ServerResource {
             log.severe("exception = " + e.getMessage());
             e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
+        } catch (NoResultException e) {
+			return Utility.apiError(this, ApiStatusCode.INCIDENT_NOT_FOUND);
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more incidents have same key");
+			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		}
         
 	    try {
 	    	jsonReturn.put("apiStatus", apiStatus);

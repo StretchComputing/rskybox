@@ -28,6 +28,10 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT fb FROM Feedback fb WHERE fb.status = :status ORDER BY fb.recordedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="Feedback.getByIncident",
+    		query="SELECT fb FROM Feedback fb WHERE fb.incidentId = :incidentId ORDER BY fb.recordedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="Feedback.getByStatusAndApplicationId",
     		query="SELECT fb FROM Feedback fb WHERE fb.status = :status and fb.applicationId = :applicationId ORDER BY fb.recordedGmtDate DESC"
     ),
@@ -63,6 +67,7 @@ public class Feedback {
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
 	private Integer number;  // sequential number auto assigned to incidents with scope of the application
+	private String incidentId; // foreign key to 'owning' incident
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -139,5 +144,13 @@ public class Feedback {
 
 	public void setNumber(Integer number) {
 		this.number = number;
+	}
+	
+	public String getIncidentId() {
+		return incidentId;
+	}
+
+	public void setIncidentId(String incidentId) {
+		this.incidentId = incidentId;
 	}
 }

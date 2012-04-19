@@ -36,6 +36,7 @@ import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.ClientLogRemoteControl;
 import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
@@ -267,8 +268,10 @@ public class ClientLogsResource extends ServerResource {
 					clientLog.setLogLevel(ClientLog.ERROR_LOG_LEVEL);
 				}
 	            
+	            String logName = null;
 	            if(json.has("logName")) {
-	            	clientLog.setLogName(json.getString("logName"));
+	            	logName = json.getString("logName");
+	            	clientLog.setLogName(logName);
 	            } else {
 	            	return Utility.apiError(this, ApiStatusCode.LOG_NAME_IS_REQUIRED);
 	            }
@@ -383,6 +386,9 @@ public class ClientLogsResource extends ServerResource {
 				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
 				clientLog.setActiveThruGmtDate(activeThruGmtDate);
+				
+				// find or create an incident that will 'own' this new clientLog
+				Incident owningIncident = Incident.fetchLogIncident(logName);
 			}
 			
             em.persist(clientLog);

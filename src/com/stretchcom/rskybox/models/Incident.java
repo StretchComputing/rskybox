@@ -6,13 +6,17 @@ import java.util.logging.Logger;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 
 import com.google.appengine.api.datastore.Key;
+import com.stretchcom.rskybox.server.EMF;
 
 @Entity
 @NamedQueries({
@@ -267,6 +271,11 @@ public class Incident {
 		return true;
 	}
 	
+	public static Boolean isModeValid(String theMode) {
+		if(theMode.equalsIgnoreCase(Incident.ACTIVE_REMOTE_CONTROL_MODE) || theMode.equalsIgnoreCase(Incident.INACTIVE_REMOTE_CONTROL_MODE)) return true;
+		return false;
+	}
+	
 	public static Boolean isStatusValid(String theStatus) {
 		if(theStatus.equalsIgnoreCase(Incident.OPEN_STATUS) || theStatus.equalsIgnoreCase(Incident.CLOSED_STATUS)) return true;
 		return false;
@@ -294,5 +303,24 @@ public class Incident {
 		}
 		int totalCount = crashCount + logCount + feedbackCount;
 		return totalCount;
+	}
+	
+	public static Incident fetchLogIncident(String theLogName) {
+		Incident logOwningIncident = null;
+        EntityManager em = EMF.get().createEntityManager();
+        Boolean isAuthenticated = false;
+
+		try {
+			logOwningIncident = (Incident)em.createNamedQuery("User.getByEmailAddress")
+				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+				.getSingleResult();
+    		isAuthenticated = true;
+		} catch (NoResultException e) {
+			log.info("Google account user not found");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more google account users have same key");
+		}
+		
+		return logOwningIncident;
 	}
 }
