@@ -191,10 +191,10 @@ var RSKYBOX = (function (r, $) {
             memberConfirmation: r.session.params.memberConfirmation,
           }),
         });
-        r.confirmMemberView.apiUrl = '/appMembers/confirmation';
-        r.confirmMemberView.setUrl();
-        r.confirmMemberView.setAppUrl(r.session.params.applicationId);
-        r.confirmMemberView.set({id: 'confirmation'}, {silent: true});
+        r.confirmMemberView.model.apiUrl = '/appMembers/confirmation';
+        r.confirmMemberView.model.setUrl();
+        r.confirmMemberView.model.setAppUrl(r.session.params.applicationId);
+        r.confirmMemberView.model.set({id: 'confirmation'}, {silent: true});
       } catch (e) {
         r.log.error(e, 'SignupController.confirmMemberBeforeShow');
       }

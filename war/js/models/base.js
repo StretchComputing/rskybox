@@ -148,7 +148,7 @@ var RSKYBOX = (function (r, $) {
         }
 
         Object.keys(this.fields).forEach(function (field) {
-          mock[field] = this.get(field) || null;
+          mock[field] = this.get(field) || '';
         }, this);
         return mock;
       } catch (e) {
