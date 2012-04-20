@@ -12,7 +12,7 @@ var RSKYBOX = (function (r, $) {
     },
 
 
-    // Your rSkybox application ID.
+    // Return your rSkybox application ID.
     getApplicationId: function () {
       try {
         return Cookie.get('appId');
@@ -22,7 +22,7 @@ var RSKYBOX = (function (r, $) {
     },
 
 
-    // Your rSkybox authentication token.
+    // Return your rSkybox authentication token.
     getAuthHeader: function () {
       try {
         return 'Basic ' + Cookie.get('authHeader');
@@ -122,22 +122,24 @@ var RSKYBOX = (function (r, $) {
     // This is an object of key/value pairs where the key is the status code to
     // respond to, and the value is the callback function that responds.
     // rSkybox API errors are returned in HTTP code 422.
-    statusCodeHandlers: r.statusCodeHandlers(function (jqXHR) {
-      try {
-        var
-          apiCodes = r.log.getApiCodes(),
-          code = r.getApiStatus(jqXHR.responseText);
+    statusCodeHandlers: {
+      422: function (jqXHR) {
+        try {
+          var
+            apiCodes = r.log.getApiCodes(),
+            code = JSON.parse(jqXHR.responseText).apiStatus;
 
-        window.console.info(code, 'RSKYBOX.log.apiErrorHandler');
+          window.console.info(code, 'RSKYBOX.log.apiErrorHandler');
 
-        if (!apiCodes[code]) {
-          window.console.info('Undefined apiStatus: ' + code, 'RSKYBOX.log.apiErrorHandler');
+          if (!apiCodes[code]) {
+            window.console.info('Undefined apiStatus: ' + code, 'RSKYBOX.log.apiErrorHandler');
+          }
+          // Notify the user using apiCodes[code].
+        } catch (e) {
+          window.console.error(e, 'RSKYBOX.log.apiErrorHandler');
         }
-        r.flash.warning(apiCodes[code]);
-      } catch (e) {
-        window.console.error(e, 'RSKYBOX.log.apiErrorHandler');
-      }
-    }),
+      },
+    }
   });
 
 
