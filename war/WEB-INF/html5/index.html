@@ -92,7 +92,7 @@
         <li>App Name: <%= name %></li>
         <li>Version: <%= version ? version : 'n/a' %></li>
         <li>Role: <%= role %></li>
-        <li>AppId: <%= id %></li>
+        <li class="long-lines">AppId: <%= id %></li>
         <li>Token: <%= token %></li>
         <li>Created: <%= date %></li>
       </ul>
@@ -275,7 +275,7 @@
     </div>
     <script type="text/template" id="logTemplate">
       <ul data-role="listview" data-inset="true">
-        <li>Log Name: <%= logName %></li>
+        <li class="long-lines">Log Name: <%= logName %></li>
         <li>Created: <%= date %></li>
         <li>Summary: <%= summary %></li>
         <li>
