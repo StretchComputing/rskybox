@@ -381,6 +381,10 @@ public class IncidentsResource extends ServerResource {
 				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
 				incident.setActiveThruGmtDate(activeThruGmtDate);
+				
+				// created and last updated is now
+				incident.setCreatedGmtDate(new Date());
+				incident.setLastUpdatedGmtDate(new Date());
 			}
 			
             em.persist(incident);

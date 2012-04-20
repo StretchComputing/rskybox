@@ -1,5 +1,6 @@
 package com.stretchcom.rskybox.models;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -16,7 +17,9 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.server.EMF;
+import com.stretchcom.rskybox.server.GMT;
 
 @Entity
 @NamedQueries({
@@ -27,6 +30,13 @@ import com.stretchcom.rskybox.server.EMF;
     @NamedQuery(
     		name="Incident.getAllWithApplicationId",
     		query="SELECT i FROM Incident i WHERE i.applicationId = :applicationId ORDER BY i.lastUpdatedGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="Incident.getByApplicationIdAndEventNameAndTag",
+    		query="SELECT i FROM Incident i WHERE " +
+    		      "i.applicationId = :applicationId" + " AND " +
+    		      "i.eventName = :eventName" + " AND " +
+    			  "i.tags = :tag ORDER BY i.lastUpdatedGmtDate DESC"
     ),
     @NamedQuery(
     		name="Incident.getAllWithApplicationIdAndTag",
@@ -91,16 +101,16 @@ public class Incident {
 	private Integer number;  // sequential number auto assigned to incidents with scope of the application
 	private String eventName;
 	private Integer eventCount;
-	private Integer severity;
+	private Integer severity = Incident.LOW_SEVERITY;
 	private Date lastUpdatedGmtDate;
 	private Date createdGmtDate;
 	private String endUser;
-	private String status;
+	private String status = Incident.OPEN_STATUS;
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
-	private Boolean inStatsOnlyMode;
-	private Boolean wasAutoClosed;
-	private String remoteControlMode;
+	private Boolean inStatsOnlyMode = false;
+	private Boolean wasAutoClosed = false;
+	private String remoteControlMode = Incident.ACTIVE_REMOTE_CONTROL_MODE;
 	private String summary;
 	private String message;
 
@@ -108,7 +118,7 @@ public class Incident {
 	// place holder for future properties
 	///////////////////////////////////////
 	private String resolution;
-	private Boolean wasResolved;
+	private Boolean wasResolved = false;
 	private String githubUrl;
 	@Basic
 	private List<String> comments;	
@@ -270,6 +280,24 @@ public class Incident {
 		
 		return true;
 	}
+
+	// returns true if the tag was added to the list; false otherwise
+	public Boolean addToTags(String theNewTag) {
+		// if there is no tag list, create it
+		if(this.tags == null) {this.tags = new ArrayList<String>();}
+		
+		// only add the tag if it is not already in the list
+		if(!this.tags.contains(theNewTag)) {
+			this.tags.add(theNewTag);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public String getId() {
+		return KeyFactory.keyToString(this.key);
+	}
 	
 	public static Boolean isModeValid(String theMode) {
 		if(theMode.equalsIgnoreCase(Incident.ACTIVE_REMOTE_CONTROL_MODE) || theMode.equalsIgnoreCase(Incident.INACTIVE_REMOTE_CONTROL_MODE)) return true;
@@ -305,22 +333,68 @@ public class Incident {
 		return totalCount;
 	}
 	
-	public static Incident fetchLogIncident(String theLogName) {
-		Incident logOwningIncident = null;
+	// pretty much guaranteed to return an Incident (short of a server error)
+	// either finds the 'owning' incident associated with the specified event or creates a new incident
+	public static Incident fetchIncident(String theEventName, String theWellKnownTag, Application theApplication, String theMessage) {
+		Incident eventOwningIncident = null;
         EntityManager em = EMF.get().createEntityManager();
-        Boolean isAuthenticated = false;
 
 		try {
-			logOwningIncident = (Incident)em.createNamedQuery("User.getByEmailAddress")
-				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+			eventOwningIncident = (Incident)em.createNamedQuery("Incident.getByApplicationIdAndEventNameAndTag")
+				.setParameter("applicationId", theApplication.getId())
+				.setParameter("eventName", theEventName)
+				.setParameter("tag", theWellKnownTag)
 				.getSingleResult();
-    		isAuthenticated = true;
 		} catch (NoResultException e) {
-			log.info("Google account user not found");
+			// this is NOT an error -- there is just no incident yet associated with this event so create one
+			eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more google account users have same key");
 		}
 		
-		return logOwningIncident;
+		return eventOwningIncident;
+	}
+	
+	public static Incident createIncident(String theEventName, String theWellKnownTag, Application theApplication, String theMessage) {
+        EntityManager em = EMF.get().createEntityManager();
+        Incident incident = null;
+        
+        em.getTransaction().begin();
+		try {
+			incident = new Incident();
+			incident.setEventName(theEventName);
+			incident.setEventCount(1);
+			incident.addToTags(theWellKnownTag);
+			incident.setMessage(theMessage);
+			incident.setLastUpdatedGmtDate(new Date());
+			incident.setCreatedGmtDate(new Date());
+			incident.setApplicationId(theApplication.getId());
+        	
+			// Default status to 'open'
+			incident.setStatus(Incident.OPEN_STATUS);
+			
+			// Default severity
+			incident.setSeverity(Incident.LOW_SEVERITY);
+			
+			// Assign application unique incident number
+			incident.setNumber(Application.getAndIncrementIncidentNumber(theApplication.getId()));
+			
+			// set the activeThruGmtDate for auto closing
+			int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
+			Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
+			incident.setActiveThruGmtDate(activeThruGmtDate);
+			
+			log.info("creating new incident for application " + theApplication.getName() + " with eventName = " + theEventName + " and well known tag = " + theWellKnownTag);
+			em.persist(incident);
+			em.getTransaction().commit();
+		} catch (Exception e) {
+			log.severe("Incident::createIncident() exception = " + e.getMessage());
+		} finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
+		return incident;
 	}
 }

@@ -33,6 +33,7 @@ import com.stretchcom.rskybox.models.AppAction;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
@@ -340,6 +341,12 @@ public class CrashDetectsResource extends ServerResource {
 				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
 				crashDetect.setActiveThruGmtDate(activeThruGmtDate);
+				
+				// find or create an incident that will 'own' this new crashDetect
+				// TODO something better for an eventName than the current date
+				Date now = new Date();
+				Incident owningIncident = Incident.fetchIncident(now.toString(), Incident.CRASH_TAG, theApplication, "new Crash Detect");
+				crashDetect.setIncidentId(owningIncident.getId());
 			}
             
             em.persist(crashDetect);

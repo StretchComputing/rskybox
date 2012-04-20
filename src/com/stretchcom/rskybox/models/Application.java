@@ -133,6 +133,11 @@ public class Application {
 	public void setNextIncidentNumber(Integer nextIncidentNumber) {
 		this.nextIncidentNumber = nextIncidentNumber;
 	}
+	
+	// returns the application ID as a string
+	public String getId() {
+		return KeyFactory.keyToString(this.key);
+	}
 
 	public static String verifyApplicationId(String theApplicationId) {
 		if(theApplicationId == null) {

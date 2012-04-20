@@ -31,6 +31,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.Feedback;
+import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
@@ -199,6 +200,12 @@ public class FeedbackResource extends ServerResource {
 				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
 				feedback.setActiveThruGmtDate(activeThruGmtDate);
+				
+				// find or create an incident that will 'own' this new feedback
+				// TODO something better for an eventName than the current date
+				Date now = new Date();
+				Incident owningIncident = Incident.fetchIncident(now.toString(), Incident.FEEDBACK_TAG, theApplication, "new Crash Detect");
+				feedback.setIncidentId(owningIncident.getId());
 			}
 
             em.persist(feedback);

@@ -235,6 +235,7 @@ public class ClientLogsResource extends ServerResource {
             clientLog = new ClientLog();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             Boolean isUpdate = false;
+            String logName = null;
             if (id != null) {
             	//////////////////////
             	// Authorization Rules
@@ -268,7 +269,6 @@ public class ClientLogsResource extends ServerResource {
 					clientLog.setLogLevel(ClientLog.ERROR_LOG_LEVEL);
 				}
 	            
-	            String logName = null;
 	            if(json.has("logName")) {
 	            	logName = json.getString("logName");
 	            	clientLog.setLogName(logName);
@@ -301,8 +301,10 @@ public class ClientLogsResource extends ServerResource {
 				clientLog.setInstanceUrl(json.getString("instanceUrl"));
 			}
 			
+			String summary = null;
 			if(!isUpdate && json.has("summary")) {
-				clientLog.setSummary(json.getString("summary"));
+				summary = json.getString("summary");
+				clientLog.setSummary(summary);
 			}
 			
 			if(!isUpdate) {
@@ -388,7 +390,8 @@ public class ClientLogsResource extends ServerResource {
 				clientLog.setActiveThruGmtDate(activeThruGmtDate);
 				
 				// find or create an incident that will 'own' this new clientLog
-				Incident owningIncident = Incident.fetchLogIncident(logName);
+				Incident owningIncident = Incident.fetchIncident(logName, Incident.LOG_TAG, theApplication, summary);
+				clientLog.setIncidentId(owningIncident.getId());
 			}
 			
             em.persist(clientLog);
