@@ -45,18 +45,18 @@
     <script src="/js/controllers/main.js"></script>
   </head>
   <body>
-    <!-- Applications -->
-    <div data-role="page" id="applications" data-title="Applications">
+    <!-- Apps -->
+    <div data-role="page" id="applications" data-title="Apps">
       <div data-role="header">
-        <a href="#settings" data-icon="gear" data-direction="reverse">Settings</a>
-        <h1>Applications</h1>
-        <a href="#newApp" data-icon="plus" data-iconpos="right">New</a>
+        <a href="#settings" data-icon="gear" data-mini="true">Settings</a>
+        <h1>Apps</h1>
+        <a href="#newApp" data-icon="plus" data-iconpos="right" data-mini="true">New</a>
       </div>
       <div data-role="content"></div>
     </div>
     <script type="text/template" id="noAppsTemplate">
       <h3>
-        You don't have any applications, yet.
+        You don't have any apps, yet.
       </h3>
       <p>
         Why don't you add one? Use the New App button above right.
@@ -67,11 +67,11 @@
     </script>
 
 
-    <!-- Application -->
-    <div data-role="page" id="application" data-title="Application">
+    <!-- App -->
+    <div data-role="page" id="application" data-title="App">
       <div data-role="header">
-        <a href="#applications" data-direction="reverse" data-icon="home">Home</a>
-        <h1>Application</h1>
+        <a href="#applications" data-icon="home" data-mini="true">Apps</a>
+        <h1>App</h1>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
@@ -99,11 +99,11 @@
     </script>
 
 
-    <!-- New Application -->
-    <div data-role="page" id="newApp" data-title="New Application">
+    <!-- New App -->
+    <div data-role="page" id="newApp" data-title="New App">
       <div data-role="header">
-        <a href="#applications" data-icon="arrow-l" data-direction="reverse">Cancel</a>
-        <h1>New Application</h1>
+        <a href="#applications" data-icon="arrow-l" data-mini="true">Cancel</a>
+        <h1>New App</h1>
       </div>
       <div data-role="content">
         <form id="newAppForm"></form>
@@ -111,23 +111,23 @@
     </div>
     <script type="text/template" id="newAppTemplate">
       <div>
-        <label for="name" class="ui-hidden-accessible">Application Name:</label>
-        <input name="name" placeholder="Application Name" value="<%= name %>"></input>
+        <label for="name" class="ui-hidden-accessible">App Name:</label>
+        <input name="name" placeholder="App Name" value="<%= name %>" data-mini="true"></input>
       </div>
       <div>
-        <label for="version" class="ui-hidden-accessible">Application Version:</label>
-        <input name="version" placeholder="Application Version" value="<%= version %>"></input>
+        <label for="version" class="ui-hidden-accessible">App Version:</label>
+        <input name="version" placeholder="App Version" value="<%= version %>" data-mini="true"></input>
       </div>
-      <input type="submit" value="Save">
+      <input type="submit" value="Save" data-mini="true">
     </script>
 
 
     <!-- Settings -->
     <div data-role="page" id="settings" data-title="Settings">
       <div data-role="header">
-        <a href="#" class="logout">Logout</a>
+        <a href="#" class="logout" data-mini="true">Logout</a>
         <h1>Settings</h1>
-        <a href="#applications" data-icon="home" data-iconpos="right">Home</a>
+        <a href="#applications" data-icon="home" data-iconpos="right" data-mini="true">Home</a>
       </div>
       <div data-role="content">
         <form id="settingsForm"></form>
@@ -135,61 +135,61 @@
     </div>
     <script type="text/template" id="settingsTemplate">
       <% if (false && isSuperAdmin) { %>
-        <button class="admin" data-inline="true" data-icon="star">Users Admin</button>
+        <button class="admin" data-inline="true" data-icon="star" data-mini="true">Users Admin</button>
       <% } %>
       <ul data-role="listview" data-inset="true">
         <li data-role="fieldcontain">
           <h3>Name</h3>
           <label for="firstName" class="ui-hidden-accessible">First Name:</label>
-          <input name="firstName" id="firstName" value="<%= firstName %>" placeholder="First Name">
+          <input name="firstName" id="firstName" value="<%= firstName %>" placeholder="First Name" data-mini="true">
           <label for="lastName" class="ui-hidden-accessible">Last Name:</label>
-          <input name="lastName" id="lastName" value="<%= lastName %>" placeholder="Last Name">
+          <input name="lastName" id="lastName" value="<%= lastName %>" placeholder="Last Name" data-mini="true">
         </li>
         <li data-role="fieldcontain">
           <h3>Email</h3>
           <% if (isEmailConfirmed) { %>
             <p><%= emailAddress %></p>
-            <input type="checkbox" name="sendEmailNotifications" id="sendEmailNotifications"<% if (sendEmailNotifications) { %> checked <% } %>>
+            <input type="checkbox" name="sendEmailNotifications" id="sendEmailNotifications"<% if (sendEmailNotifications) { %> checked <% } %> data-mini="true">
             <label for="sendEmailNotifications">Receive email notifications</label>
           <% } else { %>
             <% if (emailAddress) { %>
               <label for="emailConfirmationCode">Confirmation code for <%= emailAddress %>:</label>
               <input type="hidden" name="confirmEmailAddress" value="<%= emailAddress %>">
-              <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%= emailConfirmationCode %>">
-              <button class="confirmEmail">Confirm Email</button>
+              <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%= emailConfirmationCode %>" data-mini="true">
+              <button class="confirmEmail" data-mini="true">Confirm Email</button>
               <hr>
             <% } %>
             <label for="emailAddress" class="ui-hidden-accessible">Email address:</label>
-            <input type="email" name="emailAddress" id="emailAddress" value="<%= emailAddress %>" placeholder="Email Address" autocorrect="off" autocapitalize="off">
-            <button class="requestEmailConfirmation">Request Confirmation</button>
+            <input type="email" name="emailAddress" id="emailAddress" value="<%= emailAddress %>" placeholder="Email Address" autocorrect="off" autocapitalize="off" data-mini="true">
+            <button class="requestEmailConfirmation" data-mini="true">Request Confirmation</button>
           <% } %>
         </li>
         <li data-role="fieldcontain">
           <h3>Phone</h3>
           <% if (isSmsConfirmed) { %>
             <p><%= phoneNumber %></p>
-            <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications"<% if (sendSmsNotifications) { %> checked <% } %>>
+            <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications"<% if (sendSmsNotifications) { %> checked <% } %> data-mini="true">
             <label for="sendSmsNotifications">Receive SMS notifications</label>
           <% } else { %>
             <% if (phoneNumber) { %>
               <label for="phoneNumberConfirmationCode">Confirmation code for <%= phoneNumber %>:</label>
               <input type="hidden" name="confirmPhoneNumber" value="<%= phoneNumber %>">
-              <input name="phoneNumberConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>">
-              <button class="confirmPhone">Confirm Phone</button>
+              <input name="phoneNumberConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>" data-mini="true">
+              <button class="confirmPhone" data-mini="true">Confirm Phone</button>
               <hr>
             <% } %>
             <label for="phoneNumber" class="ui-hidden-accessible">Phone number:</label>
-            <input type="tel" name="phoneNumber" id="phoneNumber" value="<%= phoneNumber %>" placeholder="Phone Number">
+            <input type="tel" name="phoneNumber" id="phoneNumber" value="<%= phoneNumber %>" placeholder="Phone Number" data-mini="true">
             <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile carrier:</label>
-            <select name="mobileCarrierId" id="mobileCarrierId"></select>
-            <button class="requestSmsConfirmation">Request Confirmation</button>
+            <select name="mobileCarrierId" id="mobileCarrierId" data-mini="true"></select>
+            <button class="requestSmsConfirmation" data-mini="true">Request Confirmation</button>
           <% } %>
         </li>
         <li data-role="fieldcontain">
           <h3>Change Password</h3>
           <label for="password" class="ui-hidden-accessible">Password:</label>
-          <input name="password" id="password" placeholder="Password" autocorrect="off" autocapitalize="off">
-          <button class="savePassword">Save Password</button>
+          <input name="password" id="password" placeholder="Password" autocorrect="off" autocapitalize="off" data-mini="true">
+          <button class="savePassword" data-mini="true">Save Password</button>
         </li>
       </ul>
     </script>
@@ -198,9 +198,9 @@
     <!-- Feedback -->
     <div data-role="page" id="feedbackList" data-title="Feedback">
       <div data-role="header">
-        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <a href="#" data-icon="arrow-l" data-mini="true">App</a>
         <h1>Feedback</h1>
-        <a href="#feedbackList" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Archives</a>
+        <a href="#feedbackList" data-theme="b" data-icon="check" data-iconpos="right" class="archives" data-mini="true">Archives</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content">
@@ -217,7 +217,7 @@
 
     <div data-role="page" id="feedback" data-title="Feedback">
       <div data-role="header">
-        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <a href="#" data-icon="arrow-l" data-mini="true">List</a>
         <h1>Feedback</h1>
       </div>
       <div class="applicationName"></div>
@@ -237,7 +237,7 @@
         <% } %>
         <li>
           Status: <%= status %>
-          <button class="changeStatus" data-inline="true" data-theme="b">
+          <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
             <%= status === 'new' ? 'Archive' : 'Un-archive' %>
           </button>
         </li>
@@ -248,9 +248,9 @@
     <!-- Logs -->
     <div data-role="page" id="logs" data-title="Logs">
       <div data-role="header">
-        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
-        <h1>Logs</h1>
-        <a href="#logs" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Archives</a>
+        <a href="#" data-icon="arrow-l" data-mini="true">App</a>
+        <h3>Logs</h3>
+        <a href="#logs" data-theme="b" data-icon="check" data-iconpos="right" class="archives" data-mini="true">Archives</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
@@ -267,7 +267,7 @@
 
     <div data-role="page" id="log" data-title="Log">
       <div data-role="header">
-        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <a href="#" data-icon="arrow-l" data-mini="true">List</a>
         <h1>Log</h1>
       </div>
       <div class="applicationName"></div>
@@ -279,8 +279,8 @@
         <li>Created: <%= date %></li>
         <li>Summary: <%= summary %></li>
         <li>
-          Mode: <%= logMode %>
-          <button class="mode" data-inline="true">
+          <%= logMode %>
+          <button class="mode" data-inline="true" data-mini="true">
             <%= (logMode === 'inactive') ? 'Activate' : 'Deactivate' %> Log Series
           </button>
         </li>
@@ -292,7 +292,7 @@
         <li>Message: <%= message %></li>
         <li>
           Status: <%= status %>
-          <button class="changeStatus" data-inline="true" data-theme="b">
+          <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
             <%= status === 'new' ? 'Archive' : 'Un-archive' %>
           </button>
         </li>
@@ -324,9 +324,9 @@
     <!-- Crashes -->
     <div data-role="page" id="crashes" data-title="Crashes">
       <div data-role="header">
-        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <a href="#" data-icon="arrow-l" data-mini="true">App</a>
         <h1>Crashes</h1>
-        <a href="#crashes" data-theme="b" data-icon="check" data-iconpos="right" class="archives">Archives</a>
+        <a href="#crashes" data-theme="b" data-icon="check" data-iconpos="right" class="archives" data-mini="true">Archives</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
@@ -342,7 +342,7 @@
 
     <div data-role="page" id="crash" data-title="Crash">
       <div data-role="header">
-        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <a href="#" data-icon="arrow-l" data-mini="true">List</a>
         <h1>Crash</h1>
       </div>
       <div class="applicationName"></div>
@@ -359,7 +359,7 @@
         <% } %>
         <li>
           Status: <%= status %>
-          <button class="changeStatus" data-inline="true" data-theme="b">
+          <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
             <%= status === 'new' ? 'Archive' : 'Un-archive' %>
           </button>
         </li>
@@ -389,9 +389,9 @@
     <!-- Members -->
     <div data-role="page" id="members" data-title="Members">
       <div data-role="header">
-        <a href="#" class="back" data-direction="reverse" data-icon="arrow-l">Back</a>
+        <a href="#" class="back" data-icon="arrow-l" data-mini="true">App</a>
         <h1>Members</h1>
-        <a href="#" class="new" data-icon="plus" data-iconpos="right">New</a>
+        <a href="#" class="new" data-icon="plus" data-iconpos="right" data-mini="true">New</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
@@ -405,7 +405,7 @@
 
     <div data-role="page" id="member" data-title="Member">
       <div data-role="header">
-        <a href="#" class="back" data-direction="reverse" data-icon="arrow-l">Back</a>
+        <a href="#" class="back" data-icon="arrow-l" data-mini="true">List</a>
         <h1>Member</h1>
       </div>
       <div class="applicationName"></div>
@@ -420,7 +420,7 @@
           <li data-role="fieldcontain">
             <label for="role" class="ui-hidden-accessible">Role:</label>
             Role:
-            <select name="role" class="role">
+            <select name="role" class="role" data-mini="true">
               <option value="">Select Role</option>
               <option value="manager">Manager</option>
               <option value="member">Member</option>
@@ -432,14 +432,14 @@
         <li>Status: <%= status %></li>
       </ul>
       <% if (role !== 'owner' && (admin === 'owner' || admin === 'manager')) { %>
-        <button class="delete" data-icon="delete" data-theme="a">Delete Member</button>
+        <button class="delete" data-icon="delete" data-theme="a" data-mini="true">Delete Member</button>
       <% } %>
     </script>
 
     <!-- New Member -->
     <div data-role="page" id="newMember" data-title="New Member">
       <div data-role="header">
-        <a href="#" data-rel="back" data-icon="arrow-l">Cancel</a>
+        <a href="#" data-icon="arrow-l" data-mini="true">Cancel</a>
         <h1>New Member</h1>
       </div>
       <div class="applicationName"></div>
@@ -451,18 +451,18 @@
         <ul data-role="listview" data-inset="true">
           <li data-role="fieldcontain">
             <label for="emailAddress">Email Address:</label>
-            <input name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>" autocorrect="off" autocapitalize="off"></input>
+            <input name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>" autocorrect="off" autocapitalize="off" data-mini="true"></input>
           </li>
           <li data-role="fieldcontain">
             <label for="role">Role:</label>
-            <select name="role">
+            <select name="role" data-mini="true">
               <option value="">Select Role</option>
               <option value="manager">Manager</option>
               <option value="member">Member</option>
             </select>
           </li>
         </ul>
-        <input type="submit" value="Save">
+        <input type="submit" value="Save" data-mini="true">
       </form>
     </script>
 
@@ -470,7 +470,7 @@
     <!-- End Users -->
     <div data-role="page" id="endusers" data-title="End Users">
       <div data-role="header">
-        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <a href="#" data-icon="arrow-l" data-mini="true">App</a>
         <h1>End Users</h1>
       </div>
       <div class="applicationName"></div>
@@ -485,7 +485,7 @@
 
     <div data-role="page" id="enduser" data-title="End User">
       <div data-role="header">
-        <a href="#" data-rel="back" data-icon="arrow-l">Back</a>
+        <a href="#" data-icon="arrow-l" data-mini="true">List</a>
         <h1>End User</h1>
       </div>
       <div class="applicationName"></div>
