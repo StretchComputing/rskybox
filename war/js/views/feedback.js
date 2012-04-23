@@ -42,6 +42,8 @@ var RSKYBOX = (function (r, $) {
       try {
         var list;
 
+        this.appLink('back', 'application');
+
         this.getContent().empty();
         if (this.collection.length <= 0) {
           this.getContent().html(this.noFeedbackTemplate());
@@ -89,6 +91,8 @@ var RSKYBOX = (function (r, $) {
     render: function () {
       try {
         var mock = this.model.getMock();
+
+        this.appLink('back', 'feedbackList');
 
         mock.date = r.format.longDate(mock.date);
         this.getContent().html(this.template(mock));

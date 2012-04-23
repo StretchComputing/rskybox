@@ -52,6 +52,14 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+    appLink: function (clazz, name) {
+      try {
+        return this.$el.find('.' + clazz).attr('href', '#' + name + '?appId=' + r.session.params.appId);
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.appLink');
+      }
+    },
+
     renderArchiveButton: function (pageLink) {
       try {
         var

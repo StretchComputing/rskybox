@@ -39,6 +39,8 @@ var RSKYBOX = (function (r, $) {
       try {
         var list;
 
+        this.appLink('back', 'application');
+
         this.getContent().empty();
         if (this.collection.length <= 0) {
           this.getContent().html(this.template());
@@ -79,6 +81,8 @@ var RSKYBOX = (function (r, $) {
 
     render: function () {
       try {
+        this.appLink('back', 'endusers');
+
         this.getContent().html(this.template(this.model.getMock()));
         this.getContent().trigger('create');
         return this;

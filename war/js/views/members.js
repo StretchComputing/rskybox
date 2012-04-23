@@ -64,12 +64,12 @@ var RSKYBOX = (function (r, $) {
         if (this.collection.isEmpty() || this.options.applications.isEmpty()) { return this; }
 
         app = this.options.applications.findById(r.session.params.appId);
+        this.appLink('back', 'application');
 
-        this.$el.find('.back').attr('href', '#application?appId=' + app.id);
         if (app.role === 'member') {
           this.$el.find('.new').attr('href', '#').hide();
         } else {
-          this.$el.find('.new').attr('href', '#newMember?appId=' + app.id).show();
+          this.appLink('new', 'newMember').show();
         }
         this.getContent().empty();
         if (this.collection.length <= 0) {
@@ -124,8 +124,8 @@ var RSKYBOX = (function (r, $) {
         if (!this.model.get('apiStatus') || this.options.applications.isEmpty()) { return this; }
 
         app = this.options.applications.findById(r.session.params.appId);
+        this.appLink('back', 'members');
 
-        this.$el.find('.back').attr('href', '#members?appId=' + app.id);
         mock.date = r.format.longDate(mock.date);
         mock = _.extend(mock, {admin: app.get('role')});
         this.getContent().html(this.template(mock));
@@ -243,6 +243,7 @@ var RSKYBOX = (function (r, $) {
 
     render: function () {
       try {
+        this.appLink('back', 'members');
         this.getContent().html(this.template(this.model.getMock()));
         this.$el.trigger('create');
         return this;
