@@ -226,7 +226,6 @@ var RSKYBOX = (function (r, $) {
 
   try {
     r.router = new $.mobile.Router([
-      { '.*':       { handler: 'checkDestination',  events: 'bc'  } },
       { '.*':       { handler: 'isLoggedIn',        events: 'bc'  } },
       { '.*':       { handler: 'setupSession',      events: 'bs'  } },
       { '.*':       { handler: 'flashCheck',        events: 's'   } },

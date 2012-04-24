@@ -18,7 +18,6 @@ var RSKYBOX = (function (r, $) {
       401: function (jqXHR) {
         try {
           r.log.info('401 - unauthorized', 'RSKYBOX.statusCodeHandlers');
-          // TODO - Add flash message to home page after 401 occurs
           r.flash.set('warning', 'Login required');
           r.logOut();
         } catch (e) {
@@ -49,10 +48,17 @@ var RSKYBOX = (function (r, $) {
   // Handle logging in and logging out.
   r.logIn = function (token) {
     try {
+      var dest = r.destination.get();
       r.log.info('entering', 'RSKYBOX.logIn');
 
       Cookie.set('token', token, 9000, '/');
-      r.changePage('applications');
+
+      if (dest) {
+        r.destination.remove();
+        window.location = dest;
+      } else {
+        r.changePage('applications');
+      }
     } catch (e) {
       r.log.error(e, 'RSKYBOX.logIn');
     }
@@ -137,14 +143,19 @@ var RSKYBOX = (function (r, $) {
 
   // Manage page redirections
   r.destination = {
-    get value() {
-      return this.value;
+    key: 'destination',
+
+    get: function () {
+      return r.store.getItem(this.key);
     },
 
-    set value(value) {
-      this.value = value;
+    set: function (value) {
+      r.store.setItem(this.key, value);
     },
 
+    remove: function () {
+      return r.store.removeItem(this.key);
+    },
   };
 
 

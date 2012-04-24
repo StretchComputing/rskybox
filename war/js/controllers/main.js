@@ -437,7 +437,8 @@ var RSKYBOX = (function (r, $) {
   $(document).bind('pagebeforechange', function (evt, data) {
     try {
       if (!r.isLoggedIn()) {
-        r.log.debug('not logged in', 'pagebeforechange');
+        r.log.info('not logged in', 'pagebeforechange');
+        r.destination.set(location.pathname + location.hash);
         r.flash.set('warning', 'Login required');
         evt.preventDefault();
         r.changePage('login', 'signup');
