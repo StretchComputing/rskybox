@@ -33,7 +33,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'SignupController.setupSession');
 
-        r.session = {};
+        r.session = r.session || {};
         r.session.params = r.router.getParams(location.hash);
       } catch (e) {
         r.log.error(e, 'SignupController.setupSestion');
@@ -226,6 +226,7 @@ var RSKYBOX = (function (r, $) {
 
   try {
     r.router = new $.mobile.Router([
+      { '.*':       { handler: 'checkDestination',  events: 'bc'  } },
       { '.*':       { handler: 'isLoggedIn',        events: 'bc'  } },
       { '.*':       { handler: 'setupSession',      events: 'bs'  } },
       { '.*':       { handler: 'flashCheck',        events: 's'   } },

@@ -2,34 +2,6 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  var storage = {
-      clear: function () {
-        localStorage.clear();
-      },
-
-      setItem: function (item, value) {
-        r.log.info(item, 'storage.setItem');
-
-        localStorage.setItem(item, JSON.stringify(value));
-      },
-
-      getItem: function (item) {
-        try {
-          var results;
-          r.log.info(item, 'storage.getItem');
-
-          results = JSON.parse(localStorage.getItem(item));
-          if (!results || results === '' || results === 'fetching') {
-            return false;
-          }
-          return results;
-        } catch (e) {
-          r.log.error(e, 'storage.getItem');
-        }
-      },
-    };
-
-
   r.dump = function (object) {
     try {
       r.log.local(JSON.stringify(object));
@@ -92,7 +64,7 @@ var RSKYBOX = (function (r, $) {
 
       Cookie.unset('token', '/');
       r.changePage('root', 'signup');
-      sessionStorage.clear();
+      r.session.reset();
     } catch (e) {
       r.log.error(e, 'RSKYBOX.logOut');
     }
@@ -163,6 +135,19 @@ var RSKYBOX = (function (r, $) {
   };
 
 
+  // Manage page redirections
+  r.destination = {
+    get value() {
+      return this.value;
+    },
+
+    set value(value) {
+      this.value = value;
+    },
+
+  };
+
+
   r.flash = (function () {
     var display, flash = {};
 
@@ -212,7 +197,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'flash.set');
 
         if (duration) { value.duration = duration; }
-        storage.setItem('flash', value);
+        r.store.setItem('flash', value);
       } catch (e) {
         r.log.error(e, 'flash.set');
       }
@@ -220,7 +205,7 @@ var RSKYBOX = (function (r, $) {
 
     flash.check = function () {
       try {
-        var value = storage.getItem('flash');
+        var value = r.store.getItem('flash');
         r.log.info('entering', 'flash.check');
 
         if (!value) { return; }
@@ -249,7 +234,7 @@ var RSKYBOX = (function (r, $) {
 
     flash.clear = function () {
       try {
-        localStorage.removeItem('flash');
+        r.store.removeItem('flash');
       } catch (e) {
         r.log.error(e, 'flash.clear');
       }
