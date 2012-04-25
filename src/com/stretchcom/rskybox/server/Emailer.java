@@ -119,17 +119,6 @@ public class Emailer {
         	sb.append("<div style='margin-bottom:5px;'><a href='" + applicationUrl + "'>" + nd.getApplicationName() + "</a></div>");
         	sb.append("<table style='margin-left:15px; border: 1px solid black;'>");
         	sb.append("<tr>");
-         	String logListUrl = theRskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
-        	sb.append("<td style='background-color:#FFFFFF;'><a href='" + logListUrl + "'>log</a></td>");
-        	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getClientLogCount() + "</td>");
-        	sb.append("<td style='background-color:#FFFFFF;'>");
-        	if(nd.getClientLogCount() > 0) {
-            	String logUrl = theRskyboxBaseUrl + "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
-            	sb.append("<a href='" + logUrl + "'>" + nd.getClientLogMessage() + "</a>");
-        	}
-        	sb.append("</td>");
-        	sb.append("</tr>");
-        	sb.append("<tr>");
          	String crashListUrl = theRskyboxBaseUrl + "#crashes?appId=" + nd.getApplicationId() + "&status=new";
         	sb.append("<td style='background-color:#F8F8F8;'><a href='" + crashListUrl + "'>crash</a></td>");
         	sb.append("<td style='background-color:#F8F8F8; width:25px; text-align:center;'>" + nd.getCrashCount() + "</td>");
@@ -140,6 +129,29 @@ public class Emailer {
         	}
         	sb.append("</td>");
         	sb.append("</tr>");
+        	sb.append("<tr>");
+         	String logListUrl = theRskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
+        	sb.append("<td style='background-color:#FFFFFF;'><a href='" + logListUrl + "'>new log</a></td>");
+        	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getClientLogCount() + "</td>");
+        	sb.append("<td style='background-color:#FFFFFF;'>");
+        	if(nd.getClientLogCount() > 0) {
+            	String logUrl = theRskyboxBaseUrl + "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
+            	sb.append("<a href='" + logUrl + "'>" + nd.getClientLogMessage() + "</a>");
+        	}
+        	sb.append("</td>");
+        	sb.append("</tr>");
+        	
+        	sb.append("<tr>");
+        	sb.append("<td style='background-color:#FFFFFF;'><a href='" + logListUrl + "'>updated log</a></td>");
+        	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getUpdatedLogCount() + "</td>");
+        	sb.append("<td style='background-color:#FFFFFF;'>");
+        	if(nd.getUpdatedLogCount() > 0) {
+            	String logUrl = theRskyboxBaseUrl + "#log?id=" + nd.getUpdatedLogId() + "&appId=" + nd.getApplicationId();
+            	sb.append("<a href='" + logUrl + "'>" + nd.getUpdatedLogMessage() + "</a>");
+        	}
+        	sb.append("</td>");
+        	sb.append("</tr>");
+        	
         	sb.append("<tr>");
          	String feedbackListUrl = theRskyboxBaseUrl + "#feedbackList?appId=" + nd.getApplicationId() + "&status=new";
         	sb.append("<td style='background-color:#FFFFFF;'><a href='" + feedbackListUrl + "'>feedback</a></td>");

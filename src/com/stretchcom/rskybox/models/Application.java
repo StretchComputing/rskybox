@@ -50,6 +50,7 @@ import com.stretchcom.rskybox.server.EMF;
 public class Application {
     private static final Logger log = Logger.getLogger(Application.class.getName());
     
+    private static int MAX_DAYS_IN_LIMBO = 10;
     private static int DAYS_UNTIL_AUTO_ARCHIVE = 7;
     //private static int DAYS_UNTIL_AUTO_ARCHIVE = -2;  // for local testing
 	
@@ -60,6 +61,7 @@ public class Application {
 	private Date versionUpdatedGmtDate;
 	private String token;
 	private Integer nextIncidentNumber = 1;
+	private Integer daysInLimbo = MAX_DAYS_IN_LIMBO; // how long an incident can be closed and still be reopened
 
 	@Transient
 	private String memberRole; // used internally on the server to return user role with list of user's applications
@@ -137,6 +139,14 @@ public class Application {
 	// returns the application ID as a string
 	public String getId() {
 		return KeyFactory.keyToString(this.key);
+	}
+
+	public Integer getDaysInLimbo() {
+		return daysInLimbo;
+	}
+
+	public void setDaysInLimbo(Integer daysInLimbo) {
+		this.daysInLimbo = daysInLimbo;
 	}
 
 	public static String verifyApplicationId(String theApplicationId) {

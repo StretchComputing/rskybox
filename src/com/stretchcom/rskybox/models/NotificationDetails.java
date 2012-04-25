@@ -21,6 +21,9 @@ public class NotificationDetails {
 	private Integer clientLogCount;
 	private String clientLogMessage;
 	private String clientLogId;
+	private Integer updatedLogCount;
+	private String updatedLogMessage;
+	private String updatedLogId;
 	private Integer crashCount;
 	private String crashMessage;
 	private String crashId;
@@ -61,6 +64,27 @@ public class NotificationDetails {
 	}
 	public void setClientLogId(String clientLogId) {
 		this.clientLogId = clientLogId;
+	}
+	
+	public Integer getUpdatedLogCount() {
+		return updatedLogCount;
+	}
+	public void setUpdatedLogCount(Integer updatedLogCount) {
+		this.updatedLogCount = updatedLogCount;
+	}
+	
+	public String getUpdatedLogMessage() {
+		return updatedLogMessage;
+	}
+	public void setUpdatedLogMessage(String updatedLogMessage) {
+		this.updatedLogMessage = updatedLogMessage;
+	}
+	
+	public String getUpdatedLogId() {
+		return updatedLogId;
+	}
+	public void setUpdatedLogId(String updatedLogId) {
+		this.updatedLogId = updatedLogId;
 	}
 
 	public Integer getCrashCount() {

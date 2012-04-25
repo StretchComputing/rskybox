@@ -36,7 +36,7 @@ import com.stretchcom.rskybox.server.GMT;
     		query="SELECT i FROM Incident i WHERE " +
     		      "i.applicationId = :applicationId" + " AND " +
     		      "i.eventName = :eventName" + " AND " +
-    			  "i.tags = :tag ORDER BY i.lastUpdatedGmtDate DESC"
+    			  "i.tags = :tag ORDER BY i.createdGmtDate DESC"
     ),
     @NamedQuery(
     		name="Incident.getAllWithApplicationIdAndTag",
@@ -335,22 +335,71 @@ public class Incident {
 	
 	// pretty much guaranteed to return an Incident (short of a server error)
 	// either finds the 'owning' incident associated with the specified event or creates a new incident
-	public static Incident fetchIncident(String theEventName, String theWellKnownTag, Application theApplication, String theMessage) {
+	public static Incident fetchIncidentIncrementCount(String theEventName, String theWellKnownTag, String theIncidentId, Application theApplication, String theMessage) {
 		Incident eventOwningIncident = null;
+		List<Incident> relatedIncidents = null;
         EntityManager em = EMF.get().createEntityManager();
-
-		try {
-			eventOwningIncident = (Incident)em.createNamedQuery("Incident.getByApplicationIdAndEventNameAndTag")
-				.setParameter("applicationId", theApplication.getId())
-				.setParameter("eventName", theEventName)
-				.setParameter("tag", theWellKnownTag)
-				.getSingleResult();
-		} catch (NoResultException e) {
-			// this is NOT an error -- there is just no incident yet associated with this event so create one
-			eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
-		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more google account users have same key");
+        Date now = new Date();
+        Boolean isExistingIncident = true;
+        
+        if(theIncidentId != null) {
+        	try {
+    			eventOwningIncident = (Incident)em.createNamedQuery("Incident.getByKey")
+    					.setParameter("key", KeyFactory.stringToKey(theIncidentId))
+    					.getSingleResult();
+        	} catch (NoResultException e) {
+    			// this incident ID provided was not valid
+    			return null;
+    		} catch (NonUniqueResultException e) {
+    			log.severe("should never happen - two or more incidents have same key");
+    			return null;
+    		}
+        } else {
+    		try {
+    			relatedIncidents = (List<Incident>)em.createNamedQuery("Incident.getByApplicationIdAndEventNameAndTag")
+    				.setParameter("applicationId", theApplication.getId())
+    				.setParameter("eventName", theEventName)
+    				.setParameter("tag", theWellKnownTag)
+    				.getResultList();
+    			
+    			// always choose the most recently created incident which will be on the top of the list
+    			eventOwningIncident = relatedIncidents.get(0);
+    		} catch (NoResultException e) {
+    			// this is NOT an error -- there is just no incident yet associated with this event so create one
+    			eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
+				isExistingIncident = false;
+    		} catch (NonUniqueResultException e) {
+    			log.severe("should never happen - two or more google account users have same key");
+    			return null;
+    		}
+        }
+		
+		// if incident recently closed, re-open it. Closed too long, then create a new one.
+		if(eventOwningIncident.getStatus().equalsIgnoreCase(Incident.CLOSED_STATUS)) {
+			Date finalRevivalDate = GMT.addDaysToDate(eventOwningIncident.getLastUpdatedGmtDate(), theApplication.getDaysInLimbo());
+			if(finalRevivalDate.after(now)) {
+				// reopen this puppy
+				eventOwningIncident.setStatus(Incident.OPEN_STATUS);
+				log.info("fetchIncidentIncrementCount() reopening existing incident");
+			} else {
+				// create a new incident
+				eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
+				isExistingIncident = false;
+				log.info("fetchIncidentIncrementCount() existing incident CLOSED and too old to reopen");
+			}
 		}
+		
+		if(isExistingIncident){
+			Integer eventCount = eventOwningIncident.getEventCount();
+			eventOwningIncident.setEventCount(eventCount++);
+			eventOwningIncident.setLastUpdatedGmtDate(now);
+			
+			// TODO enhance message by merging summaries?
+			
+			// update severity if appropriate
+			// if severity changes, queue up notification
+		}
+        
 		
 		return eventOwningIncident;
 	}

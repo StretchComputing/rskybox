@@ -321,6 +321,11 @@ public class CrashDetectsResource extends ServerResource {
 				crashDetect.createAppActions(appActions);
 			}
 			
+			String incidentId = null;
+			if(!isUpdate && json.has("incidentId")) {
+				incidentId = json.getString("incidentId");
+			}
+			
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -345,7 +350,8 @@ public class CrashDetectsResource extends ServerResource {
 				// find or create an incident that will 'own' this new crashDetect
 				// TODO something better for an eventName than the current date
 				Date now = new Date();
-				Incident owningIncident = Incident.fetchIncident(now.toString(), Incident.CRASH_TAG, theApplication, "new Crash Detect");
+				
+				Incident owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, "new Crash Detect");
 				crashDetect.setIncidentId(owningIncident.getId());
 			}
             

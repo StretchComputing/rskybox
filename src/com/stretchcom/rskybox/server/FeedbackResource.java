@@ -180,6 +180,11 @@ public class FeedbackResource extends ServerResource {
 				feedback.setInstanceUrl(json.getString("instanceUrl"));
 			}
 			
+			String incidentId = null;
+			if(!isUpdate && json.has("incidentId")) {
+				incidentId = json.getString("incidentId");
+			}
+			
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -204,7 +209,7 @@ public class FeedbackResource extends ServerResource {
 				// find or create an incident that will 'own' this new feedback
 				// TODO something better for an eventName than the current date
 				Date now = new Date();
-				Incident owningIncident = Incident.fetchIncident(now.toString(), Incident.FEEDBACK_TAG, theApplication, "new Crash Detect");
+				Incident owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.FEEDBACK_TAG, incidentId, theApplication, "new Crash Detect");
 				feedback.setIncidentId(owningIncident.getId());
 			}
 
