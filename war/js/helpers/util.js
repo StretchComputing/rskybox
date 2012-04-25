@@ -144,7 +144,7 @@ var RSKYBOX = (function (r, $) {
 
   // Manage page redirections
   r.destination = {
-    key: 'destination',
+    key: 'rDestination',
 
     get: function () {
       return r.store.getItem(this.key);
@@ -161,7 +161,7 @@ var RSKYBOX = (function (r, $) {
 
 
   r.flash = (function () {
-    var display, flash = {};
+    var display, flash = {}, key = 'rFlash';
 
     // type: string indicating type of message; 'error', 'notice', etc.
     // message: message to display
@@ -209,7 +209,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'flash.set');
 
         if (duration) { value.duration = duration; }
-        r.store.setItem('flash', value);
+        r.store.setItem(key, value);
       } catch (e) {
         r.log.error(e, 'flash.set');
       }
@@ -217,7 +217,7 @@ var RSKYBOX = (function (r, $) {
 
     flash.check = function () {
       try {
-        var value = r.store.getItem('flash');
+        var value = r.store.getItem(key);
         r.log.info('entering', 'flash.check');
 
         if (!value) { return; }
@@ -246,7 +246,7 @@ var RSKYBOX = (function (r, $) {
 
     flash.clear = function () {
       try {
-        r.store.removeItem('flash');
+        r.store.removeItem(key);
       } catch (e) {
         r.log.error(e, 'flash.clear');
       }

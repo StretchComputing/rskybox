@@ -25,7 +25,6 @@ var RSKYBOX = (function (r, $) {
     // The URL for the REST call to create an rSkybox log.
     getUrl = function () {
       try {
-        //return 'https://rskybox-stretchcom.appspot.com/rest/v1/applications/' + r.log.getApplicationId() + '/clientLogs';
         return '/rest/v1/applications/' + r.log.getApplicationId() + '/clientLogs';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.log.getUrl');
