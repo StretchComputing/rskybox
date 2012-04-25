@@ -105,6 +105,7 @@ var RSKYBOX = (function (r, $) {
         },
         app: {
           base: '/html5',
+          application: '#application',
           applications: '',
           settings: '#settings',
         },

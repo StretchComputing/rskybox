@@ -4,78 +4,101 @@ var RSKYBOX = (function (r, $) {
 
   r.ConfirmNewUserView = Backbone.View.extend({
     initialize: function () {
-      _.bindAll(this, 'apiError');
-      this.model.on('change', this.render, this);
-      this.model.on('error', this.error, this);
-      this.template = _.template($('#confirmTemplate').html());
+      try {
+        _.bindAll(this, 'apiError');
+        this.model.on('change', this.render, this);
+        this.model.on('error', this.error, this);
+        this.template = _.template($('#confirmTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'ConfirmNewUserView.initialize');
+      }
     },
 
     events: {
       'submit': 'submit'
     },
 
-    submit: function (e) {
-      r.log.info('entering', 'ConfirmNewUserView.submit');
-      var valid;
+    submit: function (evt) {
+      try {
+        r.log.info('entering', 'ConfirmNewUserView.submit');
+        var valid;
 
-      valid = this.model.set({
-        emailAddress: this.$("input[name='emailAddress']").val(),
-        emailConfirmationCode: this.$("input[name='emailConfirmationCode']").val(),
-        phoneNumber: this.$("input[name='phoneNumber']").val(),
-        phoneConfirmationCode: this.$("input[name='phoneConfirmationCode']").val(),
-        password: this.$("input[name='password']").val(),
-      });
-
-      if (valid) {
-        this.model.prepareNewModel();
-        this.model.save(null, {
-          success: this.success,
-          statusCode: r.statusCodeHandlers(this.apiError)
+        valid = this.model.set({
+          emailAddress: this.$("input[name='emailAddress']").val(),
+          emailConfirmationCode: this.$("input[name='emailConfirmationCode']").val(),
+          phoneNumber: this.$("input[name='phoneNumber']").val(),
+          phoneConfirmationCode: this.$("input[name='phoneConfirmationCode']").val(),
+          password: this.$("input[name='password']").val(),
         });
-      }
 
-      e.preventDefault();
-      return false;
+        if (valid) {
+          this.model.prepareNewModel();
+          this.model.save(null, {
+            success: this.success,
+            statusCode: r.statusCodeHandlers(this.apiError)
+          });
+        }
+
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'ConfirmNewUserView.submit');
+      }
     },
 
     success: function (model, response) {
-      r.log.info('entering', 'ConfirmNewUserView.success');
-      r.logIn(model.get('token'));
-      // TODO - make sure we go to settings after confirmation
-      //r.changePage('settings');
+      try {
+        r.log.info('entering', 'ConfirmNewUserView.success');
+        r.destination.set('/html5#settings');
+        r.logIn(model.get('token'));
+      } catch (e) {
+        r.log.error(e, 'ConfirmNewUserView.success');
+      }
     },
 
     error: function (model, response) {
-      if (response.responseText) { return; }  // This is an apiError.
-      r.log.info(response, 'ConfirmNewUserView.error');
-      r.flash.warning(response);    // This is a validation error.
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+        r.log.info(response, 'ConfirmNewUserView.error');
+        r.flash.warning(response);    // This is a validation error.
+      } catch (e) {
+        r.log.error(e, 'ConfirmNewUserView.error');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = r.getApiStatus(jqXHR.responseText);
-      r.log.info(code, 'ConfirmNewUserView.apiError');
+      try {
+        var code = r.getApiStatus(jqXHR.responseText);
+        r.log.info(code, 'ConfirmNewUserView.apiError');
 
-      if (!this.apiCodes[code]) {
-        r.log.warn('Undefined apiStatus: ' + code, 'ConfirmNewUserView.apiError');
-        this.apiCodes[code] = 'An unknown error occurred. Please try again.';
+        if (!this.apiCodes[code]) {
+          r.log.warn('Undefined apiStatus: ' + code, 'ConfirmNewUserView.apiError');
+          this.apiCodes[code] = 'An unknown error occurred. Please try again.';
+        }
+        this.model.clear({silent: true});
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'ConfirmNewUserView.apiError');
       }
-      this.model.clear({silent: true});
-      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
-      var content = this.template(this.model.getMock());
-      r.getHeaderDiv().find('h1').text('Complete Signup');
-      this.$el.html(content);
-      this.$el.find('input[type=submit]').text('Complete Signup');
-      if (this.model.get('emailAddress')) {
-        this.$('#emailWrapper').show();
+      try {
+        var content = this.template(this.model.getMock());
+        r.getHeaderDiv().find('h1').text('Complete Signup');
+        this.$el.html(content);
+        this.$el.find('input[type=submit]').text('Complete Signup');
+        if (this.model.get('emailAddress')) {
+          this.$('#emailWrapper').show();
+        }
+        if (this.model.get('phoneNumber')) {
+          this.$('#phoneWrapper').show();
+        }
+        this.$el.trigger('create');
+        return this;
+      } catch (e) {
+        r.log.error(e, 'ConfirmNewUserView.render');
       }
-      if (this.model.get('phoneNumber')) {
-        this.$('#phoneWrapper').show();
-      }
-      this.$el.trigger('create');
-      return this;
     },
 
     apiCodes: {
@@ -103,77 +126,101 @@ var RSKYBOX = (function (r, $) {
 
   r.ConfirmExistingUserView = Backbone.View.extend({
     initialize: function () {
-      _.bindAll(this, 'apiError');
-      this.model.on('change', this.render, this);
-      this.model.on('error', this.error, this);
-      this.template = _.template($('#confirmTemplate').html());
+      try {
+        _.bindAll(this, 'apiError');
+        this.model.on('change', this.render, this);
+        this.model.on('error', this.error, this);
+        this.template = _.template($('#confirmTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'ConfirmExistingUserView.initialize');
+      }
     },
 
     events: {
       'submit': 'submit'
     },
 
-    submit: function (e) {
-      r.log.info('entering', 'ConfirmExistingUserView.submit');
-      var valid;
+    submit: function (evt) {
+      try {
+        var valid;
+        r.log.info('entering', 'ConfirmExistingUserView.submit');
 
-      valid = this.model.set({
-        emailAddress: this.$("input[name='emailAddress']").val(),
-        emailConfirmationCode: this.$("input[name='emailConfirmationCode']").val(),
-        phoneNumber: this.$("input[name='phoneNumber']").val(),
-        phoneConfirmationCode: this.$("input[name='phoneConfirmationCode']").val(),
-      });
-
-      if (valid) {
-        this.model.prepareNewModel();
-        this.model.save(null, {
-          success: this.success,
-          statusCode: r.statusCodeHandlers(this.apiError)
+        valid = this.model.set({
+          emailAddress: this.$("input[name='emailAddress']").val(),
+          emailConfirmationCode: this.$("input[name='emailConfirmationCode']").val(),
+          phoneNumber: this.$("input[name='phoneNumber']").val(),
+          phoneConfirmationCode: this.$("input[name='phoneConfirmationCode']").val(),
         });
-      }
 
-      e.preventDefault();
-      return false;
+        if (valid) {
+          this.model.prepareNewModel();
+          this.model.save(null, {
+            success: this.success,
+            statusCode: r.statusCodeHandlers(this.apiError)
+          });
+        }
+
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'ConfirmExistingUserView.submit');
+      }
     },
 
     success: function (model, response) {
-      r.log.info('entering', 'ConfirmExistingUserView.success');
-      r.changePage('applications');
+      try {
+        r.log.info('entering', 'ConfirmExistingUserView.success');
+        r.changePage('settings');
+      } catch (e) {
+        r.log.error(e, 'ConfirmExistingUserView.success');
+      }
     },
 
     error: function (model, response) {
-      if (response.responseText) { return; }  // This is an apiError.
-      r.log.info(response, 'ConfirmExistingUserView.error');
-      r.flash.warning(response);    // This is a validation error.
+      try {
+        if (response.responseText) { return; }  // This is an apiError.
+        r.log.info(response, 'ConfirmExistingUserView.error');
+        r.flash.warning(response);    // This is a validation error.
+      } catch (e) {
+        r.log.error(e, 'ConfirmExistingUserView.error');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = r.getApiStatus(jqXHR.responseText);
-      r.log.info(code, 'ConfirmExistingUserView.apiError');
+      try {
+        var code = r.getApiStatus(jqXHR.responseText);
+        r.log.info(code, 'ConfirmExistingUserView.apiError');
 
-      if (!this.apiCodes[code]) {
-        r.log.warn('Undefined apiStatus: ' + code, 'ConfirmExistingUserView.apiError');
+        if (!this.apiCodes[code]) {
+          r.log.warn('Undefined apiStatus: ' + code, 'ConfirmExistingUserView.apiError');
+        }
+        this.model.clear({silent: true});
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'ConfirmExistingUserView.apiError');
       }
-      this.model.clear({silent: true});
-      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
-      var content = this.template(this.model.getMock());
-      r.getHeaderDiv().find('h1').text('Confirmation');
-      this.$el.html(content);
-      this.$el.find('input[type=submit]').text('Confirm');
-      this.$('#passwordWrapper').hide();
-      if (this.model.get('emailAddress')) {
-        this.$('#emailWrapper').show();
-        this.$('#phoneWrapper').hide();
+      try {
+        var content = this.template(this.model.getMock());
+        r.getHeaderDiv().find('h1').text('Confirmation');
+        this.$el.html(content);
+        this.$el.find('input[type=submit]').text('Confirm');
+        this.$('#passwordWrapper').hide();
+        if (this.model.get('emailAddress')) {
+          this.$('#emailWrapper').show();
+          this.$('#phoneWrapper').hide();
+        }
+        if (this.model.get('phoneNumber')) {
+          this.$('#emailWrapper').hide();
+          this.$('#phoneWrapper').show();
+        }
+        this.$el.trigger('create');
+        return this;
+      } catch (e) {
+        r.log.error(e, 'ConfirmExistingUserView.render');
       }
-      if (this.model.get('phoneNumber')) {
-        this.$('#emailWrapper').hide();
-        this.$('#phoneWrapper').show();
-      }
-      this.$el.trigger('create');
-      return this;
     },
 
     apiCodes: {
@@ -193,92 +240,118 @@ var RSKYBOX = (function (r, $) {
 
   r.ConfirmMemberView = Backbone.View.extend({
     initialize: function () {
-      _.bindAll(this, 'apiError', 'success');
-      this.model.on('error', this.error, this);
-      this.template = _.template($('#confirmMemberTemplate').html());
+      try {
+        _.bindAll(this, 'apiError', 'success');
+        this.model.on('error', this.error, this);
+        this.template = _.template($('#confirmMemberTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'ConfirmMemberView.initialize');
+      }
     },
 
     events: {
       'submit': 'submit'
     },
 
-    submit: function (e) {
-      r.log.info('entering', 'ConfirmMemberView.submit');
-      this.model.save(null, {
-        success: this.success,
-        statusCode: r.statusCodeHandlers(this.apiError),
-        wait: true,
-      });
-      e.preventDefault();
-      return false;
+    submit: function (evt) {
+      try {
+        r.log.info('entering', 'ConfirmMemberView.submit');
+        this.model.save(null, {
+          success: this.success,
+          statusCode: r.statusCodeHandlers(this.apiError),
+          wait: true,
+        });
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'ConfirmMemberView.submit');
+      }
     },
 
     success: function (model, response) {
-      r.log.info('entering', 'ConfirmMemberView.success');
-      var params;
+      try {
+        var params;
+        r.log.info('entering', 'ConfirmMemberView.success');
 
-      if (+model.get('apiStatus') === 215) {
-        r.log.info('Member is not a registered user.', 'ConfirmMemberView.success');
-        params = r.session.params;
-        delete params.memberConfirmation;
-        delete params.applicationId;
-        params.preregistration = true;
-        params.emailConfirmationCode = params.confirmationCode;
-        delete params.confirmationCode;
-        r.changePage('confirm', 'signup', params);
-        return;
+        if (+model.get('apiStatus') === 215) {
+          r.log.info('Member is not a registered user.', 'ConfirmMemberView.success');
+          params = r.session.params;
+          delete params.memberConfirmation;
+          delete params.applicationId;
+          params.preregistration = true;
+          params.emailConfirmationCode = params.confirmationCode;
+          delete params.confirmationCode;
+          r.changePage('confirm', 'signup', params);
+          return;
+        }
+
+        r.log.info('membership confirmed', 'ConfirmMemberView.success');
+        this.proceed();
+      } catch (e) {
+        r.log.error(e, 'ConfirmMemberView.success');
       }
-
-      r.log.info('membership confirmed', 'ConfirmMemberView.success');
-      this.proceed();
     },
 
     error: function (model, response) {
-      if (response.responseText) {  // This is an apiError.
-        r.log.info(response.responseText, 'ConfirmMemberView.error');
-        return;
-      }
+      try {
+        if (response.responseText) {  // This is an apiError.
+          r.log.info(response.responseText, 'ConfirmMemberView.error');
+          return;
+        }
 
-      // Shouldn't see errors except for apiStatus returns handled above.
-      r.log.warn('Unexpected execution: ' + response, 'ConfirmMemberView.error');
+        // Shouldn't see errors except for apiStatus returns handled above.
+        r.log.error('Unexpected execution: ' + response, 'ConfirmMemberView.error');
+      } catch (e) {
+        r.log.error(e, 'ConfirmMemberView.error');
+      }
     },
 
     apiError: function (jqXHR) {
-      var code = +r.getApiStatus(jqXHR.responseText);
+      try {
+        var code = +r.getApiStatus(jqXHR.responseText);
 
-      switch (code) {
-      case 214:
-        this.proceed();
-        return;
-      case 606:
-        r.log.warn('App Member not found.', 'ConfirmMemberView.apiError');
-        this.proceed(true);
-        return;
-      case undefined:
-        r.log.warn('Undefined apiStatus: ' + code, 'ConfirmMemberView.apiError');
-        break;
+        switch (code) {
+        case 214:
+          this.proceed();
+          return;
+        case 606:
+          r.log.warn('App Member not found.', 'ConfirmMemberView.apiError');
+          this.proceed(true);
+          return;
+        case undefined:
+          r.log.warn('Undefined apiStatus: ' + code, 'ConfirmMemberView.apiError');
+          break;
+        }
+        this.model.clear({silent: true});
+        r.flash.warning(this.apiCodes[code]);
+      } catch (e) {
+        r.log.error(e, 'ConfirmMemberView.apiError');
       }
-      this.model.clear({silent: true});
-      r.flash.warning(this.apiCodes[code]);
     },
 
     render: function () {
-      r.log.info('entering', 'ConfirmMemberView.render');
-      var content = this.template(this.model.getMock());
+      try {
+        r.log.info('entering', 'ConfirmMemberView.render');
+        var content = this.template(this.model.getMock());
 
-      r.getHeaderDiv().find('h1').text('Confirmation');
-      this.$el.html(content);
-      this.$el.trigger('create');
-      return this;
+        r.getHeaderDiv().find('h1').text('Confirmation');
+        this.$el.html(content);
+        this.$el.trigger('create');
+        return this;
+      } catch (e) {
+        r.log.error(e, 'ConfirmMemberView.render');
+      }
     },
 
     proceed: function (signup) {
-      if (signup) {
-        r.changePage('root', 'signup');
-      } else if (r.isLoggedIn()) {
-        r.changePage('applications');
-      } else {
-        r.changePage('login', 'signup');
+      try {
+        if (signup) {
+          r.changePage('root', 'signup');
+          return;
+        }
+        r.changePage('application', 'app', { appId: r.session.params.applicationId });
+      } catch (e) {
+        r.log.error(e, 'ConfirmMemberView.proceed');
       }
     },
 
