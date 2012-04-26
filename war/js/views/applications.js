@@ -31,6 +31,7 @@ var RSKYBOX = (function (r, $) {
         _.bindAll(this, 'addAppEntry');
         this.collection.bind('reset', this.render, this);
         this.template = _.template($('#noAppsTemplate').html());
+        r.log.error(new Error('testing appActions'), 'ApplicationsView');
       } catch (e) {
         r.log.error(e, 'ApplicationsView.initialize');
       }

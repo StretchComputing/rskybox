@@ -32,10 +32,73 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    appAction = {
+      max: 20,
+      first: 1,
+      key: 'rAppAction',
+      indexKey: 'rAppActionIndex',
+
+      getIndex: function () {
+        var index = +localStorage[this.indexKey] || this.first;
+
+        if (index > this.max) {
+          index = this.first;
+        }
+        localStorage[this.indexKey] = index + 1;
+        return index;
+      },
+    },
+
+    getAppActions = function () {
+      var action, actions = [], i;
+
+      for (i = appAction.first; i <= appAction.max; i += 1) {
+        action = localStorage[appAction.key + i];
+        if (action) {
+          action = JSON.parse(action);
+          action.timestamp = new Date(action.timestamp);
+          actions.push(action);
+        }
+      }
+      actions.sort(function (a1, a2) {
+        if (a1.timestamp < a2.timestamp) {
+          return -1;
+        }
+        if (a1.timestamp > a2.timestamp) {
+          return 1;
+        }
+        return 0;
+      });
+
+      for (i = 0; i < actions.length - 1; i += 1) {
+        actions[i + 1].duration = actions[i + 1].timestamp - actions[i].timestamp;
+      }
+      actions[0].duration = -1;
+
+      return actions;
+    },
+
+    saveAppAction = function (name, message) {
+      var
+        key = appAction.key + appAction.getIndex();
+
+      localStorage[key] = JSON.stringify({
+        description: name + ': ' + message,
+        timestamp: new Date(),
+      });
+    },
+
+
     // Log information at the console object provided.
     local = function (console, level, message, name) {
       try {
         var output;
+
+        // Need to do the appAction here because we may be returning just below if there is
+        // no console logging enabled.
+        if (level === 'info') {
+          saveAppAction(name, message);
+        }
 
         // Not defining the console turns off console logging.
         // Set the console object in the r.log.getConsole() method.
@@ -133,6 +196,7 @@ var RSKYBOX = (function (r, $) {
             userName: r.log.getUserName(),
             summary: r.log.getSummary(),
             instanceUrl: r.log.getInstanceUrl(),
+            appActions: getAppActions(),
           };
 
         // Error level logs generall have an Error object as the message.
