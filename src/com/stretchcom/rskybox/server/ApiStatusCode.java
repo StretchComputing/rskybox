@@ -44,6 +44,7 @@ public class ApiStatusCode {
 	public static final String MODE_IS_REQUIRED = "316";
 	public static final String EMAIL_ADDRESS_CONFIRMATION_CODE_IS_REQUIRED = "317";
 	public static final String PHONE_NUMBER_CONFIRMATION_CODE_IS_REQUIRED = "318";
+	public static final String USER_ID_IS_REQUIRED = "319";
 	
 	public static final String INVALID_STATUS_PARAMETER = "400";
 	public static final String INVALID_RECORDED_DATE_PARAMETER = "401";
