@@ -304,6 +304,30 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+    // Make sure we have valid attributes for logging to the server.
+    isValid = function (attrs) {
+      try {
+        var console = r.config.getConsole();
+
+        if (!attrs) {
+          r.log.local('attrs not defined', 'RSKYBOX.enduser.isValid');
+          return false;
+        }
+        if (!attrs.appId) {
+          r.log.local('appId not specified', 'RSKYBOX.enduser.isValid');
+          return false;
+        }
+        if (!attrs.authHeader) {
+          r.log.local('authHeader not specified', 'RSKYBOX.enduser.isValid');
+          return false;
+        }
+
+        return true;
+      } catch (e) {
+        window.console.error(e, 'RSKYBOX.log.isValid');
+      }
+    },
+
     server = function () {
       try {
         var
@@ -317,6 +341,9 @@ var RSKYBOX = (function (r, $) {
           };
 
         r.log.info('entering', 'RSKYBOX.enduser.server');
+
+        // Ensure attrs are valid for making an Ajax call.
+        if (!isValid(attrs)) { return; }
 
         $.ajax({
           type: 'POST',
