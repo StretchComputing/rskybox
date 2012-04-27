@@ -24,6 +24,12 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT fb FROM Feedback fb WHERE fb.applicationId = :applicationId ORDER BY fb.recordedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="Feedback.getAllWithApplicationIdAndIncidentId",
+    		query="SELECT fb FROM Feedback fb WHERE " +
+    		      "fb.applicationId = :applicationId" + " AND " +
+    			  "fb.incidentId = :incidentId ORDER BY fb.recordedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="Feedback.getByStatus",
     		query="SELECT fb FROM Feedback fb WHERE fb.status = :status ORDER BY fb.recordedGmtDate DESC"
     ),
@@ -34,6 +40,13 @@ import com.google.appengine.api.datastore.Text;
     @NamedQuery(
     		name="Feedback.getByStatusAndApplicationId",
     		query="SELECT fb FROM Feedback fb WHERE fb.status = :status and fb.applicationId = :applicationId ORDER BY fb.recordedGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="Feedback.getByStatusAndApplicationIdAndIncidentId",
+    		query="SELECT fb FROM Feedback fb WHERE " +
+    		      "fb.status = :status" + " AND " + 
+    			  "fb.applicationId = :applicationId" + " AND " +
+    		      "fb.incidentId = :incidentId ORDER BY fb.recordedGmtDate DESC"
     ),
     @NamedQuery(
     		name="Feedback.getByKey",
@@ -119,6 +132,11 @@ public class Feedback {
 	
 	public Boolean isStatusValid(String theStatus) {
 		if(theStatus.equals(Feedback.NEW_STATUS) || theStatus.equals(Feedback.ARCHIVED_STATUS)) return true;
+		return false;
+	}
+	
+	public static Boolean isStatusParameterValid(String theStatus) {
+		if(theStatus.equals(Feedback.NEW_STATUS) || theStatus.equals(Feedback.ARCHIVED_STATUS) || theStatus.equals(Feedback.ALL_STATUS) ) return true;
 		return false;
 	}
 

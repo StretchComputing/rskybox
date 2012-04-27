@@ -27,6 +27,12 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT cd FROM CrashDetect cd WHERE cd.applicationId = :applicationId ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="CrashDetect.getAllWithApplicationIdAndIncidentId",
+    		query="SELECT cd FROM CrashDetect cd WHERE " +
+    		      "cd.applicationId = :applicationId" + " AND " +
+    			  "cd.incidentId = :incidentId ORDER BY cd.detectedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="CrashDetect.getByStatus",
     		query="SELECT cd FROM CrashDetect cd WHERE cd.status = :status ORDER BY cd.detectedGmtDate DESC"
     ),
@@ -37,6 +43,13 @@ import com.google.appengine.api.datastore.Text;
     @NamedQuery(
     		name="CrashDetect.getByStatusAndApplicationId",
     		query="SELECT cd FROM CrashDetect cd WHERE cd.status = :status and cd.applicationId = :applicationId ORDER BY cd.detectedGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="CrashDetect.getByStatusAndApplicationIdAndIncidentId",
+    		query="SELECT cd FROM CrashDetect cd WHERE " +
+    		      "cd.status = :status" + " AND " + 
+    			  "cd.applicationId = :applicationId" + " AND " +
+    		      "cd.incidentId = :incidentId ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
     		name="CrashDetect.getByKey",
@@ -143,6 +156,11 @@ public class CrashDetect {
 	
 	public Boolean isStatusValid(String theStatus) {
 		if(theStatus.equals(CrashDetect.NEW_STATUS) || theStatus.equals(CrashDetect.ARCHIVED_STATUS)) return true;
+		return false;
+	}
+	
+	public static Boolean isStatusParameterValid(String theStatus) {
+		if(theStatus.equals(CrashDetect.NEW_STATUS) || theStatus.equals(CrashDetect.ARCHIVED_STATUS) || theStatus.equals(CrashDetect.ALL_STATUS) ) return true;
 		return false;
 	}
 

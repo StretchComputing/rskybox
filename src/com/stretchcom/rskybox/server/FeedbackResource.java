@@ -30,6 +30,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.Feedback;
 import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
@@ -40,6 +41,7 @@ public class FeedbackResource extends ServerResource {
     private String id;
 	private String applicationId;
     private String listStatus;
+    private String incidentId;
 
     @Override
     protected void doInit() throws ResourceException {
@@ -54,6 +56,10 @@ public class FeedbackResource extends ServerResource {
 				this.listStatus = (String)parameter.getValue().toLowerCase();
 				this.listStatus = Reference.decode(this.listStatus);
 				log.info("FeedbackResource() - decoded status = " + this.listStatus);
+			} else if(parameter.getName().equals("incidentId"))  {
+				this.incidentId = (String)parameter.getValue().toLowerCase();
+				this.incidentId = Reference.decode(this.incidentId);
+				log.info("ClientLogResource() - incident ID = " + this.incidentId);
 			} 
 		}
     }
@@ -305,24 +311,38 @@ public class FeedbackResource extends ServerResource {
             JSONArray ja = new JSONArray();
             
 			if(this.listStatus != null) {
-			    if(this.listStatus.equalsIgnoreCase(Feedback.NEW_STATUS) || this.listStatus.equalsIgnoreCase(Feedback.ARCHIVED_STATUS)){
+				if(!Feedback.isStatusParameterValid(this.listStatus)) {
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
+				}
+			} else {
+				// by default, get only the new status incidents
+				this.listStatus = Feedback.NEW_STATUS;
+			}
+			
+			if(this.incidentId == null) {
+				if(this.listStatus.equalsIgnoreCase(Feedback.ALL_STATUS)) {
+					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.getResultList();
+				} else {
 					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 							.getResultList();
-			    } else if(this.listStatus.equalsIgnoreCase(Feedback.ALL_STATUS)) {
-					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationId")
-							.setParameter("applicationId", this.applicationId)
-							.getResultList();
-			    } else {
-			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
-			    }
+				}
 			} else {
-				// by default, only get 'new' feedback
-				feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationId")
-						.setParameter("status", Feedback.NEW_STATUS)
-						.setParameter("applicationId", this.applicationId)
-						.getResultList();
+				if(this.listStatus.equalsIgnoreCase(Feedback.ALL_STATUS)) {
+					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationIdAndIncidentId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.setParameter("incidentId", this.incidentId)
+			    			.getResultList();
+				} else {
+					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationIdAndIncidentId")
+							.setParameter("status", this.listStatus)
+							.setParameter("applicationId", this.applicationId)
+			    			.setParameter("incidentId", this.incidentId)
+							.getResultList();
+				}
 			}
             
             for (Feedback fb : feedbacks) {
