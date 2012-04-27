@@ -255,17 +255,17 @@ public class EndUsersResource extends ServerResource {
             	// Create EndUser API 
             	/////////////////////
             	
-                // userName can NOT be changed. If this is a new userName, then the "existing" end user will not be found below
-            	if (json.has("userName")) {
-                	endUser.setUserName(json.getString("userName"));
+                // userId can NOT be changed. If this is a new userId, then the "existing" end user will not be found below
+            	if (json.has("userId")) {
+                	endUser.setUserId(json.getString("userId"));
                 } else {
-                	return Utility.apiError(this, ApiStatusCode.USER_NAME_IS_REQUIRED);
+                	return Utility.apiError(this, ApiStatusCode.USER_ID_IS_REQUIRED);
                 }
 
                 // EndUser create is designed to be called multiple times. So it's ok if the endUser has not been defined yet and it is also
             	// ok if the endUser has already been defined.
             	try {
-                    endUser = (EndUser) em.createNamedQuery("EndUser.getByUserName").setParameter("userName", endUser.getUserName()).getSingleResult();
+                    endUser = (EndUser) em.createNamedQuery("EndUser.getByUserId").setParameter("userId", endUser.getUserId()).getSingleResult();
                     log.info("End User already exists");
             	} catch (NoResultException e) {
             		// NOT an error - first time create has been called for an endUser with this userName
@@ -277,8 +277,16 @@ public class EndUsersResource extends ServerResource {
         		}
             }
             
+            if (!isUpdate && json.has("userName")) {
+            	endUser.setUserName(json.getString("userName"));
+            }
+            
             if (!isUpdate && json.has("application")) {
             	endUser.setApplication(json.getString("application"));
+            }
+            
+            if (!isUpdate && json.has("summary")) {
+            	endUser.setSummary(json.getString("summary"));
             }
             
             oldVersion = endUser.getVersion();
@@ -337,10 +345,12 @@ public class EndUsersResource extends ServerResource {
         	}
         	if(theEndUser != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
                 json.put("id", KeyFactory.keyToString(theEndUser.getKey()));
+                json.put("userId", theEndUser.getUserId());
                 json.put("userName", theEndUser.getUserName());
                 json.put("application", theEndUser.getApplication());
                 json.put("version", theEndUser.getVersion());
                 json.put("instanceUrl", theEndUser.getInstanceUrl());
+                json.put("summary", theEndUser.getSummary());
                 json.put("appId", theEndUser.getApplicationId());
         	}
         } catch (JSONException e) {

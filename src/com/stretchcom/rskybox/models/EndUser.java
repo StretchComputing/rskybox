@@ -26,8 +26,8 @@ import com.google.appengine.api.datastore.Key;
     		query="SELECT eu FROM EndUser eu WHERE eu.key = :key"
     ),
     @NamedQuery(
-    		name="EndUser.getByUserName",
-    		query="SELECT eu FROM EndUser eu WHERE eu.userName = :userName"
+    		name="EndUser.getByUserId",
+    		query="SELECT eu FROM EndUser eu WHERE eu.userId = :userId"
     ),
     @NamedQuery(
     		name="EndUser.getByApplicationId",
@@ -37,10 +37,12 @@ import com.google.appengine.api.datastore.Key;
 public class EndUser {
     private static final Logger log = Logger.getLogger(EndUser.class.getName());
 	
+	private String userId;  // unique ID assigned by 3rd party app and passed in to rSkybox
 	private String userName;
 	private String application;
 	private String version;
 	private String instanceUrl;
+	private String summary;  // runtime environment contextual info (e.g. os version, app version, etc)
 	private Date createdGmtDate;
 	private Date versionUpdatedGmtDate;
 	private String applicationId;
@@ -53,6 +55,14 @@ public class EndUser {
         return key;
     }
 	
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
 	public String getUserName() {
 		return userName;
 	}
@@ -79,6 +89,14 @@ public class EndUser {
 	}
 	public void setInstanceUrl(String instanceUrl) {
 		this.instanceUrl = instanceUrl;
+	}
+
+	public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
 	}
 
 	public Date getCreatedGmtDate() {
