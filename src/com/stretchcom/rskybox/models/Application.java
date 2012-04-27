@@ -53,6 +53,12 @@ public class Application {
     private static int MAX_DAYS_IN_LIMBO = 10;
     private static int DAYS_UNTIL_AUTO_ARCHIVE = 7;
     //private static int DAYS_UNTIL_AUTO_ARCHIVE = -2;  // for local testing
+    
+    private static float LEAST_SENSITIVITY = 16;
+    private static float LOW_SENSITIVITY = 8;
+    private static float MEDIUM_SENSITIVITY = 4;
+    private static float HIGH_SENSITIVITY = 2;
+    private static float MOST_SENSITIVITY = 1;
 	
 	private String name;
 	private String organizationId;
@@ -62,6 +68,8 @@ public class Application {
 	private String token;
 	private Integer nextIncidentNumber = 1;
 	private Integer daysInLimbo = MAX_DAYS_IN_LIMBO; // how long an incident can be closed and still be reopened
+	private Float severitySensitivity = MOST_SENSITIVITY;
+	private Integer numberOfEndUsers = 0;
 
 	@Transient
 	private String memberRole; // used internally on the server to return user role with list of user's applications
@@ -147,6 +155,39 @@ public class Application {
 
 	public void setDaysInLimbo(Integer daysInLimbo) {
 		this.daysInLimbo = daysInLimbo;
+	}
+
+	public Float getSeveritySensitivity() {
+		return severitySensitivity;
+	}
+
+	public void setSeveritySensitivity(Float severitySensitivity) {
+		this.severitySensitivity = severitySensitivity;
+	}
+
+	public Integer getNumberOfEndUsers() {
+		return numberOfEndUsers;
+	}
+
+	public void setNumberOfEndUsers(Integer numberOfEndUsers) {
+		this.numberOfEndUsers = numberOfEndUsers;
+	}
+
+	public void incrementEndUserCount() {
+        EntityManager em = EMF.get().createEntityManager();
+        
+		try {
+    		Application app = (Application)em.createNamedQuery("Application.getByKey")
+				.setParameter("key", this.getKey())
+				.getSingleResult();
+    		int currentNumberOfEndUsers = app.getNumberOfEndUsers() == null ? 0 : app.getNumberOfEndUsers();
+    		app.setNumberOfEndUsers(currentNumberOfEndUsers++);
+		} catch (NoResultException e) {
+			log.severe("should never happen -- could not get application by key using an application object!");
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more applications have same key");
+		}
+		return;
 	}
 
 	public static String verifyApplicationId(String theApplicationId) {

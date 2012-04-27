@@ -27,6 +27,12 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT cl FROM ClientLog cl WHERE cl.applicationId = :applicationId ORDER BY cl.createdGmtDate DESC"
     ),
     @NamedQuery(
+    		name="ClientLog.getAllWithApplicationIdAndIncidentId",
+    		query="SELECT cl FROM ClientLog cl WHERE " +
+    		      "cl.applicationId = :applicationId" + " AND " + 
+    			  "cl.incidentId = :incidentId ORDER BY cl.createdGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="ClientLog.getByStatus",
     		query="SELECT cl FROM ClientLog cl WHERE cl.status = :status  ORDER BY cl.createdGmtDate DESC"
     ),
@@ -37,6 +43,13 @@ import com.google.appengine.api.datastore.Text;
     @NamedQuery(
     		name="ClientLog.getByStatusAndApplicationId",
     		query="SELECT cl FROM ClientLog cl WHERE cl.status = :status and cl.applicationId = :applicationId ORDER BY cl.createdGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="ClientLog.getByStatusAndApplicationIdAndIncidentId",
+    		query="SELECT cl FROM ClientLog cl WHERE " +
+    		      "cl.status = :status" + " AND " +
+    			  "cl.applicationId = :applicationId" + " AND " +
+    		      "cl.incidentId = :incidentId ORDER BY cl.createdGmtDate DESC"
     ),
     @NamedQuery(
     		name="ClientLog.getByKey",
@@ -152,8 +165,13 @@ public class ClientLog {
 		this.status = status;
 	}
 	
-	public Boolean isStatusValid(String theStatus) {
+	public static Boolean isStatusValid(String theStatus) {
 		if(theStatus.equals(ClientLog.NEW_STATUS) || theStatus.equals(ClientLog.ARCHIVED_STATUS)) return true;
+		return false;
+	}
+	
+	public static Boolean isStatusParameterValid(String theStatus) {
+		if(theStatus.equals(ClientLog.NEW_STATUS) || theStatus.equals(ClientLog.ARCHIVED_STATUS) || theStatus.equals(ClientLog.ALL_STATUS) ) return true;
 		return false;
 	}
 	

@@ -185,6 +185,7 @@ public class FeedbackResource extends ServerResource {
 				incidentId = json.getString("incidentId");
 			}
 			
+			Incident owningIncident = null;
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -209,7 +210,7 @@ public class FeedbackResource extends ServerResource {
 				// find or create an incident that will 'own' this new feedback
 				// TODO something better for an eventName than the current date
 				Date now = new Date();
-				Incident owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.FEEDBACK_TAG, incidentId, theApplication, "new Crash Detect");
+				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.FEEDBACK_TAG, incidentId, theApplication, "new Crash Detect");
 				feedback.setIncidentId(owningIncident.getId());
 			}
 
@@ -217,9 +218,7 @@ public class FeedbackResource extends ServerResource {
             em.getTransaction().commit();
             
             if(!isUpdate) {
-            	// TODO is the clientLog key really set by this point?
-            	String theItemId = KeyFactory.keyToString(feedback.getKey());
-            	User.sendNotifications(this.applicationId, Notification.FEEDBACK, feedback.getUserName(), theItemId);
+            	User.sendNotifications(this.applicationId, Notification.FEEDBACK, feedback.getUserName(), owningIncident.getId());
             }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());

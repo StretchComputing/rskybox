@@ -102,6 +102,9 @@ public class Incident {
 	private String eventName;
 	private Integer eventCount;
 	private Integer severity = Incident.LOW_SEVERITY;
+	private Integer oldSeverity = Incident.LOW_SEVERITY;
+	private Integer severityUpVotes;
+	private Integer severityDownVotes;
 	private Date lastUpdatedGmtDate;
 	private Date createdGmtDate;
 	private String endUser;
@@ -219,6 +222,30 @@ public class Incident {
 		this.severity = severity;
 	}
 	
+	public Integer getOldSeverity() {
+		return oldSeverity;
+	}
+
+	public void setOldSeverity(Integer oldSeverity) {
+		this.oldSeverity = oldSeverity;
+	}
+
+	public Integer getSeverityUpVotes() {
+		return severityUpVotes;
+	}
+
+	public void setSeverityUpVotes(Integer severityUpVotes) {
+		this.severityUpVotes = severityUpVotes;
+	}
+
+	public Integer getSeverityDownVotes() {
+		return severityDownVotes;
+	}
+
+	public void setSeverityDownVotes(Integer severityDownVotes) {
+		this.severityDownVotes = severityDownVotes;
+	}
+
 	public Boolean getInStatsOnlyMode() {
 		return inStatsOnlyMode;
 	}
@@ -299,6 +326,32 @@ public class Incident {
 		return KeyFactory.keyToString(this.key);
 	}
 	
+	public Boolean isLog() {
+		if(this.tags.contains(Incident.LOG_TAG)) {return true;}
+		return false;
+	}
+	
+	public Boolean isCrash() {
+		if(this.tags.contains(Incident.CRASH_TAG)) {return true;}
+		return false;
+	}
+	
+	public Boolean isFeedback() {
+		if(this.tags.contains(Incident.FEEDBACK_TAG)) {return true;}
+		return false;
+	}
+	
+	public String getNotificationTypeFromTag() {
+    	String wellKnownTag = this.getWellKnownTag();
+    	String notificationType = Notification.CLIENT_LOG;
+    	if(wellKnownTag.equalsIgnoreCase(Notification.CRASH)) {
+    		notificationType = Notification.CRASH;
+    	} else if(wellKnownTag.equalsIgnoreCase(Notification.FEEDBACK)) {
+    		notificationType = Notification.FEEDBACK;
+    	}
+    	return wellKnownTag;
+	}
+	
 	public static Boolean isModeValid(String theMode) {
 		if(theMode.equalsIgnoreCase(Incident.ACTIVE_REMOTE_CONTROL_MODE) || theMode.equalsIgnoreCase(Incident.INACTIVE_REMOTE_CONTROL_MODE)) return true;
 		return false;
@@ -331,6 +384,17 @@ public class Incident {
 		}
 		int totalCount = crashCount + logCount + feedbackCount;
 		return totalCount;
+	}
+	
+	public String getWellKnownTag() {
+		String wellKnownTag = null;
+		for(String tag : this.tags) {
+			if(tag.equalsIgnoreCase(Incident.CRASH_TAG) || tag.equalsIgnoreCase(Incident.LOG_TAG) ||tag.equalsIgnoreCase(Incident.FEEDBACK_TAG)) {
+				wellKnownTag = tag;
+				break;
+			}
+		}
+		return wellKnownTag;
 	}
 	
 	// pretty much guaranteed to return an Incident (short of a server error)
@@ -397,10 +461,14 @@ public class Incident {
 			// TODO enhance message by merging summaries?
 			
 			// update severity if appropriate
-			// if severity changes, queue up notification
+			Boolean severityChanged = checkForSeverityUpdate(eventOwningIncident, theApplication);
+			if(severityChanged) {
+				// queue up notification
+            	String severityMsg = "Severity changed from " + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
+            	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), severityMsg, eventOwningIncident.getId());
+			}
 		}
-        
-		
+ 		
 		return eventOwningIncident;
 	}
 	
@@ -423,7 +491,13 @@ public class Incident {
 			incident.setStatus(Incident.OPEN_STATUS);
 			
 			// Default severity
-			incident.setSeverity(Incident.LOW_SEVERITY);
+			if(incident.isLog()) {
+				incident.setSeverity(Incident.LOW_SEVERITY);
+			} else if(incident.isCrash()) {
+				incident.setSeverity(Incident.HIGH_SEVERITY);
+			} else {
+				incident.setSeverity(Incident.LOW_SEVERITY);
+			}
 			
 			// Assign application unique incident number
 			incident.setNumber(Application.getAndIncrementIncidentNumber(theApplication.getId()));
@@ -445,5 +519,35 @@ public class Incident {
             em.close();
         }
 		return incident;
+	}
+	
+	// assumption -- error count was incremented right before this method was called. Uses the info to see if severity "threshold" was just exceeded.
+	// return: true if severity changed and was updated in the incident object passed in; false otherwise
+	public static Boolean checkForSeverityUpdate(Incident theIncident, Application theApplication) {
+		Boolean didSeverityChange = false;
+		// currently, only updating severity for logs
+		if(!theIncident.isLog()) {return didSeverityChange;}
+		
+		// need the number of end users for this application
+		int numberOfEndUsers = theApplication.getNumberOfEndUsers();
+		numberOfEndUsers = numberOfEndUsers < 1000 ? 1000 : numberOfEndUsers;
+		
+		// alogrithm: severity = (numOfErrors * 1000)/(numOfEndUsers * sensitivity)
+		int newErrorCount = theIncident.getEventCount();
+		int oldErrorCount = newErrorCount--;
+		float newSeverityFloat = (newErrorCount * 1000)/(numberOfEndUsers * theApplication.getSeveritySensitivity());
+		int newSeverity = Math.round(newSeverityFloat);
+		float oldSeverityFloat = (oldErrorCount * 1000)/(numberOfEndUsers * theApplication.getSeveritySensitivity());
+		int oldSeverity = Math.round(oldSeverityFloat);
+		
+		if(newSeverity != oldSeverity) {
+			didSeverityChange = true;
+			theIncident.setOldSeverity(theIncident.getSeverity());
+			theIncident.setSeverity(newSeverity);
+		}
+		
+		// TODO **** have to account for member voting - so factor voting into final severity assignment
+		
+		return didSeverityChange;
 	}
 }

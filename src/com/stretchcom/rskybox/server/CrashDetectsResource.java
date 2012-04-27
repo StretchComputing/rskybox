@@ -326,6 +326,7 @@ public class CrashDetectsResource extends ServerResource {
 				incidentId = json.getString("incidentId");
 			}
 			
+			Incident owningIncident = null;
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -351,7 +352,7 @@ public class CrashDetectsResource extends ServerResource {
 				// TODO something better for an eventName than the current date
 				Date now = new Date();
 				
-				Incident owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, "new Crash Detect");
+				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, "new Crash Detect");
 				crashDetect.setIncidentId(owningIncident.getId());
 			}
             
@@ -359,9 +360,7 @@ public class CrashDetectsResource extends ServerResource {
             em.getTransaction().commit();
             
             if(!isUpdate) {
-            	// TODO is the clientLog key really set by this point?
-            	String theItemId = KeyFactory.keyToString(crashDetect.getKey());
-            	User.sendNotifications(this.applicationId, Notification.CRASH, crashDetect.getSummary(), theItemId);
+            	User.sendNotifications(this.applicationId, Notification.CRASH, crashDetect.getSummary(), owningIncident.getId());
             }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());

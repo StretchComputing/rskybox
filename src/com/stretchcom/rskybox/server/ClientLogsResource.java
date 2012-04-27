@@ -46,6 +46,7 @@ public class ClientLogsResource extends ServerResource {
 	private String name;
 	private String applicationId;
     private String listStatus;
+    private String incidentId;
 
     @Override
     protected void doInit() throws ResourceException {
@@ -62,6 +63,10 @@ public class ClientLogsResource extends ServerResource {
 				this.listStatus = (String)parameter.getValue().toLowerCase();
 				this.listStatus = Reference.decode(this.listStatus);
 				log.info("ClientLogResource() - decoded status = " + this.listStatus);
+			} else if(parameter.getName().equals("incidentId"))  {
+				this.incidentId = (String)parameter.getValue().toLowerCase();
+				this.incidentId = Reference.decode(this.incidentId);
+				log.info("ClientLogResource() - incident ID = " + this.incidentId);
 			} 
 		}
     }
@@ -148,24 +153,38 @@ public class ClientLogsResource extends ServerResource {
             JSONArray ja = new JSONArray();
             
 			if(this.listStatus != null) {
-			    if(this.listStatus.equalsIgnoreCase(ClientLog.NEW_STATUS) || this.listStatus.equalsIgnoreCase(ClientLog.ARCHIVED_STATUS)){
+				if(!ClientLog.isStatusParameterValid(this.listStatus)) {
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
+				}
+			} else {
+				// by default, get only the new status incidents
+				this.listStatus = ClientLog.NEW_STATUS;
+			}
+			
+			if(this.incidentId == null) {
+				if(this.listStatus.equalsIgnoreCase(ClientLog.ALL_STATUS)) {
+			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.getResultList();
+				} else {
 			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 							.getResultList();
-			    } else if(this.listStatus.equalsIgnoreCase(ClientLog.ALL_STATUS)) {
-			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationId")
-			    			.setParameter("applicationId", this.applicationId)
-			    			.getResultList();
-			    } else {
-			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
-			    }
+				}
 			} else {
-				// by default, only get 'new' clientLogs
-				clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
-						.setParameter("status", ClientLog.NEW_STATUS)
-						.setParameter("applicationId", this.applicationId)
-						.getResultList();
+				if(this.listStatus.equalsIgnoreCase(ClientLog.ALL_STATUS)) {
+			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationIdAndIncidentId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.setParameter("incidentId", this.incidentId)
+			    			.getResultList();
+				} else {
+			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationIdAndIncidentId")
+							.setParameter("status", this.listStatus)
+							.setParameter("applicationId", this.applicationId)
+			    			.setParameter("incidentId", this.incidentId)
+							.getResultList();
+				}
 			}
             
             for (ClientLog cl : clientLogs) {
@@ -374,10 +393,11 @@ public class ClientLogsResource extends ServerResource {
 				incidentId = json.getString("incidentId");
 			}
 
+			Incident owningIncident = null;
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
-	            	if(clientLog.isStatusValid(status)) {
+	            	if(ClientLog.isStatusValid(status)) {
 	            		clientLog.setStatus(status);
 	            	} else {
 						return Utility.apiError(this, ApiStatusCode.INVALID_STATUS);
@@ -395,7 +415,7 @@ public class ClientLogsResource extends ServerResource {
 				clientLog.setActiveThruGmtDate(activeThruGmtDate);
 				
 				// find or create an incident that will 'own' this new clientLog
-				Incident owningIncident = Incident.fetchIncidentIncrementCount(logName, Incident.LOG_TAG, incidentId, theApplication, summary);
+				owningIncident = Incident.fetchIncidentIncrementCount(logName, Incident.LOG_TAG, incidentId, theApplication, summary);
 				if(owningIncident == null) {
 					// assume problem was incident ID specified was not valid
 					return Utility.apiError(this, ApiStatusCode.INCIDENT_NOT_FOUND);
@@ -407,12 +427,11 @@ public class ClientLogsResource extends ServerResource {
             em.getTransaction().commit();
             
             if(!isUpdate) {
-            	String theItemId = KeyFactory.keyToString(clientLog.getKey());
             	String message = clientLog.getLogName();
             	if(clientLog.getSummary() != null && clientLog.getSummary().length() > 0) {
             		message += " " + clientLog.getSummary();
             	}
-            	User.sendNotifications(this.applicationId, Notification.CLIENT_LOG, message, theItemId);
+            	User.sendNotifications(this.applicationId, Notification.CLIENT_LOG, message, owningIncident.getId());
             	
             	ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
             	// if there is no clientLogRemoteControl, then mode must defaults to ACTIVE

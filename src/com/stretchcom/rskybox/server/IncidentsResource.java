@@ -153,11 +153,11 @@ public class IncidentsResource extends ServerResource {
 			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
 				}
 			} else {
-				// default is to retrieve 
+				// default is to retrieve open incidents only
 				this.incidentStatus = Incident.OPEN_STATUS;
 			}
             if(this.tag != null) {
-				if(Incident.isWellKnownTagValid(this.tag)) {
+				if(!Incident.isWellKnownTagValid(this.tag)) {
 			    	return Utility.apiError(this, ApiStatusCode.INVALID_TAGS_PARAMETER);
 				}
 			}
@@ -174,7 +174,6 @@ public class IncidentsResource extends ServerResource {
 							.getResultList();
 			    } 
 			} else {
-				// by default, only get 'open' incidents
 			    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
 			    	incidents= (List<Incident>)em.createNamedQuery("Incident.getAllWithApplicationIdAndTag")
 			    			.setParameter("applicationId", this.applicationId)
@@ -279,7 +278,7 @@ public class IncidentsResource extends ServerResource {
                 isUpdate = true;
             }
 			
-			if(!json.has("tags")) {
+			if(json.has("tags")) {
 				List<String> tags = new ArrayList<String>();
 	        	JSONArray tagsJsonArray = json.getJSONArray("tags");
 				int arraySize = tagsJsonArray.length();
@@ -399,7 +398,7 @@ public class IncidentsResource extends ServerResource {
             	if(severityChanged) {
                 	String theItemId = KeyFactory.keyToString(incident.getKey());
                 	String severityMsg = "Severity changed from " + oldSeverity.toString() + " to " + incident.getSeverity().toString();
-                	User.sendNotifications(this.applicationId, Notification.UPDATED_LOG, severityMsg, theItemId);
+                	User.sendNotifications(this.applicationId, incident.getNotificationTypeFromTag(), severityMsg, theItemId);
             	}
             }
         	
