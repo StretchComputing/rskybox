@@ -25,13 +25,14 @@ var RSKYBOX = (function (r, $) {
     // The URL for the REST call to create an rSkybox log.
     getUrl = function () {
       try {
-        return '/rest/v1/applications/' + r.log.getApplicationId() + '/clientLogs';
+        return '/rest/v1/applications/' + r.config.getApplicationId() + '/clientLogs';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.log.getUrl');
       }
     },
 
 
+    // AppActions that go along with a server log.
     appAction = {
       max: 20,
       first: 1,
@@ -101,7 +102,7 @@ var RSKYBOX = (function (r, $) {
         }
 
         // Not defining the console turns off console logging.
-        // Set the console object in the r.log.getConsole() method.
+        // Set the console object in the r.config.getConsole() method.
         if (!console) { return; }
 
         // Error level calls usually have an error object in the message parameter.
@@ -142,14 +143,14 @@ var RSKYBOX = (function (r, $) {
     // Log to localStorage to queue up logs when logging to the server is not available.
     cache = function (level, message, name) {
       // TODO - need functionality to log to localStorage
-      local(r.log.getConsole(), level, message, name);
+      local(r.config.getConsole(), level, message, name);
     },
 
 
     // Make sure we have valid attributes for logging to the server.
     isValid = function (attrs) {
       try {
-        var console = r.log.getConsole();
+        var console = r.config.getConsole();
 
         if (!attrs) {
           local(console, 'error', 'attrs not defined', 'RSKYBOX.log.isValid');
@@ -188,14 +189,14 @@ var RSKYBOX = (function (r, $) {
       try {
         var
           attrs = {
-            appId: r.log.getApplicationId(),
-            authHeader: r.log.getAuthHeader(),
+            appId: r.config.getApplicationId(),
+            authHeader: r.config.getAuthHeader(),
             logName: name || message,
             logLevel: level,
             message: message,
-            userName: r.log.getUserName(),
-            summary: r.log.getSummary(),
-            instanceUrl: r.log.getInstanceUrl(),
+            userName: r.config.getUserName(),
+            summary: r.config.getSummary(),
+            instanceUrl: r.config.getInstanceUrl(),
             appActions: getAppActions(),
           };
 
@@ -213,11 +214,11 @@ var RSKYBOX = (function (r, $) {
           type: 'POST',
           data: JSON.stringify(attrs),
           url: getUrl(),
-          error: r.log.errorHandler,
-          success: r.log.successHandler,
-          statusCode: r.log.statusCodeHandlers,
+          error: r.config.log.errorHandler,
+          success: r.config.log.successHandler,
+          statusCode: r.config.log.statusCodeHandlers,
           headers: {
-            Authorization: r.log.getAuthHeader(),
+            Authorization: r.config.getAuthHeader(),
           },
         });
       } catch (e) {
@@ -229,12 +230,12 @@ var RSKYBOX = (function (r, $) {
     // Traffic cop for determining where logs should go.
     base = function (level, message, name) {
       try {
-        if (r.log.getApplicationId() && (r.log.getServerLevel() >= logLevels[level])) {
+        if (r.config.getApplicationId() && (r.config.log.getServerLevel() >= logLevels[level])) {
           server(level, message, name);
         }
 
-        if (r.log.getLocalLevel() >= logLevels[level]) {
-          local(r.log.getConsole(), level, message, name);
+        if (r.config.log.getLocalLevel() >= logLevels[level]) {
+          local(r.config.getConsole(), level, message, name);
         }
       } catch (e) {
         window.console.error(e, 'RSKYBOX.log.base');
@@ -280,3 +281,62 @@ var RSKYBOX = (function (r, $) {
 
   return r;
 }(RSKYBOX || {}, jQuery));
+
+
+
+var RSKYBOX = (function (r, $) {
+  'use strict';
+
+  var
+    // The URL for the REST call to create an rSkybox enduser.
+    getUrl = function () {
+      try {
+        return '/rest/v1/applications/' + r.config.getApplicationId() + '/endUsers';
+      } catch (e) {
+        window.console.error(e, 'RSKYBOX.enduser.getUrl');
+      }
+    },
+
+    server = function () {
+      try {
+        var
+          attrs = {
+            userId: r.config.getUserId(),
+            userName: r.config.getUserName(),
+            application: r.config.getApplicationName(),
+            version: r.config.getApplicationVersion(),
+            summary: r.config.getSummary(),
+            instanceUrl: r.config.getInstanceUrl(),
+          };
+
+        r.log.info('entering', 'RSKYBOX.enduser.server');
+
+        $.ajax({
+          type: 'POST',
+          data: JSON.stringify(attrs),
+          url: getUrl(),
+          error: r.config.enduser.errorHandler,
+          success: r.config.enduser.successHandler,
+          statusCode: r.config.enduser.statusCodeHandlers,
+          headers: {
+            Authorization: r.config.getAuthHeader(),
+          },
+        });
+      } catch (e) {
+        window.console.error(e, 'RSKYBOX.enduser.server');
+      }
+    };
+
+
+  $(function () {
+    function sendToServer() {
+      server();
+      setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
+    }
+    sendToServer();
+  });
+
+
+  return r;
+}(RSKYBOX || {}, jQuery));
+
