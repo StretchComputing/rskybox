@@ -534,6 +534,7 @@ public class ClientLogsResource extends ServerResource {
             	json.put("logName", clientLog.getLogName());
             	json.put("message", clientLog.getMessage());
             	json.put("summary", clientLog.getSummary());
+            	json.put("incidentId", clientLog.getIncidentId());
             	
             	JSONArray stackBackTracesJsonArray = new JSONArray();
             	List<String> stackBackTraces = clientLog.getStackBackTraces();

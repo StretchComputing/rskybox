@@ -363,8 +363,8 @@ public class FeedbackResource extends ServerResource {
     }
 
     private JSONObject getFeedbackJson(Feedback feedback, String theApiStatus, Boolean isList) {
+    	
         JSONObject json = new JSONObject();
-
         try {
         	if(theApiStatus != null) {
         		json.put("apiStatus", theApiStatus);
@@ -381,6 +381,7 @@ public class FeedbackResource extends ServerResource {
             	json.put("instanceUrl", feedback.getInstanceUrl());
             	json.put("status", feedback.getStatus());
             	json.put("appId", feedback.getApplicationId());
+            	json.put("incidentId", feedback.getIncidentId());
         	}
         } catch (JSONException e) {
         	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());

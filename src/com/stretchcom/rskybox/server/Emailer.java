@@ -131,7 +131,7 @@ public class Emailer {
         	sb.append("</tr>");
         	sb.append("<tr>");
          	String logListUrl = theRskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
-        	sb.append("<td style='background-color:#FFFFFF;'><a href='" + logListUrl + "'>new log</a></td>");
+        	sb.append("<td style='background-color:#FFFFFF;'><a href='" + logListUrl + "'>log</a></td>");
         	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getClientLogCount() + "</td>");
         	sb.append("<td style='background-color:#FFFFFF;'>");
         	if(nd.getClientLogCount() > 0) {
@@ -141,16 +141,16 @@ public class Emailer {
         	sb.append("</td>");
         	sb.append("</tr>");
         	
-        	sb.append("<tr>");
-        	sb.append("<td style='background-color:#FFFFFF;'><a href='" + logListUrl + "'>updated log</a></td>");
-        	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getUpdatedLogCount() + "</td>");
-        	sb.append("<td style='background-color:#FFFFFF;'>");
-        	if(nd.getUpdatedLogCount() > 0) {
-            	String logUrl = theRskyboxBaseUrl + "#log?id=" + nd.getUpdatedLogId() + "&appId=" + nd.getApplicationId();
-            	sb.append("<a href='" + logUrl + "'>" + nd.getUpdatedLogMessage() + "</a>");
-        	}
-        	sb.append("</td>");
-        	sb.append("</tr>");
+//        	sb.append("<tr>");
+//        	sb.append("<td style='background-color:#FFFFFF;'><a href='" + logListUrl + "'>updated log</a></td>");
+//        	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getUpdatedLogCount() + "</td>");
+//        	sb.append("<td style='background-color:#FFFFFF;'>");
+//        	if(nd.getUpdatedLogCount() > 0) {
+//            	String logUrl = theRskyboxBaseUrl + "#log?id=" + nd.getUpdatedLogId() + "&appId=" + nd.getApplicationId();
+//            	sb.append("<a href='" + logUrl + "'>" + nd.getUpdatedLogMessage() + "</a>");
+//        	}
+//        	sb.append("</td>");
+//        	sb.append("</tr>");
         	
         	sb.append("<tr>");
          	String feedbackListUrl = theRskyboxBaseUrl + "#feedbackList?appId=" + nd.getApplicationId() + "&status=new";

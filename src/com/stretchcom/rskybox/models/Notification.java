@@ -672,16 +672,16 @@ public class Notification {
         		}
         		if(nd.getClientLogCount() != null) {
         			if(prior) {smsEmailAddressBuf.append("|");}
-        			smsEmailAddressBuf.append("new log:");
+        			smsEmailAddressBuf.append("log:");
         			smsEmailAddressBuf.append(nd.getClientLogCount());
             		prior = true;
         		}
-        		if(nd.getUpdatedLogCount() != null) {
-        			if(prior) {smsEmailAddressBuf.append("|");}
-        			smsEmailAddressBuf.append("updated log:");
-        			smsEmailAddressBuf.append(nd.getUpdatedLogCount());
-            		prior = true;
-        		}
+//        		if(nd.getUpdatedLogCount() != null) {
+//        			if(prior) {smsEmailAddressBuf.append("|");}
+//        			smsEmailAddressBuf.append("updated log:");
+//        			smsEmailAddressBuf.append(nd.getUpdatedLogCount());
+//            		prior = true;
+//        		}
         		if(nd.getFeedbackCount() != null) {
         			if(prior) {smsEmailAddressBuf.append("|");}
         			smsEmailAddressBuf.append("feedback:");

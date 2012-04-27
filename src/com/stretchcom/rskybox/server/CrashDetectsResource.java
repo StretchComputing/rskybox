@@ -427,6 +427,7 @@ public class CrashDetectsResource extends ServerResource {
             	
             	json.put("userName", crashDetect.getUserName());
             	json.put("instanceUrl", crashDetect.getInstanceUrl());
+            	json.put("incidentId", crashDetect.getIncidentId());
             	
             	if(!isList) {
                 	JSONArray appActionsJsonArray = new JSONArray();
