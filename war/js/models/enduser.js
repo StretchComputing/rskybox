@@ -7,9 +7,11 @@ var RSKYBOX = (function (r, $) {
     fields: {
       id: null,
       appId: null,
+      userId: null,
       userName: null,
       application: null,
       version: null,
+      summary: null,
       instanceUrl: null,
     },
   });

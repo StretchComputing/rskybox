@@ -245,7 +245,7 @@ var RSKYBOX = (function (r, $) {
 
 
   r.log = {
-    // Access to the apiCodes if the client app wants to user our messages.
+    // Access to the apiCodes if the client app wants to use our messages.
     getApiCodes: function () {
       return apiCodes;
     },
@@ -288,6 +288,13 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
   var
+    apiCodes = {
+      305: 'Application ID required.',
+      319: 'User ID is required.',
+      605: 'Application not found.',
+    },
+
+
     // The URL for the REST call to create an rSkybox enduser.
     getUrl = function () {
       try {
@@ -327,6 +334,13 @@ var RSKYBOX = (function (r, $) {
       }
     };
 
+
+  r.enduser = {
+    // Access to the apiCodes if the client app wants to use our messages.
+    getApiCodes: function () {
+      return apiCodes;
+    },
+  };
 
   $(function () {
     function sendToServer() {
