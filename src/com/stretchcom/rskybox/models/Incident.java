@@ -406,68 +406,80 @@ public class Incident {
         Date now = new Date();
         Boolean isExistingIncident = true;
         
-        if(theIncidentId != null) {
-        	try {
-    			eventOwningIncident = (Incident)em.createNamedQuery("Incident.getByKey")
-    					.setParameter("key", KeyFactory.stringToKey(theIncidentId))
-    					.getSingleResult();
-        	} catch (NoResultException e) {
-    			// this incident ID provided was not valid
-    			return null;
-    		} catch (NonUniqueResultException e) {
-    			log.severe("should never happen - two or more incidents have same key");
-    			return null;
+        try {
+            if(theIncidentId != null) {
+            	try {
+        			eventOwningIncident = (Incident)em.createNamedQuery("Incident.getByKey")
+        					.setParameter("key", KeyFactory.stringToKey(theIncidentId))
+        					.getSingleResult();
+            	} catch (NoResultException e) {
+        			// this incident ID provided was not valid
+        			return null;
+        		} catch (NonUniqueResultException e) {
+        			log.severe("should never happen - two or more incidents have same key");
+        			return null;
+        		}
+            } else {
+        		try {
+        			relatedIncidents = (List<Incident>)em.createNamedQuery("Incident.getByApplicationIdAndEventNameAndTag")
+        				.setParameter("applicationId", theApplication.getId())
+        				.setParameter("eventName", theEventName)
+        				.setParameter("tag", theWellKnownTag)
+        				.getResultList();
+        			if(relatedIncidents.size() == 0) {
+            			// this is NOT an error -- there is just no incident yet associated with this event so create one
+        				log.info("incident matching event name = " + theEventName + " NOT found. Creating a new incident.");
+            			eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
+        				isExistingIncident = false;
+        			} else {
+            			// always choose the most recently created incident which will be on the top of the list
+        				log.info("incident matching event name = " + theEventName + " WAS found");
+            			eventOwningIncident = relatedIncidents.get(0);
+        			}
+        		}catch (Exception e) {
+        			log.severe("should never happen - two or more google account users have same key");
+        			return null;
+        		}
+            }
+    		
+    		// if incident recently closed, re-open it. Closed too long, then create a new one.
+            // TODO maybe only re-open if it was auto closed
+    		if(eventOwningIncident.getStatus().equalsIgnoreCase(Incident.CLOSED_STATUS)) {
+    			Date finalRevivalDate = GMT.addDaysToDate(eventOwningIncident.getLastUpdatedGmtDate(), theApplication.getDaysInLimbo());
+    			if(finalRevivalDate.after(now)) {
+    				// reopen this puppy
+    				eventOwningIncident.setStatus(Incident.OPEN_STATUS);
+    				log.info("fetchIncidentIncrementCount() reopening existing incident");
+    			} else {
+    				// create a new incident
+    				eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
+    				isExistingIncident = false;
+    				log.info("fetchIncidentIncrementCount() existing incident CLOSED and too old to reopen");
+    			}
     		}
-        } else {
-    		try {
-    			relatedIncidents = (List<Incident>)em.createNamedQuery("Incident.getByApplicationIdAndEventNameAndTag")
-    				.setParameter("applicationId", theApplication.getId())
-    				.setParameter("eventName", theEventName)
-    				.setParameter("tag", theWellKnownTag)
-    				.getResultList();
+    		
+    		if(isExistingIncident){
+    			log.info("existing incident -- incident details are being updated");
+    			Integer eventCount = eventOwningIncident.getEventCount();
+    			log.info("incident prior event count = " + eventCount);
+    			eventCount++;
+    			eventOwningIncident.setEventCount(eventCount);
+    			eventOwningIncident.setLastUpdatedGmtDate(now);
     			
-    			// always choose the most recently created incident which will be on the top of the list
-    			eventOwningIncident = relatedIncidents.get(0);
-    		} catch (NoResultException e) {
-    			// this is NOT an error -- there is just no incident yet associated with this event so create one
-    			eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
-				isExistingIncident = false;
-    		} catch (NonUniqueResultException e) {
-    			log.severe("should never happen - two or more google account users have same key");
-    			return null;
+    			// TODO enhance message by merging summaries?
+    			
+    			// update severity if appropriate
+    			Boolean severityChanged = checkForSeverityUpdate(eventOwningIncident, theApplication);
+    			if(severityChanged) {
+    				// queue up notification
+                	String severityMsg = "Severity changed from " + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
+                	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), severityMsg, eventOwningIncident.getId());
+    			}
     		}
+        } finally {
+        	// this should persist the changes
+        	em.close();
         }
-		
-		// if incident recently closed, re-open it. Closed too long, then create a new one.
-		if(eventOwningIncident.getStatus().equalsIgnoreCase(Incident.CLOSED_STATUS)) {
-			Date finalRevivalDate = GMT.addDaysToDate(eventOwningIncident.getLastUpdatedGmtDate(), theApplication.getDaysInLimbo());
-			if(finalRevivalDate.after(now)) {
-				// reopen this puppy
-				eventOwningIncident.setStatus(Incident.OPEN_STATUS);
-				log.info("fetchIncidentIncrementCount() reopening existing incident");
-			} else {
-				// create a new incident
-				eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
-				isExistingIncident = false;
-				log.info("fetchIncidentIncrementCount() existing incident CLOSED and too old to reopen");
-			}
-		}
-		
-		if(isExistingIncident){
-			Integer eventCount = eventOwningIncident.getEventCount();
-			eventOwningIncident.setEventCount(eventCount++);
-			eventOwningIncident.setLastUpdatedGmtDate(now);
-			
-			// TODO enhance message by merging summaries?
-			
-			// update severity if appropriate
-			Boolean severityChanged = checkForSeverityUpdate(eventOwningIncident, theApplication);
-			if(severityChanged) {
-				// queue up notification
-            	String severityMsg = "Severity changed from " + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
-            	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), severityMsg, eventOwningIncident.getId());
-			}
-		}
  		
 		return eventOwningIncident;
 	}
@@ -534,13 +546,17 @@ public class Incident {
 		
 		// alogrithm: severity = (numOfErrors * 1000)/(numOfEndUsers * sensitivity)
 		int newErrorCount = theIncident.getEventCount();
-		int oldErrorCount = newErrorCount--;
+		int oldErrorCount = newErrorCount - 1;
+		log.info("oldErrorCount = " + oldErrorCount + " newErrorCount = " + newErrorCount);
 		float newSeverityFloat = (newErrorCount * 1000)/(numberOfEndUsers * theApplication.getSeveritySensitivity());
+		log.info("newSeverityFloat = " + newSeverityFloat);
 		int newSeverity = Math.round(newSeverityFloat);
 		float oldSeverityFloat = (oldErrorCount * 1000)/(numberOfEndUsers * theApplication.getSeveritySensitivity());
+		log.info("oldSeverityFloat = " + oldSeverityFloat);
 		int oldSeverity = Math.round(oldSeverityFloat);
 		
 		if(newSeverity != oldSeverity) {
+			log.info("change in incident severity detected");
 			didSeverityChange = true;
 			theIncident.setOldSeverity(theIncident.getSeverity());
 			theIncident.setSeverity(newSeverity);

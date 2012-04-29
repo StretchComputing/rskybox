@@ -341,7 +341,9 @@ public class User {
         } catch (Exception e) {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
-        }
+        } finally {
+			em.close();
+		}
 	}
 	
 	// Returns user matching specified user ID; null if no matching user found.
@@ -370,6 +372,8 @@ public class User {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more Users have the same key");
 			e.printStackTrace();
+		} finally {
+			em.close();
 		}
 		return user;
 	}
@@ -387,6 +391,8 @@ public class User {
 		} catch (Exception e) {
 			log.severe("exception = " + e.getMessage());
 			e.printStackTrace();
+		} finally {
+			em.close();
 		}
 		return users;
 	}
@@ -404,6 +410,8 @@ public class User {
 			log.info("Google account user not found");
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more google account users have same key");
+		} finally {
+			em.close();
 		}
 		return isAuthenticated;
 	}
@@ -472,6 +480,8 @@ public class User {
         	}
 		} catch (Exception e) {
 			log.severe("Error reading ApplicatinsUsers entity. exception = " + e.getMessage());
+		} finally {
+			em.close();
 		}
         
 		return applications;
@@ -481,35 +491,39 @@ public class User {
 	public static String verifyUserMemberOfApplication(String theEmailAddress, String theApplicationId) {
         EntityManager em = EMF.get().createEntityManager();
         String apiStatus = ApiStatusCode.SUCCESS;
-
-        User user = null;
-        try {
-    		user = (User)em.createNamedQuery("User.getByEmailAddress")
-				.setParameter("emailAddress", theEmailAddress.toLowerCase())
-				.getSingleResult();
-		} catch (NoResultException e) {
-			log.info("Google account user not found");
-			apiStatus = ApiStatusCode.USER_NOT_FOUND;
-		} catch (NonUniqueResultException e) {
-			log.severe("should never happen - two or more google account users have same key");
-			apiStatus = ApiStatusCode.SERVER_ERROR;
-		}
         
-        if(user != null) {
-        	String userId = KeyFactory.keyToString(user.getKey());
+        try {
+            User user = null;
             try {
-        		AppMember appsUsers = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndUserId")
-        				.setParameter("applicationId", theApplicationId)
-        				.setParameter("userId", userId)
-        				.getSingleResult();
+        		user = (User)em.createNamedQuery("User.getByEmailAddress")
+    				.setParameter("emailAddress", theEmailAddress.toLowerCase())
+    				.getSingleResult();
     		} catch (NoResultException e) {
-    			log.info("User is not authorized to use this application");
-    			apiStatus = ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION;
+    			log.info("Google account user not found");
+    			apiStatus = ApiStatusCode.USER_NOT_FOUND;
     		} catch (NonUniqueResultException e) {
-    			log.severe("should never happen - two or more userId/applicationId combinations in ApplicationsUsers");
+    			log.severe("should never happen - two or more google account users have same key");
     			apiStatus = ApiStatusCode.SERVER_ERROR;
     		}
-        }
+            
+            if(user != null) {
+            	String userId = KeyFactory.keyToString(user.getKey());
+                try {
+            		AppMember appsUsers = (AppMember)em.createNamedQuery("AppMember.getByApplicationIdAndUserId")
+            				.setParameter("applicationId", theApplicationId)
+            				.setParameter("userId", userId)
+            				.getSingleResult();
+        		} catch (NoResultException e) {
+        			log.info("User is not authorized to use this application");
+        			apiStatus = ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION;
+        		} catch (NonUniqueResultException e) {
+        			log.severe("should never happen - two or more userId/applicationId combinations in ApplicationsUsers");
+        			apiStatus = ApiStatusCode.SERVER_ERROR;
+        		}
+            }
+        } finally {
+			em.close();
+		}
         
 		return apiStatus;
 	}
@@ -537,6 +551,8 @@ public class User {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more google account users have same emailAddress");
 			throw e;
+		} finally {
+			em.close();
 		}
         
         return user;
@@ -557,6 +573,8 @@ public class User {
 			log.info("user with token = " + theToken + " NOT found");
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same token");
+		} finally {
+			em.close();
 		}
         
         return user;
@@ -584,6 +602,8 @@ public class User {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same phoneNumber (and maybe password)");
 			throw e;
+		} finally {
+			em.close();
 		}
         
         return user;

@@ -137,6 +137,8 @@ public class Application {
 	}
 
 	public Integer getNextIncidentNumber() {
+		// backward compatibility -- for apps created before this field added
+		nextIncidentNumber = nextIncidentNumber == null ? 1 : nextIncidentNumber;
 		return nextIncidentNumber;
 	}
 
@@ -150,6 +152,8 @@ public class Application {
 	}
 
 	public Integer getDaysInLimbo() {
+		// backward compatibility for apps created before this field existed
+		daysInLimbo = daysInLimbo == null ? MAX_DAYS_IN_LIMBO : daysInLimbo;
 		return daysInLimbo;
 	}
 
@@ -158,6 +162,8 @@ public class Application {
 	}
 
 	public Float getSeveritySensitivity() {
+		// backward compatibility for apps created before this field existed
+		severitySensitivity = severitySensitivity == null ? MOST_SENSITIVITY : severitySensitivity;
 		return severitySensitivity;
 	}
 
@@ -166,6 +172,8 @@ public class Application {
 	}
 
 	public Integer getNumberOfEndUsers() {
+		// for backward compatibility of apps created before this field existed
+		numberOfEndUsers = numberOfEndUsers == null ? 0 : numberOfEndUsers;
 		return numberOfEndUsers;
 	}
 
@@ -186,6 +194,8 @@ public class Application {
 			log.severe("should never happen -- could not get application by key using an application object!");
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more applications have same key");
+		}  finally {
+			em.close();
 		}
 		return;
 	}
@@ -215,6 +225,8 @@ public class Application {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more applications have same key");
 			apiStatus = ApiStatusCode.SERVER_ERROR;
+		}  finally {
+			em.close();
 		}
 		
 		return apiStatus;
@@ -235,6 +247,8 @@ public class Application {
 			log.info("application with token = " + theToken + " NOT found");
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more applications have same key");
+		} finally {
+			em.close();
 		}
         
         return application;
@@ -258,6 +272,8 @@ public class Application {
     		}
 		} catch (Exception e) {
 			log.severe("exception = " + e.getMessage());
+		}  finally {
+			em.close();
 		}
         
         return application;
@@ -285,6 +301,8 @@ public class Application {
 			log.info("application ID not found");
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more applications have same key");
+		} finally {
+			em.close();
 		}
 		
 		return application;
@@ -300,7 +318,6 @@ public class Application {
         EntityManager em = EMF.get().createEntityManager();
         Integer nextIncidentNumber = null;
         Integer incidentNumber = null;
-        
         em.getTransaction().begin();
         try {
 			Key appKey = null;
@@ -310,7 +327,6 @@ public class Application {
 				log.severe("could not convert application ID into a key");
 				return null;
 			}
-					
 			Application application = (Application)em.createNamedQuery("Application.getByKey")
 				.setParameter("key", appKey)
 				.getSingleResult();

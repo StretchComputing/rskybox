@@ -216,7 +216,7 @@ public class FeedbackResource extends ServerResource {
 				// find or create an incident that will 'own' this new feedback
 				// TODO something better for an eventName than the current date
 				Date now = new Date();
-				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.FEEDBACK_TAG, incidentId, theApplication, "new Crash Detect");
+				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.FEEDBACK_TAG, incidentId, theApplication, "new Feedback");
 				feedback.setIncidentId(owningIncident.getId());
 			}
 

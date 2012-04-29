@@ -255,8 +255,10 @@ public class CrashDetectsResource extends ServerResource {
                 isUpdate = true;
             }
 			
-			if(!isUpdate && json.has("summary")) {
-				crashDetect.setSummary(json.getString("summary"));
+			String summary = null;
+            if(!isUpdate && json.has("summary")) {
+            	summary = json.getString("summary");
+				crashDetect.setSummary(summary);
 			}
 			
 			if(!isUpdate && json.has("userName")) {
@@ -372,7 +374,10 @@ public class CrashDetectsResource extends ServerResource {
 				// TODO something better for an eventName than the current date
 				Date now = new Date();
 				
-				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, "new Crash Detect");
+				if(summary == null || summary.trim().length() == 0) {
+					summary = "new Crash Detect";
+				}
+				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, summary);
 				crashDetect.setIncidentId(owningIncident.getId());
 			}
             
