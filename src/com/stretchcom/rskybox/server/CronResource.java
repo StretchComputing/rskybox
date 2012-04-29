@@ -14,6 +14,7 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.Feedback;
@@ -99,88 +100,114 @@ public class CronResource extends ServerResource {
     	}
     }
     
+    // Originally used to archive logs/crashes/feedbacks. That code commented out for now (may still find a need for it later)
+    // Now, closes incidents
     private void runArchiver() {
     	log.info("runArchiver() entered");
     	
     	CronLog archiverCronLog = null;
-    	int numberOfClientLogsArchived = 0;
-    	int numberOfFeedbacksArchived = 0;
-    	int numberOfCrashDetectsArchived = 0;
+//    	int numberOfClientLogsArchived = 0;
+//    	int numberOfFeedbacksArchived = 0;
+//    	int numberOfCrashDetectsArchived = 0;
+    	int numberOfIncidentsClosed = 0;
     	
     	EntityManager emMessages = EMF.get().createEntityManager();
     	
     	try {
+    		//////////////////
+        	// Close Incidents
+    		//////////////////
+    		List<Incident> incidents = (List<Incident>)emMessages.createNamedQuery("Incident.getOldActiveThru")
+				.setParameter("currentDate", new Date())
+				.setParameter("status", Incident.OPEN_STATUS)
+				.getResultList();
+        	log.info("number of incidents ready for closing = " + incidents.size());
+        	
+    		for(Incident i : incidents) {
+    	    	emMessages.getTransaction().begin();
+    	    	Incident anIncident = (Incident)emMessages.createNamedQuery("Incident.getByKey")
+        			.setParameter("key", i.getKey())
+        			.getSingleResult();
+    			
+    	    	anIncident.setStatus(Incident.CLOSED_STATUS);
+    			emMessages.getTransaction().commit();
+    		}
+    		log.info("all incidents closed successfully");
+    		numberOfIncidentsClosed = incidents.size();
+
     		/////////////////////
         	// Archive ClientLogs
     		/////////////////////
-    		List<ClientLog> clientLogs = (List<ClientLog>)emMessages.createNamedQuery("ClientLog.getOldActiveThru")
-				.setParameter("currentDate", new Date())
-				.setParameter("status", ClientLog.NEW_STATUS)
-				.getResultList();
-        	log.info("number of client logs ready for archiving = " + clientLogs.size());
-        	
-    		for(ClientLog cl : clientLogs) {
-    	    	emMessages.getTransaction().begin();
-    	    	ClientLog aClientLog = (ClientLog)emMessages.createNamedQuery("ClientLog.getByKey")
-        			.setParameter("key", cl.getKey())
-        			.getSingleResult();
-    			
-    	    	aClientLog.setStatus(ClientLog.ARCHIVED_STATUS);
-    			emMessages.getTransaction().commit();
-    		}
-    		log.info("all client logs archived successfully");
-    		numberOfClientLogsArchived = clientLogs.size();
+//    		List<ClientLog> clientLogs = (List<ClientLog>)emMessages.createNamedQuery("ClientLog.getOldActiveThru")
+//				.setParameter("currentDate", new Date())
+//				.setParameter("status", ClientLog.NEW_STATUS)
+//				.getResultList();
+//        	log.info("number of client logs ready for archiving = " + clientLogs.size());
+//        	
+//    		for(ClientLog cl : clientLogs) {
+//    	    	emMessages.getTransaction().begin();
+//    	    	ClientLog aClientLog = (ClientLog)emMessages.createNamedQuery("ClientLog.getByKey")
+//        			.setParameter("key", cl.getKey())
+//        			.getSingleResult();
+//    			
+//    	    	aClientLog.setStatus(ClientLog.ARCHIVED_STATUS);
+//    			emMessages.getTransaction().commit();
+//    		}
+//    		log.info("all client logs archived successfully");
+//    		numberOfClientLogsArchived = clientLogs.size();
     		
     		/////////////////////
         	// Archive Feedbacks
     		/////////////////////
-        	List<Feedback> feedbacks = (List<Feedback>)emMessages.createNamedQuery("Feedback.getOldActiveThru")
-				.setParameter("currentDate", new Date())
-				.setParameter("status", Feedback.NEW_STATUS)
-				.getResultList();
-        	log.info("number of feedbacks ready for archiving = " + feedbacks.size());
-        	
-    		for(Feedback fb : feedbacks) {
-    	    	emMessages.getTransaction().begin();
-    	    	Feedback aFeedback = (Feedback)emMessages.createNamedQuery("Feedback.getByKey")
-        			.setParameter("key", fb.getKey())
-        			.getSingleResult();
-    			
-    	    	aFeedback.setStatus(Feedback.ARCHIVED_STATUS);
-    			emMessages.getTransaction().commit();
-    		}
-    		log.info("all feedbacks archived successfully");
-    		numberOfFeedbacksArchived = feedbacks.size();
+//        	List<Feedback> feedbacks = (List<Feedback>)emMessages.createNamedQuery("Feedback.getOldActiveThru")
+//				.setParameter("currentDate", new Date())
+//				.setParameter("status", Feedback.NEW_STATUS)
+//				.getResultList();
+//        	log.info("number of feedbacks ready for archiving = " + feedbacks.size());
+//        	
+//    		for(Feedback fb : feedbacks) {
+//    	    	emMessages.getTransaction().begin();
+//    	    	Feedback aFeedback = (Feedback)emMessages.createNamedQuery("Feedback.getByKey")
+//        			.setParameter("key", fb.getKey())
+//        			.getSingleResult();
+//    			
+//    	    	aFeedback.setStatus(Feedback.ARCHIVED_STATUS);
+//    			emMessages.getTransaction().commit();
+//    		}
+//    		log.info("all feedbacks archived successfully");
+//    		numberOfFeedbacksArchived = feedbacks.size();
     		
     		///////////////////////
         	// Archive CrashDetects
     		///////////////////////
-        	List<CrashDetect> crashDetects = (List<CrashDetect>)emMessages.createNamedQuery("CrashDetect.getOldActiveThru")
-				.setParameter("currentDate", new Date())
-				.setParameter("status", CrashDetect.NEW_STATUS)
-				.getResultList();
-        	log.info("number of crash detects ready for archiving = " + crashDetects.size());
-        	
-    		for(CrashDetect cd : crashDetects) {
-    	    	emMessages.getTransaction().begin();
-    	    	CrashDetect aCrashDetect = (CrashDetect)emMessages.createNamedQuery("CrashDetect.getByKey")
-        			.setParameter("key", cd.getKey())
-        			.getSingleResult();
-    			
-    	    	aCrashDetect.setStatus(CrashDetect.ARCHIVED_STATUS);
-    			emMessages.getTransaction().commit();
-    		}
-    		log.info("all crash detects archived successfully");
-    		numberOfCrashDetectsArchived = crashDetects.size();
+//        	List<CrashDetect> crashDetects = (List<CrashDetect>)emMessages.createNamedQuery("CrashDetect.getOldActiveThru")
+//				.setParameter("currentDate", new Date())
+//				.setParameter("status", CrashDetect.NEW_STATUS)
+//				.getResultList();
+//        	log.info("number of crash detects ready for archiving = " + crashDetects.size());
+//        	
+//    		for(CrashDetect cd : crashDetects) {
+//    	    	emMessages.getTransaction().begin();
+//    	    	CrashDetect aCrashDetect = (CrashDetect)emMessages.createNamedQuery("CrashDetect.getByKey")
+//        			.setParameter("key", cd.getKey())
+//        			.getSingleResult();
+//    			
+//    	    	aCrashDetect.setStatus(CrashDetect.ARCHIVED_STATUS);
+//    			emMessages.getTransaction().commit();
+//    		}
+//    		log.info("all crash detects archived successfully");
+//    		numberOfCrashDetectsArchived = crashDetects.size();
     	} finally {
     		emMessages.close();
     	}
     	
     	archiverCronLog = new CronLog();
     	archiverCronLog.setJobName("archiver");
-    	String logMessage = "Number of client logs archived = " + numberOfClientLogsArchived + "." +
-    			            "Number of feedbacks archived = " + numberOfFeedbacksArchived + "." +
-    			            "Number of crash detects archived = " + numberOfCrashDetectsArchived + ".";
+//    	String logMessage = "Number of client logs archived = " + numberOfClientLogsArchived + "." +
+//    			            "Number of feedbacks archived = " + numberOfFeedbacksArchived + "." +
+//    			            "Number of crash detects archived = " + numberOfCrashDetectsArchived + ".";
+    	String logMessage = "Number of incidents closed = " + numberOfIncidentsClosed;
+    	
     	archiverCronLog.setLogMessage(logMessage);
     	archiverCronLog.setCreatedGmtDate(new Date());
     	

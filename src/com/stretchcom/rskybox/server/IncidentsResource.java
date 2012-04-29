@@ -149,7 +149,7 @@ public class IncidentsResource extends ServerResource {
             // Valid input parameters
             /////////////////////////
             if(this.incidentStatus != null) {
-				if(Incident.isStatusValid(this.incidentStatus)) {
+				if(!Incident.isStatusParameterValid(this.incidentStatus)) {
 			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
 				}
 			} else {

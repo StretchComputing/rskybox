@@ -41,7 +41,7 @@ import com.stretchcom.rskybox.server.GMT;
     @NamedQuery(
     		name="Incident.getAllWithApplicationIdAndTag",
     		query="SELECT i FROM Incident i WHERE " +
-    		"i.applicationId = :applicationId" + " AND" +
+    		"i.applicationId = :applicationId" + " AND " +
     		"i.tags = :tag ORDER BY i.lastUpdatedGmtDate DESC"
     ),
     @NamedQuery(
@@ -359,6 +359,11 @@ public class Incident {
 	
 	public static Boolean isStatusValid(String theStatus) {
 		if(theStatus.equalsIgnoreCase(Incident.OPEN_STATUS) || theStatus.equalsIgnoreCase(Incident.CLOSED_STATUS)) return true;
+		return false;
+	}
+	
+	public static Boolean isStatusParameterValid(String theStatus) {
+		if(theStatus.equalsIgnoreCase(Incident.OPEN_STATUS) || theStatus.equalsIgnoreCase(Incident.CLOSED_STATUS) || theStatus.equalsIgnoreCase(Incident.ALL_STATUS)) return true;
 		return false;
 	}
 	
