@@ -114,12 +114,14 @@ public class FeedbackResource extends ServerResource {
 
     private JsonRepresentation save_feedback(Representation entity, Application theApplication) {
         EntityManager em = EMF.get().createEntityManager();
+        JSONObject jsonReturn = new JSONObject();
 
         Feedback feedback = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
+		Incident owningIncident = null;
         try {
             feedback = new Feedback();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
@@ -191,7 +193,6 @@ public class FeedbackResource extends ServerResource {
 				incidentId = json.getString("incidentId");
 			}
 			
-			Incident owningIncident = null;
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -222,10 +223,6 @@ public class FeedbackResource extends ServerResource {
 
             em.persist(feedback);
             em.getTransaction().commit();
-            
-            if(!isUpdate) {
-            	User.sendNotifications(this.applicationId, Notification.FEEDBACK, feedback.getUserName(), owningIncident.getId());
-            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -246,7 +243,15 @@ public class FeedbackResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getFeedbackJson(feedback, apiStatus, false));
+	    try {
+	    	jsonReturn.put("apiStatus", apiStatus);
+	    	jsonReturn.put("incident", owningIncident.getJson());
+	    } catch (JSONException e) {
+	        log.severe("exception = " + e.getMessage());
+	    	e.printStackTrace();
+	        this.setStatus(Status.SERVER_ERROR_INTERNAL);
+	    }
+	    return new JsonRepresentation(jsonReturn);
     }
 
     private JsonRepresentation show() {

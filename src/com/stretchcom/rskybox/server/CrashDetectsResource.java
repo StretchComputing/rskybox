@@ -224,12 +224,14 @@ public class CrashDetectsResource extends ServerResource {
 
     private JsonRepresentation save_crash_detect(Representation entity, Application theApplication) {
         EntityManager em = EMF.get().createEntityManager();
+        JSONObject jsonReturn = new JSONObject();
 
         CrashDetect crashDetect = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
+		Incident owningIncident = null;
         try {
             crashDetect = new CrashDetect();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
@@ -348,7 +350,6 @@ public class CrashDetectsResource extends ServerResource {
 				incidentId = json.getString("incidentId");
 			}
 			
-			Incident owningIncident = null;
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -383,10 +384,6 @@ public class CrashDetectsResource extends ServerResource {
             
             em.persist(crashDetect);
             em.getTransaction().commit();
-            
-            if(!isUpdate) {
-            	User.sendNotifications(this.applicationId, Notification.CRASH, crashDetect.getSummary(), owningIncident.getId());
-            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -407,7 +404,15 @@ public class CrashDetectsResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus, false));
+	    try {
+	    	jsonReturn.put("apiStatus", apiStatus);
+	    	jsonReturn.put("incident", owningIncident.getJson());
+	    } catch (JSONException e) {
+	        log.severe("exception = " + e.getMessage());
+	    	e.printStackTrace();
+	        this.setStatus(Status.SERVER_ERROR_INTERNAL);
+	    }
+	    return new JsonRepresentation(jsonReturn);
     }
     
     private JSONObject getCrashDetectJson(CrashDetect crashDetect, Boolean isList) {

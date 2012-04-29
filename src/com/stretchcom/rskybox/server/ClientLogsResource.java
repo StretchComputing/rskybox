@@ -122,13 +122,15 @@ public class ClientLogsResource extends ServerResource {
 			return Utility.apiError(this, ApiStatusCode.CLIENT_LOG_ID_REQUIRED);
 		}
     	
-    	if(this.id != null) {
+    	// TODO remote control is deprecated at the log level. Now handled by incident. Hold the code for a little while
+    	//if(this.id != null) {
     		// Update Client Log API
             return save_client_log(entity, null);
-    	} else {
-    		// Remote Control Client Log API
-    		return remote_control(entity);
-    	}
+    	//}
+//    	else {
+//    		// Remote Control Client Log API
+//    		return remote_control(entity);
+//    	}
     }
     
     private JsonRepresentation index() {
@@ -250,6 +252,7 @@ public class ClientLogsResource extends ServerResource {
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
+		Incident owningIncident = null;
         try {
             clientLog = new ClientLog();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
@@ -393,7 +396,6 @@ public class ClientLogsResource extends ServerResource {
 				incidentId = json.getString("incidentId");
 			}
 
-			Incident owningIncident = null;
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -423,24 +425,13 @@ public class ClientLogsResource extends ServerResource {
 				clientLog.setIncidentId(owningIncident.getId());
 			}
 			
-            em.persist(clientLog);
-            em.getTransaction().commit();
-            
-            if(!isUpdate) {
-            	String message = clientLog.getLogName();
-            	if(clientLog.getSummary() != null && clientLog.getSummary().length() > 0) {
-            		message += " " + clientLog.getSummary();
-            	}
-            	User.sendNotifications(this.applicationId, Notification.CLIENT_LOG, message, owningIncident.getId());
-            	
-            	ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
-            	// if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
-            	String logStatus = ClientLogRemoteControl.ACITVE_MODE;
-            	if(clrc != null) {
-            		logStatus = clrc.getMode();
-            	}
-				jsonReturn.put("logStatus", logStatus);
-            }
+			if(owningIncident.getMaxEventCountReached()) {
+				// log NOT persisted if incident already storing max number of events
+				log.info("log not created because incident has reached maximum event count");
+			} else {
+				em.persist(clientLog);
+	            em.getTransaction().commit();
+			}
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -463,6 +454,7 @@ public class ClientLogsResource extends ServerResource {
         
 	    try {
 	    	jsonReturn.put("apiStatus", apiStatus);
+	    	jsonReturn.put("incident", owningIncident.getJson());
 	    } catch (JSONException e) {
 	        log.severe("exception = " + e.getMessage());
 	    	e.printStackTrace();
@@ -471,44 +463,44 @@ public class ClientLogsResource extends ServerResource {
 	    return new JsonRepresentation(jsonReturn);
     }
     
-    private JsonRepresentation remote_control(Representation entity) {
-        JSONObject jsonReturn = new JSONObject();
-        
-		String apiStatus = ApiStatusCode.SUCCESS;
-        this.setStatus(Status.SUCCESS_CREATED);
-        try {
-            JSONObject json = new JsonRepresentation(entity).getJsonObject();
-            
-            String mode = null;
-            if(json.has("mode")) {
-            	mode = json.getString("mode");
-            	if(!ClientLogRemoteControl.isModeValid(mode)) {
-            		return Utility.apiError(this, ApiStatusCode.INVALID_MODE);
-            	}
-            } else {
-            	return Utility.apiError(this, ApiStatusCode.MODE_IS_REQUIRED);
-            }
-            
-            ClientLogRemoteControl.update(this.applicationId, this.name, mode);
-        } catch (IOException e) {
-            log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
-            e.printStackTrace();
-            this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        } catch (JSONException e) {
-            log.severe("exception = " + e.getMessage());
-            e.printStackTrace();
-            this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
-        
-	    try {
-	    	jsonReturn.put("apiStatus", apiStatus);
-	    } catch (JSONException e) {
-	        log.severe("exception = " + e.getMessage());
-	    	e.printStackTrace();
-	        this.setStatus(Status.SERVER_ERROR_INTERNAL);
-	    }
-	    return new JsonRepresentation(jsonReturn);
-    }
+//    private JsonRepresentation remote_control(Representation entity) {
+//        JSONObject jsonReturn = new JSONObject();
+//        
+//		String apiStatus = ApiStatusCode.SUCCESS;
+//        this.setStatus(Status.SUCCESS_CREATED);
+//        try {
+//            JSONObject json = new JsonRepresentation(entity).getJsonObject();
+//            
+//            String mode = null;
+//            if(json.has("mode")) {
+//            	mode = json.getString("mode");
+//            	if(!ClientLogRemoteControl.isModeValid(mode)) {
+//            		return Utility.apiError(this, ApiStatusCode.INVALID_MODE);
+//            	}
+//            } else {
+//            	return Utility.apiError(this, ApiStatusCode.MODE_IS_REQUIRED);
+//            }
+//            
+//            ClientLogRemoteControl.update(this.applicationId, this.name, mode);
+//        } catch (IOException e) {
+//            log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
+//            e.printStackTrace();
+//            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+//        } catch (JSONException e) {
+//            log.severe("exception = " + e.getMessage());
+//            e.printStackTrace();
+//            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+//        }
+//        
+//	    try {
+//	    	jsonReturn.put("apiStatus", apiStatus);
+//	    } catch (JSONException e) {
+//	        log.severe("exception = " + e.getMessage());
+//	    	e.printStackTrace();
+//	        this.setStatus(Status.SERVER_ERROR_INTERNAL);
+//	    }
+//	    return new JsonRepresentation(jsonReturn);
+//    }
     
     private JSONObject getClientLogJson(ClientLog clientLog, Boolean isList) {
     	return getClientLogJson(clientLog, null, isList);
@@ -557,12 +549,6 @@ public class ClientLogsResource extends ServerResource {
             	}
             	log.info("stackBackTraces # of parts = " + stackBackTraces.size());
             	json.put("stackBackTrace", stackBackTracesJsonArray);
-                	
-                ClientLogRemoteControl clrc = ClientLogRemoteControl.getEntity(this.applicationId, clientLog.getLogName());
-                // if there is no clientLogRemoteControl, then mode must defaults to ACTIVE
-                String logMode = ClientLogRemoteControl.ACITVE_MODE;
-                if(clrc != null) {logMode = clrc.getMode();}
-                json.put("logMode", logMode);
             	
             	if(!isList) {
                 	JSONArray appActionsJsonArray = new JSONArray();

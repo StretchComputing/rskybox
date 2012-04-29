@@ -53,6 +53,7 @@ public class Application {
     private static int MAX_DAYS_IN_LIMBO = 10;
     private static int DAYS_UNTIL_AUTO_ARCHIVE = 7;
     //private static int DAYS_UNTIL_AUTO_ARCHIVE = -2;  // for local testing
+    private static int MAX_EVENTS_PER_INCIDENT = 10;
     
     private static float LEAST_SENSITIVITY = 16;
     private static float LOW_SENSITIVITY = 8;
@@ -70,6 +71,7 @@ public class Application {
 	private Integer daysInLimbo = MAX_DAYS_IN_LIMBO; // how long an incident can be closed and still be reopened
 	private Float severitySensitivity = MOST_SENSITIVITY;
 	private Integer numberOfEndUsers = 0;
+	private Integer maxEventsPerIncident = MAX_EVENTS_PER_INCIDENT;
 
 	@Transient
 	private String memberRole; // used internally on the server to return user role with list of user's applications
@@ -179,6 +181,14 @@ public class Application {
 
 	public void setNumberOfEndUsers(Integer numberOfEndUsers) {
 		this.numberOfEndUsers = numberOfEndUsers;
+	}
+
+	public Integer getMaxEventsPerIncident() {
+		return maxEventsPerIncident;
+	}
+
+	public void setMaxEventsPerIncident(Integer maxEventsPerIncident) {
+		this.maxEventsPerIncident = maxEventsPerIncident;
 	}
 
 	public void incrementEndUserCount() {

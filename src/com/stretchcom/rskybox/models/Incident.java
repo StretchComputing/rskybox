@@ -16,6 +16,10 @@ import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.server.EMF;
@@ -90,6 +94,7 @@ public class Incident {
 	public final static Integer MEDIUM_SEVERITY = 5;
 	public final static Integer LOW_SEVERITY = 3;
 	public final static Integer MINIMUM_SEVERITY = 1;
+	public final static Integer INITIALIZATION_SEVERITY = 0;
 	
 	public final static String CRASH_TAG = "crash";
 	public final static String LOG_TAG = "log";
@@ -101,6 +106,7 @@ public class Incident {
 	private Integer number;  // sequential number auto assigned to incidents with scope of the application
 	private String eventName;
 	private Integer eventCount;
+	private Boolean maxEventCountReached = false;
 	private Integer severity = Incident.LOW_SEVERITY;
 	private Integer oldSeverity = Incident.LOW_SEVERITY;
 	private Integer severityUpVotes;
@@ -148,6 +154,22 @@ public class Incident {
 
 	public void setEventCount(Integer eventCount) {
 		this.eventCount = eventCount;
+	}
+	public Boolean getMaxEventCountReached() {
+		return maxEventCountReached;
+	}
+
+	public void setMaxEventCountReached(Boolean maxEventCountReached) {
+		this.maxEventCountReached = maxEventCountReached;
+	}
+
+	
+	public void incrementEventCount(Integer theMaxEventsPerIncident) {
+		this.eventCount++;
+		log.info("incremented incident event count = " + this.eventCount);
+		if(eventCount >= theMaxEventsPerIncident) {
+			maxEventCountReached = true;
+		}
 	}
 
 	public Date getLastUpdatedGmtDate() {
@@ -352,6 +374,33 @@ public class Incident {
     	return wellKnownTag;
 	}
 	
+	public JSONObject getJson() {
+		JSONObject jsonObject = new JSONObject();
+		try {
+			jsonObject.put("id", this.getId());
+			jsonObject.put("number", this.number);
+			jsonObject.put("status", this.status);
+			jsonObject.put("severity", this.severity);
+			jsonObject.put("name", this.eventName);
+			jsonObject.put("lastUpdatedDate", GMT.convertToIsoDate(this.lastUpdatedGmtDate));
+			jsonObject.put("createdDate", GMT.convertToIsoDate(this.createdGmtDate));
+			
+        	JSONArray tagsJsonArray = new JSONArray();
+        	for(String tag : this.tags) {
+        		tagsJsonArray.put(tag);
+        	}
+			jsonObject.put("tags", tagsJsonArray);
+			
+			jsonObject.put("eventCount", this.eventCount);
+			jsonObject.put("message", this.message);
+			jsonObject.put("remoteControlMode", this.remoteControlMode);
+			
+		} catch (JSONException e) {
+			log.severe("exception building Incident JSON object, message = " + e.getMessage());
+		}
+		return jsonObject;
+	}
+	
 	public static Boolean isModeValid(String theMode) {
 		if(theMode.equalsIgnoreCase(Incident.ACTIVE_REMOTE_CONTROL_MODE) || theMode.equalsIgnoreCase(Incident.INACTIVE_REMOTE_CONTROL_MODE)) return true;
 		return false;
@@ -440,6 +489,10 @@ public class Incident {
             			// always choose the most recently created incident which will be on the top of the list
         				log.info("incident matching event name = " + theEventName + " WAS found");
             			eventOwningIncident = relatedIncidents.get(0);
+            			if(eventOwningIncident.getMaxEventCountReached()) {
+            				// if incident already contains maximum number of events, don't update the incident in any way, just return it
+            				return eventOwningIncident;
+            			}
         			}
         		}catch (Exception e) {
         			log.severe("should never happen - two or more google account users have same key");
@@ -465,22 +518,29 @@ public class Incident {
     		
     		if(isExistingIncident){
     			log.info("existing incident -- incident details are being updated");
-    			Integer eventCount = eventOwningIncident.getEventCount();
-    			log.info("incident prior event count = " + eventCount);
-    			eventCount++;
-    			eventOwningIncident.setEventCount(eventCount);
+    			eventOwningIncident.incrementEventCount(theApplication.getMaxEventsPerIncident());
     			eventOwningIncident.setLastUpdatedGmtDate(now);
     			
     			// TODO enhance message by merging summaries?
-    			
-    			// update severity if appropriate
-    			Boolean severityChanged = checkForSeverityUpdate(eventOwningIncident, theApplication);
-    			if(severityChanged) {
-    				// queue up notification
-                	String severityMsg = "Severity changed from " + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
-                	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), severityMsg, eventOwningIncident.getId());
-    			}
     		}
+			
+			// update severity if appropriate
+			Boolean severityChanged = checkForSeverityUpdate(eventOwningIncident, theApplication);
+			if(severityChanged) {
+				String severityMsg = "";
+				// two scenarios to deal with
+				// 1. this is a new incident (old severity = new severity)
+				// 2. change in severity for an existing incident (old severity != new severity)
+				if(!eventOwningIncident.getOldSeverity().equals(eventOwningIncident.getSeverity())) {
+					// this is a new incident
+					severityMsg = "a new " + eventOwningIncident.getNotificationTypeFromTag() + " created";
+				} else {
+	            	severityMsg = "Severity of " + eventOwningIncident.getNotificationTypeFromTag() + " changed from " + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
+				}
+				
+				// queue up notification
+            	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), severityMsg, eventOwningIncident.getId());
+			}
         } finally {
         	// this should persist the changes
         	em.close();
@@ -508,6 +568,7 @@ public class Incident {
 			incident.setStatus(Incident.OPEN_STATUS);
 			
 			// Default severity
+			incident.setOldSeverity(Incident.INITIALIZATION_SEVERITY);
 			if(incident.isLog()) {
 				incident.setSeverity(Incident.LOW_SEVERITY);
 			} else if(incident.isCrash()) {
@@ -542,8 +603,18 @@ public class Incident {
 	// return: true if severity changed and was updated in the incident object passed in; false otherwise
 	public static Boolean checkForSeverityUpdate(Incident theIncident, Application theApplication) {
 		Boolean didSeverityChange = false;
-		// currently, only updating severity for logs
-		if(!theIncident.isLog()) {return didSeverityChange;}
+		
+		// if this is a brand new incident, place severities into steady state and return. A new incident is always
+		// treated as a 'change in severity'
+		if(theIncident.getOldSeverity().equals(Incident.INITIALIZATION_SEVERITY)) {
+			// sync old severity with new severity. NOTE: only time severities are the same and a 'true' is returned 
+			// is when it is a NEW incident
+			theIncident.setOldSeverity(theIncident.getSeverity());
+			return true;
+		}
+		
+		// this is an existing incident so we only update severity for logs
+		if(!theIncident.isLog()) {return false;}
 		
 		// need the number of end users for this application
 		int numberOfEndUsers = theApplication.getNumberOfEndUsers();
@@ -563,8 +634,11 @@ public class Incident {
 		if(newSeverity != oldSeverity) {
 			log.info("change in incident severity detected");
 			didSeverityChange = true;
+			// NOTE: for existing incidents, when a change of severity is reported, then old and new severity are always a different value!
 			theIncident.setOldSeverity(theIncident.getSeverity());
 			theIncident.setSeverity(newSeverity);
+		} else {
+			log.info("incident severity did NOT change");
 		}
 		
 		// TODO **** have to account for member voting - so factor voting into final severity assignment
