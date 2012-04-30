@@ -184,6 +184,8 @@ public class Application {
 	}
 
 	public Integer getMaxEventsPerIncident() {
+		// for backward compatibility of apps created before this field existed
+		maxEventsPerIncident = maxEventsPerIncident == null ? Application.MAX_EVENTS_PER_INCIDENT : maxEventsPerIncident;
 		return maxEventsPerIncident;
 	}
 
@@ -341,7 +343,7 @@ public class Application {
 				.setParameter("key", appKey)
 				.getSingleResult();
 			incidentNumber = application.getNextIncidentNumber();
-			nextIncidentNumber = incidentNumber++;
+			nextIncidentNumber = incidentNumber + 1;
 			application.setNextIncidentNumber(nextIncidentNumber);
 			em.persist(application);
 			em.getTransaction().commit();

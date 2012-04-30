@@ -551,8 +551,6 @@ public class User {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more google account users have same emailAddress");
 			throw e;
-		} finally {
-			em.close();
 		}
         
         return user;
@@ -602,8 +600,6 @@ public class User {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same phoneNumber (and maybe password)");
 			throw e;
-		} finally {
-			em.close();
 		}
         
         return user;

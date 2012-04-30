@@ -107,8 +107,8 @@ public class Incident {
 	private String eventName;
 	private Integer eventCount;
 	private Boolean maxEventCountReached = false;
-	private Integer severity = Incident.LOW_SEVERITY;
-	private Integer oldSeverity = Incident.LOW_SEVERITY;
+	private Integer severity = Incident.MINIMUM_SEVERITY;
+	private Integer oldSeverity = Incident.INITIALIZATION_SEVERITY;
 	private Integer severityUpVotes;
 	private Integer severityDownVotes;
 	private Date lastUpdatedGmtDate;
@@ -166,9 +166,9 @@ public class Incident {
 	
 	public void incrementEventCount(Integer theMaxEventsPerIncident) {
 		this.eventCount++;
-		log.info("incremented incident event count = " + this.eventCount);
+		log.info("incremented incident event count = " + this.eventCount + " theMaxEventsPerIncident = " + theMaxEventsPerIncident);
 		if(eventCount >= theMaxEventsPerIncident) {
-			maxEventCountReached = true;
+			this.maxEventCountReached = true;
 		}
 	}
 
@@ -489,11 +489,7 @@ public class Incident {
             			// always choose the most recently created incident which will be on the top of the list
         				log.info("incident matching event name = " + theEventName + " WAS found");
             			eventOwningIncident = relatedIncidents.get(0);
-            			if(eventOwningIncident.getMaxEventCountReached()) {
-            				// if incident already contains maximum number of events, don't update the incident in any way, just return it
-            				return eventOwningIncident;
-            			}
-        			}
+         			}
         		}catch (Exception e) {
         			log.severe("should never happen - two or more google account users have same key");
         			return null;
@@ -531,11 +527,13 @@ public class Incident {
 				// two scenarios to deal with
 				// 1. this is a new incident (old severity = new severity)
 				// 2. change in severity for an existing incident (old severity != new severity)
-				if(!eventOwningIncident.getOldSeverity().equals(eventOwningIncident.getSeverity())) {
+				if(eventOwningIncident.getOldSeverity().equals(eventOwningIncident.getSeverity())) {
 					// this is a new incident
 					severityMsg = "a new " + eventOwningIncident.getNotificationTypeFromTag() + " created";
+					log.info("severity changed because this is a new incident: oldSeverity = " + eventOwningIncident.getOldSeverity() + " newSeverity = " + eventOwningIncident.getSeverity());
 				} else {
 	            	severityMsg = "Severity of " + eventOwningIncident.getNotificationTypeFromTag() + " changed from " + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
+	            	log.info(severityMsg);
 				}
 				
 				// queue up notification
@@ -570,7 +568,7 @@ public class Incident {
 			// Default severity
 			incident.setOldSeverity(Incident.INITIALIZATION_SEVERITY);
 			if(incident.isLog()) {
-				incident.setSeverity(Incident.LOW_SEVERITY);
+				incident.setSeverity(Incident.MINIMUM_SEVERITY);
 			} else if(incident.isCrash()) {
 				incident.setSeverity(Incident.HIGH_SEVERITY);
 			} else {
@@ -604,17 +602,23 @@ public class Incident {
 	public static Boolean checkForSeverityUpdate(Incident theIncident, Application theApplication) {
 		Boolean didSeverityChange = false;
 		
+		// TODO enforce a maximum severity of 10?
+		
 		// if this is a brand new incident, place severities into steady state and return. A new incident is always
 		// treated as a 'change in severity'
 		if(theIncident.getOldSeverity().equals(Incident.INITIALIZATION_SEVERITY)) {
 			// sync old severity with new severity. NOTE: only time severities are the same and a 'true' is returned 
 			// is when it is a NEW incident
+			log.info("checkForSeverityUpdate bypassed because this is a new incident");
 			theIncident.setOldSeverity(theIncident.getSeverity());
 			return true;
 		}
 		
 		// this is an existing incident so we only update severity for logs
-		if(!theIncident.isLog()) {return false;}
+		if(!theIncident.isLog()) {
+			log.info("checkForSeverityUpdate returning because the event is NOT a log");
+			return false;
+		}
 		
 		// need the number of end users for this application
 		int numberOfEndUsers = theApplication.getNumberOfEndUsers();

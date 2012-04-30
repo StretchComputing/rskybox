@@ -197,7 +197,9 @@ public class IncidentsResource extends ServerResource {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
+        } finally {
+			em.close();
+		}
         return new JsonRepresentation(json);
     }
 
@@ -237,7 +239,9 @@ public class IncidentsResource extends ServerResource {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more incidents have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
-		} 
+		} finally {
+			em.close();
+		}
         
         return new JsonRepresentation(getIncidentJson(incident, apiStatus, false));
     }
@@ -488,6 +492,8 @@ public class IncidentsResource extends ServerResource {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more incidents have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
+			em.close();
 		}
         
 	    try {

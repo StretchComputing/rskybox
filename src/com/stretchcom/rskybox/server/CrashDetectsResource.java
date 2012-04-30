@@ -59,7 +59,7 @@ public class CrashDetectsResource extends ServerResource {
 				this.listStatus = Reference.decode(this.listStatus);
 				log.info("CrashDetectResource() - decoded status = " + this.listStatus);
 			} else if(parameter.getName().equals("incidentId"))  {
-				this.incidentId = (String)parameter.getValue().toLowerCase();
+				this.incidentId = (String)parameter.getValue();
 				this.incidentId = Reference.decode(this.incidentId);
 				log.info("ClientLogResource() - incident ID = " + this.incidentId);
 			} 
@@ -147,11 +147,13 @@ public class CrashDetectsResource extends ServerResource {
 					crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getAllWithApplicationId")
 			    			.setParameter("applicationId", this.applicationId)
 			    			.getResultList();
+					log.info("crashDetects query 1: applicationId result set count = " + crashDetects.size());
 				} else {
 					crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 							.getResultList();
+					log.info("crashDetects query 2: status/applicationId result set count = " + crashDetects.size());
 				}
 			} else {
 				if(this.listStatus.equalsIgnoreCase(CrashDetect.ALL_STATUS)) {
@@ -159,12 +161,14 @@ public class CrashDetectsResource extends ServerResource {
 			    			.setParameter("applicationId", this.applicationId)
 			    			.setParameter("incidentId", this.incidentId)
 			    			.getResultList();
+					log.info("crashDetects query 3: applicationId/incidentId result set count = " + crashDetects.size());
 				} else {
 					crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationIdAndIncidentId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 			    			.setParameter("incidentId", this.incidentId)
 							.getResultList();
+					log.info("crashDetects query 4: status/applicationId/incidentId result set count = " + crashDetects.size());
 				}
 			}
             
@@ -177,7 +181,9 @@ public class CrashDetectsResource extends ServerResource {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
+        } finally {
+			em.close();
+		}
         return new JsonRepresentation(json);
     }
 
@@ -217,6 +223,8 @@ public class CrashDetectsResource extends ServerResource {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
+			em.close();
 		} 
         
         return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus, false));

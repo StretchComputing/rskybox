@@ -64,7 +64,7 @@ public class ClientLogsResource extends ServerResource {
 				this.listStatus = Reference.decode(this.listStatus);
 				log.info("ClientLogResource() - decoded status = " + this.listStatus);
 			} else if(parameter.getName().equals("incidentId"))  {
-				this.incidentId = (String)parameter.getValue().toLowerCase();
+				this.incidentId = (String)parameter.getValue();
 				this.incidentId = Reference.decode(this.incidentId);
 				log.info("ClientLogResource() - incident ID = " + this.incidentId);
 			} 
@@ -168,11 +168,13 @@ public class ClientLogsResource extends ServerResource {
 			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationId")
 			    			.setParameter("applicationId", this.applicationId)
 			    			.getResultList();
+					log.info("clientLogs query 1: applicationId result set count = " + clientLogs.size());
 				} else {
 			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 							.getResultList();
+					log.info("clientLogs query 2: status/applicationId result set count = " + clientLogs.size());
 				}
 			} else {
 				if(this.listStatus.equalsIgnoreCase(ClientLog.ALL_STATUS)) {
@@ -180,12 +182,14 @@ public class ClientLogsResource extends ServerResource {
 			    			.setParameter("applicationId", this.applicationId)
 			    			.setParameter("incidentId", this.incidentId)
 			    			.getResultList();
+					log.info("clientLogs query 3: applicationId/incidentId result set count = " + clientLogs.size());
 				} else {
 			    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getByStatusAndApplicationIdAndIncidentId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 			    			.setParameter("incidentId", this.incidentId)
 							.getResultList();
+					log.info("clientLogs query 4: status/applicationId/incidentId result set count = " + clientLogs.size());
 				}
 			}
             
@@ -198,7 +202,9 @@ public class ClientLogsResource extends ServerResource {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
+        } finally {
+			em.close();
+		}
         return new JsonRepresentation(json);
     }
 
@@ -238,6 +244,8 @@ public class ClientLogsResource extends ServerResource {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more client logs have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
+			em.close();
 		} 
         
         return new JsonRepresentation(getClientLogJson(clientLog, apiStatus, false));

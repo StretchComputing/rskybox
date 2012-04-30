@@ -57,7 +57,7 @@ public class FeedbackResource extends ServerResource {
 				this.listStatus = Reference.decode(this.listStatus);
 				log.info("FeedbackResource() - decoded status = " + this.listStatus);
 			} else if(parameter.getName().equals("incidentId"))  {
-				this.incidentId = (String)parameter.getValue().toLowerCase();
+				this.incidentId = (String)parameter.getValue();
 				this.incidentId = Reference.decode(this.incidentId);
 				log.info("ClientLogResource() - incident ID = " + this.incidentId);
 			} 
@@ -329,11 +329,13 @@ public class FeedbackResource extends ServerResource {
 					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationId")
 			    			.setParameter("applicationId", this.applicationId)
 			    			.getResultList();
+					log.info("feedbacks query 1: applicationId result set count = " + feedbacks.size());
 				} else {
 					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 							.getResultList();
+					log.info("feedbacks query 2: status/applicationId result set count = " + feedbacks.size());
 				}
 			} else {
 				if(this.listStatus.equalsIgnoreCase(Feedback.ALL_STATUS)) {
@@ -341,12 +343,14 @@ public class FeedbackResource extends ServerResource {
 			    			.setParameter("applicationId", this.applicationId)
 			    			.setParameter("incidentId", this.incidentId)
 			    			.getResultList();
+					log.info("feedbacks query 3: applicationId/incidentId result set count = " + feedbacks.size());
 				} else {
 					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationIdAndIncidentId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 			    			.setParameter("incidentId", this.incidentId)
 							.getResultList();
+					log.info("feedbacks query 4: status/applicationId/incidentId result set count = " + feedbacks.size());
 				}
 			}
             
