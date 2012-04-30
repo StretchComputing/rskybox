@@ -452,7 +452,10 @@ var RSKYBOX = (function (r, $) {
 
   $(function () {
     try {
-      r.session.getModel(r.session.keys.currentUser, new r.User());
+      var user = new r.User();
+      user.set({id: 'current'});
+      user.setUrl();
+      r.session.getModel(r.session.keys.currentUser, user);
     } catch (e) {
       r.log.error(e, 'RSKYBOX.main.onpageload');
     }
