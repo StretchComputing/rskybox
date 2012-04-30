@@ -4,12 +4,12 @@ var RSKYBOX = (function (r, $) {
 
   var
     logLevels = {
+      off: 0,
       error: 5,
       warn: 10,
       info: 25,
       debug: 50,
       local: 75,
-      off: 99
     },
 
     apiCodes = {
@@ -210,6 +210,9 @@ var RSKYBOX = (function (r, $) {
         // Ensure attrs are valid for making an Ajax call.
         if (!isValid(attrs)) { return; }
 
+        delete attrs.appId;
+        delete attrs.authHeader;
+
         $.ajax({
           type: 'POST',
           data: JSON.stringify(attrs),
@@ -230,11 +233,11 @@ var RSKYBOX = (function (r, $) {
     // Traffic cop for determining where logs should go.
     base = function (level, message, name) {
       try {
-        if (r.config.getApplicationId() && (r.config.log.getServerLevel() >= logLevels[level])) {
+        if (r.config.getApplicationId() && (logLevels[level] <= r.config.log.getServerLevel())) {
           server(level, message, name);
         }
 
-        if (r.config.log.getLocalLevel() >= logLevels[level]) {
+        if (logLevels[level] <= r.config.log.getLocalLevel()) {
           local(r.config.getConsole(), level, message, name);
         }
       } catch (e) {
@@ -321,6 +324,10 @@ var RSKYBOX = (function (r, $) {
           r.log.local('authHeader not specified', 'RSKYBOX.enduser.isValid');
           return false;
         }
+        if (!attrs.userName) {
+          r.log.local('userName not set', 'RSKYBOX.enduser.isValid');
+          delete attrs.userName;
+        }
 
         return true;
       } catch (e) {
@@ -332,6 +339,8 @@ var RSKYBOX = (function (r, $) {
       try {
         var
           attrs = {
+            appId: r.config.getApplicationId(),
+            authHeader: r.config.getAuthHeader(),
             userId: r.config.getUserId(),
             userName: r.config.getUserName(),
             application: r.config.getApplicationName(),
@@ -344,6 +353,9 @@ var RSKYBOX = (function (r, $) {
 
         // Ensure attrs are valid for making an Ajax call.
         if (!isValid(attrs)) { return; }
+
+        delete attrs.appId;
+        delete attrs.authHeader;
 
         $.ajax({
           type: 'POST',
