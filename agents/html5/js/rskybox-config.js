@@ -161,7 +161,6 @@ var RSKYBOX = (function (r, $) {
             if (!apiCodes[code]) {
               window.console.error('Undefined apiStatus: ' + code, 'RSKYBOX.config.log.apiErrorHandler');
             }
-            r.flash.warning(apiCodes[code]);
           } catch (e) {
             window.console.error(e, 'RSKYBOX.config.log.apiErrorHandler');
           }
@@ -208,7 +207,6 @@ var RSKYBOX = (function (r, $) {
             if (!apiCodes[code]) {
               window.console.info('Undefined apiStatus: ' + code, 'RSKYBOX.config.enduser.apiErrorHandler');
             }
-            r.flash.warning(apiCodes[code]);
           } catch (e) {
             window.console.error(e, 'RSKYBOX.config.enduser.apiErrorHandler');
           }
