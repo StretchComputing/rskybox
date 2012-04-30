@@ -64,14 +64,14 @@ var RSKYBOX = (function (r, $) {
     getUserName: function () {
       try {
         var
-          name = '',
-          user = r.session && r.session.getEntity(r.session.keys.currentUser);
+          name = 'no current user code, yet';
+          //user = r.session && r.session.getEntity(r.session.keys.currentUser);
 
-        if (user.firstName) { name += user.firstName + ' '; }
-        if (user.lastName) { name += user.lastName; }
-        if (name) { name += ', '; }
-        if (user.emailAddress) { name += user.emailAddress; }
-        if (user.phoneNumber) { name += ', ' + user.phoneNumber; }
+        //if (user.firstName) { name += user.firstName + ' '; }
+        //if (user.lastName) { name += user.lastName; }
+        //if (name) { name += ', '; }
+        //if (user.emailAddress) { name += user.emailAddress; }
+        //if (user.phoneNumber) { name += ', ' + user.phoneNumber; }
 
         return name;
       } catch (e) {

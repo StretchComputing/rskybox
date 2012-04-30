@@ -369,13 +369,13 @@ var RSKYBOX = (function (r, $) {
     },
   };
 
-  $(function () {
-    function sendToServer() {
-      server();
-      setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
-    }
-    sendToServer();
-  });
+  //$(function () {
+    //function sendToServer() {
+      //server();
+      //setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
+    //}
+    //sendToServer();
+  //});
 
 
   return r;
