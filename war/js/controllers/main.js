@@ -450,6 +450,15 @@ var RSKYBOX = (function (r, $) {
   });
 
 
+  $(function () {
+    try {
+      r.session.getModel(r.session.keys.currentUser, new r.User());
+    } catch (e) {
+      r.log.error(e, 'RSKYBOX.main.onpageload');
+    }
+  });
+
+
   try {
     r.router = new $.mobile.Router([
       { '.*':                       { handler: 'setupSession',        events: 'bs'  } },

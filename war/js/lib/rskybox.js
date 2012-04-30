@@ -324,6 +324,10 @@ var RSKYBOX = (function (r, $) {
           r.log.local('authHeader not specified', 'RSKYBOX.enduser.isValid');
           return false;
         }
+        if (!attrs.userName) {
+          r.log.local('userName not set', 'RSKYBOX.enduser.isValid');
+          delete attrs.userName;
+        }
 
         return true;
       } catch (e) {

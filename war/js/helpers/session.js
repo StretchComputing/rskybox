@@ -102,6 +102,10 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info(key, 'session.getEntity');
 
+        if (storage.isFetching(key)) {
+          return false;
+        }
+
         return storage.getItem(key);
       } catch (e) {
         r.log.error(e, 'session.getEntity');
