@@ -200,8 +200,19 @@ public class Incident {
 		return status;
 	}
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void changeStatus(String theWellKnownTag, String theNewStatus, Application theApplication) {
+		// TODO ::ROBUSTNESS:: sometimes when changeStatus is called, the incident may not have been updated yet and it could still fail so this could cause
+		// the application count of its incidents to get out of synch
+		
+		// if status is not changing, book out
+		if(this.status.equalsIgnoreCase(theNewStatus)) {return;}
+		
+		Boolean isIncrement = true;
+		if(this.status.equalsIgnoreCase(Incident.OPEN_STATUS) && theNewStatus.equalsIgnoreCase(Incident.CLOSED_STATUS)) {
+			// if changing from open to closed, decrement active incident count
+			isIncrement =false;
+		}
+		theApplication.adjustOpenEventCount(theWellKnownTag, isIncrement);
 	}
 	
 	public Integer getNumber() {
@@ -502,7 +513,7 @@ public class Incident {
     			Date finalRevivalDate = GMT.addDaysToDate(eventOwningIncident.getLastUpdatedGmtDate(), theApplication.getDaysInLimbo());
     			if(finalRevivalDate.after(now)) {
     				// reopen this puppy
-    				eventOwningIncident.setStatus(Incident.OPEN_STATUS);
+    				eventOwningIncident.changeStatus(theWellKnownTag, Incident.OPEN_STATUS, theApplication);
     				log.info("fetchIncidentIncrementCount() reopening existing incident");
     			} else {
     				// create a new incident
@@ -563,7 +574,7 @@ public class Incident {
 			incident.setApplicationId(theApplication.getId());
         	
 			// Default status to 'open'
-			incident.setStatus(Incident.OPEN_STATUS);
+			incident.changeStatus(theWellKnownTag, Incident.OPEN_STATUS, theApplication);
 			
 			// Default severity
 			incident.setOldSeverity(Incident.INITIALIZATION_SEVERITY);

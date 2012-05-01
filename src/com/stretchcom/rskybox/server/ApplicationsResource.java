@@ -284,7 +284,10 @@ public class ApplicationsResource extends ServerResource {
             	json.put("name", theApplication.getName());
             	json.put("version", theApplication.getVersion());
             	json.put("token", theApplication.getToken());
-            	
+            	json.put("numberOfLogs", theApplication.getNumberOfOpenLogs());
+            	json.put("numberOfCrashess", theApplication.getNumberOfOpenCrashes());
+            	json.put("numberOfFeedbacks", theApplication.getNumberOfOpenFeedbacks());
+            	             	
             	User user = Utility.getCurrentUser(getRequest());
             	if(user != null) {
             		String userId = KeyFactory.keyToString(user.getKey());

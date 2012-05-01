@@ -14,6 +14,7 @@ import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
+import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.ClientLog;
@@ -129,7 +130,11 @@ public class CronResource extends ServerResource {
         			.setParameter("key", i.getKey())
         			.getSingleResult();
     			
-    	    	anIncident.setStatus(Incident.CLOSED_STATUS);
+    	    	// need to get owning application to update the openEventCount
+    	    	// TODO  ::FIX_ME:: just to get this to compile for now
+    	    	Application owningApplication = null;
+    	    	
+    	    	anIncident.changeStatus(anIncident.getWellKnownTag(), Incident.CLOSED_STATUS, owningApplication);
     			emMessages.getTransaction().commit();
     		}
     		log.info("all incidents closed successfully");

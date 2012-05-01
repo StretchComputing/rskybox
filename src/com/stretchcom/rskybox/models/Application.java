@@ -72,6 +72,9 @@ public class Application {
 	private Float severitySensitivity = MOST_SENSITIVITY;
 	private Integer numberOfEndUsers = 0;
 	private Integer maxEventsPerIncident = MAX_EVENTS_PER_INCIDENT;
+	private Integer numberOfOpenLogs = 0;
+	private Integer numberOfOpenCrashes = 0;
+	private Integer numberOfOpenFeedbacks = 0;
 
 	@Transient
 	private String memberRole; // used internally on the server to return user role with list of user's applications
@@ -193,6 +196,98 @@ public class Application {
 		this.maxEventsPerIncident = maxEventsPerIncident;
 	}
 
+	public Integer getNumberOfOpenLogs() {
+		return numberOfOpenLogs;
+	}
+
+	public void setNumberOfOpenLogs(Integer numberOfOpenLogs) {
+		this.numberOfOpenLogs = numberOfOpenLogs;
+	}
+	
+	public void incrementNumberOfOpenLogs() {
+		this.numberOfOpenLogs = this.numberOfOpenLogs == null ? 0 : this.numberOfOpenLogs;
+		this.numberOfOpenLogs++;
+	}
+	
+	public void decrementNumberOfOpenLogs() {
+		if(this.numberOfOpenLogs == null || this.numberOfOpenLogs == 0) {
+			log.severe("Application.decrementNumberOfOpenLogs() failed because numberOfOpenLogs was zero or null");
+			return;
+		}
+		this.numberOfOpenLogs--;
+	}
+
+	public Integer getNumberOfOpenCrashes() {
+		return numberOfOpenCrashes;
+	}
+	
+	public void incrementNumberOfOpenCrashes() {
+		this.numberOfOpenCrashes = this.numberOfOpenCrashes == null ? 0 : this.numberOfOpenCrashes;
+		this.numberOfOpenCrashes++;
+	}
+	
+	public void decrementNumberOfOpenCrashes() {
+		if(this.numberOfOpenCrashes == null || this.numberOfOpenCrashes == 0) {
+			log.severe("Application.decrementNumberOfOpenCrashes() failed because numberOfOpenCrashes was zero or null");
+			return;
+		}
+		this.numberOfOpenCrashes--;
+	}
+
+	public void setNumberOfOpenCrashes(Integer numberOfOpenCrashes) {
+		this.numberOfOpenCrashes = numberOfOpenCrashes;
+	}
+
+	public Integer getNumberOfOpenFeedbacks() {
+		return numberOfOpenFeedbacks;
+	}
+	
+	public void incrementNumberOfOpenFeedbacks() {
+		this.numberOfOpenFeedbacks = this.numberOfOpenFeedbacks == null ? 0 : this.numberOfOpenFeedbacks;
+		this.numberOfOpenFeedbacks++;
+	}
+	
+	public void decrementNumberOfOpenFeedbacks() {
+		if(this.numberOfOpenFeedbacks == null || this.numberOfOpenFeedbacks == 0) {
+			log.severe("Application.decrementNumberOfOpenFeedbacks() failed because numberOfOpenFeedbacks was zero or null");
+			return;
+		}
+		this.numberOfOpenFeedbacks--;
+	}
+
+	public void setNumberOfOpenFeedbacks(Integer numberOfOpenFeedbacks) {
+		this.numberOfOpenFeedbacks = numberOfOpenFeedbacks;
+	}
+	
+	// theIsIncrement: if true, increment count; otherwise decrement
+	public void adjustOpenEventCount(String theWellKnownTag, Boolean theIsIncrement) {
+        EntityManager em = EMF.get().createEntityManager();
+        
+		try {
+    		Application app = (Application)em.createNamedQuery("Application.getByKey")
+				.setParameter("key", this.getKey())
+				.getSingleResult();
+    		
+    		if(theWellKnownTag.equalsIgnoreCase(Incident.LOG_TAG)) {
+    			if(theIsIncrement) {app.incrementNumberOfOpenLogs();}
+    			else               {app.decrementNumberOfOpenLogs();}
+    		} else if(theWellKnownTag.equalsIgnoreCase(Incident.CRASH_TAG)) {
+    			if(theIsIncrement) {app.incrementNumberOfOpenCrashes();}
+    			else               {app.decrementNumberOfOpenCrashes();}
+    		} else if(theWellKnownTag.equalsIgnoreCase(Incident.FEEDBACK_TAG)) {
+    			if(theIsIncrement) {app.incrementNumberOfOpenFeedbacks();}
+    			else               {app.decrementNumberOfOpenFeedbacks();}
+    		}
+		} catch (NoResultException e) {
+			log.severe("adjustOpenEventCount(): should never happen -- could not get application by key using an application object!");
+		} catch (NonUniqueResultException e) {
+			log.severe("adjustOpenEventCount(): should never happen - two or more applications have same key");
+		}  finally {
+			em.close();
+		}
+		return;
+	}
+
 	public void incrementEndUserCount() {
         EntityManager em = EMF.get().createEntityManager();
         
@@ -201,7 +296,8 @@ public class Application {
 				.setParameter("key", this.getKey())
 				.getSingleResult();
     		int currentNumberOfEndUsers = app.getNumberOfEndUsers() == null ? 0 : app.getNumberOfEndUsers();
-    		app.setNumberOfEndUsers(currentNumberOfEndUsers++);
+    		currentNumberOfEndUsers += 1;
+    		app.setNumberOfEndUsers(currentNumberOfEndUsers);
 		} catch (NoResultException e) {
 			log.severe("should never happen -- could not get application by key using an application object!");
 		} catch (NonUniqueResultException e) {

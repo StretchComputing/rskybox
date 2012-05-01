@@ -306,6 +306,8 @@ public class IncidentsResource extends ServerResource {
 					}
 					incident.setTags(tags);
 				}
+			} else if(!isUpdate) {
+				return Utility.apiError(this, ApiStatusCode.WELL_KNOWN_TAG_REQUIRED);
 			}
 
             if(!isUpdate && json.has("name")) {
@@ -341,7 +343,7 @@ public class IncidentsResource extends ServerResource {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
 	            	if(Incident.isStatusValid(status)) {
-	            		incident.setStatus(status);
+	            		incident.changeStatus(incident.getWellKnownTag(), status, theApplication);
 	            	} else {
 						return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
 	            	}
@@ -372,7 +374,7 @@ public class IncidentsResource extends ServerResource {
 				incident.setApplicationId(this.applicationId);
             	
 				// Default status to 'open'
-				incident.setStatus(Incident.OPEN_STATUS);
+				incident.changeStatus(incident.getWellKnownTag(), Incident.OPEN_STATUS, theApplication);
 				
 				// Default severity
 				incident.setSeverity(Incident.LOW_SEVERITY);
