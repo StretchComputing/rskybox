@@ -2,6 +2,8 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
+  r.restUrlBase = 'https://rskybox-stretchcom.appspot.com/rest/v1';
+
   var
     logLevels = {
       off: 0,
@@ -25,7 +27,7 @@ var RSKYBOX = (function (r, $) {
     // The URL for the REST call to create an rSkybox log.
     getUrl = function () {
       try {
-        return '/rest/v1/applications/' + r.config.getApplicationId() + '/clientLogs';
+        return r.restUrlBase + '/applications/' + r.config.getApplicationId() + '/clientLogs';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.log.getUrl');
       }
@@ -301,7 +303,7 @@ var RSKYBOX = (function (r, $) {
     // The URL for the REST call to create an rSkybox enduser.
     getUrl = function () {
       try {
-        return '/rest/v1/applications/' + r.config.getApplicationId() + '/endUsers';
+        return r.restUrlBase + '/applications/' + r.config.getApplicationId() + '/endUsers';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.enduser.getUrl');
       }
@@ -382,11 +384,13 @@ var RSKYBOX = (function (r, $) {
   };
 
   $(function () {
-    function sendToServer() {
-      server();
-      setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
-    }
-    sendToServer();
+    setTimeout(function () {
+      function sendToServer() {
+        server();
+        setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
+      }
+      sendToServer();
+    }, 10 * 1000);  // delay inital call by 10 seconds
   });
 
 
