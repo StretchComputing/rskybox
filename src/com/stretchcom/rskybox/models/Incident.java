@@ -114,7 +114,7 @@ public class Incident {
 	private Date lastUpdatedGmtDate;
 	private Date createdGmtDate;
 	private String endUser;
-	private String status = Incident.OPEN_STATUS;
+	private String status = Incident.CLOSED_STATUS;  // initialization code will "changeStatus()" 
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
 	private Boolean inStatsOnlyMode = false;
@@ -213,6 +213,8 @@ public class Incident {
 			isIncrement =false;
 		}
 		theApplication.adjustOpenEventCount(theWellKnownTag, isIncrement);
+		
+		this.status = theNewStatus;
 	}
 	
 	public Integer getNumber() {
@@ -470,6 +472,8 @@ public class Incident {
         EntityManager em = EMF.get().createEntityManager();
         Date now = new Date();
         Boolean isExistingIncident = true;
+        Boolean severityChanged = false;
+		String severityMsg = "";
         
         try {
             if(theIncidentId != null) {
@@ -532,9 +536,8 @@ public class Incident {
     		}
 			
 			// update severity if appropriate
-			Boolean severityChanged = checkForSeverityUpdate(eventOwningIncident, theApplication);
+			severityChanged = checkForSeverityUpdate(eventOwningIncident, theApplication);
 			if(severityChanged) {
-				String severityMsg = "";
 				// two scenarios to deal with
 				// 1. this is a new incident (old severity = new severity)
 				// 2. change in severity for an existing incident (old severity != new severity)
@@ -548,13 +551,13 @@ public class Incident {
 				}
 				
 				// queue up notification
-            	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), severityMsg, eventOwningIncident.getId());
+	        	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), severityMsg, eventOwningIncident.getId());
 			}
         } finally {
         	// this should persist the changes
         	em.close();
         }
- 		
+        
 		return eventOwningIncident;
 	}
 	
@@ -572,9 +575,6 @@ public class Incident {
 			incident.setLastUpdatedGmtDate(new Date());
 			incident.setCreatedGmtDate(new Date());
 			incident.setApplicationId(theApplication.getId());
-        	
-			// Default status to 'open'
-			incident.changeStatus(theWellKnownTag, Incident.OPEN_STATUS, theApplication);
 			
 			// Default severity
 			incident.setOldSeverity(Incident.INITIALIZATION_SEVERITY);
@@ -585,6 +585,9 @@ public class Incident {
 			} else {
 				incident.setSeverity(Incident.LOW_SEVERITY);
 			}
+			
+			// Default status to 'open'
+			incident.changeStatus(theWellKnownTag, Incident.OPEN_STATUS, theApplication);
 			
 			// Assign application unique incident number
 			incident.setNumber(Application.getAndIncrementIncidentNumber(theApplication.getId()));
@@ -605,6 +608,8 @@ public class Incident {
             }
             em.close();
         }
+		
+		log.info("Incident::createIncident() complete and returning. Incident key = " + incident.getKey());
 		return incident;
 	}
 	

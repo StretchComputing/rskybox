@@ -264,6 +264,7 @@ public class Application {
         EntityManager em = EMF.get().createEntityManager();
         
 		try {
+			em.getTransaction().begin();
     		Application app = (Application)em.createNamedQuery("Application.getByKey")
 				.setParameter("key", this.getKey())
 				.getSingleResult();
@@ -278,13 +279,18 @@ public class Application {
     			if(theIsIncrement) {app.incrementNumberOfOpenFeedbacks();}
     			else               {app.decrementNumberOfOpenFeedbacks();}
     		}
+    		em.persist(app);
+    		em.getTransaction().commit();
 		} catch (NoResultException e) {
 			log.severe("adjustOpenEventCount(): should never happen -- could not get application by key using an application object!");
 		} catch (NonUniqueResultException e) {
 			log.severe("adjustOpenEventCount(): should never happen - two or more applications have same key");
-		}  finally {
-			em.close();
-		}
+		} finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
 		return;
 	}
 
