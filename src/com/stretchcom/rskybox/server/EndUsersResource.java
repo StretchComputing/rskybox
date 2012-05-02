@@ -67,27 +67,29 @@ public class EndUsersResource extends ServerResource {
     @Post("json")
     public JsonRepresentation post(Representation entity) {
         log.info("in post");
-    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
-    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(this, appIdStatus);
-    	}
+		if(this.applicationId == null) {return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);}
+		Application application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+			return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
     	
-        return save_end_user(entity);
+        return save_end_user(entity, application);
     }
 
     // Handles 'Update End User API'
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
-    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
-    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(this, appIdStatus);
-    	}
+		if(this.applicationId == null) {return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);}
+		Application application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+			return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
     	
 		if (this.id == null || this.id.length() == 0) {
 			return Utility.apiError(this, ApiStatusCode.END_USER_ID_REQUIRED);
 		}
-        return save_end_user(entity);
+        return save_end_user(entity, application);
     }
 
     // Handles 'Delete End User API'
@@ -220,7 +222,7 @@ public class EndUsersResource extends ServerResource {
         return new JsonRepresentation(getEndUserJson(endUser, apiStatus));
     }
 
-    private JsonRepresentation save_end_user(Representation entity) {
+    private JsonRepresentation save_end_user(Representation entity, Application theApplication) {
         EntityManager em = EMF.get().createEntityManager();
 
         EndUser endUser = null;
@@ -271,6 +273,7 @@ public class EndUsersResource extends ServerResource {
             		// NOT an error - first time create has been called for an endUser with this userName
         			log.info("End User not found -- new end user will be created");
         			endUser.setCreatedGmtDate(new Date());
+        			theApplication.incrementEndUserCount();
         		} catch (NonUniqueResultException e) {
         			log.severe("should never happen - two or more end users have same key");
         			this.setStatus(Status.SERVER_ERROR_INTERNAL);
