@@ -1,3 +1,13 @@
+//
+// rSkybox JavaScript Agent, v0.1 Beta, 2012/05/02 14:00 EDT
+//
+// Copyright © 2012 by Stretch Computing, Inc. All rights reserved.
+//
+// Any redistribution or reproduction of part or all of the contents in any
+// form is prohibited without prior approval. You may not, except with our
+// express written permission, distribute or commercially exploit the content.
+//
+
 var RSKYBOX = (function (r, $) {
   'use strict';
 
