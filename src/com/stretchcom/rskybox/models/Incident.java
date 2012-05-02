@@ -212,8 +212,13 @@ public class Incident {
 			// if changing from open to closed, decrement active incident count
 			isIncrement =false;
 		}
-		theApplication.adjustOpenEventCount(theWellKnownTag, isIncrement);
+		Application.adjustOpenEventCount(theWellKnownTag, isIncrement, theApplication.getId());
 		
+		this.status = theNewStatus;
+	}
+	
+	// DON'T call this method unless you are the CRON job!!!!!
+	public void hiddenSetStatus(String theNewStatus) {
 		this.status = theNewStatus;
 	}
 	

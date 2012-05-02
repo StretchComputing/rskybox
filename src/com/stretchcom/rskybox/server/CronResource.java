@@ -130,11 +130,12 @@ public class CronResource extends ServerResource {
         			.setParameter("key", i.getKey())
         			.getSingleResult();
     			
-    	    	// need to get owning application to update the openEventCount
-    	    	// TODO  ::FIX_ME:: just to get this to compile for now
-    	    	Application owningApplication = null;
-    	    	
-    	    	anIncident.changeStatus(anIncident.getWellKnownTag(), Incident.CLOSED_STATUS, owningApplication);
+    	    	// ::PERFORMANCE::
+    	    	// Not calling Incident.changeStatus because that would require first getting the application object via a datastore
+    	    	// call and then updating the application event count inside the changeStatus call. That would require retrieving
+    	    	// the Application entity twice.  Code below only retrieves it once.
+    	    	Application.adjustOpenEventCount(anIncident.getWellKnownTag(), false, anIncident.getApplicationId());
+    	    	anIncident.hiddenSetStatus(Incident.CLOSED_STATUS);
     			emMessages.getTransaction().commit();
     		}
     		log.info("all incidents closed successfully");

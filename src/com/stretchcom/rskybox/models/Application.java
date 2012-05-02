@@ -260,13 +260,21 @@ public class Application {
 	}
 	
 	// theIsIncrement: if true, increment count; otherwise decrement
-	public void adjustOpenEventCount(String theWellKnownTag, Boolean theIsIncrement) {
+	public static void adjustOpenEventCount(String theWellKnownTag, Boolean theIsIncrement, String theApplicationId) {
         EntityManager em = EMF.get().createEntityManager();
+        
+        Key appKey = null;
+        try {
+        	appKey = KeyFactory.stringToKey(theApplicationId);
+        } catch(Exception e) {
+        	log.severe("Application.adjustOpenEventCount stringToKey illegal argument exception e = " + e.getMessage());
+        	return;
+        }
         
 		try {
 			em.getTransaction().begin();
     		Application app = (Application)em.createNamedQuery("Application.getByKey")
-				.setParameter("key", this.getKey())
+				.setParameter("key", appKey)
 				.getSingleResult();
     		
     		if(theWellKnownTag.equalsIgnoreCase(Incident.LOG_TAG)) {
