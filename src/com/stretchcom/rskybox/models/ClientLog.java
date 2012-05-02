@@ -27,12 +27,29 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT cl FROM ClientLog cl WHERE cl.applicationId = :applicationId ORDER BY cl.createdGmtDate DESC"
     ),
     @NamedQuery(
+    		name="ClientLog.getAllWithApplicationIdAndIncidentId",
+    		query="SELECT cl FROM ClientLog cl WHERE " +
+    		      "cl.applicationId = :applicationId" + " AND " + 
+    			  "cl.incidentId = :incidentId ORDER BY cl.createdGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="ClientLog.getByStatus",
     		query="SELECT cl FROM ClientLog cl WHERE cl.status = :status  ORDER BY cl.createdGmtDate DESC"
     ),
     @NamedQuery(
+    		name="ClientLog.getByIncident",
+    		query="SELECT cl FROM ClientLog cl WHERE cl.incidentId = :incidentId ORDER BY cl.createdGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="ClientLog.getByStatusAndApplicationId",
     		query="SELECT cl FROM ClientLog cl WHERE cl.status = :status and cl.applicationId = :applicationId ORDER BY cl.createdGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="ClientLog.getByStatusAndApplicationIdAndIncidentId",
+    		query="SELECT cl FROM ClientLog cl WHERE " +
+    		      "cl.status = :status" + " AND " +
+    			  "cl.applicationId = :applicationId" + " AND " +
+    		      "cl.incidentId = :incidentId ORDER BY cl.createdGmtDate DESC"
     ),
     @NamedQuery(
     		name="ClientLog.getByKey",
@@ -68,7 +85,6 @@ public class ClientLog {
 	private String logLevel;
 	private String logName;
 	private String message;
-	// TODO support time zone and GMT for dates
 	private Date createdGmtDate;
 	private String userName;
 	private Text stackBackTrace;  // deprecated on 4/14/2012. Supported for legacy data in datastore. Replaces by array stackBackTraces below.
@@ -77,6 +93,8 @@ public class ClientLog {
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
 	private String summary;
+	private Integer number;  // sequential number auto assigned to incidents with scope of the application
+	private String incidentId; // foreign key to 'owning' incident
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -147,8 +165,13 @@ public class ClientLog {
 		this.status = status;
 	}
 	
-	public Boolean isStatusValid(String theStatus) {
+	public static Boolean isStatusValid(String theStatus) {
 		if(theStatus.equals(ClientLog.NEW_STATUS) || theStatus.equals(ClientLog.ARCHIVED_STATUS)) return true;
+		return false;
+	}
+	
+	public static Boolean isStatusParameterValid(String theStatus) {
+		if(theStatus.equals(ClientLog.NEW_STATUS) || theStatus.equals(ClientLog.ARCHIVED_STATUS) || theStatus.equals(ClientLog.ALL_STATUS) ) return true;
 		return false;
 	}
 	
@@ -199,6 +222,14 @@ public class ClientLog {
 	public void setSummary(String summary) {
 		this.summary = summary;
 	}
+
+	public Integer getNumber() {
+		return number;
+	}
+
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
     	
 	public List<String> getStackBackTraces() {
 		return stackBackTraces;
@@ -206,6 +237,14 @@ public class ClientLog {
 
 	public void setStackBackTraces(List<String> stackBackTraces) {
 		this.stackBackTraces = stackBackTraces;
+	}
+	
+	public String getIncidentId() {
+		return incidentId;
+	}
+
+	public void setIncidentId(String incidentId) {
+		this.incidentId = incidentId;
 	}
 
 	public Boolean createAppActions(List<AppAction> theNewAppActionList) {

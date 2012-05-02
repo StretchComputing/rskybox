@@ -30,7 +30,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.Feedback;
+import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
@@ -39,6 +41,7 @@ public class FeedbackResource extends ServerResource {
     private String id;
 	private String applicationId;
     private String listStatus;
+    private String incidentId;
 
     @Override
     protected void doInit() throws ResourceException {
@@ -53,6 +56,10 @@ public class FeedbackResource extends ServerResource {
 				this.listStatus = (String)parameter.getValue().toLowerCase();
 				this.listStatus = Reference.decode(this.listStatus);
 				log.info("FeedbackResource() - decoded status = " + this.listStatus);
+			} else if(parameter.getName().equals("incidentId"))  {
+				this.incidentId = (String)parameter.getValue();
+				this.incidentId = Reference.decode(this.incidentId);
+				log.info("ClientLogResource() - incident ID = " + this.incidentId);
 			} 
 		}
     }
@@ -107,12 +114,14 @@ public class FeedbackResource extends ServerResource {
 
     private JsonRepresentation save_feedback(Representation entity, Application theApplication) {
         EntityManager em = EMF.get().createEntityManager();
+        JSONObject jsonReturn = new JSONObject();
 
         Feedback feedback = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
+		Incident owningIncident = null;
         try {
             feedback = new Feedback();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
@@ -179,6 +188,11 @@ public class FeedbackResource extends ServerResource {
 				feedback.setInstanceUrl(json.getString("instanceUrl"));
 			}
 			
+			String incidentId = null;
+			if(!isUpdate && json.has("incidentId")) {
+				incidentId = json.getString("incidentId");
+			}
+			
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -199,16 +213,16 @@ public class FeedbackResource extends ServerResource {
 				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
 				feedback.setActiveThruGmtDate(activeThruGmtDate);
+				
+				// find or create an incident that will 'own' this new feedback
+				// TODO something better for an eventName than the current date
+				Date now = new Date();
+				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.FEEDBACK_TAG, incidentId, theApplication, "new Feedback");
+				feedback.setIncidentId(owningIncident.getId());
 			}
 
             em.persist(feedback);
             em.getTransaction().commit();
-            
-            if(!isUpdate) {
-            	// TODO is the clientLog key really set by this point?
-            	String theItemId = KeyFactory.keyToString(feedback.getKey());
-            	User.sendNotifications(this.applicationId, Notification.FEEDBACK, feedback.getUserName(), theItemId);
-            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -229,7 +243,15 @@ public class FeedbackResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getFeedbackJson(feedback, apiStatus, false));
+	    try {
+	    	jsonReturn.put("apiStatus", apiStatus);
+	    	jsonReturn.put("incident", owningIncident.getJson());
+	    } catch (JSONException e) {
+	        log.severe("exception = " + e.getMessage());
+	    	e.printStackTrace();
+	        this.setStatus(Status.SERVER_ERROR_INTERNAL);
+	    }
+	    return new JsonRepresentation(jsonReturn);
     }
 
     private JsonRepresentation show() {
@@ -294,24 +316,42 @@ public class FeedbackResource extends ServerResource {
             JSONArray ja = new JSONArray();
             
 			if(this.listStatus != null) {
-			    if(this.listStatus.equalsIgnoreCase(Feedback.NEW_STATUS) || this.listStatus.equalsIgnoreCase(Feedback.ARCHIVED_STATUS)){
+				if(!Feedback.isStatusParameterValid(this.listStatus)) {
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
+				}
+			} else {
+				// by default, get only the new status incidents
+				this.listStatus = Feedback.NEW_STATUS;
+			}
+			
+			if(this.incidentId == null) {
+				if(this.listStatus.equalsIgnoreCase(Feedback.ALL_STATUS)) {
+					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.getResultList();
+					log.info("feedbacks query 1: applicationId result set count = " + feedbacks.size());
+				} else {
 					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 							.getResultList();
-			    } else if(this.listStatus.equalsIgnoreCase(Feedback.ALL_STATUS)) {
-					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationId")
-							.setParameter("applicationId", this.applicationId)
-							.getResultList();
-			    } else {
-			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
-			    }
+					log.info("feedbacks query 2: status/applicationId result set count = " + feedbacks.size());
+				}
 			} else {
-				// by default, only get 'new' feedback
-				feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationId")
-						.setParameter("status", Feedback.NEW_STATUS)
-						.setParameter("applicationId", this.applicationId)
-						.getResultList();
+				if(this.listStatus.equalsIgnoreCase(Feedback.ALL_STATUS)) {
+					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationIdAndIncidentId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.setParameter("incidentId", this.incidentId)
+			    			.getResultList();
+					log.info("feedbacks query 3: applicationId/incidentId result set count = " + feedbacks.size());
+				} else {
+					feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getByStatusAndApplicationIdAndIncidentId")
+							.setParameter("status", this.listStatus)
+							.setParameter("applicationId", this.applicationId)
+			    			.setParameter("incidentId", this.incidentId)
+							.getResultList();
+					log.info("feedbacks query 4: status/applicationId/incidentId result set count = " + feedbacks.size());
+				}
 			}
             
             for (Feedback fb : feedbacks) {
@@ -332,8 +372,8 @@ public class FeedbackResource extends ServerResource {
     }
 
     private JSONObject getFeedbackJson(Feedback feedback, String theApiStatus, Boolean isList) {
+    	
         JSONObject json = new JSONObject();
-
         try {
         	if(theApiStatus != null) {
         		json.put("apiStatus", theApiStatus);
@@ -350,6 +390,7 @@ public class FeedbackResource extends ServerResource {
             	json.put("instanceUrl", feedback.getInstanceUrl());
             	json.put("status", feedback.getStatus());
             	json.put("appId", feedback.getApplicationId());
+            	json.put("incidentId", feedback.getIncidentId());
         	}
         } catch (JSONException e) {
         	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());

@@ -32,7 +32,9 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppAction;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
@@ -41,6 +43,7 @@ public class CrashDetectsResource extends ServerResource {
 	private String id;
 	private String applicationId;
     private String listStatus;
+    private String incidentId;
 
     @Override
     protected void doInit() throws ResourceException {
@@ -55,6 +58,10 @@ public class CrashDetectsResource extends ServerResource {
 				this.listStatus = (String)parameter.getValue().toLowerCase();
 				this.listStatus = Reference.decode(this.listStatus);
 				log.info("CrashDetectResource() - decoded status = " + this.listStatus);
+			} else if(parameter.getName().equals("incidentId"))  {
+				this.incidentId = (String)parameter.getValue();
+				this.incidentId = Reference.decode(this.incidentId);
+				log.info("ClientLogResource() - incident ID = " + this.incidentId);
 			} 
 		}
     }
@@ -127,24 +134,42 @@ public class CrashDetectsResource extends ServerResource {
             JSONArray ja = new JSONArray();
             
 			if(this.listStatus != null) {
-			    if(this.listStatus.equalsIgnoreCase(CrashDetect.NEW_STATUS) || this.listStatus.equalsIgnoreCase(CrashDetect.ARCHIVED_STATUS)){
-			    	crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationId")
+				if(!CrashDetect.isStatusParameterValid(this.listStatus)) {
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
+				}
+			} else {
+				// by default, get only the new status incidents
+				this.listStatus = CrashDetect.NEW_STATUS;
+			}
+			
+			if(this.incidentId == null) {
+				if(this.listStatus.equalsIgnoreCase(CrashDetect.ALL_STATUS)) {
+					crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getAllWithApplicationId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.getResultList();
+					log.info("crashDetects query 1: applicationId result set count = " + crashDetects.size());
+				} else {
+					crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationId")
 							.setParameter("status", this.listStatus)
 							.setParameter("applicationId", this.applicationId)
 							.getResultList();
-			    } else if(this.listStatus.equalsIgnoreCase(CrashDetect.ALL_STATUS)) {
-			    	crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getAllWithApplicationId")
-			    			.setParameter("applicationId", this.applicationId)
-			    			.getResultList();
-			    } else {
-			    	return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
-			    }
+					log.info("crashDetects query 2: status/applicationId result set count = " + crashDetects.size());
+				}
 			} else {
-				// by default, only get 'new' crashDetects
-				crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationId")
-						.setParameter("status", CrashDetect.NEW_STATUS)
-						.setParameter("applicationId", this.applicationId)
-						.getResultList();
+				if(this.listStatus.equalsIgnoreCase(CrashDetect.ALL_STATUS)) {
+					crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getAllWithApplicationIdAndIncidentId")
+			    			.setParameter("applicationId", this.applicationId)
+			    			.setParameter("incidentId", this.incidentId)
+			    			.getResultList();
+					log.info("crashDetects query 3: applicationId/incidentId result set count = " + crashDetects.size());
+				} else {
+					crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getByStatusAndApplicationIdAndIncidentId")
+							.setParameter("status", this.listStatus)
+							.setParameter("applicationId", this.applicationId)
+			    			.setParameter("incidentId", this.incidentId)
+							.getResultList();
+					log.info("crashDetects query 4: status/applicationId/incidentId result set count = " + crashDetects.size());
+				}
 			}
             
             for (CrashDetect cd : crashDetects) {
@@ -156,7 +181,9 @@ public class CrashDetectsResource extends ServerResource {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
+        } finally {
+			em.close();
+		}
         return new JsonRepresentation(json);
     }
 
@@ -196,6 +223,8 @@ public class CrashDetectsResource extends ServerResource {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
+			em.close();
 		} 
         
         return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus, false));
@@ -203,12 +232,14 @@ public class CrashDetectsResource extends ServerResource {
 
     private JsonRepresentation save_crash_detect(Representation entity, Application theApplication) {
         EntityManager em = EMF.get().createEntityManager();
+        JSONObject jsonReturn = new JSONObject();
 
         CrashDetect crashDetect = null;
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
         em.getTransaction().begin();
+		Incident owningIncident = null;
         try {
             crashDetect = new CrashDetect();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
@@ -234,8 +265,10 @@ public class CrashDetectsResource extends ServerResource {
                 isUpdate = true;
             }
 			
-			if(!isUpdate && json.has("summary")) {
-				crashDetect.setSummary(json.getString("summary"));
+			String summary = null;
+            if(!isUpdate && json.has("summary")) {
+            	summary = json.getString("summary");
+				crashDetect.setSummary(summary);
 			}
 			
 			if(!isUpdate && json.has("userName")) {
@@ -320,6 +353,11 @@ public class CrashDetectsResource extends ServerResource {
 				crashDetect.createAppActions(appActions);
 			}
 			
+			String incidentId = null;
+			if(!isUpdate && json.has("incidentId")) {
+				incidentId = json.getString("incidentId");
+			}
+			
 			if(isUpdate) {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
@@ -340,16 +378,20 @@ public class CrashDetectsResource extends ServerResource {
 				int daysUntilAutoArchive = theApplication.daysUntilAutoArchive();
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
 				crashDetect.setActiveThruGmtDate(activeThruGmtDate);
+				
+				// find or create an incident that will 'own' this new crashDetect
+				// TODO something better for an eventName than the current date
+				Date now = new Date();
+				
+				if(summary == null || summary.trim().length() == 0) {
+					summary = "new Crash Detect";
+				}
+				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, summary);
+				crashDetect.setIncidentId(owningIncident.getId());
 			}
             
             em.persist(crashDetect);
             em.getTransaction().commit();
-            
-            if(!isUpdate) {
-            	// TODO is the clientLog key really set by this point?
-            	String theItemId = KeyFactory.keyToString(crashDetect.getKey());
-            	User.sendNotifications(this.applicationId, Notification.CRASH, crashDetect.getSummary(), theItemId);
-            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -370,7 +412,15 @@ public class CrashDetectsResource extends ServerResource {
             em.close();
         }
         
-        return new JsonRepresentation(getCrashDetectJson(crashDetect, apiStatus, false));
+	    try {
+	    	jsonReturn.put("apiStatus", apiStatus);
+	    	jsonReturn.put("incident", owningIncident.getJson());
+	    } catch (JSONException e) {
+	        log.severe("exception = " + e.getMessage());
+	    	e.printStackTrace();
+	        this.setStatus(Status.SERVER_ERROR_INTERNAL);
+	    }
+	    return new JsonRepresentation(jsonReturn);
     }
     
     private JSONObject getCrashDetectJson(CrashDetect crashDetect, Boolean isList) {
@@ -395,6 +445,7 @@ public class CrashDetectsResource extends ServerResource {
             	
             	json.put("userName", crashDetect.getUserName());
             	json.put("instanceUrl", crashDetect.getInstanceUrl());
+            	json.put("incidentId", crashDetect.getIncidentId());
             	
             	if(!isList) {
                 	JSONArray appActionsJsonArray = new JSONArray();

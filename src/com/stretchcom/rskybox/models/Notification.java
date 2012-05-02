@@ -72,6 +72,7 @@ public class Notification {
 	public static final String CRASH = "crash";
 	public static final String CLIENT_LOG = "clientlog";
 	public static final String FEEDBACK = "feedback";
+	public static final String UPDATED_LOG = "updatedLog";
 	
 	public static final int DEFAULT_NOTIFICATION_PERIOD = 5;
 
@@ -102,6 +103,15 @@ public class Notification {
 	
 	@Basic
 	private List<String> clientLogIds;
+	
+	@Basic
+	private List<Integer> updatedLogCounts;
+	
+	@Basic
+	private List<String> updatedLogMessages;
+	
+	@Basic
+	private List<String> updatedLogIds;
 	
 	@Basic
 	private List<Integer> crashCounts;
@@ -224,6 +234,30 @@ public class Notification {
 				log.severe("clientLogIds array size corrupt");
 			}
 			nd.setClientLogId(clientLogId);
+			
+			Integer updatedLogCount = null;
+			if(this.updatedLogCounts.size() > i) {
+				updatedLogCount = this.updatedLogCounts.get(i);
+			} else {
+				log.severe("updatedLogCounts array size corrupt");
+			}
+			nd.setUpdatedLogCount(updatedLogCount);
+			
+			String updatedLogMessage = null;
+			if(this.updatedLogMessages.size() > i) {
+				updatedLogMessage = this.updatedLogMessages.get(i).equals("") ? null : this.updatedLogMessages.get(i);
+			} else {
+				log.severe("updated log messages array size corrupt");
+			}
+			nd.setUpdatedLogMessage(updatedLogMessage);
+			
+			String updatedLogId = null;
+			if(this.updatedLogIds.size() > i) {
+				updatedLogId = this.updatedLogIds.get(i).equals("") ? null : this.updatedLogIds.get(i);
+			} else {
+				log.severe("updatedLogIds array size corrupt");
+			}
+			nd.setUpdatedLogId(updatedLogId);
 			
 			Integer crashCount = null;
 			if(this.crashCounts.size() > i) {
@@ -357,6 +391,7 @@ public class Notification {
         	
         	notificationDetails.setCrashCount(0);
         	notificationDetails.setClientLogCount(0);
+        	notificationDetails.setUpdatedLogCount(0);
         	notificationDetails.setFeedbackCount(0);
 
         	if(theNotificationType.equalsIgnoreCase(Notification.CRASH)) {
@@ -367,6 +402,10 @@ public class Notification {
         		notificationDetails.setClientLogCount(1);
             	notificationDetails.setClientLogMessage(theMessage);
             	notificationDetails.setClientLogId(theItemId);
+        	} else if(theNotificationType.equalsIgnoreCase(Notification.UPDATED_LOG)) {
+        		notificationDetails.setUpdatedLogCount(1);
+            	notificationDetails.setUpdatedLogMessage(theMessage);
+            	notificationDetails.setUpdatedLogId(theItemId);
         	} else if(theNotificationType.equalsIgnoreCase(Notification.FEEDBACK)) {
         		notificationDetails.setFeedbackCount(1);
             	notificationDetails.setFeedbackMessage(theMessage);
@@ -411,6 +450,9 @@ public class Notification {
 		this.clientLogCounts = new ArrayList<Integer>();
 		this.clientLogMessages = new ArrayList<String>();
 		this.clientLogIds = new ArrayList<String>();
+		this.updatedLogCounts = new ArrayList<Integer>();
+		this.updatedLogMessages = new ArrayList<String>();
+		this.updatedLogIds = new ArrayList<String>();
 		this.crashCounts = new ArrayList<Integer>();
 		this.crashMessages = new ArrayList<String>();
 		this.crashIds = new ArrayList<String>();
@@ -439,6 +481,16 @@ public class Notification {
 
 		String clientLogId = nd.getClientLogId() == null ? "" : nd.getClientLogId();
 		this.clientLogIds.add(clientLogId);
+
+		// if empty, replace with 0
+		Integer updatedLogCount = nd.getUpdatedLogCount() == null ? 0 : nd.getUpdatedLogCount();
+		this.updatedLogCounts.add(updatedLogCount);
+
+		String updatedLogMessage = nd.getUpdatedLogMessage() == null ? "" : nd.getUpdatedLogMessage();
+		this.updatedLogMessages.add(updatedLogMessage);
+
+		String updatedLogId = nd.getUpdatedLogId() == null ? "" : nd.getUpdatedLogId();
+		this.updatedLogIds.add(updatedLogId);
 
 		// if empty, replace with 0
 		Integer crashCount = nd.getCrashCount() == null ? 0 : nd.getCrashCount();
@@ -546,6 +598,20 @@ public class Notification {
 				this.clientLogCounts.set(applicationIdIndex, originalClientLogCount);
 			}
 			
+			Integer newUpdatedLogCount = theNewNotificationDetails.getUpdatedLogCount();
+			if(newUpdatedLogCount > 0) {
+				Integer originalUpdatedLogCount = this.updatedLogCounts.get(applicationIdIndex);
+				if(originalUpdatedLogCount == 0) {
+					String updatedLogMessage = theNewNotificationDetails.getUpdatedLogMessage() == null ? "" : theNewNotificationDetails.getUpdatedLogMessage();
+					this.updatedLogMessages.set(applicationIdIndex, updatedLogMessage);
+
+					String updatedLogId = theNewNotificationDetails.getUpdatedLogId() == null ? "" : theNewNotificationDetails.getUpdatedLogId();
+					this.updatedLogIds.set(applicationIdIndex, updatedLogId);
+				}
+				originalUpdatedLogCount++;
+				this.updatedLogCounts.set(applicationIdIndex, originalUpdatedLogCount);
+			}
+			
 			Integer newCrashCount = theNewNotificationDetails.getCrashCount();
 			if(newCrashCount > 0) {
 				Integer originalCrashCount = this.crashCounts.get(applicationIdIndex);
@@ -606,10 +672,16 @@ public class Notification {
         		}
         		if(nd.getClientLogCount() != null) {
         			if(prior) {smsEmailAddressBuf.append("|");}
-        			smsEmailAddressBuf.append("clientlog:");
+        			smsEmailAddressBuf.append("log:");
         			smsEmailAddressBuf.append(nd.getClientLogCount());
             		prior = true;
         		}
+//        		if(nd.getUpdatedLogCount() != null) {
+//        			if(prior) {smsEmailAddressBuf.append("|");}
+//        			smsEmailAddressBuf.append("updated log:");
+//        			smsEmailAddressBuf.append(nd.getUpdatedLogCount());
+//            		prior = true;
+//        		}
         		if(nd.getFeedbackCount() != null) {
         			if(prior) {smsEmailAddressBuf.append("|");}
         			smsEmailAddressBuf.append("feedback:");

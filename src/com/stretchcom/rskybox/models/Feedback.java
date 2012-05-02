@@ -24,12 +24,29 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT fb FROM Feedback fb WHERE fb.applicationId = :applicationId ORDER BY fb.recordedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="Feedback.getAllWithApplicationIdAndIncidentId",
+    		query="SELECT fb FROM Feedback fb WHERE " +
+    		      "fb.applicationId = :applicationId" + " AND " +
+    			  "fb.incidentId = :incidentId ORDER BY fb.recordedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="Feedback.getByStatus",
     		query="SELECT fb FROM Feedback fb WHERE fb.status = :status ORDER BY fb.recordedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="Feedback.getByIncident",
+    		query="SELECT fb FROM Feedback fb WHERE fb.incidentId = :incidentId ORDER BY fb.recordedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="Feedback.getByStatusAndApplicationId",
     		query="SELECT fb FROM Feedback fb WHERE fb.status = :status and fb.applicationId = :applicationId ORDER BY fb.recordedGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="Feedback.getByStatusAndApplicationIdAndIncidentId",
+    		query="SELECT fb FROM Feedback fb WHERE " +
+    		      "fb.status = :status" + " AND " + 
+    			  "fb.applicationId = :applicationId" + " AND " +
+    		      "fb.incidentId = :incidentId ORDER BY fb.recordedGmtDate DESC"
     ),
     @NamedQuery(
     		name="Feedback.getByKey",
@@ -62,6 +79,8 @@ public class Feedback {
 	private String status;
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
+	private Integer number;  // sequential number auto assigned to incidents with scope of the application
+	private String incidentId; // foreign key to 'owning' incident
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -115,6 +134,11 @@ public class Feedback {
 		if(theStatus.equals(Feedback.NEW_STATUS) || theStatus.equals(Feedback.ARCHIVED_STATUS)) return true;
 		return false;
 	}
+	
+	public static Boolean isStatusParameterValid(String theStatus) {
+		if(theStatus.equals(Feedback.NEW_STATUS) || theStatus.equals(Feedback.ARCHIVED_STATUS) || theStatus.equals(Feedback.ALL_STATUS) ) return true;
+		return false;
+	}
 
 	public String getApplicationId() {
 		return applicationId;
@@ -130,5 +154,21 @@ public class Feedback {
 
 	public void setActiveThruGmtDate(Date activeThruGmtDate) {
 		this.activeThruGmtDate = activeThruGmtDate;
+	}
+
+	public Integer getNumber() {
+		return number;
+	}
+
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
+	
+	public String getIncidentId() {
+		return incidentId;
+	}
+
+	public void setIncidentId(String incidentId) {
+		this.incidentId = incidentId;
 	}
 }

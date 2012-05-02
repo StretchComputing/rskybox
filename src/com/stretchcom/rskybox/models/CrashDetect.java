@@ -27,12 +27,29 @@ import com.google.appengine.api.datastore.Text;
     		query="SELECT cd FROM CrashDetect cd WHERE cd.applicationId = :applicationId ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="CrashDetect.getAllWithApplicationIdAndIncidentId",
+    		query="SELECT cd FROM CrashDetect cd WHERE " +
+    		      "cd.applicationId = :applicationId" + " AND " +
+    			  "cd.incidentId = :incidentId ORDER BY cd.detectedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="CrashDetect.getByStatus",
     		query="SELECT cd FROM CrashDetect cd WHERE cd.status = :status ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="CrashDetect.getByIncident",
+    		query="SELECT cd FROM CrashDetect cd WHERE cd.incidentId = :incidentId ORDER BY cd.detectedGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="CrashDetect.getByStatusAndApplicationId",
     		query="SELECT cd FROM CrashDetect cd WHERE cd.status = :status and cd.applicationId = :applicationId ORDER BY cd.detectedGmtDate DESC"
+    ),
+    @NamedQuery(
+    		name="CrashDetect.getByStatusAndApplicationIdAndIncidentId",
+    		query="SELECT cd FROM CrashDetect cd WHERE " +
+    		      "cd.status = :status" + " AND " + 
+    			  "cd.applicationId = :applicationId" + " AND " +
+    		      "cd.incidentId = :incidentId ORDER BY cd.detectedGmtDate DESC"
     ),
     @NamedQuery(
     		name="CrashDetect.getByKey",
@@ -69,6 +86,8 @@ public class CrashDetect {
 	private String status;
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
+	private Integer number;  // sequential number auto assigned to incidents with scope of the application
+	private String incidentId; // foreign key to 'owning' incident
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -139,6 +158,11 @@ public class CrashDetect {
 		if(theStatus.equals(CrashDetect.NEW_STATUS) || theStatus.equals(CrashDetect.ARCHIVED_STATUS)) return true;
 		return false;
 	}
+	
+	public static Boolean isStatusParameterValid(String theStatus) {
+		if(theStatus.equals(CrashDetect.NEW_STATUS) || theStatus.equals(CrashDetect.ARCHIVED_STATUS) || theStatus.equals(CrashDetect.ALL_STATUS) ) return true;
+		return false;
+	}
 
 	public String getApplicationId() {
 		return applicationId;
@@ -154,6 +178,22 @@ public class CrashDetect {
 
 	public void setActiveThruGmtDate(Date activeThruGmtDate) {
 		this.activeThruGmtDate = activeThruGmtDate;
+	}
+
+	public Integer getNumber() {
+		return number;
+	}
+
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
+	
+	public String getIncidentId() {
+		return incidentId;
+	}
+
+	public void setIncidentId(String incidentId) {
+		this.incidentId = incidentId;
 	}
 
 	public Boolean createAppActions(List<AppAction> theNewAppActionList) {

@@ -218,7 +218,9 @@ public class UsersResource extends ServerResource {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
+        } finally {
+			em.close();
+		}
         return new JsonRepresentation(json);
     }
 
@@ -269,6 +271,8 @@ public class UsersResource extends ServerResource {
 		} catch (NonUniqueResultException e) {
 			log.severe("should never happen - two or more users have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
+			em.close();
 		} 
         
         return new JsonRepresentation(getUserJson(user, apiStatus, isCurrentUser));
@@ -624,40 +628,44 @@ public class UsersResource extends ServerResource {
     public JsonRepresentation getUserToken() {
         JSONObject jsonReturn = new JSONObject();
         EntityManager em = EMF.get().createEntityManager();
-
-        if(this.userName == null) {
-    		return Utility.apiError(this, ApiStatusCode.USER_NAME_IS_REQUIRED);
-        } else if(this.password == null) {
-    		return Utility.apiError(this, ApiStatusCode.PASSWORD_IS_REQUIRED);
-        }
-        
-        // won't really be able to detect if the username is a bad phone number or not
-        Boolean isUserNamePhoneNumber = Utility.isPhoneNumber(this.userName);
-        User user = null;
-        String encryptedPassword = Utility.encrypt(this.password);
-        if(isUserNamePhoneNumber) {
-        	user = User.getUserWithPhoneNumber(em, this.userName, encryptedPassword);
-        } else {
-        	user = User.getUser(em, this.userName, encryptedPassword);
-        }
-        
-        if(user == null) {
-    		return Utility.apiError(this, ApiStatusCode.INVALID_USER_CREDENTIALS);
-        }
         
         try {
-            jsonReturn.put("apiStatus", ApiStatusCode.SUCCESS);
-            jsonReturn.put("token", user.getToken());
-            jsonReturn.put("authHeader", user.getAuthHeader());
-        } catch (JSONException e) {
-        	log.severe("getUserToken() error creating JSON return object. Exception = " + e.getMessage());
-            this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
-    	
-    	// need request to set cookie
-        //setTokenCookie(user.getToken());
-    	
-        return new JsonRepresentation(jsonReturn);
+            if(this.userName == null) {
+        		return Utility.apiError(this, ApiStatusCode.USER_NAME_IS_REQUIRED);
+            } else if(this.password == null) {
+        		return Utility.apiError(this, ApiStatusCode.PASSWORD_IS_REQUIRED);
+            }
+            
+            // won't really be able to detect if the username is a bad phone number or not
+            Boolean isUserNamePhoneNumber = Utility.isPhoneNumber(this.userName);
+            User user = null;
+            String encryptedPassword = Utility.encrypt(this.password);
+            if(isUserNamePhoneNumber) {
+            	user = User.getUserWithPhoneNumber(em, this.userName, encryptedPassword);
+            } else {
+            	user = User.getUser(em, this.userName, encryptedPassword);
+            }
+            
+            if(user == null) {
+        		return Utility.apiError(this, ApiStatusCode.INVALID_USER_CREDENTIALS);
+            }
+            
+            try {
+                jsonReturn.put("apiStatus", ApiStatusCode.SUCCESS);
+                jsonReturn.put("token", user.getToken());
+                jsonReturn.put("authHeader", user.getAuthHeader());
+            } catch (JSONException e) {
+            	log.severe("getUserToken() error creating JSON return object. Exception = " + e.getMessage());
+                this.setStatus(Status.SERVER_ERROR_INTERNAL);
+            }
+        	
+        	// need request to set cookie
+            //setTokenCookie(user.getToken());
+        	
+            return new JsonRepresentation(jsonReturn);
+        } finally {
+			em.close();
+		}
     }
     
     private JsonRepresentation confirm_user(Representation entity) {
