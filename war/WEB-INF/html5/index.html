@@ -280,49 +280,61 @@
     </div>
     <script type="text/template" id="iLogTemplate">
       <ul data-role="listview" data-inset="true">
-        <li class="long-lines">Log Name: <%= logName %></li>
-        <li>Created: <%= date %></li>
+        <li class="long-lines">Log Name: <%= name %></li>
+        <li>Created: <%= createdDate %></li>
+        <li>Updated: <%= lastUpdatedDate %></li>
         <li>Summary: <%= summary %></li>
+        <li>Message: <%= message %></li>
         <li>
-          <%= logMode %>
+          <%= mode %>
           <button class="mode" data-inline="true" data-mini="true">
-            <%= (logMode === 'inactive') ? 'Activate' : 'Deactivate' %> Log Series
+            <%= (mode === 'inactive') ? 'Activate' : 'Deactivate' %> Log Series
           </button>
         </li>
+        <li>
+          Status: <%= status %>
+          <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
+            <%= status === 'open' ? 'Close' : 'Re-open' %>
+          </button>
+        </li>
+      </ul>
+      <div data-role="collapsible" data-theme="c" data-content-theme="c" data-collapsed="false">
+        <h3>Logs (<%= eventCount %>)</h3>
+        <div class="logsView"></div>
+      </div>
+      <button class="more">More Logs</button>
+    </script>
+    <script type="text/template" id="logTemplate">
+      <h1><%= RSKYBOX.format.longDate(date, true) %> - <%= logLevel %></h1>
+      <ul data-role="listview" data-inset="true">
+        <li>Message: <%= message %></li>
+        <li>Summary: <%= summary %></li>
         <li>User: <%= userName %></li>
         <% if (instanceUrl) { %>
           <li class="long-lines">For: <%= instanceUrl %></li>
         <% } %>
-        <li>Log Level: <%= logLevel %></li>
-        <li>Message: <%= message %></li>
-        <li>
-          Status: <%= status %>
-          <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
-            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
-          </button>
-        </li>
-        <% if (appActions) { %>
-          <li>
-            <h3>App Actions:</h3>
-            <% var on = false; %>
-            <% appActions.forEach(function(action) { %>
-              <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
-                <%= RSKYBOX.format.compactDate(action.timestamp) %>
-                <% if (action.duration) { %>
-                  - <%= action.duration %>ms
-                <% } %>
-                <br>
-                <%= action.description %>
-              </div>
-              <% on = !on; %>
-            <% }); %>
-          </li>
-        <% } %>
-        <li class="long-lines">
-          Stack Back Trace:<br>
-          <%= stackBackTrace %>
-        </li>
       </ul>
+      <% if (appActions) { %>
+        <div data-role="collapsible" data-theme="c" data-content-theme="c">
+          <h3>App Actions:</h3>
+          <% var on = false; %>
+          <% appActions.forEach(function(action) { %>
+            <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
+              <%= RSKYBOX.format.compactDate(action.timestamp) %>
+              <% if (action.duration) { %>
+                - <%= action.duration %>ms
+              <% } %>
+              <br>
+              <%= action.description %>
+            </div>
+            <% on = !on; %>
+          <% }); %>
+        </div>
+      <% } %>
+      <div class="long-lines" data-role="collapsible" data-theme="c" data-content-theme="c">
+        <h3>Stack Back Trace:</h3>
+        <%= stackBackTrace %>
+      </div>
     </script>
 
 
@@ -340,10 +352,8 @@
       <h3>No logs at this time.</h3>
     </script>
     <script type="text/template" id="logEntryTemplate">
-      <a href="#log?id=<%= id %>&appId=<%= appId %>">
-        <h3><%= date %> <%= logMode === 'inactive' ? '(inactive)' : '' %></h3>
-        <p><%= logName %></p>
-        <p><%= message %></p></a>
+      <a class="logEntry" href="#log?id=<%= id %>&appId=<%= appId %>">
+        <h3><%= date %></h3><p><%= logName %></p><p><%= message %></p></a>
     </script>
 
     <div data-role="page" id="log" data-title="Log">
@@ -354,29 +364,17 @@
       <div class="applicationName"></div>
       <div data-role="content"></div>
     </div>
-    <script type="text/template" id="logTemplate">
+    <script type="text/template" id="">
       <ul data-role="listview" data-inset="true">
         <li class="long-lines">Log Name: <%= logName %></li>
         <li>Created: <%= date %></li>
         <li>Summary: <%= summary %></li>
-        <li>
-          <%= logMode %>
-          <button class="mode" data-inline="true" data-mini="true">
-            <%= (logMode === 'inactive') ? 'Activate' : 'Deactivate' %> Log Series
-          </button>
-        </li>
         <li>User: <%= userName %></li>
         <% if (instanceUrl) { %>
           <li class="long-lines">For: <%= instanceUrl %></li>
         <% } %>
         <li>Log Level: <%= logLevel %></li>
         <li>Message: <%= message %></li>
-        <li>
-          Status: <%= status %>
-          <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
-            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
-          </button>
-        </li>
         <% if (appActions) { %>
           <li>
             <h3>App Actions:</h3>

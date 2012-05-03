@@ -89,11 +89,11 @@ var RSKYBOX = (function (r, $) {
     changeStatus: function () {
       try {
         switch (this.model.get('status')) {
-        case 'new':
-          this.model.set('status', 'archived');
+        case 'open':
+          this.model.set('status', 'closed');
           break;
-        case 'archived':
-          this.model.set('status', 'new');
+        case 'closed':
+          this.model.set('status', 'open');
           break;
         default:
           r.log.warn('Invalid status for: ' + this.model.get('id'), 'View.changeStatus');
