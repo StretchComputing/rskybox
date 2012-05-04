@@ -80,6 +80,7 @@ public class CrashDetect {
 	private String summary;
 	// TODO support time zone and GMT for dates
 	private Date detectedGmtDate;
+	private String userId;
 	private String userName;
 	private Text stackDataBase64;
 	private String instanceUrl;
@@ -120,6 +121,14 @@ public class CrashDetect {
 
 	public void setDetectedGmtDate(Date detectedGmtDate) {
 		this.detectedGmtDate = detectedGmtDate;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public String getUserName() {

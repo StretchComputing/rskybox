@@ -271,6 +271,10 @@ public class CrashDetectsResource extends ServerResource {
 				crashDetect.setSummary(summary);
 			}
 			
+			if(!isUpdate && json.has("userId")) {
+				crashDetect.setUserId(json.getString("userId"));
+			}
+			
 			if(!isUpdate && json.has("userName")) {
 				crashDetect.setUserName(json.getString("userName"));
 			}
@@ -383,10 +387,8 @@ public class CrashDetectsResource extends ServerResource {
 				// TODO something better for an eventName than the current date
 				Date now = new Date();
 				
-				if(summary == null || summary.trim().length() == 0) {
-					summary = "new Crash Detect";
-				}
-				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, summary);
+				String message = "new Crash Detect";
+				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, message, summary);
 				crashDetect.setIncidentId(owningIncident.getId());
 			}
             
@@ -443,6 +445,7 @@ public class CrashDetectsResource extends ServerResource {
             		json.put("date", GMT.convertToIsoDate(detectedDate));
             	}
             	
+            	json.put("userId", crashDetect.getUserId());
             	json.put("userName", crashDetect.getUserName());
             	json.put("instanceUrl", crashDetect.getInstanceUrl());
             	json.put("incidentId", crashDetect.getIncidentId());

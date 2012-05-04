@@ -321,8 +321,10 @@ public class ClientLogsResource extends ServerResource {
 	            }
 			}
 			
+			String message = null;
 			if(!isUpdate && json.has("message")) {
-				clientLog.setMessage(json.getString("message"));
+				message = json.getString("message");
+				clientLog.setMessage(message);
 			}
 			
 			if(!isUpdate && json.has("stackBackTrace")) {
@@ -335,6 +337,10 @@ public class ClientLogsResource extends ServerResource {
 					stackBackTraces.add(stackBackTrace);
 				}
 				clientLog.setStackBackTraces(stackBackTraces);
+			}
+			
+			if(!isUpdate && json.has("userId")) {
+				clientLog.setUserId(json.getString("userId"));
 			}
 			
 			if(!isUpdate && json.has("userName")) {
@@ -439,7 +445,7 @@ public class ClientLogsResource extends ServerResource {
 				clientLog.setActiveThruGmtDate(activeThruGmtDate);
 				
 				// find or create an incident that will 'own' this new clientLog
-				owningIncident = Incident.fetchIncidentIncrementCount(logName, Incident.LOG_TAG, incidentId, theApplication, summary);
+				owningIncident = Incident.fetchIncidentIncrementCount(logName, Incident.LOG_TAG, incidentId, theApplication, message, summary);
 				if(owningIncident == null) {
 					// assume problem was incident ID specified was not valid
 					return Utility.apiError(this, ApiStatusCode.INCIDENT_NOT_FOUND);
@@ -542,6 +548,7 @@ public class ClientLogsResource extends ServerResource {
             	if(createdDate != null) {
             		json.put("date", GMT.convertToIsoDate(createdDate));
             	}
+            	json.put("userId", clientLog.getUserId());
             	json.put("userName", clientLog.getUserName());
             	json.put("instanceUrl", clientLog.getInstanceUrl());
             	json.put("logLevel", clientLog.getLogLevel());

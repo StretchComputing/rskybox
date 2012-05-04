@@ -74,6 +74,7 @@ public class Feedback {
 	
 	@Basic private Text voiceBase64;
 	private Date recordedGmtDate;
+	private String userId;
 	private String userName;
 	private String instanceUrl;
 	private String status;
@@ -104,6 +105,14 @@ public class Feedback {
 
 	public void setRecordedGmtDate(Date recordedGmtDate) {
 		this.recordedGmtDate = recordedGmtDate;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public String getUserName() {

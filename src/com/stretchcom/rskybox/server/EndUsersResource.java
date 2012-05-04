@@ -261,7 +261,12 @@ public class EndUsersResource extends ServerResource {
             	if (json.has("userId")) {
                 	endUser.setUserId(json.getString("userId"));
                 } else {
-                	return Utility.apiError(this, ApiStatusCode.USER_ID_IS_REQUIRED);
+                	// for backward compatibility, rskybox clients used to pass in only userName
+                	if(json.has("userName")) {
+                    	endUser.setUserId(json.getString("userName"));
+                	} else {
+                    	return Utility.apiError(this, ApiStatusCode.USER_ID_IS_REQUIRED);
+                	}
                 }
 
                 // EndUser create is designed to be called multiple times. So it's ok if the endUser has not been defined yet and it is also
@@ -348,8 +353,17 @@ public class EndUsersResource extends ServerResource {
         	}
         	if(theEndUser != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
                 json.put("id", KeyFactory.keyToString(theEndUser.getKey()));
-                json.put("userId", theEndUser.getUserId());
-                json.put("userName", theEndUser.getUserName());
+                
+                // for backward compatibility. Only userName used to be required/reported. Now userId is required.
+                String userId = theEndUser.getUserId();
+                String userName = theEndUser.getUserName();
+                if(userId != null) {
+                    json.put("userId", userId);
+                } else {
+                    json.put("userId", userName);
+                }
+                json.put("userName", userName);
+                
                 json.put("application", theEndUser.getApplication());
                 json.put("version", theEndUser.getVersion());
                 json.put("instanceUrl", theEndUser.getInstanceUrl());
