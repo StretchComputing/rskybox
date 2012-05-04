@@ -412,7 +412,8 @@ public class Incident {
 			
 			jsonObject.put("eventCount", this.eventCount);
 			jsonObject.put("message", this.message);
-			jsonObject.put("remoteControlMode", this.remoteControlMode);
+			jsonObject.put("summary", this.summary);
+			jsonObject.put("mode", this.remoteControlMode);
 			
 		} catch (JSONException e) {
 			log.severe("exception building Incident JSON object, message = " + e.getMessage());
