@@ -293,12 +293,12 @@
             <%= status === 'open' ? 'Close' : 'Re-open' %>
           </button>
         </li>
+        <li>
+          Logs (<%= eventCount %>)
+          <button class="getLogs" data-mini="true" data-inline="true">Get Logs</button>
+        </li>
       </ul>
-      <div data-role="collapsible" data-theme="c" data-content-theme="c" data-collapsed="false">
-        <h3>Logs (<%= eventCount %>)</h3>
-        <div class="logsView"></div>
-      </div>
-      <button class="more">More Logs</button>
+      <div class="logsView" data-role="collapsible" data-theme="c" data-content-theme="c" data-collapsed="false" style="display: none;" data-mini="true"></div>
     </script>
     <script type="text/template" id="logTemplate">
       <h1><%= RSKYBOX.format.longDate(date, true) %> - <%= logLevel %></h1>
@@ -312,7 +312,7 @@
         <% } %>
       </ul>
       <% if (appActions) { %>
-        <div data-role="collapsible" data-theme="c" data-content-theme="c">
+        <div data-role="collapsible" data-theme="c" data-content-theme="c" data-mini="true">
           <h3>App Actions:</h3>
           <% var on = false; %>
           <% appActions.forEach(function(action) { %>
@@ -328,9 +328,11 @@
           <% }); %>
         </div>
       <% } %>
-      <div class="long-lines" data-role="collapsible" data-theme="c" data-content-theme="c">
+      <div data-role="collapsible" data-theme="c" data-content-theme="c" data-mini="true">
         <h3>Stack Back Trace:</h3>
-        <%= stackBackTrace %>
+        <div  class="long-lines">
+          <%= stackBackTrace %>
+        </div>
       </div>
     </script>
 

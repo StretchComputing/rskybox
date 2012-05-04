@@ -77,7 +77,7 @@ var RSKYBOX = (function (r, $) {
     events: {
       'click .changeStatus': 'changeStatus',
       'click .mode': 'changeMode',
-      'click .more': 'moreLogs',
+      'click .getLogs': 'getLogs',
     },
 
     initialize: function () {
@@ -132,7 +132,7 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
-    moreLogs: function (evt) {
+    getLogs: function (evt) {
       try {
         this.logsView = new r.LogsView({
           el: this.$el.find('.logsView'),
@@ -141,6 +141,8 @@ var RSKYBOX = (function (r, $) {
         this.logsView.collection.setAppUrl(r.session.params.appId);
 
         this.logsView.collection.fetch({data: { incidentId : this.model.get('id') }});
+        this.logsView.$el.show();
+        this.$el.find('.getLogs').parent('.ui-btn').hide();
 
         evt.preventDefault();
         return false;

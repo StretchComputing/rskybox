@@ -21,6 +21,7 @@ var RSKYBOX = (function (r, $) {
               'data-role': 'collapsible',
               'data-theme': 'c',
               'data-content-theme': 'c',
+              'data-mini': 'true',
             },
           }).render().el);
         }, this);
