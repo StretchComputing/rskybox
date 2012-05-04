@@ -450,18 +450,16 @@ public class CrashDetectsResource extends ServerResource {
             	json.put("instanceUrl", crashDetect.getInstanceUrl());
             	json.put("incidentId", crashDetect.getIncidentId());
             	
-            	if(!isList) {
-                	JSONArray appActionsJsonArray = new JSONArray();
-                	List<AppAction> appActions = crashDetect.getAppActions();
-                	for(AppAction aa : appActions) {
-                		JSONObject appActionJsonObj = new JSONObject();
-                		appActionJsonObj.put("description", aa.getDescription());
-                		appActionJsonObj.put("timestamp", GMT.convertToIsoDate(aa.getTimestamp()));
-                		if(aa.getDuration() != null) appActionJsonObj.put("duration", aa.getDuration());
-                		appActionsJsonArray.put(appActionJsonObj);
-                	}
-                	if(appActions.size() > 0) {json.put("appActions", appActionsJsonArray);}
+            	JSONArray appActionsJsonArray = new JSONArray();
+            	List<AppAction> appActions = crashDetect.getAppActions();
+            	for(AppAction aa : appActions) {
+            		JSONObject appActionJsonObj = new JSONObject();
+            		appActionJsonObj.put("description", aa.getDescription());
+            		appActionJsonObj.put("timestamp", GMT.convertToIsoDate(aa.getTimestamp()));
+            		if(aa.getDuration() != null) appActionJsonObj.put("duration", aa.getDuration());
+            		appActionsJsonArray.put(appActionJsonObj);
             	}
+            	if(appActions.size() > 0) {json.put("appActions", appActionsJsonArray);}
             	
             	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
             	String status = crashDetect.getStatus();
