@@ -194,6 +194,7 @@ var RSKYBOX = (function (r, $) {
             logName: name || message,
             logLevel: level,
             message: message,
+            userId: r.config.getUserId(),
             userName: r.config.getUserName(),
             summary: r.config.getSummary(),
             instanceUrl: r.config.getInstanceUrl(),

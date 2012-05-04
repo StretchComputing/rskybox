@@ -19,8 +19,6 @@ var RSKYBOX = (function (r, $) {
         var mock = this.model.getMock();
 
         mock.lastUpdatedDate = r.format.longDate(mock.lastUpdatedDate);
-        // TODO - remove this line once appId is set on the server.
-        mock.appId = mock.appId || r.session.params.appId;
         this.$el.html(this.template(mock));
         return this;
       } catch (e) {
@@ -97,7 +95,7 @@ var RSKYBOX = (function (r, $) {
       try {
         var mock = this.model.getMock();
 
-        this.appLink('back', 'ilogs');
+        this.appLink('back', 'iLogs');
 
         mock.lastUpdatedDate = r.format.longDate(mock.lastUpdatedDate);
         mock.createdDate = r.format.longDate(mock.createdDate);

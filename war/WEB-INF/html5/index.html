@@ -280,19 +280,15 @@
     </div>
     <script type="text/template" id="iLogTemplate">
       <ul data-role="listview" data-inset="true">
-        <li class="long-lines">Log Name: <%= name %></li>
+        <li class="long-lines">#<%= number %> - <%= name %></li>
+        <li>Message: <%= message %></li>
+        <li>Summary: <%= summary %></li>
         <li>Created: <%= createdDate %></li>
         <li>Updated: <%= lastUpdatedDate %></li>
-        <li>Summary: <%= summary %></li>
-        <li>Message: <%= message %></li>
         <li>
-          <%= mode %>
           <button class="mode" data-inline="true" data-mini="true">
             <%= (mode === 'inactive') ? 'Activate' : 'Deactivate' %> Log Series
           </button>
-        </li>
-        <li>
-          Status: <%= status %>
           <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
             <%= status === 'open' ? 'Close' : 'Re-open' %>
           </button>
@@ -310,6 +306,7 @@
         <li>Message: <%= message %></li>
         <li>Summary: <%= summary %></li>
         <li>User: <%= userName %></li>
+        <li>User ID: <%= userId %></li>
         <% if (instanceUrl) { %>
           <li class="long-lines">For: <%= instanceUrl %></li>
         <% } %>
