@@ -301,11 +301,13 @@
       <div class="logsView" data-role="collapsible" data-theme="c" data-content-theme="c" data-collapsed="false" style="display: none;" data-mini="true"></div>
     </script>
     <script type="text/template" id="logTemplate">
-      <h1><%= RSKYBOX.format.longDate(date, true) %> - <%= logLevel %></h1>
+      <h1>
+        <%= logLevel %>: <%= RSKYBOX.format.compactDate(date) %><br>
+        <%= message %><br>
+        <%= userName %>
+      </h1>
       <ul data-role="listview" data-inset="true">
-        <li>Message: <%= message %></li>
         <li>Summary: <%= summary %></li>
-        <li>User: <%= userName %></li>
         <li>User ID: <%= userId %></li>
         <% if (instanceUrl) { %>
           <li class="long-lines">For: <%= instanceUrl %></li>
