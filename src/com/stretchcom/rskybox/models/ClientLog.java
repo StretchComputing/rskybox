@@ -86,6 +86,7 @@ public class ClientLog {
 	private String logName;
 	private String message;
 	private Date createdGmtDate;
+	private String userId;
 	private String userName;
 	private Text stackBackTrace;  // deprecated on 4/14/2012. Supported for legacy data in datastore. Replaces by array stackBackTraces below.
 	private String instanceUrl;
@@ -131,6 +132,14 @@ public class ClientLog {
 
 	public void setCreatedGmtDate(Date createdGmtDate) {
 		this.createdGmtDate = createdGmtDate;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 
 	public String getUserName() {

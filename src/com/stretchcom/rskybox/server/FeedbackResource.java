@@ -156,6 +156,10 @@ public class FeedbackResource extends ServerResource {
 				log.info("no JSON voice field found");
 			}
 			
+			if(!isUpdate && json.has("userId")) {
+				feedback.setUserId(json.getString("userId"));
+			}
+			
 			if(!isUpdate && json.has("userName")) {
 				feedback.setUserName(json.getString("userName"));
 			}
@@ -386,6 +390,7 @@ public class FeedbackResource extends ServerResource {
             		json.put("date", GMT.convertToIsoDate(recordedDate));
             	}
             	
+            	json.put("userId", feedback.getUserId());
             	json.put("userName", feedback.getUserName());
             	json.put("instanceUrl", feedback.getInstanceUrl());
             	json.put("status", feedback.getStatus());

@@ -271,6 +271,10 @@ public class CrashDetectsResource extends ServerResource {
 				crashDetect.setSummary(summary);
 			}
 			
+			if(!isUpdate && json.has("userId")) {
+				crashDetect.setUserId(json.getString("userId"));
+			}
+			
 			if(!isUpdate && json.has("userName")) {
 				crashDetect.setUserName(json.getString("userName"));
 			}
@@ -441,6 +445,7 @@ public class CrashDetectsResource extends ServerResource {
             		json.put("date", GMT.convertToIsoDate(detectedDate));
             	}
             	
+            	json.put("userId", crashDetect.getUserId());
             	json.put("userName", crashDetect.getUserName());
             	json.put("instanceUrl", crashDetect.getInstanceUrl());
             	json.put("incidentId", crashDetect.getIncidentId());

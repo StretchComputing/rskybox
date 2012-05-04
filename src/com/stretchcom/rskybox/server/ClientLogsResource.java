@@ -339,6 +339,10 @@ public class ClientLogsResource extends ServerResource {
 				clientLog.setStackBackTraces(stackBackTraces);
 			}
 			
+			if(!isUpdate && json.has("userId")) {
+				clientLog.setUserId(json.getString("userId"));
+			}
+			
 			if(!isUpdate && json.has("userName")) {
 				clientLog.setUserName(json.getString("userName"));
 			}
@@ -544,6 +548,7 @@ public class ClientLogsResource extends ServerResource {
             	if(createdDate != null) {
             		json.put("date", GMT.convertToIsoDate(createdDate));
             	}
+            	json.put("userId", clientLog.getUserId());
             	json.put("userName", clientLog.getUserName());
             	json.put("instanceUrl", clientLog.getInstanceUrl());
             	json.put("logLevel", clientLog.getLogLevel());
