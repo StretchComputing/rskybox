@@ -383,10 +383,8 @@ public class CrashDetectsResource extends ServerResource {
 				// TODO something better for an eventName than the current date
 				Date now = new Date();
 				
-				if(summary == null || summary.trim().length() == 0) {
-					summary = "new Crash Detect";
-				}
-				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, summary);
+				String message = "new Crash Detect";
+				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, message, summary);
 				crashDetect.setIncidentId(owningIncident.getId());
 			}
             

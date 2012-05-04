@@ -291,19 +291,25 @@ public class IncidentsResource extends ServerResource {
 					String tag = tagsJsonArray.getString(i);
 					tags.add(tag);
 				}
+				
 				int wktCount = Incident.getWellKnownTagCount(tags);
+				// ::BusinessRule:: tag list must have exactly one well known tag
+				if(wktCount > 1) {
+					return Utility.apiError(this, ApiStatusCode.INVALID_TAGS_PARAMETER);
+				} else if(wktCount == 0) {
+					return Utility.apiError(this, ApiStatusCode.WELL_KNOWN_TAG_REQUIRED);
+				}
+
 				if(isUpdate) {
-					// well known tags not allowed in an update API call
-					if(wktCount > 0) {
+					// for an update, the tag list is replaced with the new tags
+					// ::BusinessRule:: the new tag list must have the same well known tag as the original list
+					String originalWellKnownTag = incident.getWellKnownTag();
+					incident.setTags(tags);
+					String newWellKnownTag = incident.getWellKnownTag();
+					if(!newWellKnownTag.equalsIgnoreCase(originalWellKnownTag)) {
 						return Utility.apiError(this, ApiStatusCode.INVALID_TAGS_PARAMETER);
 					}
-					incident.addToTags(tags);
 				} else {
-					if(wktCount > 1) {
-						return Utility.apiError(this, ApiStatusCode.INVALID_TAGS_PARAMETER);
-					} else if(wktCount == 0) {
-						return Utility.apiError(this, ApiStatusCode.WELL_KNOWN_TAG_REQUIRED);
-					}
 					incident.setTags(tags);
 				}
 			} else if(!isUpdate) {
@@ -545,6 +551,9 @@ public class IncidentsResource extends ServerResource {
             	
             	json.put("eventCount", incident.getEventCount());
             	json.put("message", incident.getMessage());
+            	json.put("summary", incident.getSummary());
+            	json.put("appId", incident.getApplicationId());
+            	json.put("mode", incident.getRemoteControlMode());
         	}
         } catch (JSONException e) {
         	log.severe("IncidentsResrouce::getIncidentJson() error creating JSON return object. Exception = " + e.getMessage());

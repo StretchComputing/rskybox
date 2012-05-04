@@ -334,6 +334,7 @@ public class Incident {
 		this.message = message;
 	}
 
+	// merges the provided tag list into the existing tag list
 	public Boolean addToTags(List<String> theNewTagList) {
 		if(theNewTagList == null || theNewTagList.size() == 0) {
 			return false;
@@ -471,7 +472,7 @@ public class Incident {
 	
 	// pretty much guaranteed to return an Incident (short of a server error)
 	// either finds the 'owning' incident associated with the specified event or creates a new incident
-	public static Incident fetchIncidentIncrementCount(String theEventName, String theWellKnownTag, String theIncidentId, Application theApplication, String theMessage) {
+	public static Incident fetchIncidentIncrementCount(String theEventName, String theWellKnownTag, String theIncidentId, Application theApplication, String theMessage, String theSummary) {
 		Incident eventOwningIncident = null;
 		List<Incident> relatedIncidents = null;
         EntityManager em = EMF.get().createEntityManager();
@@ -503,7 +504,7 @@ public class Incident {
         			if(relatedIncidents.size() == 0) {
             			// this is NOT an error -- there is just no incident yet associated with this event so create one
         				log.info("incident matching event name = " + theEventName + " NOT found. Creating a new incident.");
-            			eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
+            			eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage, theSummary);
         				isExistingIncident = false;
         			} else {
             			// always choose the most recently created incident which will be on the top of the list
@@ -526,7 +527,7 @@ public class Incident {
     				log.info("fetchIncidentIncrementCount() reopening existing incident");
     			} else {
     				// create a new incident
-    				eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage);
+    				eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage, theSummary);
     				isExistingIncident = false;
     				log.info("fetchIncidentIncrementCount() existing incident CLOSED and too old to reopen");
     			}
@@ -566,7 +567,7 @@ public class Incident {
 		return eventOwningIncident;
 	}
 	
-	public static Incident createIncident(String theEventName, String theWellKnownTag, Application theApplication, String theMessage) {
+	public static Incident createIncident(String theEventName, String theWellKnownTag, Application theApplication, String theMessage, String theSummary) {
         EntityManager em = EMF.get().createEntityManager();
         Incident incident = null;
         
@@ -576,6 +577,7 @@ public class Incident {
 			incident.setEventName(theEventName);
 			incident.setEventCount(1);
 			incident.addToTags(theWellKnownTag);
+			incident.setSummary(theSummary);
 			incident.setMessage(theMessage);
 			incident.setLastUpdatedGmtDate(new Date());
 			incident.setCreatedGmtDate(new Date());
