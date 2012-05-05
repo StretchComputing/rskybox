@@ -82,8 +82,8 @@
     <script type="text/template" id="applicationTemplate">
       <ul data-role="listview" data-inset="true">
         <li><a href="#iLogs?appId=<%= id %>">Logs</a></li>
-        <li><a href="#iCrashes?appId=<%= id %>">Crashes</a></li>
-        <li><a href="#iFeedback?appId=<%= id %>">Feedback</a></li>
+        <li><a href="#crashes?appId=<%= id %>">Crashes</a></li>
+        <li><a href="#feedbackList?appId=<%= id %>">Feedback</a></li>
       </ul>
       <% if (role !== 'member') { %>
         <ul data-role="listview" data-inset="true">
