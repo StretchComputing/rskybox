@@ -120,7 +120,7 @@ public class Emailer {
         	sb.append("<table style='margin-left:15px; border: 1px solid black;'>");
         	sb.append("<tr>");
          	String crashListUrl = theRskyboxBaseUrl + "#iCrashes?appId=" + nd.getApplicationId() + "&status=new";
-        	sb.append("<td style='background-color:#F8F8F8; width:75px;'><a href='" + crashListUrl + "'>crash</a></td>");
+        	sb.append("<td style='background-color:#F8F8F8; width:65px;'><a href='" + crashListUrl + "'>crash</a></td>");
         	sb.append("<td style='background-color:#F8F8F8; width:25px; text-align:center;'>" + nd.getCrashCount() + "</td>");
         	sb.append("<td style='background-color:#F8F8F8;'>");
         	if(nd.getCrashCount() > 0) {
@@ -131,7 +131,7 @@ public class Emailer {
         	sb.append("</tr>");
         	sb.append("<tr>");
          	String logListUrl = theRskyboxBaseUrl + "#iLogs?appId=" + nd.getApplicationId() + "&status=new";
-        	sb.append("<td style='background-color:#FFFFFF; width:75px;'><a href='" + logListUrl + "'>log</a></td>");
+        	sb.append("<td style='background-color:#FFFFFF; width:65px;'><a href='" + logListUrl + "'>log</a></td>");
         	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getClientLogCount() + "</td>");
         	sb.append("<td style='background-color:#FFFFFF;'>");
         	if(nd.getClientLogCount() > 0) {
@@ -154,7 +154,7 @@ public class Emailer {
         	
         	sb.append("<tr>");
          	String feedbackListUrl = theRskyboxBaseUrl + "#iFeedbackList?appId=" + nd.getApplicationId() + "&status=new";
-        	sb.append("<td style='background-color:#FFFFFF; width:75px;'><a href='" + feedbackListUrl + "'>feedback</a></td>");
+        	sb.append("<td style='background-color:#FFFFFF; width:65px;'><a href='" + feedbackListUrl + "'>feedback</a></td>");
         	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getFeedbackCount() + "</td>");
         	sb.append("<td style='background-color:#FFFFFF;'>");
         	if(nd.getFeedbackCount() > 0) {
