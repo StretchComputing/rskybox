@@ -408,9 +408,9 @@ public class IncidentsResource extends ServerResource {
             	}
             } else {
             	if(severityChanged) {
-                	String theItemId = KeyFactory.keyToString(incident.getKey());
+                	String theIncidentId = KeyFactory.keyToString(incident.getKey());
                 	String severityMsg = "Severity changed from " + oldSeverity.toString() + " to " + incident.getSeverity().toString();
-                	User.sendNotifications(this.applicationId, incident.getNotificationTypeFromTag(), severityMsg, theItemId);
+                	User.sendNotifications(this.applicationId, incident.getNotificationTypeFromTag(), severityMsg, theIncidentId);
             	}
             }
         	

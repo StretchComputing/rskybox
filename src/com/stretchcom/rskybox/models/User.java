@@ -296,7 +296,7 @@ public class User {
 	// Sends a notification (if appropriate) to all active members of the specified application
 	// TODO notifications options should be application specific. When that happens, also put both the email address and phone
 	//      number in AppMember then the notifications can be sent without having to retrieve the User entity for each AppMember
-	public static void sendNotifications(String theApplicationId, String theNotificationType, String theMessage, String theItemId) {
+	public static void sendNotifications(String theApplicationId, String theNotificationType, String theMessage, String theIncidentId) {
         EntityManager em = EMF.get().createEntityManager();
         
         try {
@@ -333,7 +333,7 @@ public class User {
                         
                         // only queue the notification if either email or SMS is active
                         if(isEmailActive || isSmsActive) {
-                            Notification.queueNotification(user, theApplicationId, am, theNotificationType, theMessage, theItemId, isEmailActive, isSmsActive);
+                            Notification.queueNotification(user, theApplicationId, am, theNotificationType, theMessage, theIncidentId, isEmailActive, isSmsActive);
                         }
                 	}
             	}
