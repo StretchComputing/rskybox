@@ -759,11 +759,20 @@ public class Notification {
         	} else if(nd.getClientLogCount() > 0  && (nd.getCrashCount() == 0 && nd.getFeedbackCount() == 0)) {
         		if(nd.getClientLogCount() == 1) {
         			// only one clientLog, link all the way down to the clientLog detail page
-        			url = rskyboxBaseUrl + "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
+        			url = rskyboxBaseUrl + "#iLog?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
         		} else {
-        			// multiple crashes so link to the clientLog list
-        			url = rskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
+        			// multiple logs so link to the clientLog list
+        			url = rskyboxBaseUrl + "#iLogs?appId=" + nd.getApplicationId() + "&status=new";
         		}
+/*
+Log Incidents:  #iLogs?appId=<applicationId> status=<archived | new>
+
+Log Incident:  #iLog?id=<logIncidentId>&appId=<applicationId> */
+        		
+        		
+        		
+        		
+        		
         	} else if(nd.getFeedbackCount() > 0  && (nd.getClientLogCount() == 0 && nd.getCrashCount() == 0)) {
         		if(nd.getFeedbackCount() == 1) {
         			// only one feedback, link all the way down to the feedback detail page
