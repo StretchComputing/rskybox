@@ -105,10 +105,11 @@ public class IncidentsResource extends ServerResource {
     @Put("json")
     public JsonRepresentation put(Representation entity) {
         log.info("in put");
-    	String appIdStatus = Application.verifyApplicationId(this.applicationId);
-    	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
-    		return Utility.apiError(this, appIdStatus);
-    	}
+		if(this.applicationId == null) {return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);}
+		Application application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+			return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
     	
 		// incident ID is required
     	if (this.id == null || this.id.length() == 0) {
@@ -117,7 +118,7 @@ public class IncidentsResource extends ServerResource {
     	
     	if(this.remoteControl == null) {
     		// Update Incident API
-            return save_incident(entity, null);
+            return save_incident(entity, application);
     	} else {
     		// Remote Control Incident API
     		return remote_control(entity);
