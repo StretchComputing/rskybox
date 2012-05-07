@@ -281,8 +281,9 @@
     <script type="text/template" id="iLogTemplate">
       <ul data-role="listview" data-inset="true">
         <li class="long-lines">#<%= number %> - <%= name %></li>
-        <li>Message: <%= message %></li>
-        <li>Summary: <%= summary %></li>
+        <li>Severity: <%= severity %></li>
+        <li><%= message %></li>
+        <li><%= summary %></li>
         <li>Created: <%= createdDate %></li>
         <li>Updated: <%= lastUpdatedDate %></li>
         <li>
@@ -293,11 +294,11 @@
             <%= status === 'open' ? 'Close' : 'Re-open' %>
           </button>
         </li>
-        <li>
-          Logs (<%= eventCount %>)
-          <button class="getLogs" data-mini="true" data-inline="true">Get Logs</button>
-        </li>
       </ul>
+      <p>
+        <strong>Logs (<%= eventCount %>)</strong>
+        <button class="getLogs" data-mini="true" data-inline="true">Get Logs</button>
+      </p>
       <div class="logsView" data-role="collapsible" data-theme="c" data-content-theme="c" data-collapsed="false" style="display: none;" data-mini="true"></div>
     </script>
     <script type="text/template" id="logTemplate">
