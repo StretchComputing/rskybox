@@ -119,7 +119,7 @@ public class Emailer {
         	sb.append("<div style='margin-bottom:5px;'><a href='" + applicationUrl + "'>" + nd.getApplicationName() + "</a></div>");
         	sb.append("<table style='margin-left:15px; border: 1px solid black;'>");
         	sb.append("<tr>");
-         	String crashListUrl = theRskyboxBaseUrl + "#iCrashes?appId=" + nd.getApplicationId() + "&status=new";
+         	String crashListUrl = theRskyboxBaseUrl + "#iCrashes?appId=" + nd.getApplicationId() + "&status=open";
         	sb.append("<td style='background-color:#F8F8F8; width:65px;'><a href='" + crashListUrl + "'>crash</a></td>");
         	sb.append("<td style='background-color:#F8F8F8; width:25px; text-align:center;'>" + nd.getCrashCount() + "</td>");
         	sb.append("<td style='background-color:#F8F8F8;'>");
@@ -130,7 +130,7 @@ public class Emailer {
         	sb.append("</td>");
         	sb.append("</tr>");
         	sb.append("<tr>");
-         	String logListUrl = theRskyboxBaseUrl + "#iLogs?appId=" + nd.getApplicationId() + "&status=new";
+         	String logListUrl = theRskyboxBaseUrl + "#iLogs?appId=" + nd.getApplicationId() + "&status=open";
         	sb.append("<td style='background-color:#FFFFFF; width:65px;'><a href='" + logListUrl + "'>log</a></td>");
         	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getClientLogCount() + "</td>");
         	sb.append("<td style='background-color:#FFFFFF;'>");
@@ -153,7 +153,7 @@ public class Emailer {
 //        	sb.append("</tr>");
         	
         	sb.append("<tr>");
-         	String feedbackListUrl = theRskyboxBaseUrl + "#iFeedbackList?appId=" + nd.getApplicationId() + "&status=new";
+         	String feedbackListUrl = theRskyboxBaseUrl + "#iFeedbackList?appId=" + nd.getApplicationId() + "&status=open";
         	sb.append("<td style='background-color:#FFFFFF; width:65px;'><a href='" + feedbackListUrl + "'>feedback</a></td>");
         	sb.append("<td style='background-color:#FFFFFF; width:25px; text-align:center;'>" + nd.getFeedbackCount() + "</td>");
         	sb.append("<td style='background-color:#FFFFFF;'>");

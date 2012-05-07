@@ -744,7 +744,7 @@ public class Notification {
         			url = rskyboxBaseUrl + "#iCrash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
         		} else {
         			// multiple crashes so link to the crash list
-        			url = rskyboxBaseUrl + "#iCrashes?appId=" + nd.getApplicationId() + "&status=new";
+        			url = rskyboxBaseUrl + "#iCrashes?appId=" + nd.getApplicationId() + "&status=open";
         		}
         	} else if(nd.getClientLogCount() > 0  && (nd.getCrashCount() == 0 && nd.getFeedbackCount() == 0)) {
         		if(nd.getClientLogCount() == 1) {
@@ -752,7 +752,7 @@ public class Notification {
         			url = rskyboxBaseUrl + "#iLog?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
         		} else {
         			// multiple logs so link to the clientLog list
-        			url = rskyboxBaseUrl + "#iLogs?appId=" + nd.getApplicationId() + "&status=new";
+        			url = rskyboxBaseUrl + "#iLogs?appId=" + nd.getApplicationId() + "&status=open";
         		}
         	} else if(nd.getFeedbackCount() > 0  && (nd.getClientLogCount() == 0 && nd.getCrashCount() == 0)) {
         		if(nd.getFeedbackCount() == 1) {
@@ -760,7 +760,7 @@ public class Notification {
         			url = rskyboxBaseUrl + "#iFeedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
         		} else {
         			// multiple crashes so link to the feedback list
-        			url = rskyboxBaseUrl + "#iFeedbackList?appId=" + nd.getApplicationId() + "&status=new";
+        			url = rskyboxBaseUrl + "#iFeedbackList?appId=" + nd.getApplicationId() + "&status=open";
         		}
         	}
         }
