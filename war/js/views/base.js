@@ -78,7 +78,7 @@ var RSKYBOX = (function (r, $) {
           model.display = 'Closed';
         }
 
-        el = this.getHeader().find('.archives');
+        el = this.getHeader().find('.status');
         el.attr('href', hrefTemplate(model));
         el.find('.ui-btn-text').text(model.display);
       } catch (e) {

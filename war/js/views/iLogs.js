@@ -18,7 +18,6 @@ var RSKYBOX = (function (r, $) {
       try {
         var mock = this.model.getMock();
 
-        mock.lastUpdatedDate = r.format.longDate(mock.lastUpdatedDate);
         this.$el.html(this.template(mock));
         return this;
       } catch (e) {
@@ -97,8 +96,6 @@ var RSKYBOX = (function (r, $) {
 
         this.appLink('back', 'iLogs');
 
-        mock.lastUpdatedDate = r.format.longDate(mock.lastUpdatedDate);
-        mock.createdDate = r.format.longDate(mock.createdDate);
         if (Array.isArray(mock.stackBackTrace)) {
           mock.stackBackTrace = mock.stackBackTrace.join('<br>');
         }
