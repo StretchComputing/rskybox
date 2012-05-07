@@ -390,7 +390,7 @@ public class Incident {
     	} else if(wellKnownTag.equalsIgnoreCase(Notification.FEEDBACK)) {
     		notificationType = Notification.FEEDBACK;
     	}
-    	return wellKnownTag;
+    	return notificationType;
 	}
 	
 	public JSONObject getJson() {

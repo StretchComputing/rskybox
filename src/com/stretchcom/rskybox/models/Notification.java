@@ -16,22 +16,12 @@ import javax.persistence.NamedQuery;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.restlet.data.Reference;
-import org.restlet.data.Status;
-
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.users.UserService;
-import com.google.appengine.api.users.UserServiceFactory;
-import com.stretchcom.rskybox.server.ApiStatusCode;
 import com.stretchcom.rskybox.server.EMF;
 import com.stretchcom.rskybox.server.Emailer;
 import com.stretchcom.rskybox.server.GMT;
 import com.stretchcom.rskybox.server.RskyboxApplication;
-import com.stretchcom.rskybox.server.UsersResource;
-import com.stretchcom.rskybox.server.Utility;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Only one notification entity per user. The one notification holds the notification details for all a user's notifications for all their applications
@@ -348,7 +338,7 @@ public class Notification {
 	}
 	
 	public static void queueNotification(User theUser, String theApplicationId, AppMember theAppMember, String theNotificationType, 
-			                             String theMessage, String theItemId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
+			                             String theMessage, String theIncidentId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
         EntityManager em = EMF.get().createEntityManager();
         
         String userId = null;
@@ -397,19 +387,19 @@ public class Notification {
         	if(theNotificationType.equalsIgnoreCase(Notification.CRASH)) {
         		notificationDetails.setCrashCount(1);
             	notificationDetails.setCrashMessage(theMessage);
-            	notificationDetails.setCrashId(theItemId);
+            	notificationDetails.setCrashId(theIncidentId);
         	} else if(theNotificationType.equalsIgnoreCase(Notification.CLIENT_LOG)) {
         		notificationDetails.setClientLogCount(1);
             	notificationDetails.setClientLogMessage(theMessage);
-            	notificationDetails.setClientLogId(theItemId);
+            	notificationDetails.setClientLogId(theIncidentId);
         	} else if(theNotificationType.equalsIgnoreCase(Notification.UPDATED_LOG)) {
         		notificationDetails.setUpdatedLogCount(1);
             	notificationDetails.setUpdatedLogMessage(theMessage);
-            	notificationDetails.setUpdatedLogId(theItemId);
+            	notificationDetails.setUpdatedLogId(theIncidentId);
         	} else if(theNotificationType.equalsIgnoreCase(Notification.FEEDBACK)) {
         		notificationDetails.setFeedbackCount(1);
             	notificationDetails.setFeedbackMessage(theMessage);
-            	notificationDetails.setFeedbackId(theItemId);
+            	notificationDetails.setFeedbackId(theIncidentId);
         	}
         	notification.updateNotificationDetailsList(notificationDetails);
         	
@@ -751,26 +741,26 @@ public class Notification {
         	if(nd.getCrashCount() > 0  && (nd.getClientLogCount() == 0 && nd.getFeedbackCount() == 0)) {
         		if(nd.getCrashCount() == 1) {
         			// only one crash, link all the way down to the crash detail page
-        			url = rskyboxBaseUrl + "#crash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
+        			url = rskyboxBaseUrl + "#iCrash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
         		} else {
         			// multiple crashes so link to the crash list
-        			url = rskyboxBaseUrl + "#crashes?appId=" + nd.getApplicationId() + "&status=new";
+        			url = rskyboxBaseUrl + "#iCrashes?appId=" + nd.getApplicationId() + "&status=new";
         		}
         	} else if(nd.getClientLogCount() > 0  && (nd.getCrashCount() == 0 && nd.getFeedbackCount() == 0)) {
         		if(nd.getClientLogCount() == 1) {
         			// only one clientLog, link all the way down to the clientLog detail page
-        			url = rskyboxBaseUrl + "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
+        			url = rskyboxBaseUrl + "#iLog?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
         		} else {
-        			// multiple crashes so link to the clientLog list
-        			url = rskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=new";
+        			// multiple logs so link to the clientLog list
+        			url = rskyboxBaseUrl + "#iLogs?appId=" + nd.getApplicationId() + "&status=new";
         		}
         	} else if(nd.getFeedbackCount() > 0  && (nd.getClientLogCount() == 0 && nd.getCrashCount() == 0)) {
         		if(nd.getFeedbackCount() == 1) {
         			// only one feedback, link all the way down to the feedback detail page
-        			url = rskyboxBaseUrl + "#feedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
+        			url = rskyboxBaseUrl + "#iFeedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
         		} else {
         			// multiple crashes so link to the feedback list
-        			url = rskyboxBaseUrl + "#feedbackList?appId=" + nd.getApplicationId() + "&status=new";
+        			url = rskyboxBaseUrl + "#iFeedbackList?appId=" + nd.getApplicationId() + "&status=new";
         		}
         	}
         }
