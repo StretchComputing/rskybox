@@ -193,6 +193,7 @@ var RSKYBOX = (function (r, $) {
 
         if (!this.apiCodes[code]) {
           r.log.warn('Undefined apiStatus: ' + code, 'ConfirmExistingUserView.apiError');
+          this.apiCodes[code] = 'An unknown error occurred. Please try again.';
         }
         this.model.clear({silent: true});
         r.flash.warning(this.apiCodes[code]);

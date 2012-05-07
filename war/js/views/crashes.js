@@ -118,6 +118,7 @@ var RSKYBOX = (function (r, $) {
 
         if (!this.apiCodes[code]) {
           r.log.warn('Undefined apiStatus: ' + code, 'CrashView.apiError');
+          this.apiCodes[code] = 'An unknown error occurred. Please try again.';
         }
         r.flash.warning(this.apiCodes[code]);
       } catch (e) {

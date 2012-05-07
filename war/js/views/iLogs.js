@@ -82,7 +82,7 @@ var RSKYBOX = (function (r, $) {
 
     initialize: function () {
       try {
-        _.bindAll(this, 'changeStatus', 'changeMode', 'success');
+        _.bindAll(this, 'changeStatus', 'changeMode', 'success', 'apiError');
         this.model.on('change', this.render, this);
         this.model.on('error', this.error, this);
         this.template = _.template($('#iLogTemplate').html());
@@ -176,6 +176,7 @@ var RSKYBOX = (function (r, $) {
 
         if (!this.apiCodes[code]) {
           r.log.warn('Undefined apiStatus: ' + code, 'iLogView.apiError');
+          this.apiCodes[code] = 'An unknown error occurred. Please try again.';
         }
         r.flash.warning(this.apiCodes[code]);
       } catch (e) {

@@ -204,9 +204,9 @@ var RSKYBOX = (function (r, $) {
         var code = r.getApiStatus(jqXHR.responseText);
         r.log.info(code, 'MemberView.apiError');
 
-        r.dump(this.apiCodes);
         if (!this.apiCodes[code]) {
           r.log.warn('Undefined apiStatus: ' + code, 'MemberView.apiError');
+          this.apiCodes[code] = 'An unknown error occurred. Please try again.';
         }
         r.flash.warning(this.apiCodes[code]);
       } catch (e) {
