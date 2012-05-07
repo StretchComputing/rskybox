@@ -81,9 +81,18 @@
     </div>
     <script type="text/template" id="applicationTemplate">
       <ul data-role="listview" data-inset="true">
-        <li><a href="#iLogs?appId=<%= id %>">Logs</a></li>
-        <li><a href="#crashes?appId=<%= id %>">Crashes</a></li>
-        <li><a href="#feedbackList?appId=<%= id %>">Feedback</a></li>
+        <li>
+          <a href="#iLogs?appId=<%= id %>">Logs</a>
+          <span class="ui-li-count count-bubble"><%= numberOfOpenLogs ? numberOfOpenLogs : 0 %></span>
+        </li>
+        <li>
+          <a href="#crashes?appId=<%= id %>">Crashes</a>
+          <span class="ui-li-count count-bubble"><%= numberOfOpenCrashes ? numberOfOpenCrashes : 0 %></span>
+        </li>
+        <li>
+          <a href="#feedbackList?appId=<%= id %>">Feedback</a>
+          <span class="ui-li-count count-bubble"><%= numberOfOpenFeedback ? numberOfOpenFeedback : 0 %></span>
+        </li>
       </ul>
       <% if (role !== 'member') { %>
         <ul data-role="listview" data-inset="true">
@@ -267,7 +276,7 @@
         <p><%= lastUpdatedDate %></p>
         <p><%= name %></p>
         <p><%= message %></p></a>
-        <span class="ui-li-count" style="font-size: 100%;"><%= eventCount %></span>
+        <span class="ui-li-count count-bubble"><%= eventCount %></span>
     </script>
 
     <div data-role="page" id="iLog" data-title="Log">
