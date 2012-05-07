@@ -316,10 +316,12 @@ public class IncidentsResource extends ServerResource {
 				return Utility.apiError(this, ApiStatusCode.WELL_KNOWN_TAG_REQUIRED);
 			}
 
-            if(!isUpdate && json.has("name")) {
-            	incident.setEventName(json.getString("name"));
-            } else {
-            	return Utility.apiError(this, ApiStatusCode.NAME_REQUIRED);
+            if(!isUpdate) {
+            	if(json.has("name")) {
+                	incident.setEventName(json.getString("name"));
+            	} else {
+                	return Utility.apiError(this, ApiStatusCode.NAME_REQUIRED);
+                }
             }
 			
 			if(!isUpdate && json.has("summary")) {
