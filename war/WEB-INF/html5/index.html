@@ -212,7 +212,7 @@
       <div data-role="header">
         <a href="#" class="back" data-icon="arrow-l" data-mini="true">App</a>
         <h1>Feedback</h1>
-        <a href="#feedbackList" data-theme="b" data-icon="check" data-iconpos="right" class="archives" data-mini="true">Archives</a>
+        <a href="#feedbackList" data-theme="b" data-icon="check" data-iconpos="right" class="archives" data-mini="true">Closed</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content">
@@ -248,9 +248,9 @@
           <li>For: <%= instanceUrl %></li>
         <% } %>
         <li>
-          Status: <%= status %>
+          Status: <%= status === 'open' ? 'Open' : 'Closed' %>
           <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
-            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
+            <%= status === 'open' ? 'Close' : 'Reopen' %>
           </button>
         </li>
       </ul>
@@ -354,7 +354,7 @@
       <div data-role="header">
         <a href="#" class="back" data-icon="arrow-l" data-mini="true">App</a>
         <h3>Logs</h3>
-        <a href="#logs" data-theme="b" data-icon="check" data-iconpos="right" class="archives" data-mini="true">Archives</a>
+        <a href="#logs" data-theme="b" data-icon="check" data-iconpos="right" class="archives" data-mini="true">Closed</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
@@ -416,7 +416,7 @@
       <div data-role="header">
         <a href="#" class="back" data-icon="arrow-l" data-mini="true">App</a>
         <h1>Crashes</h1>
-        <a href="#crashes" data-theme="b" data-icon="check" data-iconpos="right" class="archives" data-mini="true">Archives</a>
+        <a href="#crashes" data-theme="b" data-icon="check" data-iconpos="right" class="archives" data-mini="true">Closed</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
@@ -448,9 +448,9 @@
           <li class="long-lines">For: <%= instanceUrl %></li>
         <% } %>
         <li>
-          Status: <%= status %>
+          Status: <%= status === 'open' ? 'Open' : 'Closed' %>
           <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
-            <%= status === 'new' ? 'Archive' : 'Un-archive' %>
+            <%= status === 'open' ? 'Close' : 'Reopen' %>
           </button>
         </li>
         <li>Summary: <%= summary %></li>

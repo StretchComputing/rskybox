@@ -60,7 +60,7 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
-    renderArchiveButton: function (pageLink) {
+    renderStatusButton: function (pageLink) {
       try {
         var
           el,
@@ -70,19 +70,19 @@ var RSKYBOX = (function (r, $) {
 
         model.appId = params.appId;
         model.pageLink = pageLink;
-        if (params.status === 'archived') {
-          model.status = 'new';
-          model.display = 'Active';
+        if (params.status === 'closed') {
+          model.status = 'open';
+          model.display = 'Open';
         } else {
-          model.status = 'archived';
-          model.display = 'Archives';
+          model.status = 'closed';
+          model.display = 'Closed';
         }
 
         el = this.getHeader().find('.archives');
         el.attr('href', hrefTemplate(model));
         el.find('.ui-btn-text').text(model.display);
       } catch (e) {
-        r.log.error(e, 'JqmPageBaseView.renderArchiveButton');
+        r.log.error(e, 'JqmPageBaseView.renderStatusButton');
       }
     },
 

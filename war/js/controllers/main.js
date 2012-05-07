@@ -124,7 +124,7 @@ var RSKYBOX = (function (r, $) {
         r.feedbackListView.collection.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.feedbackListView.options.applications);
         r.feedbackListView.collection.fetch({data: { status: r.session.params.status }});
-        r.feedbackListView.renderArchiveButton('#feedbackList');
+        r.feedbackListView.renderStatusButton('#feedbackList');
       } catch (e) {
         r.log.error(e, 'MainController.feedbackListShow');
       }
@@ -181,7 +181,7 @@ var RSKYBOX = (function (r, $) {
         r.iLogsView.collection.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.iLogsView.options.applications);
         r.iLogsView.collection.fetch({data: { status: r.session.params.status }});
-        r.iLogsView.renderArchiveButton('#iLogs');
+        r.iLogsView.renderStatusButton('#iLogs');
       } catch (e) {
         r.log.error(e, 'MainController.iLogsShow');
       }
@@ -238,7 +238,7 @@ var RSKYBOX = (function (r, $) {
         r.crashesView.collection.setAppUrl(r.session.params.appId);
         r.crashesView.collection.fetch({data: { status: r.session.params.status }});
         r.session.getCollection(r.session.keys.applications, r.crashesView.options.applications);
-        r.crashesView.renderArchiveButton('#crashes');
+        r.crashesView.renderStatusButton('#crashes');
       } catch (e) {
         r.log.error(e, 'MainController.crashesShow');
       }
