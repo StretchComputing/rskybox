@@ -2,30 +2,36 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.Crash = r.BaseModel.extend({
-    apiUrl: '/crashDetects',
+  r.iCrash = r.BaseModel.extend({
+    apiUrl: '/incidents',
     fields: {
       id: null,
       appId: null,
-      summary: null,
-      date: null,
-      userName: null,
-      instanceUrl: null,
+      number: null,
       status: null,
+      severity: null,
+      name: null,
+      lastUpdatedDate: null,
+      createdDate: null,
+      tags: null,
+      eventCount: null,
+      summary: null,
+      mode: null,
+      message: null,
       appActions: null,
     },
   });
 
 
-  r.Crashes = r.BaseCollection.extend({
-    model: r.Crash,
-    apiUrl: '/crashDetects',
+  r.iCrashes = r.BaseCollection.extend({
+    model: r.iCrash,
+    apiUrl: '/incidents?tag=crash',
 
     parse: function (response) {
       try {
-        return response.crashDetects;
+        return response.incidents;
       } catch (e) {
-        r.log.error(e, 'Crashes.parse');
+        r.log.error(e, 'iCrashes.parse');
       }
     }
   });

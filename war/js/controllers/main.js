@@ -165,7 +165,7 @@ var RSKYBOX = (function (r, $) {
     iLogsInit: function () {
       try {
         r.log.info('entering', 'MainController.iLogsInit');
-        r.iLogsView = new r.iLogsView({
+        r.logsView = new r.iLogsView({
           collection: new r.iLogs(),
           applications: new r.Applications(),
         });
@@ -177,11 +177,11 @@ var RSKYBOX = (function (r, $) {
     iLogsShow: function () {
       try {
         r.log.info('entering', 'MainController.iLogsShow');
-        r.iLogsView.setElement($.mobile.activePage);
-        r.iLogsView.collection.setAppUrl(r.session.params.appId);
-        r.session.getCollection(r.session.keys.applications, r.iLogsView.options.applications);
-        r.iLogsView.collection.fetch({data: { status: r.session.params.status }});
-        r.iLogsView.renderStatusButton('#iLogs');
+        r.logsView.setElement($.mobile.activePage);
+        r.logsView.collection.setAppUrl(r.session.params.appId);
+        r.session.getCollection(r.session.keys.applications, r.logsView.options.applications);
+        r.logsView.collection.fetch({data: { status: r.session.params.status }});
+        r.logsView.renderStatusButton('#iLogs');
       } catch (e) {
         r.log.error(e, 'MainController.iLogsShow');
       }
@@ -192,7 +192,7 @@ var RSKYBOX = (function (r, $) {
     iLogInit: function () {
       try {
         r.log.info('entering', 'MainController.iLogInit');
-        r.iLogView = new r.iLogView({
+        r.logView = new r.iLogView({
           model: new r.iLog(),
           applications: new r.Applications(),
         });
@@ -204,12 +204,12 @@ var RSKYBOX = (function (r, $) {
     iLogShow: function () {
       try {
         r.log.info('entering', 'MainController.iLogShow');
-        r.iLogView.setElement($.mobile.activePage);
-        r.iLogView.model.clear({ silent: true });
-        r.iLogView.model.set({id: r.session.params.id}, {silent: true});
-        r.iLogView.model.setAppUrl(r.session.params.appId);
-        r.session.getCollection(r.session.keys.applications, r.iLogView.options.applications);
-        r.iLogView.model.fetch({
+        r.logView.setElement($.mobile.activePage);
+        r.logView.model.clear({ silent: true });
+        r.logView.model.set({id: r.session.params.id}, {silent: true});
+        r.logView.model.setAppUrl(r.session.params.appId);
+        r.session.getCollection(r.session.keys.applications, r.logView.options.applications);
+        r.logView.model.fetch({
           statusCode: r.statusCodeHandlers(),
         });
       } catch (e) {
@@ -218,49 +218,49 @@ var RSKYBOX = (function (r, $) {
     },
 
 
-    // Crashes
-    crashesInit: function () {
+    // iCrashes
+    iCrashesInit: function () {
       try {
-        r.log.info('entering', 'MainController.crashesInit');
-        r.crashesView = new r.CrashesView({
-          collection: new r.Crashes(),
+        r.log.info('entering', 'MainController.iCrashesInit');
+        r.crashesView = new r.iCrashesView({
+          collection: new r.iCrashes(),
           applications: new r.Applications(),
         });
       } catch (e) {
-        r.log.error(e, 'MainController.crashesInit');
+        r.log.error(e, 'MainController.iCrashesInit');
       }
     },
 
-    crashesShow: function () {
+    iCrashesShow: function () {
       try {
-        r.log.info('entering', 'MainController.crashesShow');
+        r.log.info('entering', 'MainController.iCrashesShow');
         r.crashesView.setElement($.mobile.activePage);
         r.crashesView.collection.setAppUrl(r.session.params.appId);
         r.crashesView.collection.fetch({data: { status: r.session.params.status }});
         r.session.getCollection(r.session.keys.applications, r.crashesView.options.applications);
-        r.crashesView.renderStatusButton('#crashes');
+        r.crashesView.renderStatusButton('#iCrashes');
       } catch (e) {
-        r.log.error(e, 'MainController.crashesShow');
+        r.log.error(e, 'MainController.iCrashesShow');
       }
     },
 
 
-    // Crash
-    crashInit: function () {
+    // iCrash
+    iCrashInit: function () {
       try {
-        r.log.info('entering', 'MainController.crashInit');
-        r.crashView = new r.CrashView({
-          model: new r.Crash(),
+        r.log.info('entering', 'MainController.iCrashInit');
+        r.crashView = new r.iCrashView({
+          model: new r.iCrash(),
           applications: new r.Applications(),
         });
       } catch (e) {
-        r.log.error(e, 'MainController.crashInit');
+        r.log.error(e, 'MainController.iCrashInit');
       }
     },
 
-    crashShow: function () {
+    iCrashShow: function () {
       try {
-        r.log.info('entering', 'MainController.crashShow');
+        r.log.info('entering', 'MainController.iCrashShow');
         r.crashView.setElement($.mobile.activePage);
         r.crashView.model.clear({silent: true});
         r.crashView.model.set({id: r.session.params.id}, {silent: true});
@@ -270,7 +270,7 @@ var RSKYBOX = (function (r, $) {
           statusCode: r.statusCodeHandlers(),
         });
       } catch (e) {
-        r.log.error(e, 'MainController.crashShow');
+        r.log.error(e, 'MainController.iCrashShow');
       }
     },
 
@@ -485,18 +485,10 @@ var RSKYBOX = (function (r, $) {
       { '#iLogs':                   { handler: 'iLogsShow',           events: 's'   } },
       { '#iLog[?]id=.*':            { handler: 'iLogInit',            events: 'i'   } },
       { '#iLog[?]id=.*':            { handler: 'iLogShow',            events: 's'   } },
-      { '#logs':                    { handler: 'logsInit',            events: 'i'   } },
-      { '#logs':                    { handler: 'logsShow',            events: 's'   } },
-      { '#log[?]id=.*':             { handler: 'logInit',             events: 'i'   } },
-      { '#log[?]id=.*':             { handler: 'logShow',             events: 's'   } },
       { '#iCrashes':                { handler: 'iCrashesInit',        events: 'i'   } },
       { '#iCrashes':                { handler: 'iCrashesShow',        events: 's'   } },
       { '#iCrash[?]id=.*':          { handler: 'iCrashInit',          events: 'i'   } },
       { '#iCrash[?]id=.*':          { handler: 'iCrashShow',          events: 's'   } },
-      { '#crashes':                 { handler: 'crashesInit',         events: 'i'   } },
-      { '#crashes':                 { handler: 'crashesShow',         events: 's'   } },
-      { '#crash[?]id=.*':           { handler: 'crashInit',           events: 'i'   } },
-      { '#crash[?]id=.*':           { handler: 'crashShow',           events: 's'   } },
       { '#members':                 { handler: 'membersInit',         events: 'i'   } },
       { '#members':                 { handler: 'membersShow',         events: 's'   } },
       { '#member[?]id=.*':          { handler: 'memberInit',          events: 'i'   } },

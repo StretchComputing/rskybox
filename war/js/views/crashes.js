@@ -2,84 +2,43 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.CrashEntryView = Backbone.View.extend({
-    tagName: 'li',
-
-    initialize: function () {
-      try {
-        _.bindAll(this, 'render');
-        this.template = _.template($('#crashEntryTemplate').html());
-      } catch (e) {
-        r.log.error(e, 'CrashEntryView.initialize');
-      }
-    },
-
-    render: function () {
-      try {
-        var mock = this.model.getMock();
-
-        mock.date = r.format.longDate(mock.date);
-        this.$el.html(this.template(mock));
-        return this;
-      } catch (e) {
-        r.log.error(e, 'CrashEntryView.render');
-      }
-    }
-  });
-
-
   r.CrashesView = r.JqmPageBaseView.extend({
     initialize: function () {
       try {
         this.collection.bind('reset', this.render, this);
-        this.template = _.template($('#noCrashesTemplate').html());
       } catch (e) {
-        r.log.error(e, 'CrashesView.');
+        r.log.error(e, 'CrashesView.initialize');
       }
     },
 
     render: function () {
       try {
-        var list;
-
-        this.appLink('back', 'application');
-
-        this.getContent().empty();
-        if (this.collection.length <= 0) {
-          this.getContent().html(this.template());
-        } else {
-          list = $('<ul>');
-          this.collection.each(function (crash) {
-            this.addCrashEntry(list, crash);
-          }, this);
-          this.getContent().html(list);
-          list.listview();
-        }
+        this.$el.empty();
+        this.collection.each(function (crash) {
+          console.log('****');
+          this.$el.append(new r.CrashView({
+            model: crash,
+            attributes: {
+              'data-role': 'collapsible',
+              'data-theme': 'c',
+              'data-content-theme': 'c',
+              'data-mini': 'true',
+            },
+          }).render().el);
+        }, this);
+        console.log(this.$el.html());
+        this.$el.trigger('create');
         return this;
       } catch (e) {
-        r.log.error(e, 'CrashesView.');
+        r.log.error(e, 'CrashesView.render');
       }
     },
-
-    addCrashEntry: function (list, crash) {
-      try {
-        list.append(new r.CrashEntryView({ model: crash }).render().el);
-      } catch (e) {
-        r.log.error(e, 'CrashesView.');
-      }
-    }
   });
 
 
   r.CrashView = r.JqmPageBaseView.extend({
-    events: {
-      'click .changeStatus': 'changeStatus',
-    },
-
     initialize: function () {
       try {
-        this.model.on('change', this.render, this);
-        this.model.on('error', this.error, this);
         this.template = _.template($('#crashTemplate').html());
       } catch (e) {
         r.log.error(e, 'CrashView.');
@@ -90,14 +49,10 @@ var RSKYBOX = (function (r, $) {
       try {
         var mock = this.model.getMock();
 
-        this.appLink('back', 'crashes');
-
-        mock.date = r.format.longDate(mock.date);
-        this.getContent().html(this.template(mock));
-        this.$el.trigger('create');
+        this.$el.html(this.template(mock));
         return this;
       } catch (e) {
-        r.log.error(e, 'CrashView.');
+        r.log.error(e, 'CrashView.render');
       }
     },
 

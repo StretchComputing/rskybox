@@ -14,7 +14,6 @@ var RSKYBOX = (function (r, $) {
       lastUpdatedDate: null,
       createdDate: null,
       tags: null,
-      firstEvent: null,
       eventCount: null,
       summary: null,
       mode: null,

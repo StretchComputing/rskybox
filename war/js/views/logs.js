@@ -45,7 +45,6 @@ var RSKYBOX = (function (r, $) {
 
     render: function () {
       try {
-        r.log.info('entering', 'LogView.render');
         var mock = this.model.getMock();
 
         if (Array.isArray(mock.stackBackTrace)) {

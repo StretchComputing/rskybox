@@ -144,7 +144,7 @@ var RSKYBOX = (function (r, $) {
         evt.preventDefault();
         return false;
       } catch (e) {
-        r.log.error(e, 'iLogView.moreLogs');
+        r.log.error(e, 'iLogView.getLogs');
       }
     },
 
