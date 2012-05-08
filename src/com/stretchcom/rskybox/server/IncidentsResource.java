@@ -255,7 +255,6 @@ public class IncidentsResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
-        em.getTransaction().begin();
         try {
             incident = new Incident();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
@@ -352,6 +351,7 @@ public class IncidentsResource extends ServerResource {
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
 	            	if(Incident.isStatusValid(status)) {
+	            		// changeStatus calls a method that uses a transaction
 	            		incident.changeStatus(incident.getWellKnownTag(), status, theApplication);
 	            	} else {
 						return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
@@ -402,7 +402,6 @@ public class IncidentsResource extends ServerResource {
 			}
 			
             em.persist(incident);
-            em.getTransaction().commit();
             
             if(!isUpdate) {
             	String message = incident.getEventName();
@@ -432,9 +431,6 @@ public class IncidentsResource extends ServerResource {
 			log.severe("should never happen - two or more incidents have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} finally {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
             em.close();
         }
         
