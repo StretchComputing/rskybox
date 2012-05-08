@@ -364,6 +364,13 @@
     <script type="text/template" id="iNoCrashesTemplate">
       <h3>No crashes at this time.</h3>
     </script>
+    <script type="text/template" id="iCrashEntryTemplate">
+      <a href="#iCrash?id=<%= id %>&appId=<%= appId %>">
+        <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
+        <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
+        <p><%= name %></p>
+        <p><%= message %></p></a>
+    </script>
 
     <div data-role="page" id="iCrash" data-title="Crash">
       <div data-role="header">
@@ -382,9 +389,6 @@
         <li>Created: <%= RSKYBOX.format.longDate(createdDate) %></li>
         <li>Updated: <%= RSKYBOX.format.longDate(lastUpdatedDate) %></li>
         <li>
-          <button class="mode" data-inline="true" data-mini="true">
-            <%= (mode === 'inactive') ? 'Activate' : 'Deactivate' %> Log Series
-          </button>
           <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
             <%= status === 'open' ? 'Close' : 'Re-open' %>
           </button>
@@ -400,19 +404,13 @@
       <h1>
         Detected: <%= RSKYBOX.format.compactDate(date) %><br>
         <% if (userName) { %>
-          <%= userName %><br>
+          User: <%= userName %>
         <% } %>
       </h1>
       <ul data-role="listview" data-inset="true">
         <% if (instanceUrl) { %>
           <li class="long-lines">For: <%= instanceUrl %></li>
         <% } %>
-        <li>
-          Status: <%= status === 'open' ? 'Open' : 'Closed' %>
-          <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
-            <%= status === 'open' ? 'Close' : 'Reopen' %>
-          </button>
-        </li>
         <li>Summary: <%= summary %></li>
         <% if (appActions) { %>
           <li>
