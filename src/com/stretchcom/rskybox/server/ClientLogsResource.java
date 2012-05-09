@@ -208,7 +208,12 @@ public class ClientLogsResource extends ServerResource {
 			}
             
             for (ClientLog cl : clientLogs) {
-                ja.put(getClientLogJson(cl, true));
+            	JSONObject clientLogObj = ClientLog.getJson(cl, true);
+            	if(clientLogObj == null) {
+            		this.setStatus(Status.SERVER_ERROR_INTERNAL);
+            		break;
+            	}
+                ja.put(clientLogObj);
             }
             json.put("clientLogs", ja);
             json.put("apiStatus", apiStatus);
@@ -262,7 +267,12 @@ public class ClientLogsResource extends ServerResource {
 			em.close();
 		} 
         
-        return new JsonRepresentation(getClientLogJson(clientLog, apiStatus, false));
+        JSONObject clientJsonObj = ClientLog.getJson(clientLog, apiStatus, false);
+        if(clientJsonObj == null) {
+        	this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        	clientJsonObj = new JSONObject();
+        }
+		return new JsonRepresentation(clientJsonObj);
     }
 
     private JsonRepresentation save_client_log(Representation entity, Application theApplication) {
@@ -530,76 +540,4 @@ public class ClientLogsResource extends ServerResource {
 //	    return new JsonRepresentation(jsonReturn);
 //    }
     
-    private JSONObject getClientLogJson(ClientLog clientLog, Boolean isList) {
-    	return getClientLogJson(clientLog, null, isList);
-    }
-
-    private JSONObject getClientLogJson(ClientLog clientLog, String theApiStatus, Boolean isList) {
-        JSONObject json = new JSONObject();
-
-        try {
-        	if(theApiStatus != null) {
-        		json.put("apiStatus", theApiStatus);
-        	}
-        	if(clientLog != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
-        		json.put("id", KeyFactory.keyToString(clientLog.getKey()));
-    			
-            	Date createdDate = clientLog.getCreatedGmtDate();
-            	if(createdDate != null) {
-            		json.put("date", GMT.convertToIsoDate(createdDate));
-            	}
-            	json.put("userId", clientLog.getUserId());
-            	json.put("userName", clientLog.getUserName());
-            	json.put("instanceUrl", clientLog.getInstanceUrl());
-            	json.put("logLevel", clientLog.getLogLevel());
-            	json.put("logName", clientLog.getLogName());
-            	json.put("message", clientLog.getMessage());
-            	json.put("summary", clientLog.getSummary());
-            	json.put("incidentId", clientLog.getIncidentId());
-            	
-            	JSONArray stackBackTracesJsonArray = new JSONArray();
-            	List<String> stackBackTraces = clientLog.getStackBackTraces();
-            	
-            	//////////////////////////////////////////////////
-            	// TODO - remove support of stackBackTrace string
-            	//////////////////////////////////////////////////
-            	if(stackBackTraces == null || stackBackTraces.size() == 0) {
-        			log.info("returning legacy stackBackTrace");
-            		stackBackTraces = new ArrayList<String>();
-            		String stackBackTrace = clientLog.getStackBackTrace();
-            		if(stackBackTrace != null && stackBackTrace.length() > 0) {
-                		stackBackTraces.add(stackBackTrace);
-            		}
-            	}
-            	//////////////////////////////////////////////////
-
-            	for(String sbt: stackBackTraces) {
-            		stackBackTracesJsonArray.put(sbt);
-            	}
-            	log.info("stackBackTraces # of parts = " + stackBackTraces.size());
-            	json.put("stackBackTrace", stackBackTracesJsonArray);
-            	
-            	JSONArray appActionsJsonArray = new JSONArray();
-            	List<AppAction> appActions = clientLog.getAppActions();
-            	for(AppAction aa : appActions) {
-            		JSONObject appActionJsonObj = new JSONObject();
-            		appActionJsonObj.put("description", aa.getDescription());
-            		appActionJsonObj.put("timestamp", GMT.convertToIsoDate(aa.getTimestamp()));
-            		if(aa.getDuration() != null) appActionJsonObj.put("duration", aa.getDuration());
-            		appActionsJsonArray.put(appActionJsonObj);
-            	}
-            	if(appActions.size() > 0) {json.put("appActions", appActionsJsonArray);}
-            	
-            	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
-            	String status = clientLog.getStatus();
-            	if(status == null || status.length() == 0) {status = "new";}
-            	json.put("status", status);
-            	json.put("appId", clientLog.getApplicationId());
-        	}
-        } catch (JSONException e) {
-        	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
-            this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
-        return json;
-    }
 }
