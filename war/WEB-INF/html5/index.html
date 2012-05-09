@@ -27,7 +27,6 @@
     <script src="/js/helpers/session.js"></script>
     <script src="/js/models/base.js"></script>
     <script src="/js/models/iLog.js"></script>
-    <script src="/js/models/log.js"></script>
     <script src="/js/models/user.js"></script>
     <script src="/js/models/carrier.js"></script>
     <script src="/js/models/application.js"></script>
@@ -41,7 +40,6 @@
     <script src="/js/views/carriers.js"></script>
     <script src="/js/views/feedback.js"></script>
     <script src="/js/views/iLogs.js"></script>
-    <script src="/js/views/logs.js"></script>
     <script src="/js/views/iCrashes.js"></script>
     <script src="/js/views/members.js"></script>
     <script src="/js/views/endusers.js"></script>
@@ -306,46 +304,50 @@
       </ul>
       <p>
         <strong>Logs (<%= eventCount %>)</strong>
-        <button class="getLogs" data-mini="true" data-inline="true">Get Logs</button>
       </p>
-      <div class="logsView"></div>
-    </script>
-    <script type="text/template" id="logTemplate">
-      <h1>
-        <%= logLevel %>: <%= RSKYBOX.format.compactDate(date) %><br>
-        <%= message %><br>
-        <%= userName %>
-      </h1>
-      <ul data-role="listview" data-inset="true">
-        <li>Summary: <%= summary %></li>
-        <li>User ID: <%= userId %></li>
-        <% if (instanceUrl) { %>
-          <li class="long-lines">For: <%= instanceUrl %></li>
-        <% } %>
-      </ul>
-      <% if (appActions) { %>
-        <div data-role="collapsible" data-collapsed="false" data-theme="c" data-content-theme="c" data-mini="true">
-          <h3>App Actions:</h3>
-          <% var on = false; %>
-          <% appActions.forEach(function (action) { %>
-            <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
-              <%= RSKYBOX.format.compactDate(action.timestamp) %>
-              <% if (action.duration) { %>
-                - <%= action.duration %>ms
+      <% if (events && events.logs) { %>
+        <% events.logs.forEach(function (log) { %>
+          <div data-role='collapsible' data-theme='c' data-content-theme='c' data-mini: 'true'>
+            <h1>
+              <%= log.logLevel %>: <%= RSKYBOX.format.compactDate(log.date) %><br>
+              <%= log.message %><br>
+              <% if (log.userName) { %>
+                User: <%= log.userName %>
               <% } %>
-              <br>
-              <%= action.description %>
+            </h1>
+            <ul data-role="listview" data-inset="true">
+              <li>Summary: <%= log.summary %></li>
+              <li>User ID: <%= log.userId %></li>
+              <% if (log.instanceUrl) { %>
+                <li class="long-lines">For: <%= log.instanceUrl %></li>
+              <% } %>
+              <% if (log.appActions) { %>
+                <li>
+                  <h3>App Actions:</h3>
+                  <% var on = false; %>
+                  <% log.appActions.forEach(function (action) { %>
+                    <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
+                      <%= RSKYBOX.format.compactDate(action.timestamp) %>
+                      <% if (action.duration) { %>
+                        - <%= action.duration %>ms
+                      <% } %>
+                      <br>
+                      <%= action.description %>
+                    </div>
+                    <% on = !on; %>
+                  <% }); %>
+                </li>
+              <% } %>
+            </ul>
+            <div data-role="collapsible" data-theme="c" data-content-theme="c" data-mini="true">
+              <h3>Stack Back Trace:</h3>
+              <div  class="long-lines">
+                <%= log.stackBackTrace %>
+              </div>
             </div>
-            <% on = !on; %>
-          <% }); %>
-        </div>
+          </div>
+        <% }); %>
       <% } %>
-      <div data-role="collapsible" data-theme="c" data-content-theme="c" data-mini="true">
-        <h3>Stack Back Trace:</h3>
-        <div  class="long-lines">
-          <%= stackBackTrace %>
-        </div>
-      </div>
     </script>
 
 
@@ -398,41 +400,40 @@
       <% if (events && events.crashes) { %>
         <% events.crashes.forEach(function (crash) { %>
           <div data-role='collapsible' data-theme='c' data-content-theme='c' data-mini: 'true'>
-          <h1>
-            Detected: <%= RSKYBOX.format.compactDate(crash.date) %><br>
-            <% if (crash.userName) { %>
-              User: <%= crash.userName %>
-            <% } %>
-          </h1>
-          <ul data-role="listview" data-inset="true">
-            <% if (crash.instanceUrl) { %>
-              <li class="long-lines">For: <%= crash.instanceUrl %></li>
-            <% } %>
-            <li>Summary: <%= crash.summary %></li>
-            <% if (crash.appActions) { %>
-              <li>
-                <h3>App Actions:</h3>
-                <% var on = false; %>
-                <% crash.appActions.forEach(function (action) { %>
-                  <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
-                    <%= RSKYBOX.format.compactDate(action.timestamp) %>
-                    <% if (action.duration) { %>
-                      - <%= action.duration %>ms
-                    <% } %>
-                    <br>
-                    <%= action.description %>
-                  </div>
-                  <% on = !on; %>
-                <% }); %>
-              </li>
-            <% } %>
-          </ul>
+            <h1>
+              Detected: <%= RSKYBOX.format.compactDate(crash.date) %><br>
+              <% if (crash.userName) { %>
+                User: <%= crash.userName %>
+              <% } %>
+            </h1>
+            <ul data-role="listview" data-inset="true">
+              <% if (crash.instanceUrl) { %>
+                <li class="long-lines">For: <%= crash.instanceUrl %></li>
+              <% } %>
+              <li>Summary: <%= crash.summary %></li>
+              <li>User ID: <%= crash.userId %></li>
+              <% if (crash.appActions) { %>
+                <li>
+                  <h3>App Actions:</h3>
+                  <% var on = false; %>
+                  <% crash.appActions.forEach(function (action) { %>
+                    <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
+                      <%= RSKYBOX.format.compactDate(action.timestamp) %>
+                      <% if (action.duration) { %>
+                        - <%= action.duration %>ms
+                      <% } %>
+                      <br>
+                      <%= action.description %>
+                    </div>
+                    <% on = !on; %>
+                  <% }); %>
+                </li>
+              <% } %>
+            </ul>
           Crash Stack Data: <a href="/crashStackData/<%= crash.appId %>/<%= id %>.plcrash" data-ajax="false">plcrash file</a>
           </div>
         <% }); %>
       <% } %>
-    </script>
-    <script type="text/template" id="crashTemplate">
     </script>
 
 

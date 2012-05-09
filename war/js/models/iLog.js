@@ -15,6 +15,7 @@ var RSKYBOX = (function (r, $) {
       createdDate: null,
       tags: null,
       eventCount: null,
+      events: null,
       summary: null,
       mode: null,
       message: null,
@@ -25,7 +26,7 @@ var RSKYBOX = (function (r, $) {
 
   r.iLogs = r.BaseCollection.extend({
     model: r.iLog,
-    apiUrl: '/incidents?tag=log',
+    apiUrl: '/incidents',
 
     parse: function (response) {
       try {

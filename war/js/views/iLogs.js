@@ -30,8 +30,6 @@ var RSKYBOX = (function (r, $) {
   r.iLogsView = r.JqmPageBaseView.extend({
     initialize: function () {
       try {
-        r.log.info('entering', 'iLogsView.initialize');
-        _.bindAll(this, 'addLogEntry');
         this.collection.bind('reset', this.render, this);
         this.template = _.template($('#iNoLogsTemplate').html());
       } catch (e) {
@@ -76,7 +74,6 @@ var RSKYBOX = (function (r, $) {
     events: {
       'click .changeStatus': 'changeStatus',
       'click .mode': 'changeMode',
-      'click .getLogs': 'getLogs',
     },
 
     initialize: function () {
@@ -86,7 +83,7 @@ var RSKYBOX = (function (r, $) {
         this.model.on('error', this.error, this);
         this.template = _.template($('#iLogTemplate').html());
       } catch (e) {
-        r.log.error(e, 'iLogView.');
+        r.log.error(e, 'iLogView.initialize');
       }
     },
 
@@ -126,25 +123,6 @@ var RSKYBOX = (function (r, $) {
         return false;
       } catch (e) {
         r.log.error(e, 'iLogView.changeMode');
-      }
-    },
-
-    getLogs: function (evt) {
-      try {
-        this.logsView = new r.LogsView({
-          el: this.$el.find('.logsView'),
-          collection: new r.Logs()
-        });
-        this.logsView.collection.setAppUrl(r.session.params.appId);
-
-        this.logsView.collection.fetch({data: { incidentId : this.model.get('id') }});
-        this.logsView.$el.show();
-        this.$el.find('.getLogs').parent('.ui-btn').hide();
-
-        evt.preventDefault();
-        return false;
-      } catch (e) {
-        r.log.error(e, 'iLogView.getLogs');
       }
     },
 

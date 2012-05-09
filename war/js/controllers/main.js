@@ -180,7 +180,12 @@ var RSKYBOX = (function (r, $) {
         r.logsView.setElement($.mobile.activePage);
         r.logsView.collection.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.logsView.options.applications);
-        r.logsView.collection.fetch({data: { status: r.session.params.status }});
+        r.logsView.collection.fetch({
+          data: {
+            tag: 'log',
+            status: r.session.params.status
+          },
+        });
         r.logsView.renderStatusButton('#iLogs');
       } catch (e) {
         r.log.error(e, 'MainController.iLogsShow');
@@ -211,6 +216,9 @@ var RSKYBOX = (function (r, $) {
         r.session.getCollection(r.session.keys.applications, r.logView.options.applications);
         r.logView.model.fetch({
           statusCode: r.statusCodeHandlers(),
+          data: {
+            includeEvents: true,
+          },
         });
       } catch (e) {
         r.log.error(e, 'MainController.iLogShow');
