@@ -1,6 +1,7 @@
 package com.stretchcom.rskybox.models;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
@@ -10,8 +11,15 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.restlet.data.Status;
+
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.stretchcom.rskybox.server.ApiStatusCode;
+import com.stretchcom.rskybox.server.GMT;
 
 @Entity
 @NamedQueries({
@@ -68,6 +76,8 @@ import com.google.appengine.api.datastore.Text;
       ),
 })
 public class Feedback {
+	private static final Logger log = Logger.getLogger(Feedback.class.getName());
+	
 	public final static String NEW_STATUS = "new";
 	public final static String ARCHIVED_STATUS = "archived";
 	public final static String ALL_STATUS = "all";
@@ -180,4 +190,37 @@ public class Feedback {
 	public void setIncidentId(String incidentId) {
 		this.incidentId = incidentId;
 	}
+	
+    public static JSONObject getJson(Feedback feedback, Boolean isList) {
+    	return getJson(feedback, null, isList);
+    }
+
+    public static JSONObject getJson(Feedback feedback, String theApiStatus, Boolean isList) {
+    	
+        JSONObject json = new JSONObject();
+        try {
+        	if(theApiStatus != null) {
+        		json.put("apiStatus", theApiStatus);
+        	}
+        	if(feedback != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
+        		json.put("id", KeyFactory.keyToString(feedback.getKey()));
+    			
+            	Date recordedDate = feedback.getRecordedGmtDate();
+            	if(recordedDate != null) {
+            		json.put("date", GMT.convertToIsoDate(recordedDate));
+            	}
+            	
+            	json.put("userId", feedback.getUserId());
+            	json.put("userName", feedback.getUserName());
+            	json.put("instanceUrl", feedback.getInstanceUrl());
+            	json.put("status", feedback.getStatus());
+            	json.put("appId", feedback.getApplicationId());
+            	json.put("incidentId", feedback.getIncidentId());
+        	}
+        } catch (JSONException e) {
+        	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());
+            return null;
+        }
+        return json;
+    }
 }

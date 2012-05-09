@@ -30,6 +30,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.ClientLog;
+import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.Feedback;
 import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
@@ -41,6 +44,7 @@ public class IncidentsResource extends ServerResource {
 	private String applicationId;
     private String incidentStatus;
     private String remoteControl;
+    private String includeEvents;
 
     @Override
     protected void doInit() throws ResourceException {
@@ -60,6 +64,10 @@ public class IncidentsResource extends ServerResource {
 				this.tag = (String)parameter.getValue().toLowerCase();
 				this.tag = Reference.decode(this.tag);
 				log.info("IncidentResource() - decoded tag = " + this.tag);
+			}  else if(parameter.getName().equals("includeEvents"))  {
+				this.includeEvents = (String)parameter.getValue().toLowerCase();
+				this.includeEvents = Reference.decode(this.includeEvents);
+				log.info("IncidentResource() - decoded includeEvents = " + this.includeEvents);
 			}
 		}
     }
@@ -557,11 +565,87 @@ public class IncidentsResource extends ServerResource {
             	json.put("summary", incident.getSummary());
             	json.put("appId", incident.getApplicationId());
             	json.put("mode", incident.getRemoteControlMode());
+            	
+            	if(this.includeEvents != null && this.includeEvents.equalsIgnoreCase("true")) {
+            		json.put("events", getEventsJsonObj(incident));
+            	}
         	}
         } catch (JSONException e) {
         	log.severe("IncidentsResrouce::getIncidentJson() error creating JSON return object. Exception = " + e.getMessage());
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return json;
+    }
+    
+    private JSONObject getEventsJsonObj(Incident theIncident) {
+    	JSONObject eventsObj = new JSONObject();
+        EntityManager em = EMF.get().createEntityManager();
+        
+        try {
+        	// for now, incidents are contain only one of the event types: logs/crashes/feedback
+        	String wellKnownTag = theIncident.getWellKnownTag();
+            JSONArray emptyJa = new JSONArray();
+            JSONArray ja = new JSONArray();
+        	if(wellKnownTag.equalsIgnoreCase(Incident.LOG_TAG)) {
+        		List<ClientLog> clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationIdAndIncidentId")
+		    			.setParameter("applicationId", this.applicationId)
+		    			.setParameter("incidentId", theIncident.getId())
+		    			.getResultList();
+        		
+                for (ClientLog cl : clientLogs) {
+                	JSONObject clientLogObj = ClientLog.getJson(cl, true);
+                	if(clientLogObj == null) {
+                		this.setStatus(Status.SERVER_ERROR_INTERNAL);
+                		break;
+                	}
+                    ja.put(clientLogObj);
+                }
+                eventsObj.put("crashes", emptyJa);
+                eventsObj.put("logs", ja);
+                eventsObj.put("feedback", emptyJa);
+        	} else if(wellKnownTag.equalsIgnoreCase(Incident.CRASH_TAG)) {
+        		List<CrashDetect> crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getAllWithApplicationIdAndIncidentId")
+		    			.setParameter("applicationId", this.applicationId)
+		    			.setParameter("incidentId", theIncident.getId())
+		    			.getResultList();
+        		
+                for (CrashDetect cd : crashDetects) {
+                	JSONObject crashDetectObj = CrashDetect.getJson(cd, true);
+                	if(crashDetectObj == null) {
+                		this.setStatus(Status.SERVER_ERROR_INTERNAL);
+                		break;
+                	}
+                    ja.put(crashDetectObj);
+                }
+                eventsObj.put("crashes", ja);
+                eventsObj.put("logs", emptyJa);
+                eventsObj.put("feedback", emptyJa);
+        	} else if(wellKnownTag.equalsIgnoreCase(Incident.FEEDBACK_TAG)) {
+        		List<Feedback> feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationIdAndIncidentId")
+		    			.setParameter("applicationId", this.applicationId)
+		    			.setParameter("incidentId", theIncident.getId())
+		    			.getResultList();
+        		
+                for (Feedback fb : feedbacks) {
+                	JSONObject feedbackObj = Feedback.getJson(fb, true);
+                	if(feedbackObj == null) {
+                		this.setStatus(Status.SERVER_ERROR_INTERNAL);
+                		break;
+                	}
+                    ja.put(feedbackObj);
+                }
+                eventsObj.put("crashes", emptyJa);
+                eventsObj.put("logs", emptyJa);
+                eventsObj.put("feedback", ja);
+        	} else {
+        		log.severe("getEventsJsonObj() well known tag not set properly");
+        	}
+        } catch (Exception e) {
+            log.severe("getEventsJsonObj(): exception = " + e.getMessage());
+        } finally {
+			em.close();
+		}
+    	
+    	return eventsObj;
     }
 }

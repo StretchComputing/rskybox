@@ -13,8 +13,16 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.restlet.data.Status;
+
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.stretchcom.rskybox.server.ApiStatusCode;
+import com.stretchcom.rskybox.server.GMT;
 
 @Entity
 @NamedQueries({
@@ -278,4 +286,54 @@ public class CrashDetect {
 		}
 		return appActions;
 	}
+	
+    
+    public static JSONObject getJson(CrashDetect crashDetect, Boolean isList) {
+    	return getJson(crashDetect, null, isList);
+    }
+
+    public static JSONObject getJson(CrashDetect crashDetect, String theApiStatus, Boolean isList) {
+        JSONObject json = new JSONObject();
+
+        try {
+        	if(theApiStatus != null) {
+        		json.put("apiStatus", theApiStatus);
+        	}
+        	if(crashDetect != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
+        		json.put("id", KeyFactory.keyToString(crashDetect.getKey()));
+        		json.put("summary", crashDetect.getSummary());
+    			
+            	Date detectedDate = crashDetect.getDetectedGmtDate();
+            	if(detectedDate != null) {
+            		json.put("date", GMT.convertToIsoDate(detectedDate));
+            	}
+            	
+            	json.put("userId", crashDetect.getUserId());
+            	json.put("userName", crashDetect.getUserName());
+            	json.put("instanceUrl", crashDetect.getInstanceUrl());
+            	json.put("incidentId", crashDetect.getIncidentId());
+            	
+            	JSONArray appActionsJsonArray = new JSONArray();
+            	List<AppAction> appActions = crashDetect.getAppActions();
+            	for(AppAction aa : appActions) {
+            		JSONObject appActionJsonObj = new JSONObject();
+            		appActionJsonObj.put("description", aa.getDescription());
+            		appActionJsonObj.put("timestamp", GMT.convertToIsoDate(aa.getTimestamp()));
+            		if(aa.getDuration() != null) appActionJsonObj.put("duration", aa.getDuration());
+            		appActionsJsonArray.put(appActionJsonObj);
+            	}
+            	if(appActions.size() > 0) {json.put("appActions", appActionsJsonArray);}
+            	
+            	// TODO remove eventually, for backward compatibility before status field existed. If status not set, default to 'new'
+            	String status = crashDetect.getStatus();
+            	if(status == null || status.length() == 0) {status = "new";}
+            	json.put("status", status);
+            	json.put("appId", crashDetect.getApplicationId());
+        	}
+        } catch (JSONException e) {
+        	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());
+            return null;
+        }
+        return json;
+    }
 }

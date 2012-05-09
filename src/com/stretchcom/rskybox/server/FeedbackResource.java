@@ -296,7 +296,12 @@ public class FeedbackResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-        return new JsonRepresentation(getFeedbackJson(feedback, apiStatus, false));
+        JSONObject feedbackJsonObj = Feedback.getJson(feedback, apiStatus, false);
+        if(feedbackJsonObj == null) {
+        	this.setStatus(Status.SERVER_ERROR_INTERNAL);
+        	feedbackJsonObj = new JSONObject();
+        }
+        return new JsonRepresentation(feedbackJsonObj);
     }
     
     private JsonRepresentation index() {
@@ -359,7 +364,12 @@ public class FeedbackResource extends ServerResource {
 			}
             
             for (Feedback fb : feedbacks) {
-                ja.put(getFeedbackJson(fb, true));
+            	JSONObject feedbackObj = Feedback.getJson(fb, true);
+            	if(feedbackObj == null) {
+            		this.setStatus(Status.SERVER_ERROR_INTERNAL);
+            		break;
+            	}
+                ja.put(feedbackObj);
             }
             json.put("feedback", ja);
             json.put("apiStatus", apiStatus);
@@ -369,38 +379,5 @@ public class FeedbackResource extends ServerResource {
             this.setStatus(Status.SERVER_ERROR_INTERNAL);
         }
         return new JsonRepresentation(json);
-    }
-    
-    private JSONObject getFeedbackJson(Feedback feedback, Boolean isList) {
-    	return getFeedbackJson(feedback, null, isList);
-    }
-
-    private JSONObject getFeedbackJson(Feedback feedback, String theApiStatus, Boolean isList) {
-    	
-        JSONObject json = new JSONObject();
-        try {
-        	if(theApiStatus != null) {
-        		json.put("apiStatus", theApiStatus);
-        	}
-        	if(feedback != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
-        		json.put("id", KeyFactory.keyToString(feedback.getKey()));
-    			
-            	Date recordedDate = feedback.getRecordedGmtDate();
-            	if(recordedDate != null) {
-            		json.put("date", GMT.convertToIsoDate(recordedDate));
-            	}
-            	
-            	json.put("userId", feedback.getUserId());
-            	json.put("userName", feedback.getUserName());
-            	json.put("instanceUrl", feedback.getInstanceUrl());
-            	json.put("status", feedback.getStatus());
-            	json.put("appId", feedback.getApplicationId());
-            	json.put("incidentId", feedback.getIncidentId());
-        	}
-        } catch (JSONException e) {
-        	log.severe("getUserJson() error creating JSON return object. Exception = " + e.getMessage());
-            this.setStatus(Status.SERVER_ERROR_INTERNAL);
-        }
-        return json;
     }
 }
