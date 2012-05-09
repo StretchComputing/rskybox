@@ -74,7 +74,6 @@ var RSKYBOX = (function (r, $) {
   r.iCrashView = r.JqmPageBaseView.extend({
     events: {
       'click .changeStatus': 'changeStatus',
-      'click .getCrashes': 'getCrashes',
     },
 
     initialize: function () {
@@ -98,27 +97,6 @@ var RSKYBOX = (function (r, $) {
         return this;
       } catch (e) {
         r.log.error(e, 'iCrashView.render');
-      }
-    },
-
-    getCrashes: function (evt) {
-      try {
-        this.crashesView = new r.CrashesView({
-          el: this.$el.find('.crashesView'),
-          collection: new r.Crashes()
-        });
-        r.dump(this.$el.html());
-        r.dump(this.crashesView.$el.html());
-        this.crashesView.collection.setAppUrl(r.session.params.appId);
-
-        this.crashesView.collection.fetch({data: { incidentId : this.model.get('id') }});
-        this.crashesView.$el.show();
-        this.$el.find('.getCrashes').parent('.ui-btn').hide();
-
-        evt.preventDefault();
-        return false;
-      } catch (e) {
-        r.log.error(e, 'iCrashView.getCrashes');
       }
     },
 

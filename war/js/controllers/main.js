@@ -236,7 +236,12 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.iCrashesShow');
         r.crashesView.setElement($.mobile.activePage);
         r.crashesView.collection.setAppUrl(r.session.params.appId);
-        r.crashesView.collection.fetch({data: { status: r.session.params.status }});
+        r.crashesView.collection.fetch({
+          data: {
+            tag: 'crash',
+            status: r.session.params.status,
+          },
+        });
         r.session.getCollection(r.session.keys.applications, r.crashesView.options.applications);
         r.crashesView.renderStatusButton('#iCrashes');
       } catch (e) {
@@ -268,6 +273,9 @@ var RSKYBOX = (function (r, $) {
         r.session.getCollection(r.session.keys.applications, r.crashView.options.applications);
         r.crashView.model.fetch({
           statusCode: r.statusCodeHandlers(),
+          data: {
+            includeEvents: true,
+          },
         });
       } catch (e) {
         r.log.error(e, 'MainController.iCrashShow');
