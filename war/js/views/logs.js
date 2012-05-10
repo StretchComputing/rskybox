@@ -157,11 +157,11 @@ var RSKYBOX = (function (r, $) {
     },
 
     apiCodes: {
-      201: 'Invalid status.',
       203: 'You are not authorized for this application.',
       305: 'Application ID required.',
       316: 'Mode is required.',
       319: 'Incident ID required.',
+      400: 'Invalid status.',
       416: 'Invalid mode.',
       605: 'Application was not found',
       609: 'Incident was not found',

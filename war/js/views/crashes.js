@@ -129,8 +129,10 @@ var RSKYBOX = (function (r, $) {
     apiCodes: {
       203: 'You are not authorized for this application.',
       305: 'Application ID required.',
-      602: 'Crash was not found',
+      319: 'Incident ID required.',
+      400: 'Invalid status.',
       605: 'Application was not found',
+      609: 'Incident was not found',
     }
   });
 
