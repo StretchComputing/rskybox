@@ -2,7 +2,7 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.iCrash = r.BaseModel.extend({
+  r.Incident = r.BaseModel.extend({
     apiUrl: '/incidents',
     fields: {
       id: null,
@@ -24,15 +24,15 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-  r.iCrashes = r.BaseCollection.extend({
-    model: r.iCrash,
+  r.Incidents = r.BaseCollection.extend({
+    model: r.Incident,
     apiUrl: '/incidents',
 
     parse: function (response) {
       try {
         return response.incidents;
       } catch (e) {
-        r.log.error(e, 'iCrashes.parse');
+        r.log.error(e, 'Incidents.parse');
       }
     }
   });

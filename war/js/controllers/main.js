@@ -166,7 +166,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.iLogsInit');
         r.logsView = new r.iLogsView({
-          collection: new r.iLogs(),
+          collection: new r.Incidents(),
           applications: new r.Applications(),
         });
       } catch (e) {
@@ -198,7 +198,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.iLogInit');
         r.logView = new r.iLogView({
-          model: new r.iLog(),
+          model: new r.Incident(),
           applications: new r.Applications(),
         });
       } catch (e) {
@@ -231,7 +231,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.iCrashesInit');
         r.crashesView = new r.iCrashesView({
-          collection: new r.iCrashes(),
+          collection: new r.Incidents(),
           applications: new r.Applications(),
         });
       } catch (e) {
@@ -263,7 +263,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.iCrashInit');
         r.crashView = new r.iCrashView({
-          model: new r.iCrash(),
+          model: new r.Incident(),
           applications: new r.Applications(),
         });
       } catch (e) {
