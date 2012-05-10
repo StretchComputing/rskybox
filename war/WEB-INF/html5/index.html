@@ -302,19 +302,19 @@
           </button>
         </li>
       </ul>
-      <p>
-        <strong>Logs (<%= eventCount %>)</strong>
-      </p>
       <% if (events && events.logs) { %>
+        <p>
+          <strong>Logs (<%= eventCount %>)</strong>
+        </p>
         <% events.logs.forEach(function (log) { %>
-          <div data-role='collapsible' data-theme='c' data-content-theme='c' data-mini: 'true'>
-            <h1>
+          <div data-role='collapsible' data-theme='c' data-content-theme='c' data-mini='true'>
+            <h3>
               <%= log.logLevel %>: <%= RSKYBOX.format.compactDate(log.date) %><br>
               <%= log.message %><br>
               <% if (log.userName) { %>
                 User: <%= log.userName %>
               <% } %>
-            </h1>
+            </h3>
             <ul data-role="listview" data-inset="true">
               <li>Summary: <%= log.summary %></li>
               <li>User ID: <%= log.userId %></li>
@@ -341,15 +341,17 @@
             </ul>
             <div data-role="collapsible" data-theme="c" data-content-theme="c" data-mini="true">
               <h3>Stack Back Trace:</h3>
-              <% if (Array.isArray(log.stackBackTrace)) { %>
-                <% on = false; %>
-                <% log.stackBackTrace.forEach(function (line) { %>
-                  <div class="long-lines" style="background-color: <%= on ? 'beige' : 'transparent' %>;"><%= line.trim() %></div>
-                  <% on = !on; %>
-                <% }); %>
-              <% } else { %>
-                <%= log.stackBackTrace %>
-              <% } %>
+              <div class="long-lines">
+              r <% if (Array.isArray(log.stackBackTrace)) { %>
+                  <% on = false; %>
+                  <% log.stackBackTrace.forEach(function (line) { %>
+                    <div style="background-color: <%= on ? 'beige' : 'transparent' %>;"><%= line.trim() %></div>
+                    <% on = !on; %>
+                  <% }); %>
+                <% } else { %>
+                  <%= log.stackBackTrace %>
+                <% } %>
+              </div>
             </div>
           </div>
         <% }); %>
@@ -400,12 +402,12 @@
           </button>
         </li>
       </ul>
-      <p>
-        <strong>Crashes (<%= eventCount %>)</strong>
-      </p>
       <% if (events && events.crashes) { %>
+        <p>
+          <strong>Crashes (<%= eventCount %>)</strong>
+        </p>
         <% events.crashes.forEach(function (crash) { %>
-          <div data-role='collapsible' data-theme='c' data-content-theme='c' data-mini: 'true'>
+          <div data-role='collapsible' data-theme='c' data-content-theme='c' data-mini='true'>
             <h1>
               Detected: <%= RSKYBOX.format.compactDate(crash.date) %><br>
               <% if (crash.userName) { %>

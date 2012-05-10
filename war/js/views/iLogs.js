@@ -93,9 +93,6 @@ var RSKYBOX = (function (r, $) {
 
         this.appLink('back', 'iLogs');
 
-        if (Array.isArray(mock.stackBackTrace)) {
-          mock.stackBackTrace = mock.stackBackTrace.join('<br>');
-        }
         this.getContent().html(this.template(mock));
         this.$el.trigger('create');
         return this;
