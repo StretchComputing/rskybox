@@ -220,8 +220,11 @@
     </script>
     <script type="text/template" id="feedbackEntryTemplate">
       <a href="#feedback?id=<%= id %>&appId=<%= appId %>">
-        <h3><%= date %></h3>
-        <p><%= userName %></p></a>
+        <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
+        <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
+        <p><%= name %></p>
+        <p><%= message %></p></a>
+        <span class="ui-li-count count-bubble"><%= eventCount %></span>
     </script>
 
     <div data-role="page" id="feedback" data-title="Feedback">
@@ -234,23 +237,39 @@
     </div>
     <script type="text/template" id="feedbackTemplate">
       <ul data-role="listview" data-inset="true">
+        <li class="long-lines">#<%= number %> - <%= name %></li>
+        <li>Severity: <%= severity %></li>
+        <li><%= message %></li>
+        <li><%= summary %></li>
+        <li>Created: <%= RSKYBOX.format.longDate(createdDate) %></li>
+        <li>Updated: <%= RSKYBOX.format.longDate(lastUpdatedDate) %></li>
         <li>
-          <audio controls>
-            <source src="<%= audioUrl %>.mp4" type="audio/mp4">
-          </audio>
-        </li>
-        <li>Recorded: <%= date %></li>
-        <li>By: <%= userName %></li>
-        <% if (instanceUrl) { %>
-          <li>For: <%= instanceUrl %></li>
-        <% } %>
-        <li>
-          Status: <%= status === 'open' ? 'Open' : 'Closed' %>
           <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
-            <%= status === 'open' ? 'Close' : 'Reopen' %>
+            <%= status === 'open' ? 'Close' : 'Re-open' %>
           </button>
         </li>
       </ul>
+      <% if (events && events.feedback) { %>
+        <p>
+          <strong>Feedback (<%= eventCount %>)</strong>
+        </p>
+        <% events.feedback.forEach(function (f) { %>
+          <div data-theme='c' data-content-theme='c' data-mini='true'>
+            <ul data-role="listview" data-inset="true">
+              <li>
+                <audio controls>
+                  <source src="<%= f.audioUrl %>.mp4" type="audio/mp4">
+                </audio>
+              </li>
+              <li>Recorded: <%= f.date %></li>
+              <li>By: <%= f.userName %></li>
+              <% if (f.instanceUrl) { %>
+                <li>For: <%= f.instanceUrl %></li>
+              <% } %>
+            </ul>
+          </div>
+        <% }); %>
+      <% } %>
     </script>
 
 

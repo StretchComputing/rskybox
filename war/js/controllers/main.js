@@ -109,7 +109,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.feedbackListInit');
         r.feedbackListView = new r.FeedbackListView({
-          collection: new r.FeedbackList(),
+          collection: new r.Incidents(),
           applications: new r.Applications(),
         });
       } catch (e) {
@@ -123,7 +123,12 @@ var RSKYBOX = (function (r, $) {
         r.feedbackListView.setElement($.mobile.activePage);
         r.feedbackListView.collection.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.feedbackListView.options.applications);
-        r.feedbackListView.collection.fetch({data: { status: r.session.params.status }});
+        r.feedbackListView.collection.fetch({
+          data: {
+            tag: 'feedback',
+            status: r.session.params.status,
+          }
+        });
         r.feedbackListView.renderStatusButton('#feedbackList');
       } catch (e) {
         r.log.error(e, 'MainController.feedbackListShow');
@@ -136,7 +141,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.feedbackInit');
         r.feedbackView = new r.FeedbackView({
-          model: new r.Feedback(),
+          model: new r.Incident(),
           applications: new r.Applications(),
         });
       } catch (e) {
@@ -154,6 +159,9 @@ var RSKYBOX = (function (r, $) {
         r.session.getCollection(r.session.keys.applications, r.feedbackView.options.applications);
         r.feedbackView.model.fetch({
           statusCode: r.statusCodeHandlers(),
+          data: {
+            includeEvents: true,
+          },
         });
       } catch (e) {
         r.log.error(e, 'MainController.feedbackShow');
@@ -183,7 +191,7 @@ var RSKYBOX = (function (r, $) {
         r.logsView.collection.fetch({
           data: {
             tag: 'log',
-            status: r.session.params.status
+            status: r.session.params.status,
           },
         });
         r.logsView.renderStatusButton('#logs');

@@ -18,7 +18,6 @@ var RSKYBOX = (function (r, $) {
       try {
         var mock = this.model.getMock();
 
-        mock.date = r.format.longDate(mock.date);
         this.$el.html(this.template(mock));
         return this;
       } catch (e) {
@@ -32,7 +31,7 @@ var RSKYBOX = (function (r, $) {
     initialize: function () {
       try {
         this.collection.bind('reset', this.render, this);
-        this.noFeedbackTemplate = _.template($('#noFeedbackTemplate').html());
+        this.template = _.template($('#noFeedbackTemplate').html());
       } catch (e) {
         r.log.error(e, 'FeedbackListView.initialize');
       }
@@ -46,7 +45,7 @@ var RSKYBOX = (function (r, $) {
 
         this.getContent().empty();
         if (this.collection.length <= 0) {
-          this.getContent().html(this.noFeedbackTemplate());
+          this.getContent().html(this.template());
         } else {
           list = $('<ul>');
           this.collection.each(function (feedback) {
@@ -71,7 +70,6 @@ var RSKYBOX = (function (r, $) {
   });
 
 
-
   r.FeedbackView = r.JqmPageBaseView.extend({
     events: {
       'click .changeStatus': 'changeStatus',
@@ -79,7 +77,7 @@ var RSKYBOX = (function (r, $) {
 
     initialize: function () {
       try {
-        _.bindAll(this, 'changeStatus');
+        _.bindAll(this, 'changeStatus', 'apiError');
         this.model.on('change', this.render, this);
         this.model.on('error', this.error, this);
         this.template = _.template($('#feedbackTemplate').html());
@@ -94,7 +92,6 @@ var RSKYBOX = (function (r, $) {
 
         this.appLink('back', 'feedbackList');
 
-        mock.date = r.format.longDate(mock.date);
         this.getContent().html(this.template(mock));
         this.$el.trigger('create');
         return this;
