@@ -341,14 +341,8 @@
             </ul>
             <div data-role="collapsible" data-theme="c" data-content-theme="c" data-mini="true">
               <h3>Stack Back Trace:</h3>
-              <div class="long-lines">
-              r <% if (Array.isArray(log.stackBackTrace)) { %>
-                  <% on = false; %>
-                  <% log.stackBackTrace.forEach(function (line) { %>
-                    <div style="background-color: <%= on ? 'beige' : 'transparent' %>;"><%= line.trim() %></div>
-                    <% on = !on; %>
-                  <% }); %>
-                <% } else { %>
+              <div class="long-lines"><% if (Array.isArray(log.stackBackTrace)) { %>
+                  <% on = false;  log.stackBackTrace.forEach(function (line) { %><div style="background-color: <%= on ? 'beige' : 'transparent' %>;"><%= line.trim() %></div><% on = !on; %><% }); %><% } else { %>
                   <%= log.stackBackTrace %>
                 <% } %>
               </div>
