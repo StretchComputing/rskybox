@@ -2,15 +2,15 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.iLogEntryView = Backbone.View.extend({
+  r.LogEntryView = Backbone.View.extend({
     tagName: 'li',
 
     initialize: function () {
       try {
         _.bindAll(this, 'render');
-        this.template = _.template($('#iLogEntryTemplate').html());
+        this.template = _.template($('#logEntryTemplate').html());
       } catch (e) {
-        r.log.error(e, 'iLogEntryView.initialize');
+        r.log.error(e, 'LogEntryView.initialize');
       }
     },
 
@@ -21,19 +21,19 @@ var RSKYBOX = (function (r, $) {
         this.$el.html(this.template(mock));
         return this;
       } catch (e) {
-        r.log.error(e, 'iLogEntryView.render');
+        r.log.error(e, 'LogEntryView.render');
       }
     }
   });
 
 
-  r.iLogsView = r.JqmPageBaseView.extend({
+  r.LogsView = r.JqmPageBaseView.extend({
     initialize: function () {
       try {
         this.collection.bind('reset', this.render, this);
-        this.template = _.template($('#iNoLogsTemplate').html());
+        this.template = _.template($('#noLogsTemplate').html());
       } catch (e) {
-        r.log.error(e, 'iLogsView.initialize');
+        r.log.error(e, 'LogsView.initialize');
       }
     },
 
@@ -56,21 +56,21 @@ var RSKYBOX = (function (r, $) {
         }
         return this;
       } catch (e) {
-        r.log.error(e, 'iLogsView.render');
+        r.log.error(e, 'LogsView.render');
       }
     },
 
     addLogEntry: function (list, log) {
       try {
-        list.append(new r.iLogEntryView({ model: log }).render().el);
+        list.append(new r.LogEntryView({ model: log }).render().el);
       } catch (e) {
-        r.log.error(e, 'iLogsView.addLogEntry');
+        r.log.error(e, 'LogsView.addLogEntry');
       }
     }
   });
 
 
-  r.iLogView = r.JqmPageBaseView.extend({
+  r.LogView = r.JqmPageBaseView.extend({
     events: {
       'click .changeStatus': 'changeStatus',
       'click .mode': 'changeMode',
@@ -81,9 +81,9 @@ var RSKYBOX = (function (r, $) {
         _.bindAll(this, 'changeStatus', 'changeMode', 'success', 'apiError');
         this.model.on('change', this.render, this);
         this.model.on('error', this.error, this);
-        this.template = _.template($('#iLogTemplate').html());
+        this.template = _.template($('#logTemplate').html());
       } catch (e) {
-        r.log.error(e, 'iLogView.initialize');
+        r.log.error(e, 'LogView.initialize');
       }
     },
 
@@ -91,13 +91,13 @@ var RSKYBOX = (function (r, $) {
       try {
         var mock = this.model.getMock();
 
-        this.appLink('back', 'iLogs');
+        this.appLink('back', 'logs');
 
         this.getContent().html(this.template(mock));
         this.$el.trigger('create');
         return this;
       } catch (e) {
-        r.log.error(e, 'iLogView.render');
+        r.log.error(e, 'LogView.render');
       }
     },
 
@@ -119,7 +119,7 @@ var RSKYBOX = (function (r, $) {
         evt.preventDefault();
         return false;
       } catch (e) {
-        r.log.error(e, 'iLogView.changeMode');
+        r.log.error(e, 'LogView.changeMode');
       }
     },
 
@@ -127,32 +127,32 @@ var RSKYBOX = (function (r, $) {
       try {
         this.model.fetch();
       } catch (e) {
-        r.log.error(e, 'iLogView.succes');
+        r.log.error(e, 'LogView.success');
       }
     },
 
     error: function (model, response) {
       try {
         if (response.responseText) { return; }  // This is an apiError.
-        r.log.info(response, 'iLogView.error');
+        r.log.info(response, 'LogView.error');
         r.flash.warning(response);              // This is a validation error.
       } catch (e) {
-        r.log.error(e, 'iLogView.error');
+        r.log.error(e, 'LogView.error');
       }
     },
 
     apiError: function (jqXHR) {
       try {
         var code = r.getApiStatus(jqXHR.responseText);
-        r.log.info(code, 'iLogView.apiError');
+        r.log.info(code, 'LogView.apiError');
 
         if (!this.apiCodes[code]) {
-          r.log.warn('Undefined apiStatus: ' + code, 'iLogView.apiError');
+          r.log.warn('Undefined apiStatus: ' + code, 'LogView.apiError');
           this.apiCodes[code] = 'An unknown error occurred. Please try again.';
         }
         r.flash.warning(this.apiCodes[code]);
       } catch (e) {
-        r.log.error(e, 'iLogView.apiError');
+        r.log.error(e, 'LogView.apiError');
       }
     },
 

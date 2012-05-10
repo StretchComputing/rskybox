@@ -741,26 +741,26 @@ public class Notification {
         	if(nd.getCrashCount() > 0  && (nd.getClientLogCount() == 0 && nd.getFeedbackCount() == 0)) {
         		if(nd.getCrashCount() == 1) {
         			// only one crash, link all the way down to the crash detail page
-        			url = rskyboxBaseUrl + "#iCrash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
+        			url = rskyboxBaseUrl + "#crash?id=" + nd.getCrashId() + "&appId=" + nd.getApplicationId();
         		} else {
         			// multiple crashes so link to the crash list
-        			url = rskyboxBaseUrl + "#iCrashes?appId=" + nd.getApplicationId() + "&status=open";
+        			url = rskyboxBaseUrl + "#crashes?appId=" + nd.getApplicationId() + "&status=open";
         		}
         	} else if(nd.getClientLogCount() > 0  && (nd.getCrashCount() == 0 && nd.getFeedbackCount() == 0)) {
         		if(nd.getClientLogCount() == 1) {
         			// only one clientLog, link all the way down to the clientLog detail page
-        			url = rskyboxBaseUrl + "#iLog?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
+        			url = rskyboxBaseUrl + "#log?id=" + nd.getClientLogId() + "&appId=" + nd.getApplicationId();
         		} else {
         			// multiple logs so link to the clientLog list
-        			url = rskyboxBaseUrl + "#iLogs?appId=" + nd.getApplicationId() + "&status=open";
+        			url = rskyboxBaseUrl + "#logs?appId=" + nd.getApplicationId() + "&status=open";
         		}
         	} else if(nd.getFeedbackCount() > 0  && (nd.getClientLogCount() == 0 && nd.getCrashCount() == 0)) {
         		if(nd.getFeedbackCount() == 1) {
         			// only one feedback, link all the way down to the feedback detail page
-        			url = rskyboxBaseUrl + "#iFeedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
+        			url = rskyboxBaseUrl + "#feedback?id=" + nd.getFeedbackId() + "&appId=" + nd.getApplicationId();
         		} else {
         			// multiple crashes so link to the feedback list
-        			url = rskyboxBaseUrl + "#iFeedbackList?appId=" + nd.getApplicationId() + "&status=open";
+        			url = rskyboxBaseUrl + "#feedbackList?appId=" + nd.getApplicationId() + "&status=open";
         		}
         	}
         }

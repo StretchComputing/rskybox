@@ -38,8 +38,8 @@
     <script src="/js/views/settings.js"></script>
     <script src="/js/views/carriers.js"></script>
     <script src="/js/views/feedback.js"></script>
-    <script src="/js/views/iLogs.js"></script>
-    <script src="/js/views/iCrashes.js"></script>
+    <script src="/js/views/logs.js"></script>
+    <script src="/js/views/crashes.js"></script>
     <script src="/js/views/members.js"></script>
     <script src="/js/views/endusers.js"></script>
     <script src="/js/controllers/main.js"></script>
@@ -79,11 +79,11 @@
     <script type="text/template" id="applicationTemplate">
       <ul data-role="listview" data-inset="true">
         <li>
-          <a href="#iLogs?appId=<%= id %>">Logs</a>
+          <a href="#logs?appId=<%= id %>">Logs</a>
           <span class="ui-li-count count-bubble"><%= numberOfOpenLogs ? numberOfOpenLogs : 0 %></span>
         </li>
         <li>
-          <a href="#iCrashes?appId=<%= id %>">Crashes</a>
+          <a href="#crashes?appId=<%= id %>">Crashes</a>
           <span class="ui-li-count count-bubble"><%= numberOfOpenCrashes ? numberOfOpenCrashes : 0 %></span>
         </li>
         <li>
@@ -254,21 +254,21 @@
     </script>
 
 
-    <!-- iLogs -->
-    <div data-role="page" id="iLogs" data-title="Logs">
+    <!-- Logs -->
+    <div data-role="page" id="logs" data-title="Logs">
       <div data-role="header">
         <a href="#" class="back" data-icon="arrow-l" data-mini="true">App</a>
         <h3>Logs</h3>
-        <a href="#iLogs" data-theme="b" data-icon="check" data-iconpos="right" class="status" data-mini="true">Closed</a>
+        <a href="#logs" data-theme="b" data-icon="check" data-iconpos="right" class="status" data-mini="true">Closed</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
     </div>
-    <script type="text/template" id="iNoLogsTemplate">
+    <script type="text/template" id="noLogsTemplate">
       <h3>No logs at this time.</h3>
     </script>
-    <script type="text/template" id="iLogEntryTemplate">
-      <a href="#iLog?id=<%= id %>&appId=<%= appId %>">
+    <script type="text/template" id="logEntryTemplate">
+      <a href="#log?id=<%= id %>&appId=<%= appId %>">
         <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
         <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
         <p><%= name %></p>
@@ -276,7 +276,7 @@
         <span class="ui-li-count count-bubble"><%= eventCount %></span>
     </script>
 
-    <div data-role="page" id="iLog" data-title="Log">
+    <div data-role="page" id="log" data-title="Log">
       <div data-role="header">
         <a href="#" class="back" data-icon="arrow-l" data-mini="true">List</a>
         <h1>Log</h1>
@@ -284,7 +284,7 @@
       <div class="applicationName"></div>
       <div data-role="content"></div>
     </div>
-    <script type="text/template" id="iLogTemplate">
+    <script type="text/template" id="logTemplate">
       <ul data-role="listview" data-inset="true">
         <li class="long-lines">#<%= number %> - <%= name %></li>
         <li>Severity: <%= severity %></li>
@@ -350,28 +350,28 @@
     </script>
 
 
-    <!-- iCrashes -->
-    <div data-role="page" id="iCrashes" data-title="Crashes">
+    <!-- Crashes -->
+    <div data-role="page" id="crashes" data-title="Crashes">
       <div data-role="header">
         <a href="#" class="back" data-icon="arrow-l" data-mini="true">App</a>
         <h1>Crashes</h1>
-        <a href="#iCrashes" data-theme="b" data-icon="check" data-iconpos="right" class="status" data-mini="true">Closed</a>
+        <a href="#crashes" data-theme="b" data-icon="check" data-iconpos="right" class="status" data-mini="true">Closed</a>
       </div>
       <div class="applicationName"></div>
       <div data-role="content"></div>
     </div>
-    <script type="text/template" id="iNoCrashesTemplate">
+    <script type="text/template" id="noCrashesTemplate">
       <h3>No crashes at this time.</h3>
     </script>
-    <script type="text/template" id="iCrashEntryTemplate">
-      <a href="#iCrash?id=<%= id %>&appId=<%= appId %>">
+    <script type="text/template" id="crashEntryTemplate">
+      <a href="#crash?id=<%= id %>&appId=<%= appId %>">
         <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
         <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
         <p><%= name %></p>
         <p><%= message %></p></a>
     </script>
 
-    <div data-role="page" id="iCrash" data-title="Crash">
+    <div data-role="page" id="crash" data-title="Crash">
       <div data-role="header">
         <a href="#" class="back" data-icon="arrow-l" data-mini="true">List</a>
         <h1>Crash</h1>
@@ -379,7 +379,7 @@
       <div class="applicationName"></div>
       <div data-role="content"></div>
     </div>
-    <script type="text/template" id="iCrashTemplate">
+    <script type="text/template" id="crashTemplate">
       <ul data-role="listview" data-inset="true">
         <li class="long-lines">#<%= number %> - <%= name %></li>
         <li>Severity: <%= severity %></li>
