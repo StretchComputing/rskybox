@@ -110,9 +110,7 @@ var RSKYBOX = (function (r, $) {
       // Levels in increasing value are: error, warn, info, debug, local, off.
       getServerLevel: function () {
         try {
-          //return r.log.getLevels().off;
-          // TODO re-enable server logging
-          return r.log.getLevels().error;
+          return r.log.getLevels().warn;
         } catch (e) {
           window.console.error(e, 'RSKYBOX.log.getServerLevel');
         }
