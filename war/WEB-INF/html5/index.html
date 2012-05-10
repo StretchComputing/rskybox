@@ -30,7 +30,6 @@
     <script src="/js/models/user.js"></script>
     <script src="/js/models/carrier.js"></script>
     <script src="/js/models/application.js"></script>
-    <script src="/js/models/feedback.js"></script>
     <script src="/js/models/member.js"></script>
     <script src="/js/models/enduser.js"></script>
     <script src="/js/views/base.js"></script>
@@ -258,7 +257,7 @@
             <ul data-role="listview" data-inset="true">
               <li>
                 <audio controls>
-                  <source src="<%= f.audioUrl %>.mp4" type="audio/mp4">
+                  <source src="<%= '/audio/' + f.appId + '/' + f.id %>.mp4" type="audio/mp4">
                 </audio>
               </li>
               <li>Recorded: <%= f.date %></li>
