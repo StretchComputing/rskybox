@@ -86,8 +86,8 @@ public class ClientLog {
 	
 	public final static String DEBUG_LOG_LEVEL = "debug";
 	public final static String INFO_LOG_LEVEL = "info";
+	public final static String WARN_LOG_LEVEL = "warn";
 	public final static String ERROR_LOG_LEVEL = "error";
-	public final static String EXCEPTION_LOG_LEVEL = "exception";
 
 	private String logLevel;
 	private String logName;
@@ -209,7 +209,7 @@ public class ClientLog {
 
 	public Boolean isLogLevelValid(String theLogLevel) {
 		if(theLogLevel.equals(ClientLog.DEBUG_LOG_LEVEL) || theLogLevel.equals(ClientLog.INFO_LOG_LEVEL) ||
-		   theLogLevel.equals(ClientLog.ERROR_LOG_LEVEL) || theLogLevel.equals(ClientLog.EXCEPTION_LOG_LEVEL)) {
+		   theLogLevel.equals(ClientLog.ERROR_LOG_LEVEL) || theLogLevel.equals(ClientLog.WARN_LOG_LEVEL)) {
 			return true;
 		}
 		return false;
