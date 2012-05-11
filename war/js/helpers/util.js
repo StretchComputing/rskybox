@@ -342,6 +342,15 @@ var RSKYBOX = (function (r, $) {
         r.log.error(e, 'format.timeOnly');
       }
     },
+    milliseconds: function (ms) {
+      try {
+        var date = new Date(ms);
+
+        return window.dateFormat(date, 'MM:ss.l');
+      } catch (e) {
+        r.log.error(e, 'format.milliseconds');
+      }
+    },
   };
 
 

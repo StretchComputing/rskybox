@@ -340,13 +340,13 @@
               <% } %>
               <% if (log.appActions) { %>
                 <li>
-                  <h3>App Actions:</h3>
+                  <h3>App Actions (time - duration)</h3>
                   <% var on = false; %>
                   <% log.appActions.forEach(function (action) { %>
                     <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
                       <%= RSKYBOX.format.timeOnly(action.timestamp) %>
                       <% if (action.duration) { %>
-                        - <%= action.duration %>ms
+                        - <%= RSKYBOX.format.milliseconds(action.duration) %>
                       <% } %>
                       <br>
                       <%= action.description %>
@@ -431,13 +431,13 @@
               <li>User ID: <%= crash.userId %></li>
               <% if (crash.appActions) { %>
                 <li>
-                  <h3>App Actions:</h3>
+                  <h3>App Actions (time - duration)</h3>
                   <% var on = false; %>
                   <% crash.appActions.forEach(function (action) { %>
                     <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
                       <%= RSKYBOX.format.timeOnly(action.timestamp) %>
                       <% if (action.duration) { %>
-                        - <%= action.duration %>ms
+                        - <%= RSKYBOX.format.milliseconds(action.duration) %>
                       <% } %>
                       <br>
                       <%= action.description %>
