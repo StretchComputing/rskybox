@@ -172,12 +172,20 @@ var RSKYBOX = (function (r, $) {
 
         $('.flash').remove();
 
-        element = $('<div>', {
+        element = $('<a>', {
+          href: '#',
           class: 'flash ' + type,
-          text: message
-        }).hide();
+          text: message,
+          'data-role': 'button',
+          'data-iconpos': 'right',
+          'data-icon': 'delete',
+        }).hide().click(function () {
+          $(this).hide();
+        }).button();
 
         $.mobile.activePage.prepend(element);
+        element.find('.ui-btn-inner').css('white-space', 'normal');
+
         element.fadeIn().delay(duration * 1000).fadeOut(600);
         r.log.info(message, 'flash.display');
         flash.clear();
