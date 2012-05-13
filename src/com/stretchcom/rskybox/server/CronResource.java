@@ -125,7 +125,6 @@ public class CronResource extends ServerResource {
         	log.info("number of incidents ready for closing = " + incidents.size());
         	
     		for(Incident i : incidents) {
-    	    	emMessages.getTransaction().begin();
     	    	Incident anIncident = (Incident)emMessages.createNamedQuery("Incident.getByKey")
         			.setParameter("key", i.getKey())
         			.getSingleResult();
@@ -136,7 +135,7 @@ public class CronResource extends ServerResource {
     	    	// the Application entity twice.  Code below only retrieves it once.
     	    	Application.adjustOpenEventCount(anIncident.getWellKnownTag(), false, anIncident.getApplicationId());
     	    	anIncident.hiddenSetStatus(Incident.CLOSED_STATUS);
-    			emMessages.getTransaction().commit();
+    	    	emMessages.persist(anIncident);
     		}
     		log.info("all incidents closed successfully");
     		numberOfIncidentsClosed = incidents.size();
