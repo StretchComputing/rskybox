@@ -569,7 +569,9 @@
         <li>Application: <%= application %></li>
         <li>Version: <%= version %></li>
         <li>Summary: <%= summary %></li>
-        <li>For: <%= instanceUrl %></li>
+        <% if (instanceUrl) { %>
+          <li>For: <%= instanceUrl %></li>
+        <% } %>
       </ul>
     </script>
 
