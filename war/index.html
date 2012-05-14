@@ -82,6 +82,9 @@
       <ul data-role="listview">
         <li id="emailWrapper" style="display: none" data-role="fieldcontain">
           <h1>Email Address</h1>
+          <% if (!emailConfirmationCode) { %>
+            <div>Please check your email for your confirmation code.</div>
+          <% } %>
           <label class="ui-hidden-accessible">Email address: </label>
           <input type="email" name="emailAddress" value="<%= emailAddress %>" readonly data-mini="true">
           <label class="ui-hidden-accessible">Email confirmation code:</label>
@@ -89,6 +92,9 @@
         </li>
         <li id="phoneWrapper" style="display: none;" data-role="fieldcontain">
           <h1>Phone Number</h1>
+          <% if (!phoneConfirmationCode) { %>
+            <div>Please check your phone for your confirmation code.</div>
+          <% } %>
           <label class="ui-hidden-accessible">Phone number: </label>
           <input type="tel" name="phoneNumber" value="<%= phoneNumber %>" readonly data-mini="true">
           <label class="ui-hidden-accessible">Phone confirmation code:</label>
