@@ -167,7 +167,7 @@ public class Incident {
 	public void incrementEventCount(Integer theMaxEventsPerIncident) {
 		this.eventCount++;
 		log.info("incremented incident event count = " + this.eventCount + " theMaxEventsPerIncident = " + theMaxEventsPerIncident);
-		if(eventCount >= theMaxEventsPerIncident) {
+		if(eventCount > theMaxEventsPerIncident) {
 			this.maxEventCountReached = true;
 		}
 	}
