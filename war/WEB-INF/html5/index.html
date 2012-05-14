@@ -345,7 +345,7 @@
                   <% log.appActions.forEach(function (action) { %>
                     <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
                       <%= RSKYBOX.format.timeOnly(action.timestamp) %>
-                      <% if (action.duration) { %>
+                      <% if (action.duration != undefined) { %>
                         - <%= RSKYBOX.format.milliseconds(action.duration) %>
                       <% } %>
                       <br>
@@ -436,7 +436,7 @@
                   <% crash.appActions.forEach(function (action) { %>
                     <div style="background-color: <%= on ? 'beige' : 'transparent' %>;">
                       <%= RSKYBOX.format.timeOnly(action.timestamp) %>
-                      <% if (action.duration) { %>
+                      <% if (action.duration != undefined) { %>
                         - <%= RSKYBOX.format.milliseconds(action.duration) %>
                       <% } %>
                       <br>
