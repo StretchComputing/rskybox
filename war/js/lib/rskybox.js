@@ -184,22 +184,50 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    // Disallow multiple logs being created at once.
+    guard = (function () {
+      var guarding = false;
+
+      return {
+        enable: function () {
+          guarding = true;
+        },
+
+        disable: function () {
+          guarding = false;
+        },
+
+        isEnabled: function () {
+          return guarding;
+        },
+      };
+    }()),
+
+
     // Create a new log on the rSkybox service.
     server = function (level, message, name) {
       try {
-        var
-          attrs = {
-            appId: r.config.getApplicationId(),
-            authHeader: r.config.getAuthHeader(),
-            logName: name || message,
-            logLevel: level,
-            message: message,
-            userId: r.config.getUserId(),
-            userName: r.config.getUserName(),
-            summary: r.config.getSummary(),
-            instanceUrl: r.config.getInstanceUrl(),
-            appActions: getAppActions(),
-          };
+        var attrs;
+
+        if (guard.isEnabled()) {
+          r.log.local('not logging, guard on', 'RSKYBOX.log.server');
+          return;
+        }
+        r.log.local('logging, guard off', 'RSKYBOX.log.server');
+        guard.enable();
+
+        attrs = {
+          appId: r.config.getApplicationId(),
+          authHeader: r.config.getAuthHeader(),
+          logName: name || message,
+          logLevel: level,
+          message: message,
+          userId: r.config.getUserId(),
+          userName: r.config.getUserName(),
+          summary: r.config.getSummary(),
+          instanceUrl: r.config.getInstanceUrl(),
+          appActions: getAppActions(),
+        };
 
         // Error level logs generall have an Error object as the message.
         // We'll just make sure it's not a string.
@@ -218,8 +246,26 @@ var RSKYBOX = (function (r, $) {
           type: 'POST',
           data: JSON.stringify(attrs),
           url: getUrl(),
-          error: r.config.log.errorHandler,
-          success: r.config.log.successHandler,
+          error: function () {
+            try {
+              guard.enable();
+              r.config.log.errorHandler();
+            } catch (e) {
+              window.console.error(e, 'RSKYBOX.log.server.errorHandler');
+            } finally {
+              guard.disable();
+            }
+          },
+          success: function () {
+            try {
+              guard.enable();
+              r.config.log.successHandler();
+            } catch (e) {
+              window.console.error(e, 'RSKYBOX.log.server.successHandler');
+            } finally {
+              guard.disable();
+            }
+          },
           statusCode: r.config.log.statusCodeHandlers,
           headers: {
             Authorization: r.config.getAuthHeader(),
@@ -227,6 +273,8 @@ var RSKYBOX = (function (r, $) {
         });
       } catch (e) {
         window.console.error(e, 'RSKYBOX.log.server');
+      } finally {
+        guard.disable();
       }
     },
 
