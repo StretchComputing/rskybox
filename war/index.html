@@ -39,6 +39,7 @@
   </head>
   <body>
 
+    <!-- Signup -->
     <div data-role="page" id="signup" data-title="rSkybox Signup">
       <div data-role="header">
         <h1>rSkybox Signup</h1>
@@ -56,10 +57,10 @@
         </li>
         <li data-role="fieldcontain">
           <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
-          <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>" autocorrect="off" autocapitalize="off" data-mini="true">
+          <input type="email" name="emailAddress" placeholder="Email Address" value="<%- emailAddress %>" autocorrect="off" autocapitalize="off" data-mini="true">
           <h3>or</h3>
           <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
-          <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>" data-mini="true">
+          <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%- phoneNumber %>" data-mini="true">
           <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile Carrier:</label>
           <select name="mobileCarrierId" id="mobileCarrierId" value="<%= mobileCarrierId %>" data-mini="true"></select>
         </li>
@@ -69,6 +70,8 @@
       </ul>
     </script>
 
+
+    <!-- Confirm New User -->
     <div data-role="page" id="confirm">
       <div data-role="header">
         <a href="#signup" data-icon="arrow-l" data-mini="true">Cancel</a>
@@ -86,9 +89,9 @@
             <div>Please check your email for your confirmation code.</div>
           <% } %>
           <label class="ui-hidden-accessible">Email address: </label>
-          <input type="email" name="emailAddress" value="<%= emailAddress %>" readonly data-mini="true">
+          <input type="email" name="emailAddress" value="<%- emailAddress %>" readonly data-mini="true">
           <label class="ui-hidden-accessible">Email confirmation code:</label>
-          <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%= emailConfirmationCode %>" data-mini="true">
+          <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%- emailConfirmationCode %>" data-mini="true">
         </li>
         <li id="phoneWrapper" style="display: none;" data-role="fieldcontain">
           <h1>Phone Number</h1>
@@ -96,9 +99,9 @@
             <div>Please check your phone for your confirmation code.</div>
           <% } %>
           <label class="ui-hidden-accessible">Phone number: </label>
-          <input type="tel" name="phoneNumber" value="<%= phoneNumber %>" readonly data-mini="true">
+          <input type="tel" name="phoneNumber" value="<%- phoneNumber %>" readonly data-mini="true">
           <label class="ui-hidden-accessible">Phone confirmation code:</label>
-          <input name="phoneConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>" data-mini="true">
+          <input name="phoneConfirmationCode" placeholder="Confirmation Code" value="<%- phoneConfirmationCode %>" data-mini="true">
         </li>
         </li>
         <li id="passwordWrapper" data-role="fieldcontain">
@@ -112,14 +115,16 @@
       </ul>
     </script>
 
+
+    <!-- Confirm Member -->
     <script type="text/template" id="confirmMemberTemplate">
       <ul data-role="listview">
         <li data-role="fieldcontain">
           <h1>Email Address</h1>
           <label class="ui-hidden-accessible">Email address: </label>
-          <input type="email" name="emailAddress" value="<%= emailAddress %>" readonly data-mini="true">
+          <input type="email" name="emailAddress" value="<%- emailAddress %>" readonly data-mini="true">
           <label class="ui-hidden-accessible">Email confirmation code:</label>
-          <input name="confirmationCode" placeholder="Confirmation Code" value="<%= confirmationCode %>" data-mini="true">
+          <input name="confirmationCode" placeholder="Confirmation Code" value="<%- confirmationCode %>" data-mini="true">
         </li>
         <li data-role="fieldcontain">
           <input type="submit" value="Confirm Membership" data-mini="true">
@@ -128,6 +133,7 @@
     </script>
 
 
+    <!-- Login -->
     <div data-role="page" id="login" data-title="Login">
       <div data-role="header">
         <a href="#signup" data-icon="arrow-l" data-mini="true">Cancel</a>
@@ -141,16 +147,16 @@
       <ul data-role="listview">
         <li data-role="fieldcontain">
           <label for="emailAddress" class="ui-hidden-accessible">Email Address:</label>
-          <input type="email" name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>" autocorrect="off" autocapitalize="off" data-mini="true">
+          <input type="email" name="emailAddress" placeholder="Email Address" value="<%- emailAddress %>" autocorrect="off" autocapitalize="off" data-mini="true">
           <div style="text-align: center;">
             <strong>or</strong>
           </div>
           <label for="phoneNumber" class="ui-hidden-accessible">Phone Number:</label>
-          <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%= phoneNumber %>" data-mini="true">
+          <input type="tel" name="phoneNumber" placeholder="Phone Number" value="<%- phoneNumber %>" data-mini="true">
         </li>
         <li data-role="fieldcontain">
           <label for="password" class="ui-hidden-accessible">Password:</label>
-          <input name="password" placeholder="Password" value="<%= password %>" autocorrect="off" autocapitalize="off" data-mini="true">
+          <input name="password" placeholder="Password" value="<%- password %>" autocorrect="off" autocapitalize="off" data-mini="true">
 
         <li data-role="fieldcontain">
           <input type="submit" value="Login" data-mini="true">

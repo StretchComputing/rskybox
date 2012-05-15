@@ -126,7 +126,6 @@ var RSKYBOX = (function (r, $) {
         app = this.options.applications.findById(r.session.params.appId);
         this.appLink('back', 'members');
 
-        mock.date = r.format.longDate(mock.date);
         mock = _.extend(mock, {admin: app.get('role')});
         this.getContent().html(this.template(mock));
         this.$el.find('.role').val(this.model.get('role'));

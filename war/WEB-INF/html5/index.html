@@ -44,6 +44,7 @@
     <script src="/js/controllers/main.js"></script>
   </head>
   <body>
+
     <!-- Apps -->
     <div data-role="page" id="applications" data-title="Apps">
       <div data-role="header">
@@ -65,7 +66,7 @@
       </p>
     </script>
     <script type="text/template" id="appEntryTemplate">
-      <a href="#application?appId=<%= id %>"><%= name %> <%= version %> <% role === 'member' ? '' : print('(' + role + ')')%></a>
+      <a href="#application?appId=<%= id %>"><%- name %> <%- version %> <%- role === 'member' ? '' : '(' + role + ')' %></a>
     </script>
 
 
@@ -100,9 +101,9 @@
         </ul>
       <% } %>
       <ul data-role="listview" data-inset="true">
-        <li>App Name: <%= name %></li>
-        <li>Version: <%= version ? version : 'n/a' %></li>
-        <li>Role: <%= role %></li>
+        <li>App Name: <%- name %></li>
+        <li>Version: <%- version ? version : 'n/a' %></li>
+        <li>Role: <%- role %></li>
         <li class="long-lines">AppId: <%= id %></li>
         <li>Token: <%= token %></li>
         <li>Created: <%= date %></li>
@@ -152,9 +153,9 @@
         <li data-role="fieldcontain">
           <h3>Name</h3>
           <label for="firstName" class="ui-hidden-accessible">First Name:</label>
-          <input name="firstName" id="firstName" value="<%= firstName %>" placeholder="First Name" data-mini="true">
+          <input name="firstName" id="firstName" value="<%- firstName %>" placeholder="First Name" data-mini="true">
           <label for="lastName" class="ui-hidden-accessible">Last Name:</label>
-          <input name="lastName" id="lastName" value="<%= lastName %>" placeholder="Last Name" data-mini="true">
+          <input name="lastName" id="lastName" value="<%- lastName %>" placeholder="Last Name" data-mini="true">
         </li>
         <li data-role="fieldcontain">
           <h3>Email</h3>
@@ -164,33 +165,33 @@
             <label for="sendEmailNotifications">Receive email notifications</label>
           <% } else { %>
             <% if (emailAddress) { %>
-              <label for="emailConfirmationCode">Confirmation code for <%= emailAddress %>:</label>
-              <input type="hidden" name="confirmEmailAddress" value="<%= emailAddress %>">
-              <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%= emailConfirmationCode %>" data-mini="true">
+              <label for="emailConfirmationCode">Confirmation code for <%- emailAddress %>:</label>
+              <input type="hidden" name="confirmEmailAddress" value="<%- emailAddress %>">
+              <input name="emailConfirmationCode" placeholder="Confirmation Code" value="<%- emailConfirmationCode %>" data-mini="true">
               <button class="confirmEmail" data-mini="true">Confirm Email</button>
               <hr>
             <% } %>
             <label for="emailAddress" class="ui-hidden-accessible">Email address:</label>
-            <input type="email" name="emailAddress" id="emailAddress" value="<%= emailAddress %>" placeholder="Email Address" autocorrect="off" autocapitalize="off" data-mini="true">
+            <input type="email" name="emailAddress" id="emailAddress" value="<%- emailAddress %>" placeholder="Email Address" autocorrect="off" autocapitalize="off" data-mini="true">
             <button class="requestEmailConfirmation" data-mini="true">Request Confirmation</button>
           <% } %>
         </li>
         <li data-role="fieldcontain">
           <h3>Phone</h3>
           <% if (isSmsConfirmed) { %>
-            <p><%= phoneNumber %></p>
+            <p><%- phoneNumber %></p>
             <input type="checkbox" name="sendSmsNotifications" id="sendSmsNotifications"<% if (sendSmsNotifications) { %> checked <% } %> data-mini="true">
             <label for="sendSmsNotifications">Receive SMS notifications</label>
           <% } else { %>
             <% if (phoneNumber) { %>
-              <label for="phoneNumberConfirmationCode">Confirmation code for <%= phoneNumber %>:</label>
-              <input type="hidden" name="confirmPhoneNumber" value="<%= phoneNumber %>">
+              <label for="phoneNumberConfirmationCode">Confirmation code for <%- phoneNumber %>:</label>
+              <input type="hidden" name="confirmPhoneNumber" value="<%- phoneNumber %>">
               <input name="phoneNumberConfirmationCode" placeholder="Confirmation Code" value="<%= phoneConfirmationCode %>" data-mini="true">
               <button class="confirmPhone" data-mini="true">Confirm Phone</button>
               <hr>
             <% } %>
             <label for="phoneNumber" class="ui-hidden-accessible">Phone number:</label>
-            <input type="tel" name="phoneNumber" id="phoneNumber" value="<%= phoneNumber %>" placeholder="Phone Number" data-mini="true">
+            <input type="tel" name="phoneNumber" id="phoneNumber" value="<%- phoneNumber %>" placeholder="Phone Number" data-mini="true">
             <label for="mobileCarrierId" class="ui-hidden-accessible">Mobile carrier:</label>
             <select name="mobileCarrierId" id="mobileCarrierId" data-mini="true"></select>
             <button class="requestSmsConfirmation" data-mini="true">Request Confirmation</button>
@@ -224,8 +225,8 @@
       <a href="#feedback?id=<%= id %>&appId=<%= appId %>">
         <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
         <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
-        <p><%= name %></p>
-        <p><%= message %></p></a>
+        <p><%- name %></p>
+        <p><%- message %></p></a>
         <span class="ui-li-count count-bubble"><%= eventCount %></span>
     </script>
 
@@ -239,10 +240,10 @@
     </div>
     <script type="text/template" id="feedbackTemplate">
       <ul data-role="listview" data-inset="true">
-        <li class="long-lines">#<%= number %> - <%= name %></li>
+        <li class="long-lines">#<%= number %> - <%- name %></li>
         <li>Severity: <%= severity %></li>
-        <li><%= message %></li>
-        <li><%= summary %></li>
+        <li><%- message %></li>
+        <li><%- summary %></li>
         <li>Created: <%= RSKYBOX.format.longDate(createdDate) %></li>
         <li>Updated: <%= RSKYBOX.format.longDate(lastUpdatedDate) %></li>
         <li>
@@ -264,9 +265,9 @@
                 </audio>
               </li>
               <li>Recorded: <%= f.date %></li>
-              <li>By: <%= f.userName %></li>
+              <li>By: <%- f.userName %></li>
               <% if (f.instanceUrl) { %>
-                <li>For: <%= f.instanceUrl %></li>
+                <li>For: <%- f.instanceUrl %></li>
               <% } %>
             </ul>
           </div>
@@ -292,8 +293,8 @@
       <a href="#log?id=<%= id %>&appId=<%= appId %>">
         <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
         <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
-        <p><%= name %></p>
-        <p><%= message %></p></a>
+        <p><%- name %></p>
+        <p><%- message %></p></a>
         <span class="ui-li-count count-bubble"><%= eventCount %></span>
     </script>
 
@@ -307,10 +308,10 @@
     </div>
     <script type="text/template" id="logTemplate">
       <ul data-role="listview" data-inset="true">
-        <li class="long-lines">#<%= number %> - <%= name %></li>
+        <li class="long-lines">#<%= number %> - <%- name %></li>
         <li>Severity: <%= severity %></li>
-        <li><%= message %></li>
-        <li><%= summary %></li>
+        <li><%- message %></li>
+        <li><%- summary %></li>
         <li>Created: <%= RSKYBOX.format.longDate(createdDate) %></li>
         <li>Updated: <%= RSKYBOX.format.longDate(lastUpdatedDate) %></li>
         <li>
@@ -330,16 +331,16 @@
           <div data-role='collapsible' data-theme='c' data-content-theme='c' data-mini='true'>
             <h3>
               <%= log.logLevel %>: <%= RSKYBOX.format.compactDate(log.date) %><br>
-              <%= log.message %><br>
+              <%- log.message %><br>
               <% if (log.userName) { %>
-                User: <%= log.userName %>
+                User: <%- log.userName %>
               <% } %>
             </h3>
             <ul data-role="listview" data-inset="true">
-              <li>Summary: <%= log.summary %></li>
-              <li>User ID: <%= log.userId %></li>
+              <li>Summary: <%- log.summary %></li>
+              <li>User ID: <%- log.userId %></li>
               <% if (log.instanceUrl) { %>
-                <li class="long-lines">For: <%= log.instanceUrl %></li>
+                <li class="long-lines">For: <%- log.instanceUrl %></li>
               <% } %>
               <% if (log.appActions) { %>
                 <li>
@@ -352,7 +353,7 @@
                         - <%= RSKYBOX.format.milliseconds(action.duration) %>
                       <% } %>
                       <br>
-                      <%= action.description %>
+                      <%- action.description %>
                     </div>
                     <% on = !on; %>
                   <% }); %>
@@ -388,8 +389,8 @@
       <a href="#crash?id=<%= id %>&appId=<%= appId %>">
         <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
         <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
-        <p><%= name %></p>
-        <p><%= message %></p></a>
+        <p><%- name %></p>
+        <p><%- message %></p></a>
     </script>
 
     <div data-role="page" id="crash" data-title="Crash">
@@ -402,10 +403,10 @@
     </div>
     <script type="text/template" id="crashTemplate">
       <ul data-role="listview" data-inset="true">
-        <li class="long-lines">#<%= number %> - <%= name %></li>
+        <li class="long-lines">#<%= number %> - <%- name %></li>
         <li>Severity: <%= severity %></li>
-        <li><%= message %></li>
-        <li><%= summary %></li>
+        <li><%- message %></li>
+        <li><%- summary %></li>
         <li>Created: <%= RSKYBOX.format.longDate(createdDate) %></li>
         <li>Updated: <%= RSKYBOX.format.longDate(lastUpdatedDate) %></li>
         <li>
@@ -423,15 +424,15 @@
             <h1>
               Detected: <%= RSKYBOX.format.compactDate(crash.date) %><br>
               <% if (crash.userName) { %>
-                User: <%= crash.userName %>
+                User: <%- crash.userName %>
               <% } %>
             </h1>
             <ul data-role="listview" data-inset="true">
               <% if (crash.instanceUrl) { %>
-                <li class="long-lines">For: <%= crash.instanceUrl %></li>
+                <li class="long-lines">For: <%- crash.instanceUrl %></li>
               <% } %>
-              <li>Summary: <%= crash.summary %></li>
-              <li>User ID: <%= crash.userId %></li>
+              <li>Summary: <%- crash.summary %></li>
+              <li>User ID: <%- crash.userId %></li>
               <% if (crash.appActions) { %>
                 <li>
                   <h3>App Actions (time - duration)</h3>
@@ -443,7 +444,7 @@
                         - <%= RSKYBOX.format.milliseconds(action.duration) %>
                       <% } %>
                       <br>
-                      <%= action.description %>
+                      <%- action.description %>
                     </div>
                     <% on = !on; %>
                   <% }); %>
@@ -471,7 +472,7 @@
       <h3>No members at this time.</h3>
     </script>
     <script type="text/template" id="memberEntryTemplate">
-      <a href="#member?id=<%= id %>&appId=<%= appId %>"><%= display %></a>
+      <a href="#member?id=<%= id %>&appId=<%= appId %>"><%- display %></a>
     </script>
 
     <div data-role="page" id="member" data-title="Member">
@@ -484,9 +485,9 @@
     </div>
     <script type="text/template" id="memberTemplate">
       <ul data-role="listview" data-inset="true">
-        <li>Created: <%= date %></li>
-        <li>Email: <%= emailAddress %></li>
-        <li>Phone: <%= phoneNumber %></li>
+        <li>Created: <%= RSKYBOX.format.longDate(date) %></li>
+        <li>Email: <%- emailAddress %></li>
+        <li>Phone: <%- phoneNumber %></li>
         <% if (role !== 'owner' && (admin === 'owner' || admin === 'manager')) { %>
           <li data-role="fieldcontain">
             <label for="role" class="ui-hidden-accessible">Role:</label>
@@ -522,7 +523,7 @@
         <ul data-role="listview" data-inset="true">
           <li data-role="fieldcontain">
             <label for="emailAddress">Email Address:</label>
-            <input name="emailAddress" placeholder="Email Address" value="<%= emailAddress %>" autocorrect="off" autocapitalize="off" data-mini="true"></input>
+            <input name="emailAddress" placeholder="Email Address" value="<%- emailAddress %>" autocorrect="off" autocapitalize="off" data-mini="true"></input>
           </li>
           <li data-role="fieldcontain">
             <label for="role">Role:</label>
@@ -551,7 +552,7 @@
       <h3>No End Users at this time.</h3>
     </script>
     <script type="text/template" id="enduserEntryTemplate">
-      <a href="#enduser?id=<%= id %>&appId=<%= appId %>"><%= userName %> : <%= version %></a>
+      <a href="#enduser?id=<%= id %>&appId=<%= appId %>"><%- userName %> : <%- version %></a>
     </script>
 
     <div data-role="page" id="enduser" data-title="End User">
@@ -564,13 +565,13 @@
     </div>
     <script type="text/template" id="enduserTemplate">
       <ul data-role="listview" data-inset="true">
-        <li>User ID: <%= userId %></li>
-        <li>Username: <%= userName %></li>
-        <li>Application: <%= application %></li>
-        <li>Version: <%= version %></li>
-        <li>Summary: <%= summary %></li>
+        <li>User ID: <%- userId %></li>
+        <li>Username: <%- userName %></li>
+        <li>Application: <%- application %></li>
+        <li>Version: <%- version %></li>
+        <li>Summary: <%- summary %></li>
         <% if (instanceUrl) { %>
-          <li>For: <%= instanceUrl %></li>
+          <li>For: <%- instanceUrl %></li>
         <% } %>
       </ul>
     </script>
