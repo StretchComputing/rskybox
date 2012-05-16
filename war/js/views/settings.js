@@ -41,10 +41,14 @@ var RSKYBOX = (function (r, $) {
 
     saveFirstName: function (evt) {
       try {
+        var name = this.$('input[name=firstName]').val();
         r.log.info('entering', 'SettingsView.saveFirstName');
-        this.partialSave({
-          firstName: this.$('input[name=firstName]').val()
-        });
+
+        if (name || this.model.get('firstName')) {
+          this.partialSave({
+            firstName: name,
+          }, true);
+        }
         evt.preventDefault();
         return false;
       } catch (e) {
@@ -54,10 +58,14 @@ var RSKYBOX = (function (r, $) {
 
     saveLastName: function (evt) {
       try {
+        var name = this.$('input[name=lastName]').val();
         r.log.info('entering', 'SettingsView.saveLastName');
-        this.partialSave({
-          lastName: this.$('input[name=lastName]').val()
-        });
+
+        if (name || this.model.get('lastName')) {
+          this.partialSave({
+            lastName: name,
+          }, true);
+        }
         evt.preventDefault();
         return false;
       } catch (e) {
@@ -70,7 +78,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'SettingsView.sendEmailNotifications');
         this.partialSave({
           sendEmailNotifications: this.$('input[name=sendEmailNotifications]')[0].checked,
-        });
+        }, true);
         evt.preventDefault();
         return false;
       } catch (e) {
@@ -83,7 +91,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'SettingsView.sendSmsNotifications');
         this.partialSave({
           sendSmsNotifications: this.$('input[name=sendSmsNotifications]')[0].checked,
-        });
+        }, true);
         evt.preventDefault();
         return false;
       } catch (e) {
@@ -98,7 +106,7 @@ var RSKYBOX = (function (r, $) {
         if (this.model.isPasswordValid(password)) {
           this.partialSave({
             password: password,
-          });
+          }, true);
         } else {
           r.flash.warning('Minimum password length is 6 characters.');
         }
@@ -116,7 +124,7 @@ var RSKYBOX = (function (r, $) {
         if (this.model.isEmailValid(email)) {
           this.partialSave({
             emailAddress: email,
-          }, true);
+          }, false, true);
         } else {
           r.flash.warning('Valid email address required.');
         }
@@ -137,7 +145,7 @@ var RSKYBOX = (function (r, $) {
           this.partialSave({
             phoneNumber: phone,
             mobileCarrierId: carrier,
-          }, true);
+          }, false, true);
         } else {
           r.flash.warning('Valid phone number and mobile carrier selection required.');
         }
@@ -188,18 +196,19 @@ var RSKYBOX = (function (r, $) {
           r.flash.warning('Confirmation code must be 3 characters.');
         }
         evt.preventDefault();
-      return false;
+        return false;
       } catch (e) {
         r.log.error(e, 'SettingsView.confirmPhone');
       }
     },
 
-    partialSave: function (attrs, force) {
+    partialSave: function (attrs, silent, force) {
       try {
         this.model.partial.save(this.model, attrs, {
           success: this.success,
           statusCode: r.statusCodeHandlers(this.apiError),
           wait: true,
+          silent: !!silent,
         }, force);
       } catch (e) {
         r.log.error(e, 'SettingsView.partialSave');
@@ -209,6 +218,8 @@ var RSKYBOX = (function (r, $) {
     success: function (model, response) {
       try {
         r.flash.success('Changes were saved');
+        model.set({ password: undefined }, { silent: true });
+        this.$('input[name=password]').val('');
         r.session.reset();
       } catch (e) {
         r.log.error(e, 'SettingsView.success');

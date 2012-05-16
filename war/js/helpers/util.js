@@ -400,7 +400,7 @@ var RSKYBOX = (function (r, $) {
 
   $('html').ajaxSend(function (event, jqXHR, settings) {
     try {
-      if (settings.headers && settings.headers.Authorization) {
+      if (settings.headers && (settings.headers.Authorization || settings.headers.background)) {
         return;
       }
       RSKYBOX.log.local(settings.url, 'ajaxSend');
@@ -412,7 +412,7 @@ var RSKYBOX = (function (r, $) {
 
   $('html').ajaxComplete(function (event, jqXHR, settings) {
     try {
-      if (settings.headers && settings.headers.Authorization) {
+      if (settings.headers && (settings.headers.Authorization || settings.headers.background)) {
         return;
       }
       RSKYBOX.log.local(settings.url, 'ajaxComplete');

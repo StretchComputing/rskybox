@@ -95,6 +95,8 @@ var RSKYBOX = (function (r, $) {
           try {
             var proceed = false;
 
+            r.dump(model);
+            r.dump(attrs);
             // Set the fields that have changed.
             Object.keys(attrs).forEach(function (key) {
               if (force || model.get(key) !== attrs[key]) {
@@ -104,6 +106,8 @@ var RSKYBOX = (function (r, $) {
             });
 
             if (proceed) {
+              options.headers = options.headers || {};
+              options.headers.background = true;
               model.save(attrs, options);
             }
             partial.clear();
