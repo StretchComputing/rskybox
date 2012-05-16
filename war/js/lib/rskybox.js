@@ -246,24 +246,22 @@ var RSKYBOX = (function (r, $) {
           type: 'POST',
           data: JSON.stringify(attrs),
           url: getUrl(),
-          error: function () {
+          error: function (jqXHR, textStatus, errorThrown) {
             try {
               guard.enable();
-              r.config.log.errorHandler();
+              r.config.log.errorHandler(jqXHR, textStatus, errorThrown);
+              guard.disable();
             } catch (e) {
               window.console.error(e, 'RSKYBOX.log.server.errorHandler');
-            } finally {
-              guard.disable();
             }
           },
-          success: function () {
+          success: function (data, status, jqXHR) {
             try {
               guard.enable();
-              r.config.log.successHandler();
+              r.config.log.successHandler(data, status, jqXHR);
+              guard.disable();
             } catch (e) {
               window.console.error(e, 'RSKYBOX.log.server.successHandler');
-            } finally {
-              guard.disable();
             }
           },
           statusCode: r.config.log.statusCodeHandlers,
@@ -271,10 +269,10 @@ var RSKYBOX = (function (r, $) {
             Authorization: r.config.getAuthHeader(),
           },
         });
+
+        guard.disable();
       } catch (e) {
         window.console.error(e, 'RSKYBOX.log.server');
-      } finally {
-        guard.disable();
       }
     },
 
