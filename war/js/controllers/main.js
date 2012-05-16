@@ -153,6 +153,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.feedbackShow');
         r.feedbackView.setElement($.mobile.activePage);
+        delete r.feedbackView.options.status;
         r.feedbackView.model.clear({silent: true});
         r.feedbackView.model.set({id: r.session.params.id}, {silent: true});
         r.feedbackView.model.setAppUrl(r.session.params.appId);
@@ -218,6 +219,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.logShow');
         r.logView.setElement($.mobile.activePage);
+        delete r.logView.options.status;
         r.logView.model.clear({ silent: true });
         r.logView.model.set({id: r.session.params.id}, {silent: true});
         r.logView.model.setAppUrl(r.session.params.appId);
@@ -283,6 +285,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.crashShow');
         r.crashView.setElement($.mobile.activePage);
+        delete r.crashView.options.status;
         r.crashView.model.clear({silent: true});
         r.crashView.model.set({id: r.session.params.id}, {silent: true});
         r.crashView.model.setAppUrl(r.session.params.appId);

@@ -91,7 +91,10 @@ var RSKYBOX = (function (r, $) {
       try {
         var mock = this.model.getMock();
 
-        this.appLink('back', 'crashes');
+        if (!this.options.status) {
+          this.options.status = this.model.get('status');
+        }
+        this.appLink('back', 'crashes', this.options.status);
 
         this.getContent().html(this.template(mock));
         this.$el.trigger('create');

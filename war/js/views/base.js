@@ -52,9 +52,14 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
-    appLink: function (clazz, name) {
+    appLink: function (clazz, name, status) {
       try {
-        return this.$el.find('.' + clazz).attr('href', '#' + name + '?appId=' + r.session.params.appId);
+        var params = '';
+
+        if (status) {
+          params = '&status=' + status;
+        }
+        return this.$el.find('.' + clazz).attr('href', '#' + name + '?appId=' + r.session.params.appId + params);
       } catch (e) {
         r.log.error(e, 'JqmPageBaseView.appLink');
       }
