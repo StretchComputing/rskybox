@@ -80,7 +80,7 @@ public class MigrationTaskServlet extends HttpServlet {
 			resp.getWriter().println(response);
 		}
 		catch (Exception ex) {
-			response = "Should not happen. Email send: failure : " + ex.getMessage();
+			response = "Should not happen. MigrationTaskServlet failure : " + ex.getMessage();
 			log.severe(response);
 			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.getWriter().println(response);
