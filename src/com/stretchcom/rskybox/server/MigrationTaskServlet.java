@@ -2,6 +2,7 @@ package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -67,6 +68,8 @@ public class MigrationTaskServlet extends HttpServlet {
 
 	    	if(migrationName.equalsIgnoreCase("archiverTask")) {
 	    		archiver();
+	    	} else if(migrationName.equalsIgnoreCase("cleanRskyboxLogsTask")) {
+	    		cleanRskyboxLogs();
 	    	} else {
 	    		log.info("task unknown");
 	    	}
@@ -85,6 +88,40 @@ public class MigrationTaskServlet extends HttpServlet {
 			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.getWriter().println(response);
 		}
+	}
+	
+	private void cleanRskyboxLogs() {
+		EntityManager emCleaner = EMF.get().createEntityManager();
+		int numberOfClientLogsMatched = 0;
+		int numberOfClientLogsCleaned = 0;
+		//String RSKYBOX_APPLICATION_ID = "ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGHYM"; // local app id
+		String RSKYBOX_APPLICATION_ID = "ahRzfnJza3lib3gtc3RyZXRjaGNvbXITCxILQXBwbGljYXRpb24Y0c4NDA"; // production app id for rSkybox
+		
+		List<ClientLog> clientLogs = (List<ClientLog>)emCleaner.createNamedQuery("ClientLog.getAllWithApplicationId")
+				.setParameter("applicationId", RSKYBOX_APPLICATION_ID)
+				.getResultList();
+    	log.info("number of total client logs = " + clientLogs.size());
+    	
+		for(ClientLog cl : clientLogs) {
+			if(matchesTargetDate(cl.getCreatedGmtDate())) {
+				numberOfClientLogsMatched++;
+			}
+		}
+    	log.info("number of numberOfClientLogsMatched = " + numberOfClientLogsMatched);
+	}
+	
+	private Boolean matchesTargetDate(Date theDate) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(theDate);
+		int month = cal.get(Calendar.MONTH);
+		int day = cal.get(Calendar.DAY_OF_MONTH);
+		
+		if(month == 3 && day == 28) {
+			//log.info("month=" + month + " day=" + day + " returning true");
+			return true;
+		}
+		//log.info("month=" + month + " day=" + day + " returning false");
+		return false;
 	}
 	
     private void archiver() {
