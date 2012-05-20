@@ -229,7 +229,7 @@ public class IncidentsResource extends ServerResource {
             Query q = new Query("Incident");
             
             q.addFilter("applicationId", Query.FilterOperator.EQUAL, this.applicationId);
-            //q.addSort("lastUpdatedGmtDate", SortDirection.DESCENDING);
+            q.addSort("lastUpdatedGmtDate", SortDirection.DESCENDING);
 			if(this.tag == null) {
 			    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
 			    	// no additional filter need here

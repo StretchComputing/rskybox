@@ -13,6 +13,9 @@ import javax.persistence.NonUniqueResultException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.restlet.data.Form;
+import org.restlet.data.Parameter;
+import org.restlet.data.Reference;
 import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
@@ -29,18 +32,45 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.EndUser;
+import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.User;
+
+import com.google.appengine.api.datastore.Cursor;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.QueryResultList;
+
 
 public class EndUsersResource extends ServerResource {
     private static final Logger log = Logger.getLogger(EndUsersResource.class.getName());
     private String id;
 	private String applicationId;
+    private String pageSizeStr;
+    private String cursor;
 
     @Override
     protected void doInit() throws ResourceException {
         log.info("in doInit");
         id = (String) getRequest().getAttributes().get("id");
         this.applicationId = (String) getRequest().getAttributes().get("applicationId");
+        
+		Form form = getRequest().getResourceRef().getQueryAsForm();
+		for (Parameter parameter : form) {
+			log.info("parameter " + parameter.getName() + " = " + parameter.getValue());
+			if(parameter.getName().equals("pageSize"))  {
+				this.pageSizeStr = (String)parameter.getValue();
+				this.pageSizeStr = Reference.decode(this.pageSizeStr);
+				log.info("IncidentResource() - decoded pageSizeStr = " + this.pageSizeStr);
+			} else if(parameter.getName().equals("cursor"))  {
+				this.cursor = (String)parameter.getValue();
+				log.info("IncidentResource() - cursor = " + this.cursor);
+			}
+		}
     }
 
     // Handles 'Get End User API'
@@ -161,16 +191,57 @@ public class EndUsersResource extends ServerResource {
 				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
-            List<EndUser> endUsers = new ArrayList<EndUser>();
-            JSONArray ja = new JSONArray();
-            endUsers = (List<EndUser>) em.createNamedQuery("EndUser.getAllWithApplicationId")
-            		.setParameter("applicationId", this.applicationId)
-            		.getResultList();
-            for (EndUser endUser : endUsers) {
-                ja.put(getEndUserJson(endUser));
+            /////////////////////////
+            // Valid input parameters
+            /////////////////////////
+            int pageSize = Incident.DEFAULT_PAGE_SIZE;
+            if(this.pageSizeStr != null) {
+            	try {
+            		pageSize = new Integer(this.pageSizeStr);
+            		if(pageSize > Incident.MAX_PAGE_SIZE) {
+                		log.info("pageSizeStr exceeds maximum, value = " + pageSize);
+    			    	return Utility.apiError(this, ApiStatusCode.INVALID_PAGE_SIZE_PARAMETER);
+            		}
+            	} catch(NumberFormatException e) {
+            		log.info("pageSizeStr is not an integer, value = " + this.pageSizeStr);
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_PAGE_SIZE_PARAMETER);
+            	}
             }
+            
+            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+            Query q = new Query("Incident");
+            q.addFilter("applicationId", Query.FilterOperator.EQUAL, this.applicationId);
+            q.addSort("createdGmtDate", SortDirection.DESCENDING);
+            PreparedQuery pq = datastore.prepare(q);
+            FetchOptions fetchOptions = FetchOptions.Builder.withLimit(pageSize);
+            log.info("setting page size to " + pageSize);
+            
+            if (this.cursor != null) {
+                fetchOptions.startCursor(Cursor.fromWebSafeString(this.cursor));
+                log.info("setting cursor to " + this.cursor);
+              }
+            QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
+            log.info("number of end users from query = " + results.size());
+            
+            JSONArray ja = new JSONArray();
+            for (Entity entity : results) {
+            	EndUser eu = EndUser.build(entity);
+            	ja.put(getEndUserJson(eu));
+            }
+
+//            List<EndUser> endUsers = new ArrayList<EndUser>();
+//            JSONArray ja = new JSONArray();
+//            endUsers = (List<EndUser>) em.createNamedQuery("EndUser.getAllWithApplicationId")
+//            		.setParameter("applicationId", this.applicationId)
+//            		.getResultList();
+//            
+//            for (EndUser endUser : endUsers) {
+//                ja.put(getEndUserJson(endUser));
+//            }
+            
             json.put("endUsers", ja);
             json.put("apiStatus", apiStatus);
+            json.put("cursor", results.getCursor().toWebSafeString());
         } catch (JSONException e) {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();
