@@ -103,6 +103,9 @@ public class Incident {
 	public final static String ACTIVE_REMOTE_CONTROL_MODE = "active";
 	public final static String INACTIVE_REMOTE_CONTROL_MODE = "inactive";
 
+	public final static Integer MAX_PAGE_SIZE = 1000;
+	public final static Integer DEFAULT_PAGE_SIZE = 25;
+
 	private Integer number;  // sequential number auto assigned to incidents with scope of the application
 	private String eventName;
 	private Integer eventCount;
@@ -146,6 +149,10 @@ public class Incident {
 
 	public Key getKey() {
         return key;
+    }
+
+	public void setKey(Key key) {
+        this.key = key;
     }
 
     public Integer getEventCount() {
@@ -198,6 +205,10 @@ public class Incident {
 	
 	public String getStatus() {
 		return status;
+	}
+	
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 	public void changeStatus(String theWellKnownTag, String theNewStatus, Application theApplication) {
@@ -672,5 +683,52 @@ public class Incident {
 		// TODO **** have to account for member voting - so factor voting into final severity assignment
 		
 		return didSeverityChange;
+	}
+	
+	public static Incident build(com.google.appengine.api.datastore.Entity theEntity) {
+		Incident i = new Incident();
+		i.setKey(theEntity.getKey());
+		i.setTags((List<String>)theEntity.getProperty("tags"));
+		i.setEventName((String)theEntity.getProperty("eventName"));
+		
+		// NOTE: not sure why low leve Java API is returning Long instead of Integer, but it is ....
+		Long numL = (Long)theEntity.getProperty("number");
+		Integer numI = numL == null ? null : numL.intValue();
+		i.setNumber(numI);
+		
+		Long eventCountL = (Long)theEntity.getProperty("eventCount");
+		Integer eventCountI = eventCountL == null ? null : eventCountL.intValue();
+		i.setEventCount(eventCountI);
+		
+		i.setMaxEventCountReached((Boolean)theEntity.getProperty("maxEventCountReached"));
+		
+		Long severityL = (Long)theEntity.getProperty("severity");
+		Integer severityI = severityL == null ? null : severityL.intValue();
+		i.setSeverity(severityI);
+		
+		Long oldSeverityL = (Long)theEntity.getProperty("oldSeverity");
+		Integer oldSeverityI = oldSeverityL == null ? null : oldSeverityL.intValue();
+		i.setOldSeverity(oldSeverityI);
+		
+		Long severityUpVotesL = (Long)theEntity.getProperty("severityUpVotes");
+		Integer severityUpVotesI = severityUpVotesL == null ? null : severityUpVotesL.intValue();
+		i.setSeverityUpVotes(severityUpVotesI);
+		
+		Long severityDownVotesL = (Long)theEntity.getProperty("severityDownVotes");
+		Integer severityDownVotesI = severityDownVotesL == null ? null : severityDownVotesL.intValue();
+		i.setSeverityDownVotes(severityDownVotesI);
+		
+		i.setLastUpdatedGmtDate((Date)theEntity.getProperty("lastUpdatedGmtDate"));
+		i.setCreatedGmtDate((Date)theEntity.getProperty("createdGmtDate"));
+		i.setEndUser((String)theEntity.getProperty("endUser"));
+		i.setStatus((String)theEntity.getProperty("status"));
+		i.setApplicationId((String)theEntity.getProperty("applicationId"));
+		i.setActiveThruGmtDate((Date)theEntity.getProperty("activeThruGmtDate"));
+		i.setInStatsOnlyMode((Boolean)theEntity.getProperty("inStatsOnlyMode"));
+		i.setWasAutoClosed((Boolean)theEntity.getProperty("wasAutoClosed"));
+		i.setRemoteControlMode((String)theEntity.getProperty("remoteControlMode"));
+		i.setSummary((String)theEntity.getProperty("summary"));
+		i.setMessage((String)theEntity.getProperty("message"));
+		return i;
 	}
 }
