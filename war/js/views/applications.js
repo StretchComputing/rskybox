@@ -80,7 +80,9 @@ var RSKYBOX = (function (r, $) {
     },
 
     events: {
-      'submit': 'submit'
+      'submit': 'submit',
+      'click .config': 'config',
+      'click .library': 'library',
     },
 
     setModel: function () {
@@ -88,6 +90,35 @@ var RSKYBOX = (function (r, $) {
         this.model.set(this.options.applications.findById(r.session.params.appId));
       } catch (e) {
         r.log.error(e, 'ApplicationView.setModel');
+      }
+    },
+
+    config: function (evt) {
+      try {
+        var el = $('<div/>'), bb = new window.BlobBuilder(), mock = this.model.getMock();
+
+        r.dump(mock);
+        el.load('/agents/html5/rskybox-config.js', function () {
+          bb.append(_.template(el.text(), mock, { variable: 'app' }));
+          window.saveAs(bb.getBlob('text/javascript;charset=utf-8'), 'rskybox-config.js');
+        });
+        evt.preventDefault();
+      } catch (e) {
+        r.log.error(e, 'ApplicationView.config');
+      }
+    },
+
+    library: function (evt) {
+      try {
+        var el = $('<div/>'), bb = new window.BlobBuilder();
+
+        el.load('/agents/html5/rskybox.js', function () {
+          bb.append(el.text());
+          window.saveAs(bb.getBlob('text/javascript;charset=utf-8'), 'rskybox.js');
+        });
+        evt.preventDefault();
+      } catch (e) {
+        r.log.error(e, 'ApplicationView.library');
       }
     },
 
@@ -138,6 +169,19 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+    render: function () {
+      try {
+        var mock = this.model.getMock();
+
+        mock.date = r.format.longDate(mock.date);
+        this.getContent().html(this.template(mock));
+        this.getContent().trigger('create');
+        return this;
+      } catch (e) {
+        r.log.error(e, 'ApplicationView.render');
+      }
+    },
+
     apiError: function (jqXHR) {
       try {
         var code = r.getApiStatus(jqXHR.responseText);
@@ -150,19 +194,6 @@ var RSKYBOX = (function (r, $) {
         r.flash.warning(this.apiCodes[code]);
       } catch (e) {
         r.log.error(e, 'ApplicationView.apiError');
-      }
-    },
-
-    render: function () {
-      try {
-        var mock = this.model.getMock();
-
-        mock.date = r.format.longDate(mock.date);
-        this.getContent().html(this.template(mock));
-        this.getContent().trigger('create');
-        return this;
-      } catch (e) {
-        r.log.error(e, 'ApplicationView.render');
       }
     },
 

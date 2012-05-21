@@ -18,7 +18,7 @@ var RSKYBOX = (function (r, $) {
 
     initialize: function () {
       try {
-        _.bindAll(this, 'partialSave', 'success', 'apiError');
+        _.bindAll(this, 'success', 'apiError');
         this.model.on('change', this.render, this);
         this.model.on('error', this.error, this);
         this.template = _.template($('#settingsTemplate').html());
