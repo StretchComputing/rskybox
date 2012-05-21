@@ -40,7 +40,6 @@ var RSKYBOX = (function (r, $) {
     },
 
     more: function () {
-      r.log.info('entering', 'LogsView.more');
       if (this.options.more &&
           $(window).scrollTop() === ($(document).height() - $(window).height())) {
         r.logsView.collection.fetch({
