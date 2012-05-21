@@ -20,6 +20,9 @@
     <script src="/js/lib/backbone-min.js"></script>
     <script src="/js/lib/cookie.js"></script>
     <script src="/js/lib/date.format.js"></script>
+    <script src="/js/lib/cookie.js"></script>
+    <script src="/js/lib/BlobBuilder.min.js"></script>
+    <script src="/js/lib/FileSaver.min.js"></script>
     <script src="/js/helpers/util.js"></script>
     <script src="/js/lib/rskybox.js"></script>
     <script src="/js/lib/rskybox-config.js"></script>
@@ -107,6 +110,13 @@
         <li class="long-lines">AppId: <%= id %></li>
         <li>Token: <%= token %></li>
         <li>Created: <%= date %></li>
+      </ul>
+      <h3>Agents</h3>
+      <p>Files will be downloaded to your default download location.</p>
+      <h4>JavaScript/HTML5</h4>
+      <ul data-role="listview" data-inset="true" data-mini="true">
+        <li><a href="#" class="library">Library (rskybox.js)</a></li>
+        <li><a href="#" class="config">Your Config (rskybox-config.js)</a></li>
       </ul>
     </script>
 

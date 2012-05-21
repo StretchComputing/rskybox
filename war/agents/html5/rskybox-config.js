@@ -163,22 +163,23 @@ var RSKYBOX = (function (r, $) {
       // This is an object of key/value pairs where the key is the status code to
       // respond to, and the value is the callback function that responds.
       // rSkybox API errors are returned in HTTP code 422.
-      statusCodeHandlers: r.statusCodeHandlers(function (jqXHR) {
-        try {
-          var
-            apiCodes = r.log.getApiCodes(),
-            code = JSON.parse(jqXHR.responseText).apiStatus;
+      statusCodeHandlers: {
+        422: function (jqXHR) {
+          try {
+            var
+              apiCodes = r.log.getApiCodes(),
+              code = JSON.parse(jqXHR.responseText).apiStatus;
 
-          window.console.info(code, 'RSKYBOX.config.log.apiErrorHandler');
+            window.console.info(code, 'RSKYBOX.config.log.apiErrorHandler');
 
-          if (!apiCodes[code]) {
-            window.console.error('Undefined apiStatus: ' + code, 'RSKYBOX.config.log.apiErrorHandler');
+            if (!apiCodes[code]) {
+              window.console.error('Undefined apiStatus: ' + code, 'RSKYBOX.config.log.apiErrorHandler');
+            }
+          } catch (e) {
+            window.console.error(e, 'RSKYBOX.config.log.apiErrorHandler');
           }
-          r.flash.warning(apiCodes[code]);
-        } catch (e) {
-          window.console.error(e, 'RSKYBOX.config.log.apiErrorHandler');
-        }
-      }),
+        },
+      },
     },
 
 
@@ -208,22 +209,23 @@ var RSKYBOX = (function (r, $) {
       // This is an object of key/value pairs where the key is the status code to
       // respond to, and the value is the callback function that responds.
       // rSkybox API errors are returned in HTTP code 422.
-      statusCodeHandlers: r.statusCodeHandlers(function (jqXHR) {
-        try {
-          var
-            apiCodes = r.enduser.getApiCodes(),
-            code = JSON.parse(jqXHR.responseText).apiStatus;
+      statusCodeHandlers: {
+        422: function (jqXHR) {
+          try {
+            var
+              apiCodes = r.enduser.getApiCodes(),
+              code = JSON.parse(jqXHR.responseText).apiStatus;
 
-          window.console.info(code, 'RSKYBOX.config.enduser.apiErrorHandler');
+            window.console.info(code, 'RSKYBOX.config.enduser.apiErrorHandler');
 
-          if (!apiCodes[code]) {
-            window.console.info('Undefined apiStatus: ' + code, 'RSKYBOX.config.enduser.apiErrorHandler');
+            if (!apiCodes[code]) {
+              window.console.info('Undefined apiStatus: ' + code, 'RSKYBOX.config.enduser.apiErrorHandler');
+            }
+          } catch (e) {
+            window.console.error(e, 'RSKYBOX.config.enduser.apiErrorHandler');
           }
-          r.flash.warning(apiCodes[code]);
-        } catch (e) {
-          window.console.error(e, 'RSKYBOX.config.enduser.apiErrorHandler');
-        }
-      }),
+        },
+      },
     },
   };
 
