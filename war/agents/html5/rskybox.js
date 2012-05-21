@@ -12,7 +12,7 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.restUrlBase = '/rest/v1';
+  r.restUrlBase = 'https://rskybox-stretchcom.appspot.com/rest/v1';
 
   var
     logLevels = {
