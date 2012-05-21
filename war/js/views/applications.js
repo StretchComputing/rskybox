@@ -95,10 +95,11 @@ var RSKYBOX = (function (r, $) {
 
     config: function (evt) {
       try {
-        var el = $('<div/>'), bb = new window.BlobBuilder();
+        var el = $('<div/>'), bb = new window.BlobBuilder(), mock = this.model.getMock();
 
+        r.dump(mock);
         el.load('/agents/html5/rskybox-config.js', function () {
-          bb.append(el.text());
+          bb.append(_.template(el.text(), mock, { variable: 'app' }));
           window.saveAs(bb.getBlob('text/javascript;charset=utf-8'), 'rskybox-config.js');
         });
         evt.preventDefault();

@@ -25,7 +25,7 @@ var RSKYBOX = (function (r, $) {
     // Your application's name.
     getApplicationName: function () {
       try {
-        return 'rSkybox';
+        return '<%- app.name %>';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationName');
       }
@@ -35,7 +35,7 @@ var RSKYBOX = (function (r, $) {
     // Your application's version.
     getApplicationVersion: function () {
       try {
-        return 'beta1';
+        return '<%- app.version %>';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationVersion');
       }
@@ -45,7 +45,7 @@ var RSKYBOX = (function (r, $) {
     // Your rSkybox application ID.
     getApplicationId: function () {
       try {
-        return Cookie.get('appId');
+        return '<%= app.id %>';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationId');
       }
@@ -55,7 +55,8 @@ var RSKYBOX = (function (r, $) {
     // Your rSkybox authentication token.
     getAuthHeader: function () {
       try {
-        return 'Basic ' + Cookie.get('authHeader');
+        // TODO - token must be replaced with authHeader.
+        return 'Basic ' + '<%= app.token %>';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getAuthHeader');
       }
@@ -65,7 +66,7 @@ var RSKYBOX = (function (r, $) {
     // Track information about who experienced the issue here.
     getUserId: function () {
       try {
-        return Cookie.get('token');
+        return 'Insert code to retrieve user ID here.';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserId');
       }
@@ -73,21 +74,7 @@ var RSKYBOX = (function (r, $) {
 
     getUserName: function () {
       try {
-        var
-          name = '',
-          user = r.session && r.session.getEntity(r.session.keys.currentUser);
-
-        if (!user) {
-          return;
-        }
-
-        if (user.firstName) { name += user.firstName + ' '; }
-        if (user.lastName) { name += user.lastName; }
-        if (name) { name += ', '; }
-        if (user.emailAddress) { name += user.emailAddress; }
-        if (user.phoneNumber) { name += ', ' + user.phoneNumber; }
-
-        return name;
+        return 'Insert code to retrieve user name here.';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserName');
       }
