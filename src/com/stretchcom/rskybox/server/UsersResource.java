@@ -654,6 +654,10 @@ public class UsersResource extends ServerResource {
                 jsonReturn.put("apiStatus", ApiStatusCode.SUCCESS);
                 jsonReturn.put("token", user.getToken());
                 jsonReturn.put("authHeader", user.getAuthHeader());
+                jsonReturn.put("firstName", user.getFirstName());
+                jsonReturn.put("lastName", user.getLastName());
+                jsonReturn.put("emailAddress", user.getEmailAddress());
+                jsonReturn.put("phoneNumber", user.getPhoneNumber());
             } catch (JSONException e) {
             	log.severe("getUserToken() error creating JSON return object. Exception = " + e.getMessage());
                 this.setStatus(Status.SERVER_ERROR_INTERNAL);
