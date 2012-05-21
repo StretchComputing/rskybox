@@ -177,6 +177,9 @@ var RSKYBOX = (function (r, $) {
         r.logsView = new r.LogsView({
           collection: new r.Incidents(),
           applications: new r.Applications(),
+          tag: 'log',
+          pageSize: 10,
+          more: true,
         });
       } catch (e) {
         r.log.error(e, 'MainController.logsInit');
@@ -188,12 +191,10 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.logsShow');
         r.logsView.setElement($.mobile.activePage);
         r.logsView.collection.setAppUrl(r.session.params.appId);
+        r.logsView.options.more = true;
         r.session.getCollection(r.session.keys.applications, r.logsView.options.applications);
-        r.logsView.collection.fetch({
-          data: {
-            tag: 'log',
-            status: r.session.params.status,
-          },
+        $(window).scroll(function () {
+          r.logsView.trigger('more');
         });
         r.logsView.renderStatusButton('#logs');
       } catch (e) {
@@ -258,6 +259,7 @@ var RSKYBOX = (function (r, $) {
           data: {
             tag: 'crash',
             status: r.session.params.status,
+            pageSize: 10,
           },
         });
         r.session.getCollection(r.session.keys.applications, r.crashesView.options.applications);
@@ -452,6 +454,7 @@ var RSKYBOX = (function (r, $) {
     setupSession: function (eventType, matchObj, ui, page, evt) {
       try {
         r.log.info('entering', 'MainController.setupSession');
+        $(window).off('scroll');
         r.session = r.session || {};
         r.session.params = r.router.getParams(location.hash);
       } catch (e) {
