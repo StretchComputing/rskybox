@@ -142,8 +142,8 @@ var RSKYBOX = (function (r, $) {
         this.collection.fetch({
           add: true,
           data: {
-            //tag: this.options.tag,
-            //status: r.session.params.status || 'open',
+            tag: this.options.tag,
+            status: r.session.params.status || 'open',
             pageSize: this.options.pageSize || 10,
             cursor: this.options.cursor || undefined,
           },
