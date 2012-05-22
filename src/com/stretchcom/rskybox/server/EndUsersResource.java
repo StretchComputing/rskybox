@@ -32,7 +32,6 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.EndUser;
-import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.User;
 
 import com.google.appengine.api.datastore.Cursor;
@@ -65,10 +64,10 @@ public class EndUsersResource extends ServerResource {
 			if(parameter.getName().equals("pageSize"))  {
 				this.pageSizeStr = (String)parameter.getValue();
 				this.pageSizeStr = Reference.decode(this.pageSizeStr);
-				log.info("IncidentResource() - decoded pageSizeStr = " + this.pageSizeStr);
+				log.info("EndUsersResource() - decoded pageSizeStr = " + this.pageSizeStr);
 			} else if(parameter.getName().equals("cursor"))  {
 				this.cursor = (String)parameter.getValue();
-				log.info("IncidentResource() - cursor = " + this.cursor);
+				log.info("EndUsersResource() - cursor = " + this.cursor);
 			}
 		}
     }
@@ -194,11 +193,11 @@ public class EndUsersResource extends ServerResource {
             /////////////////////////
             // Valid input parameters
             /////////////////////////
-            int pageSize = Incident.DEFAULT_PAGE_SIZE;
+            int pageSize = EndUser.DEFAULT_PAGE_SIZE;
             if(this.pageSizeStr != null) {
             	try {
             		pageSize = new Integer(this.pageSizeStr);
-            		if(pageSize > Incident.MAX_PAGE_SIZE) {
+            		if(pageSize > EndUser.MAX_PAGE_SIZE) {
                 		log.info("pageSizeStr exceeds maximum, value = " + pageSize);
     			    	return Utility.apiError(this, ApiStatusCode.INVALID_PAGE_SIZE_PARAMETER);
             		}
@@ -209,7 +208,7 @@ public class EndUsersResource extends ServerResource {
             }
             
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            Query q = new Query("Incident");
+            Query q = new Query("EndUser");
             q.addFilter("applicationId", Query.FilterOperator.EQUAL, this.applicationId);
             q.addSort("createdGmtDate", SortDirection.DESCENDING);
             PreparedQuery pq = datastore.prepare(q);

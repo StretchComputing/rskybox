@@ -37,6 +37,9 @@ import com.google.appengine.api.datastore.Key;
 })
 public class EndUser {
     private static final Logger log = Logger.getLogger(EndUser.class.getName());
+    
+	public final static Integer MAX_PAGE_SIZE = 1000;
+	public final static Integer DEFAULT_PAGE_SIZE = 25;
 	
 	private String userId;  // unique ID assigned by 3rd party app and passed in to rSkybox
 	private String userName;
