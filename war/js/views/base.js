@@ -136,7 +136,7 @@ var RSKYBOX = (function (r, $) {
     more: function () {
       if (this.options.first ||
           (this.options.more &&
-          ($(window).scrollTop() === ($(document).height() - $(window).height())))) {
+          ($(window).scrollTop() === ($(document).height() - window.innerHeight)))) {
         this.collection.fetch({
           add: true,
           data: {
