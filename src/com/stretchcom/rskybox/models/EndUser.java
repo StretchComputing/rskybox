@@ -1,6 +1,7 @@
 package com.stretchcom.rskybox.models;
 
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.persistence.Entity;
@@ -53,6 +54,10 @@ public class EndUser {
 
     public Key getKey() {
         return key;
+    }
+
+	public void setKey(Key key) {
+        this.key = key;
     }
 	
 	public String getUserId() {
@@ -121,5 +126,20 @@ public class EndUser {
 
 	public void setApplicationId(String applicationId) {
 		this.applicationId = applicationId;
+	}
+	
+	public static EndUser build(com.google.appengine.api.datastore.Entity theEntity) {
+		EndUser eu = new EndUser();
+		eu.setKey(theEntity.getKey());
+		eu.setUserId((String)theEntity.getProperty("userId"));
+		eu.setUserName((String)theEntity.getProperty("userName"));
+		eu.setApplication((String)theEntity.getProperty("application"));
+		eu.setVersion((String)theEntity.getProperty("version"));
+		eu.setInstanceUrl((String)theEntity.getProperty("instanceUrl"));
+		eu.setSummary((String)theEntity.getProperty("summary"));
+		eu.setCreatedGmtDate((Date)theEntity.getProperty("createdGmtDate"));
+		eu.setVersionUpdatedGmtDate((Date)theEntity.getProperty("versionUpdatedGmtDate"));
+		eu.setApplicationId((String)theEntity.getProperty("applicationId"));
+		return eu;
 	}
 }
