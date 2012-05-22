@@ -130,7 +130,9 @@ var RSKYBOX = (function (r, $) {
       $(window).scroll(function () {
         that.trigger('more');
       });
-      this.renderStatusButton(listLinkId);
+      if (listLinkId) {
+        this.renderStatusButton(listLinkId);
+      }
     },
 
     more: function () {
@@ -140,8 +142,8 @@ var RSKYBOX = (function (r, $) {
         this.collection.fetch({
           add: true,
           data: {
-            tag: this.options.tag,
-            status: r.session.params.status || 'open',
+            //tag: this.options.tag,
+            //status: r.session.params.status || 'open',
             pageSize: this.options.pageSize || 10,
             cursor: this.options.cursor || undefined,
           },
@@ -153,7 +155,12 @@ var RSKYBOX = (function (r, $) {
 
     moreSuccess: function (collection, response) {
       this.options.cursor = response.cursor;
-      this.options.more = response.incidents.length > 0;
+      this.options.more = false;
+      if (response.incidents) {
+        this.options.more = response.incidents.length > 0;
+      } else if (response.endUsers) {
+        this.options.more = response.endUsers.length > 0;
+      }
       this.render();
     },
   });

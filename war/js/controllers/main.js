@@ -377,6 +377,7 @@ var RSKYBOX = (function (r, $) {
         r.endusersView = new r.EndusersView({
           collection: new r.Endusers(),
           applications: new r.Applications(),
+          pageSize: 10,
         });
       } catch (e) {
         r.log.error(e, 'MainController.endusersInit');
@@ -386,12 +387,7 @@ var RSKYBOX = (function (r, $) {
     endusersShow: function () {
       try {
         r.log.info('entering', 'MainController.endusersShow');
-        r.endusersView.setElement($.mobile.activePage);
-        r.endusersView.collection.setAppUrl(r.session.params.appId);
-        r.session.getCollection(r.session.keys.applications, r.endusersView.options.applications);
-        r.endusersView.collection.fetch({
-          statusCode: r.statusCodeHandlers(),
-        });
+        r.endusersView.resetList();
       } catch (e) {
         r.log.error(e, 'MainController.endusersShow');
       }
