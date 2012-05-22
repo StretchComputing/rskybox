@@ -30,35 +30,11 @@ var RSKYBOX = (function (r, $) {
   r.LogsView = r.JqmPageBaseView.extend({
     initialize: function () {
       try {
-        _.bindAll(this, 'success', 'render');
-        //this.collection.on('reset', this.render, this);
-        this.on('more', this.more, this);
+        _.bindAll(this, 'render');
         this.template = _.template($('#noLogsTemplate').html());
       } catch (e) {
         r.log.error(e, 'LogsView.initialize');
       }
-    },
-
-    more: function () {
-      if (this.options.more &&
-          $(window).scrollTop() === ($(document).height() - $(window).height())) {
-        r.logsView.collection.fetch({
-          add: true,
-          data: {
-            tag: this.options.tag,
-            status: r.session.params.status || 'open',
-            pageSize: this.options.pageSize,
-            cursor: this.options.cursor || undefined,
-          },
-          success: this.success,
-        });
-      }
-    },
-
-    success: function (collection, response) {
-      this.options.cursor = response.cursor;
-      this.options.more = response.incidents.length > 0;
-      this.render();
     },
 
     render: function () {

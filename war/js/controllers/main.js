@@ -111,6 +111,8 @@ var RSKYBOX = (function (r, $) {
         r.feedbackListView = new r.FeedbackListView({
           collection: new r.Incidents(),
           applications: new r.Applications(),
+          tag: 'feedback',
+          pageSize: 10,
         });
       } catch (e) {
         r.log.error(e, 'MainController.feedbackListInit');
@@ -120,16 +122,7 @@ var RSKYBOX = (function (r, $) {
     feedbackListShow: function () {
       try {
         r.log.info('entering', 'MainController.feedbackListShow');
-        r.feedbackListView.setElement($.mobile.activePage);
-        r.feedbackListView.collection.setAppUrl(r.session.params.appId);
-        r.session.getCollection(r.session.keys.applications, r.feedbackListView.options.applications);
-        r.feedbackListView.collection.fetch({
-          data: {
-            tag: 'feedback',
-            status: r.session.params.status,
-          }
-        });
-        r.feedbackListView.renderStatusButton('#feedbackList');
+        r.feedbackListView.resetList('#feedbackList');
       } catch (e) {
         r.log.error(e, 'MainController.feedbackListShow');
       }
@@ -179,7 +172,7 @@ var RSKYBOX = (function (r, $) {
           applications: new r.Applications(),
           tag: 'log',
           pageSize: 10,
-          more: true,
+
         });
       } catch (e) {
         r.log.error(e, 'MainController.logsInit');
@@ -189,14 +182,7 @@ var RSKYBOX = (function (r, $) {
     logsShow: function () {
       try {
         r.log.info('entering', 'MainController.logsShow');
-        r.logsView.setElement($.mobile.activePage);
-        r.logsView.collection.setAppUrl(r.session.params.appId);
-        r.logsView.options.more = true;
-        r.session.getCollection(r.session.keys.applications, r.logsView.options.applications);
-        $(window).scroll(function () {
-          r.logsView.trigger('more');
-        });
-        r.logsView.renderStatusButton('#logs');
+        r.logsView.resetList('#logs');
       } catch (e) {
         r.log.error(e, 'MainController.logsShow');
       }
@@ -244,6 +230,8 @@ var RSKYBOX = (function (r, $) {
         r.crashesView = new r.CrashesView({
           collection: new r.Incidents(),
           applications: new r.Applications(),
+          tag: 'crash',
+          pageSize: 10,
         });
       } catch (e) {
         r.log.error(e, 'MainController.crashesInit');
@@ -253,17 +241,7 @@ var RSKYBOX = (function (r, $) {
     crashesShow: function () {
       try {
         r.log.info('entering', 'MainController.crashesShow');
-        r.crashesView.setElement($.mobile.activePage);
-        r.crashesView.collection.setAppUrl(r.session.params.appId);
-        r.crashesView.collection.fetch({
-          data: {
-            tag: 'crash',
-            status: r.session.params.status,
-            pageSize: 10,
-          },
-        });
-        r.session.getCollection(r.session.keys.applications, r.crashesView.options.applications);
-        r.crashesView.renderStatusButton('#crashes');
+        r.crashesView.resetList('#crashes');
       } catch (e) {
         r.log.error(e, 'MainController.crashesShow');
       }
@@ -464,6 +442,7 @@ var RSKYBOX = (function (r, $) {
   };
 
 
+  // Capture user's destination so they can be redirected back to it after they log in.
   $(document).bind('pagebeforechange', function (evt, data) {
     try {
       if (!r.isLoggedIn()) {

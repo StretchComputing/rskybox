@@ -11,6 +11,10 @@ var RSKYBOX = (function (r, $) {
         if (this.options && this.options.applications) {
           this.options.applications.bind('reset', this.updateApplicationName, this);
         }
+        if (this.collection) {
+          this.on('more', this.more, this);
+          _.bindAll(this, 'moreSuccess');
+        }
       } catch (e) {
         r.log.error(e, 'JqmPageBaseView.constructor');
       }
@@ -110,6 +114,47 @@ var RSKYBOX = (function (r, $) {
       } catch (e) {
         r.log.error(e, 'JqmPageBaseView.changeStatus');
       }
+    },
+
+    resetList: function (listLinkId) {
+      var that = this;
+
+      this.setElement($.mobile.activePage);
+      this.collection.setAppUrl(r.session.params.appId);
+      this.collection.reset();
+      this.options.first = true;
+      this.options.more = true;
+      delete this.options.cursor;
+      r.session.getCollection(r.session.keys.applications, this.options.applications);
+      this.trigger('more');
+      $(window).scroll(function () {
+        that.trigger('more');
+      });
+      this.renderStatusButton(listLinkId);
+    },
+
+    more: function () {
+      if (this.options.first ||
+          (this.options.more &&
+          ($(window).scrollTop() === ($(document).height() - $(window).height())))) {
+        this.collection.fetch({
+          add: true,
+          data: {
+            tag: this.options.tag,
+            status: r.session.params.status || 'open',
+            pageSize: this.options.pageSize || 10,
+            cursor: this.options.cursor || undefined,
+          },
+          success: this.moreSuccess,
+        });
+        this.options.first = false;
+      }
+    },
+
+    moreSuccess: function (collection, response) {
+      this.options.cursor = response.cursor;
+      this.options.more = response.incidents.length > 0;
+      this.render();
     },
   });
 
