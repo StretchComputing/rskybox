@@ -117,51 +117,63 @@ var RSKYBOX = (function (r, $) {
     },
 
     resetList: function (listLinkId) {
-      var that = this;
+      try {
+        var that = this;
 
-      this.setElement($.mobile.activePage);
-      this.collection.setAppUrl(r.session.params.appId);
-      this.collection.reset();
-      this.options.first = true;
-      this.options.more = true;
-      delete this.options.cursor;
-      r.session.getCollection(r.session.keys.applications, this.options.applications);
-      this.trigger('more');
-      $(window).scroll(function () {
-        that.trigger('more');
-      });
-      if (listLinkId) {
-        this.renderStatusButton(listLinkId);
+        this.setElement($.mobile.activePage);
+        this.collection.setAppUrl(r.session.params.appId);
+        this.collection.reset();
+        this.options.first = true;
+        this.options.more = true;
+        delete this.options.cursor;
+        r.session.getCollection(r.session.keys.applications, this.options.applications);
+        this.trigger('more');
+        $(window).scroll(function () {
+          that.trigger('more');
+        });
+        if (listLinkId) {
+          this.renderStatusButton(listLinkId);
+        }
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.resetList');
       }
     },
 
     more: function () {
-      if (this.options.first ||
-          (this.options.more &&
-          ($(window).scrollTop() === ($(document).height() - window.innerHeight)))) {
-        this.collection.fetch({
-          add: true,
-          data: {
-            tag: this.options.tag,
-            status: r.session.params.status || 'open',
-            pageSize: this.options.pageSize || 10,
-            cursor: this.options.cursor || undefined,
-          },
-          success: this.moreSuccess,
-        });
-        this.options.first = false;
+      try {
+        if (this.options.first ||
+            (this.options.more &&
+            ($(window).scrollTop() === ($(document).height() - window.innerHeight)))) {
+          this.collection.fetch({
+            add: true,
+            data: {
+              tag: this.options.tag,
+              status: r.session.params.status || 'open',
+              pageSize: this.options.pageSize || 10,
+              cursor: this.options.cursor || undefined,
+            },
+            success: this.moreSuccess,
+          });
+          this.options.first = false;
+        }
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.more');
       }
     },
 
     moreSuccess: function (collection, response) {
-      this.options.cursor = response.cursor;
-      this.options.more = false;
-      if (response.incidents) {
-        this.options.more = response.incidents.length > 0;
-      } else if (response.endUsers) {
-        this.options.more = response.endUsers.length > 0;
+      try {
+        this.options.cursor = response.cursor;
+        //this.options.more = false;
+        if (response.incidents) {
+          this.options.more = response.incidents.length > 0;
+        } else if (response.endUsers) {
+          this.options.more = response.endUsers.length > 0;
+        }
+        this.render();
+      } catch (e) {
+        r.log.error(e, 'JqmPageBaseView.moreSuccess');
       }
-      this.render();
     },
   });
 
