@@ -713,7 +713,13 @@ public class UsersResource extends ServerResource {
         	jsonReturn.put("apiStatus", apiStatus);
         	
         	// return the token if the user is confirmed
-        	if(user.getIsEmailConfirmed() || user.getIsSmsConfirmed()) jsonReturn.put("token", user.getToken());
+        	if(user.getIsEmailConfirmed() || user.getIsSmsConfirmed()) {
+        		jsonReturn.put("token", user.getToken());
+                jsonReturn.put("firstName", user.getFirstName());
+                jsonReturn.put("lastName", user.getLastName());
+                jsonReturn.put("emailAddress", user.getEmailAddress());
+                jsonReturn.put("phoneNumber", user.getPhoneNumber());
+        	}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
