@@ -152,7 +152,7 @@ var RSKYBOX = (function (r, $) {
         r.feedbackView.model.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.feedbackView.options.applications);
         r.feedbackView.model.fetch({
-          statusCode: r.statusCodeHandlers(),
+          statusCode: r.statusCodeHandlers(r.feedbackView.apiError),
           data: {
             includeEvents: true,
           },
@@ -212,7 +212,7 @@ var RSKYBOX = (function (r, $) {
         r.logView.model.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.logView.options.applications);
         r.logView.model.fetch({
-          statusCode: r.statusCodeHandlers(),
+          statusCode: r.statusCodeHandlers(r.logView.apiError),
           data: {
             includeEvents: true,
           },
@@ -271,7 +271,7 @@ var RSKYBOX = (function (r, $) {
         r.crashView.model.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.crashView.options.applications);
         r.crashView.model.fetch({
-          statusCode: r.statusCodeHandlers(),
+          statusCode: r.statusCodeHandlers(r.crashView.apiError),
           data: {
             includeEvents: true,
           },
@@ -332,7 +332,7 @@ var RSKYBOX = (function (r, $) {
         r.memberView.model.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.memberView.options.applications);
         r.memberView.model.fetch({
-          statusCode: r.statusCodeHandlers(),
+          statusCode: r.statusCodeHandlers(r.memberView.apiError),
         });
       } catch (e) {
         r.log.error(e, 'MainController.memberShow');
@@ -416,7 +416,7 @@ var RSKYBOX = (function (r, $) {
         r.enduserView.model.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.enduserView.options.applications);
         r.enduserView.model.fetch({
-          statusCode: r.statusCodeHandlers(),
+          statusCode: r.statusCodeHandlers(r.enduserView.apiError),
         });
       } catch (e) {
         r.log.error(e, 'MainController.enduserShow');

@@ -71,6 +71,7 @@ var RSKYBOX = (function (r, $) {
   r.EnduserView = r.JqmPageBaseView.extend({
     initialize: function () {
       try {
+        _.bindAll(this, 'apiError');
         this.model.on('change', this.render, this);
         this.model.on('error', this.error, this);
         this.template = _.template($('#enduserTemplate').html());
