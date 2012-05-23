@@ -362,7 +362,9 @@ public class UserAuthenticationFilter implements Filter {
     	
     	String authHeaderCookieValue = extractCookie(theHttpRequest, RSKYBOX_AUTH_HEADER_COOKIE_NAME);
     	if(authHeaderCookieValue == null) {
-    		authHeaderCookieValue = Utility.getRskyboxAuthHeader(this.tokenCookie);
+    		// NOTE: for now, the authHeader cookie does not contain the "Basic " beginning portion. The 'space' is causing an issue if not encoded
+    		// TODO: return the full authHeader and encode the space (assuming this will work but not sure)
+    		authHeaderCookieValue = Utility.getRskyboxAuthHeader(this.tokenCookie, false);
     		log.info("***** authHeaderCookieValue = " + authHeaderCookieValue);
     		// cookie not set so we need to set it with age of one year
     		Utility.setCookie(theHttpResponse, RSKYBOX_AUTH_HEADER_COOKIE_NAME, authHeaderCookieValue, 31557600);

@@ -144,6 +144,10 @@ public class Utility {
     }
     
     public static String getRskyboxAuthHeader(String theToken) {
+    	return getRskyboxAuthHeader(theToken, true);
+    }
+    
+    public static String getRskyboxAuthHeader(String theToken, Boolean theWithBasic) {
         // format: Basic rSkyboxLogin:<token_value> where rSkyboxLogin:<token_value> portion is base64 encoded
     	String phrase = "rSkyboxLogin:" + theToken;
     	String phraseBase64 = null;
@@ -153,6 +157,14 @@ public class Utility {
 			log.severe("UnsupportedEncodingException::getRskyboxAuthHeader");
 			return null;
 		}
-    	return "Basic " + phraseBase64;
+		
+		String authHeader = null;
+		if(theWithBasic) {
+			authHeader = "Basic " + phraseBase64;
+		} else {
+			authHeader = phraseBase64;
+		}
+		
+    	return authHeader;
     }
 }
