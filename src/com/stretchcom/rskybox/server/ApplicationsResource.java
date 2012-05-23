@@ -284,6 +284,7 @@ public class ApplicationsResource extends ServerResource {
             	json.put("name", theApplication.getName());
             	json.put("version", theApplication.getVersion());
             	json.put("token", theApplication.getToken());
+            	json.put("authHeader", Utility.getRskyboxAuthHeader(theApplication.getToken()));
             	json.put("numberOfOpenLogs", theApplication.getNumberOfOpenLogs());
             	json.put("numberOfOpenCrashes", theApplication.getNumberOfOpenCrashes());
             	json.put("numberOfOpenFeedback", theApplication.getNumberOfOpenFeedbacks());

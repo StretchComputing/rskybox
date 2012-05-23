@@ -153,6 +153,6 @@ public class Utility {
 			log.severe("UnsupportedEncodingException::getRskyboxAuthHeader");
 			return null;
 		}
-    	return phraseBase64;
+    	return "Basic " + phraseBase64;
     }
 }
