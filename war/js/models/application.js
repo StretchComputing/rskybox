@@ -11,6 +11,7 @@ var RSKYBOX = (function (r, $) {
       date: null,
       token: null,
       role: null,
+      authHeader: null,
       numberOfOpenLogs: null,
       numberOfOpenCrashes: null,
       numberOfOpenFeedback: null,

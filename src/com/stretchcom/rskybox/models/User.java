@@ -388,6 +388,10 @@ public class User {
     		users = (List<User>)em.createNamedQuery("User.getByEmailAddress")
 				.setParameter("emailAddress", theEmailAddress.toLowerCase())
 				.getResultList();
+    		// access the first user to prevent 'lazy loading' which would break the calling routines
+    		if(users.size() > 0) {
+        		User user = users.get(0);
+    		}
 		} catch (Exception e) {
 			log.severe("exception = " + e.getMessage());
 			e.printStackTrace();
