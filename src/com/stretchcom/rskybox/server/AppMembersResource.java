@@ -297,7 +297,7 @@ public class AppMembersResource extends ServerResource {
         				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
             		}
             		
-        			if(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) && !currentUserMember.hasOwnerAuthority()) {
+        			if(role.equalsIgnoreCase(AppMember.MANAGER_ROLE) && !currentUserMember.hasManagerAuthority()) {
         				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_TO_CREATE_MEMBER_WITH_SPECIFIED_ROLE);
         			}
         		}
