@@ -74,6 +74,7 @@ public class ApiStatusCode {
 	public static final String INVALID_SEVERITY_PARAMETER = "422";
 	public static final String INVALID_TAGS_PARAMETER = "423";
 	public static final String LAST_UPDATED_DATE_PARAMETER = "424";
+	public static final String INVALID_PAGE_SIZE_PARAMETER = "425";
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 	public static final String NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID = "501";

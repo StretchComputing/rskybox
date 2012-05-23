@@ -95,8 +95,6 @@ var RSKYBOX = (function (r, $) {
           try {
             var proceed = false;
 
-            r.dump(model);
-            r.dump(attrs);
             // Set the fields that have changed.
             Object.keys(attrs).forEach(function (key) {
               if (force || model.get(key) !== attrs[key]) {

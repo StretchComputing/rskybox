@@ -34,8 +34,17 @@ import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.Feedback;
 import com.stretchcom.rskybox.models.Incident;
-import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
+
+import com.google.appengine.api.datastore.Cursor;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.QueryResultList;
 
 public class IncidentsResource extends ServerResource {
 	private static final Logger log = Logger.getLogger(IncidentsResource.class.getName());
@@ -45,6 +54,8 @@ public class IncidentsResource extends ServerResource {
     private String incidentStatus;
     private String remoteControl;
     private String includeEvents;
+    private String pageSizeStr;
+    private String cursor;
 
     @Override
     protected void doInit() throws ResourceException {
@@ -64,10 +75,17 @@ public class IncidentsResource extends ServerResource {
 				this.tag = (String)parameter.getValue().toLowerCase();
 				this.tag = Reference.decode(this.tag);
 				log.info("IncidentResource() - decoded tag = " + this.tag);
-			}  else if(parameter.getName().equals("includeEvents"))  {
+			} else if(parameter.getName().equals("includeEvents"))  {
 				this.includeEvents = (String)parameter.getValue().toLowerCase();
 				this.includeEvents = Reference.decode(this.includeEvents);
 				log.info("IncidentResource() - decoded includeEvents = " + this.includeEvents);
+			} else if(parameter.getName().equals("pageSize"))  {
+				this.pageSizeStr = (String)parameter.getValue();
+				this.pageSizeStr = Reference.decode(this.pageSizeStr);
+				log.info("IncidentResource() - decoded pageSizeStr = " + this.pageSizeStr);
+			} else if(parameter.getName().equals("cursor"))  {
+				this.cursor = (String)parameter.getValue();
+				log.info("IncidentResource() - cursor = " + this.cursor);
 			}
 		}
     }
@@ -140,7 +158,6 @@ public class IncidentsResource extends ServerResource {
         
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
-		List<Incident> incidents = null;
     	User currentUser = Utility.getCurrentUser(getRequest());
         try {
         	//////////////////////
@@ -150,9 +167,6 @@ public class IncidentsResource extends ServerResource {
         	if(appMember == null) {
 				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
-
-            List<User> users = new ArrayList<User>();
-            JSONArray ja = new JSONArray();
             
             /////////////////////////
             // Valid input parameters
@@ -171,37 +185,88 @@ public class IncidentsResource extends ServerResource {
 				}
 			}
             
+            int pageSize = Incident.DEFAULT_PAGE_SIZE;
+            if(this.pageSizeStr != null) {
+            	try {
+            		pageSize = new Integer(this.pageSizeStr);
+            		if(pageSize > Incident.MAX_PAGE_SIZE) {
+                		log.info("pageSizeStr exceeds maximum, value = " + pageSize);
+    			    	return Utility.apiError(this, ApiStatusCode.INVALID_PAGE_SIZE_PARAMETER);
+            		}
+            	} catch(NumberFormatException e) {
+            		log.info("pageSizeStr is not an integer, value = " + this.pageSizeStr);
+			    	return Utility.apiError(this, ApiStatusCode.INVALID_PAGE_SIZE_PARAMETER);
+            	}
+            }
+            
+//			if(this.tag == null) {
+//		    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
+//		    	incidents= (List<Incident>)em.createNamedQuery("Incident.getAllWithApplicationId")
+//		    			.setParameter("applicationId", this.applicationId)
+//		    			.getResultList();
+//		    } else {
+//		    	incidents= (List<Incident>)em.createNamedQuery("Incident.getByStatusAndApplicationId")
+//						.setParameter("status", this.incidentStatus)
+//						.setParameter("applicationId", this.applicationId)
+//						.getResultList();
+//		    } 
+//		} else {
+//		    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
+//		    	incidents= (List<Incident>)em.createNamedQuery("Incident.getAllWithApplicationIdAndTag")
+//		    			.setParameter("applicationId", this.applicationId)
+//		    			.setParameter("tag", this.tag)
+//		    			.getResultList();
+//		    } else {
+//		    	incidents= (List<Incident>)em.createNamedQuery("Incident.getByStatusAndApplicationIdAndTag")
+//						.setParameter("status", this.incidentStatus)
+//						.setParameter("applicationId", this.applicationId)
+//						.setParameter("tag", this.tag)
+//						.getResultList();
+//		    } 
+//		}
+
+            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+            Query q = new Query("Incident");
+            
+            q.addFilter("applicationId", Query.FilterOperator.EQUAL, this.applicationId);
+            q.addSort("lastUpdatedGmtDate", SortDirection.DESCENDING);
 			if(this.tag == null) {
 			    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
-			    	incidents= (List<Incident>)em.createNamedQuery("Incident.getAllWithApplicationId")
-			    			.setParameter("applicationId", this.applicationId)
-			    			.getResultList();
+			    	// no additional filter need here
+			    	log.info("query conditions 1");
 			    } else {
-			    	incidents= (List<Incident>)em.createNamedQuery("Incident.getByStatusAndApplicationId")
-							.setParameter("status", this.incidentStatus)
-							.setParameter("applicationId", this.applicationId)
-							.getResultList();
+		            q.addFilter("status", Query.FilterOperator.EQUAL, this.incidentStatus);
+			    	log.info("query conditions 2");
 			    } 
 			} else {
 			    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
-			    	incidents= (List<Incident>)em.createNamedQuery("Incident.getAllWithApplicationIdAndTag")
-			    			.setParameter("applicationId", this.applicationId)
-			    			.setParameter("tag", this.tag)
-			    			.getResultList();
+		            q.addFilter("tags", Query.FilterOperator.EQUAL, this.tag);
+			    	log.info("query conditions 3");
 			    } else {
-			    	incidents= (List<Incident>)em.createNamedQuery("Incident.getByStatusAndApplicationIdAndTag")
-							.setParameter("status", this.incidentStatus)
-							.setParameter("applicationId", this.applicationId)
-							.setParameter("tag", this.tag)
-							.getResultList();
-			    } 
+		            q.addFilter("status", Query.FilterOperator.EQUAL, this.incidentStatus);
+		            q.addFilter("tags", Query.FilterOperator.EQUAL, this.tag);
+			    	log.info("query conditions 4. status = " + this.incidentStatus + " tag = " + this.tag);
+			    }
 			}
+            PreparedQuery pq = datastore.prepare(q);
+            FetchOptions fetchOptions = FetchOptions.Builder.withLimit(pageSize);
+            log.info("setting page size to " + pageSize);
             
-            for (Incident i : incidents) {
+            if (this.cursor != null) {
+                fetchOptions.startCursor(Cursor.fromWebSafeString(this.cursor));
+                log.info("setting cursor to " + this.cursor);
+              }
+            QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
+            log.info("number of incidents from query = " + results.size());
+            
+            JSONArray ja = new JSONArray();
+            for (Entity entity : results) {
+            	Incident i = Incident.build(entity);
                 ja.put(getIncidentJson(i, true));
             }
             json.put("incidents", ja);
             json.put("apiStatus", apiStatus);
+            json.put("cursor", results.getCursor().toWebSafeString());
         } catch (JSONException e) {
             log.severe("exception = " + e.getMessage());
         	e.printStackTrace();

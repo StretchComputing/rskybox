@@ -55,8 +55,7 @@ var RSKYBOX = (function (r, $) {
     // Your rSkybox authentication token.
     getAuthHeader: function () {
       try {
-        // TODO - token must be replaced with authHeader.
-        return 'Basic ' + '<%= app.token %>';
+        return '<%= app.authHeader %>';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getAuthHeader');
       }

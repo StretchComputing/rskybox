@@ -30,7 +30,7 @@ var RSKYBOX = (function (r, $) {
   r.LogsView = r.JqmPageBaseView.extend({
     initialize: function () {
       try {
-        this.collection.bind('reset', this.render, this);
+        _.bindAll(this, 'render');
         this.template = _.template($('#noLogsTemplate').html());
       } catch (e) {
         r.log.error(e, 'LogsView.initialize');
