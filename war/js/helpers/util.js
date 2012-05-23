@@ -46,12 +46,13 @@ var RSKYBOX = (function (r, $) {
 
 
   // Handle logging in and logging out.
-  r.logIn = function (token) {
+  r.logIn = function (model) {
     try {
       var dest = r.destination.get();
       r.log.info('entering', 'RSKYBOX.logIn');
 
-      Cookie.set('token', token, 9000, '/');
+      Cookie.set('token', model.token, 9000, '/');
+      r.store.setItem(r.session.keys.currentUser, model);
 
       if (dest) {
         r.destination.remove();
@@ -69,6 +70,7 @@ var RSKYBOX = (function (r, $) {
       r.log.info('entering', 'RSKYBOX.logOut');
 
       Cookie.unset('token', '/');
+      r.store.removeItem(r.session.keys.currentUser);
       r.changePage('root', 'signup');
       r.session.reset();
     } catch (e) {

@@ -50,7 +50,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'ConfirmNewUserView.success');
         r.destination.set('/html5');
-        r.logIn(model.get('token'));
+        r.logIn(response);
       } catch (e) {
         r.log.error(e, 'ConfirmNewUserView.success');
       }
