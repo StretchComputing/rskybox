@@ -441,13 +441,11 @@ var RSKYBOX = (function (r, $) {
   };
 
   $(function () {
-    setTimeout(function () {
-      function sendToServer() {
-        server();
-        setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
-      }
-      sendToServer();
-    }, 10 * 1000);  // delay inital call by 10 seconds
+    function sendToServer() {
+      server();
+      setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
+    }
+    sendToServer();
   });
 
 
