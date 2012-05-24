@@ -300,7 +300,6 @@ public class EndUsersResource extends ServerResource {
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
     	String oldVersion = null;
-        em.getTransaction().begin();
         try {
             endUser = new EndUser();
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
@@ -386,7 +385,6 @@ public class EndUsersResource extends ServerResource {
             }
             
             em.persist(endUser);
-            em.getTransaction().commit();
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
