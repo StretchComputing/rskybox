@@ -75,7 +75,7 @@ var RSKYBOX = (function (r, $) {
       try {
         var
           name = '',
-          user = r.session && r.session.getEntity(r.session.keys.currentUser);
+          user = (r.session && r.session.getEntity(r.session.keys.currentUser)) || r.store.getItem(r.session.keys.currentUser);
 
         if (!user) {
           return;

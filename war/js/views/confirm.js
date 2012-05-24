@@ -50,7 +50,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'ConfirmNewUserView.success');
         r.destination.set('/html5');
-        r.logIn(model.get('token'));
+        r.logIn(response);
       } catch (e) {
         r.log.error(e, 'ConfirmNewUserView.success');
       }
@@ -283,6 +283,8 @@ var RSKYBOX = (function (r, $) {
           params.emailConfirmationCode = params.confirmationCode;
           delete params.confirmationCode;
           r.changePage('confirm', 'signup', params);
+          r.flash.info('Please supply a password to complete your registration.');
+          location.reload();
           return;
         }
 
