@@ -283,6 +283,8 @@ var RSKYBOX = (function (r, $) {
           params.emailConfirmationCode = params.confirmationCode;
           delete params.confirmationCode;
           r.changePage('confirm', 'signup', params);
+          r.flash.info('Please supply a password to complete your registration.');
+          location.reload();
           return;
         }
 
