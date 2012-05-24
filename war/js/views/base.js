@@ -153,6 +153,7 @@ var RSKYBOX = (function (r, $) {
               cursor: this.options.cursor || undefined,
             },
             success: this.moreSuccess,
+            statusCode: r.statusCodeHandlers(),
           });
           this.options.first = false;
         }
