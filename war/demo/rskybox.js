@@ -12,7 +12,9 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  r.restUrlBase = 'https://rskybox-stretchcom.appspot.com/rest/v1';
+  // TODO - use full path for demo app
+  //r.restUrlBase = 'https://rskybox-stretchcom.appspot.com/rest/v1';
+  r.restUrlBase = '/rest/v1';
 
   var
     logLevels = {
@@ -441,13 +443,11 @@ var RSKYBOX = (function (r, $) {
   };
 
   $(function () {
-    setTimeout(function () {
-      function sendToServer() {
-        server();
-        setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
-      }
-      sendToServer();
-    }, 10 * 1000);  // delay inital call by 10 seconds
+    function sendToServer() {
+      server();
+      setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
+    }
+    sendToServer();
   });
 
 

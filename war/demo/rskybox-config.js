@@ -25,7 +25,7 @@ var RSKYBOX = (function (r, $) {
     // Your application's name.
     getApplicationName: function () {
       try {
-        return 'rSkybox';
+        return 'rSkybox Demo';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationName');
       }
@@ -35,7 +35,7 @@ var RSKYBOX = (function (r, $) {
     // Your application's version.
     getApplicationVersion: function () {
       try {
-        return 'beta1';
+        return 'beta';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationVersion');
       }
@@ -45,7 +45,8 @@ var RSKYBOX = (function (r, $) {
     // Your rSkybox application ID.
     getApplicationId: function () {
       try {
-        return 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEQsSC0FwcGxpY2F0aW9uGAIM';
+        // TODO - get appId from cookie
+        return 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEgsSC0FwcGxpY2F0aW9uGOIIDA';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationId');
       }
@@ -55,7 +56,8 @@ var RSKYBOX = (function (r, $) {
     // Your rSkybox authentication token.
     getAuthHeader: function () {
       try {
-        return 'Basic clNreWJveExvZ2luOmMxZGI5ZmdwOGdhdTUzZDgya3FkMjJpbzA5';
+        // TODO - get authHeader from cookie
+        return 'Basic clNreWJveExvZ2luOmxtcXFpbXB2b3J2M3U1NzNuazA1YmYyaWZx';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getAuthHeader');
       }
@@ -65,7 +67,8 @@ var RSKYBOX = (function (r, $) {
     // Track information about who experienced the issue here.
     getUserId: function () {
       try {
-        return 'Insert code to retrieve user ID here.';
+        // TODO - get demo user token from cookie
+        return 'demo user token goes here';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserId');
       }
@@ -73,7 +76,8 @@ var RSKYBOX = (function (r, $) {
 
     getUserName: function () {
       try {
-        return 'Insert code to retrieve user name here.';
+        // TODO - get demo username from cookie
+        return 'demo username goes here';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserName');
       }
