@@ -15,23 +15,37 @@
     <h1>rSkybox Weather Sample Application</h1>
     <p>(Use your browser's View Source capability for more information.)</p>
 
-    <h2>Your Info</h2>
-    <p>Enter your info and we'll get a weather forecast for you.</p>
+    <h2>Your Weather</h2>
+    <p id="flash" style="display: none; background-color: #FFFFC8;"></p>
+    <p>Enter your location (Post/Zip Code, City/Town) and we'll get a weather forecast for you.</p>
     <form id="weather">
-      <div>
-        <label for="name">Name:</label>
-        <input id="name">
-      </div>
-
-      <div>
-        <label for="location">Zip/Postal Code:</label>
-        <input id="location">
-      </div>
-
-      <div>
-        <input type="submit" value="Submit">
-      </div>
+      <p>
+        <label for="location">Location:</label>
+        <input id="location"> <input type="submit" value="Submit">
+      </p>
     </form>
-    <p id="display"></p>
+    <div id="display" style="display: none;">
+      <h3>Location: <span class="query"></span></h3>
+      <div class="current">
+        <h4>Current Conditions</h4>
+        <p>
+          <span class="desc"></span> <img class="icon-url"></img>
+        </p>
+        <p>
+          Wind: <span class="winddir"></span> at <span class="windspeed"></span> mph
+        </p>
+      </div>
+
+      <div class="forecast">
+        <h4>Forecast for <span class="date"></span></h4>
+        <p>
+          <span class="desc"></span> <img class="icon-url"></img>
+        </p>
+        <p>
+          Wind: <span class="winddir"></span> at <span class="windspeed"></span> mph
+        </p>
+      </div>
+
+    </div>
   </body>
 </html>

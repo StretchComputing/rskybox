@@ -1,30 +1,75 @@
 var RSKYBOX = (function (r, $) {
   'use strict';
 
+
   var
     key = '4a125c4379170658122405',
+    num_of_results = 3,
     url = 'http://free.worldweatheronline.com/feed/weather.ashx',
+
+
+    flash = function (message) {
+      $('#flash').html(message).fadeIn().delay(3000).fadeOut();
+    },
+
+
+    displayError = function (message) {
+      try {
+        flash(message);
+        r.log.info(message, 'displayError');
+      } catch (e) {
+        r.log.error(e, 'displayError');
+      }
+    },
+
+
+    display = function (wx) {
+      try {
+        r.log.debug(JSON.stringify(wx), 'success');
+        $('.query').text(wx.request[0].query);
+        $('.current .time').text(wx.current_condition[0].observation_time);
+        $('.current .desc').text(wx.current_condition[0].weatherDesc[0].value);
+        $('.current .icon-url').attr('src', wx.current_condition[0].weatherIconUrl[0].value);
+        $('.current .winddir').text(wx.current_condition[0].winddir16Point);
+        $('.current .windspeed').text(wx.current_condition[0].windspeedMiles);
+        $('.forecast .date').text(wx.weather[0].date);
+        $('.forecast .desc').text(wx.weather[0].weatherDesc[0].value);
+        $('.forecast .icon-url').attr('src', wx.weather[0].weatherIconUrl[0].value);
+        $('.forecast .winddir').text(wx.weather[0].winddir16Point);
+        $('.forecast .windspeed').text(wx.weather[0].windspeedMiles);
+        $('#display').show();
+      } catch (e) {
+        r.log.error(e, 'display');
+      }
+    },
+
+
+    success = function (response) {
+      try {
+        var message, wx = response.data;
+        r.log.info('entering', 'success');
+
+        if (wx.error) {
+          displayError(wx.error[0].msg);
+          return;
+        }
+        r.wx = wx;
+        display(wx);
+      } catch (e) {
+        r.log.error(e, 'success');
+      }
+    },
+
 
     error = function (response) {
       try {
         r.log.info('entering', 'error');
+        displayError(response);
       } catch (e) {
-        r.log.error(e, 'success');
+        r.log.error(e, 'error');
       }
     },
 
-    success = function (response) {
-      console.log(response);
-      try {
-        var wx = response.data;
-        r.log.info('entering', 'success');
-
-        r.log.debug(wx.request[0].query, 'success');
-        $('#display').html(wx.request[0].query + ': ' + wx.weather[0].weatherDesc[0].value);
-      } catch (e) {
-        r.log.error(e, 'success');
-      }
-    },
 
     submit = function () {
       try {
@@ -34,8 +79,9 @@ var RSKYBOX = (function (r, $) {
           dataType: 'json',
           data: {
             key: key,
-            q: '46528',
-            format: 'json'
+            q: $('#location').val(),
+            format: 'json',
+            num_of_results: num_of_results,
           },
           success: success,
           error: error,
@@ -46,6 +92,7 @@ var RSKYBOX = (function (r, $) {
       }
     };
 
+
   $(function () {
     try {
       $('#weather').on('submit', submit);
@@ -53,6 +100,7 @@ var RSKYBOX = (function (r, $) {
       r.log.error(e, 'jQuery.documentReady');
     }
   });
+
 
   return r;
 
