@@ -76,12 +76,12 @@ var RSKYBOX = (function (r, $) {
         r.log.info('triggered', 'submit');
         $.ajax({
           url: url,
-          dataType: 'json',
+          dataType: 'jsonp',
           data: {
             key: key,
             q: $('#location').val(),
             format: 'json',
-            num_of_results: num_of_results,
+            num_of_days: num_of_results,
           },
           success: success,
           error: error,
