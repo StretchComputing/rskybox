@@ -386,6 +386,7 @@ var RSKYBOX = (function (r, $) {
         if (!attrs.userName) {
           r.log.local('userName not set', 'RSKYBOX.enduser.isValid');
           delete attrs.userName;
+          return false;
         }
 
         return true;

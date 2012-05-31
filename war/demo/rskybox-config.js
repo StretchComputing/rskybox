@@ -46,7 +46,11 @@ var RSKYBOX = (function (r, $) {
     getApplicationId: function () {
       try {
         // TODO - get appId from cookie
-        return 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEgsSC0FwcGxpY2F0aW9uGOIIDA';
+        if (r.isDev()) {
+          return 'ahJyc2t5Ym94LXN0cmV0Y2hjb21yEgsSC0FwcGxpY2F0aW9uGOIIDA';
+        }
+        // else Prod
+        return 'ahRzfnJza3lib3gtc3RyZXRjaGNvbXITCxILQXBwbGljYXRpb24YvdswDA';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationId');
       }
@@ -57,7 +61,11 @@ var RSKYBOX = (function (r, $) {
     getAuthHeader: function () {
       try {
         // TODO - get authHeader from cookie
-        return 'Basic clNreWJveExvZ2luOmxtcXFpbXB2b3J2M3U1NzNuazA1YmYyaWZx';
+        if (r.isDev()) {
+          return 'Basic clNreWJveExvZ2luOmxtcXFpbXB2b3J2M3U1NzNuazA1YmYyaWZx';
+        }
+        // else Prod
+        return 'Basic clNreWJveExvZ2luOjc2dTkyMHJvNzZuMjByODB0bXRvMnBiZTJ1';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getAuthHeader');
       }
@@ -68,7 +76,7 @@ var RSKYBOX = (function (r, $) {
     getUserId: function () {
       try {
         // TODO - get demo user token from cookie
-        return 'demo user token goes here';
+        return '';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserId');
       }
@@ -77,7 +85,7 @@ var RSKYBOX = (function (r, $) {
     getUserName: function () {
       try {
         // TODO - get demo username from cookie
-        return 'demo username goes here';
+        return '';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserName');
       }

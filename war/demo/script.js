@@ -13,12 +13,12 @@ var RSKYBOX = (function (r, $) {
     },
 
 
-    displayError = function (message) {
+    showMessage = function (message) {
       try {
         flash(message);
-        r.log.info(message, 'displayError');
+        r.log.warn(message, 'showMessage');
       } catch (e) {
-        r.log.error(e, 'displayError');
+        r.log.error(e, 'showMessage');
       }
     },
 
@@ -50,7 +50,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'success');
 
         if (wx.error) {
-          displayError(wx.error[0].msg);
+          showMessage(wx.error[0].msg);
           return;
         }
         r.wx = wx;
@@ -64,7 +64,7 @@ var RSKYBOX = (function (r, $) {
     error = function (response) {
       try {
         r.log.info('entering', 'error');
-        displayError(response);
+        showMessage(response);
       } catch (e) {
         r.log.error(e, 'error');
       }

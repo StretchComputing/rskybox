@@ -12,9 +12,15 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  // TODO - use full path for demo app
-  //r.restUrlBase = 'https://rskybox-stretchcom.appspot.com/rest/v1';
-  r.restUrlBase = '/rest/v1';
+  r.isDev = function () {
+    return location.hostname === "localhost";
+  };
+
+  if (r.isDev()) {
+    r.restUrlBase = '/rest/v1';
+  } else {
+    r.restUrlBase = 'https://rskybox-stretchcom.appspot.com/rest/v1';
+  }
 
   var
     logLevels = {
@@ -388,6 +394,7 @@ var RSKYBOX = (function (r, $) {
         if (!attrs.userName) {
           r.log.local('userName not set', 'RSKYBOX.enduser.isValid');
           delete attrs.userName;
+          return false;
         }
 
         return true;
