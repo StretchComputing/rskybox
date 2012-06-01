@@ -9,7 +9,11 @@ var RSKYBOX = (function (r, $) {
 
 
     flash = function (message) {
-      $('#flash').html(message).fadeIn().delay(3000).fadeOut();
+      try {
+        $('#flash').html(message).fadeIn().delay(3000).fadeOut();
+      } catch (e) {
+        r.log.error(e, 'flash');
+      }
     },
 
 
@@ -25,19 +29,39 @@ var RSKYBOX = (function (r, $) {
 
     display = function (wx) {
       try {
+        var cc, clone, current = $('.current'), forecast = $('.forecast'), template = $('.template');
+
         r.log.debug(JSON.stringify(wx), 'success');
         $('.query').text(wx.request[0].query);
-        $('.current .time').text(wx.current_condition[0].observation_time);
-        $('.current .desc').text(wx.current_condition[0].weatherDesc[0].value);
-        $('.current .icon-url').attr('src', wx.current_condition[0].weatherIconUrl[0].value);
-        $('.current .winddir').text(wx.current_condition[0].winddir16Point);
-        $('.current .windspeed').text(wx.current_condition[0].windspeedMiles);
-        $('.forecast .date').text(wx.weather[0].date);
-        $('.forecast .desc').text(wx.weather[0].weatherDesc[0].value);
-        $('.forecast .icon-url').attr('src', wx.weather[0].weatherIconUrl[0].value);
-        $('.forecast .winddir').text(wx.weather[0].winddir16Point);
-        $('.forecast .windspeed').text(wx.weather[0].windspeedMiles);
-        $('#display').show();
+
+        cc = wx.current_condition[0];
+        //$('.current .time').text(wx.current_condition[0].observation_time);
+        current.find('.desc').text(cc.weatherDesc[0].value);
+        current.find('.temp').text(cc.temp_F);
+        current.find('.humidity').text(cc.humidity);
+        current.find('.icon-url').attr('src', cc.weatherIconUrl[0].value);
+        current.find('.winddir').text(cc.winddir16Point);
+        current.find('.windspeed').text(cc.windspeedMiles);
+
+        forecast.html('');
+        if (wx.weather.length) {
+          wx.weather.forEach(function (w) {
+            clone = template.clone();
+
+            clone.find('.date').text(w.date);
+            clone.find('.desc').text(w.weatherDesc[0].value);
+            clone.find('.temp-min').text(w.tempMinF);
+            clone.find('.temp-max').text(w.tempMaxF);
+            clone.find('.icon-url').attr('src', w.weatherIconUrl[0].value);
+            clone.find('.winddir').text(w.winddir16Point);
+            clone.find('.windspeed').text(w.windspeedMiles);
+            forecast.append(clone);
+            clone.removeClass('template').addClass('day');
+          });
+        }
+
+        $('.display').show();
+        $('footer').hide();
       } catch (e) {
         r.log.error(e, 'display');
       }
@@ -71,6 +95,16 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    reset = function () {
+      try {
+        r.log.info('triggered', 'reset');
+        $('#location').val('');
+        $('#display').hide();
+      } catch (e) {
+        r.log.error(e, 'reset');
+      }
+    },
+
     submit = function () {
       try {
         r.log.info('triggered', 'submit');
@@ -81,7 +115,7 @@ var RSKYBOX = (function (r, $) {
             key: key,
             q: $('#location').val(),
             format: 'json',
-            num_of_days: num_of_results,
+            num_of_days: $('#days').val(),
           },
           success: success,
           error: error,
@@ -96,6 +130,7 @@ var RSKYBOX = (function (r, $) {
   $(function () {
     try {
       $('#weather').on('submit', submit);
+      $('#weather').on('reset', reset);
     } catch (e) {
       r.log.error(e, 'jQuery.documentReady');
     }

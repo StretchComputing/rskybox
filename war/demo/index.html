@@ -1,51 +1,103 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>rSkybox demo</title>
-    <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1.min.js"></script>
-    <script>
-      jQuery || document.write('<script src="/js/lib/jquery-1.7.1.min.js"><\/script>')
-    </script>
-    <script src="rskybox.js"></script>
-    <script src="rskybox-config.js"></script>
-    <script src="script.js"></script>
-  </head>
-  <body>
-    <h1>rSkybox Weather Sample Application</h1>
-    <p>(Use your browser's View Source capability for more information.)</p>
+<!--[if lt IE 7]> <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title></title>
+  <meta name="description" content="">
 
-    <h2>Your Weather</h2>
-    <p id="flash" style="display: none; background-color: #FFFFC8;"></p>
-    <p>Enter your location (Post/Zip Code, City/Town, Airport Code, Lat/Long) and we'll get a weather forecast for you.</p>
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="css/bp.css">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <script src="js/libs/modernizr-2.5.3.min.js"></script>
+</head>
+<body>
+  <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
+  <header>
+    <h1>rSkybox Demo</h1>
+    <p>(View Source for more information.)</p>
+  </header>
+
+
+  <div role="main">
+    <div class="display">
+      <h3>Current Conditions at <span class="query"></span></h3>
+      <div class="current day">
+        <p>
+          <span class="desc"></span> <img class="icon-url"></img>
+        </p>
+        <p>
+          <strong>Temp:</strong> <span class="temp">&deg;</span>
+        </p>
+        <p>
+          <strong>Humidity:</strong> <span class="humidity"></span>%
+        </p>
+        <p>
+          <strong>Wind:</strong> <span class="winddir"></span> at <span class="windspeed"></span> mph
+        </p>
+      </div>
+
+      <div class="clear"></div>
+      <h3>Forecast</h3>
+      <div class="forecast clear"></div>
+    </div>
+  </div>
+
+
+  <footer class="clear">
+    <h2>Get Weather and Forecast</h2>
+
     <form id="weather">
       <p>
         <label for="location">Location:</label>
-        <input id="location"> <input type="submit" value="Submit">
+        <input id="location" size="15"><br>
+        (Postal/Zip Code, City/Town, Airport Code, Lat/Long)
+      </p>
+      <p>
+        <label for="days">Days to Forecast:</label>
+        <input id="days" size="2" type="number" min="1" max="5" value="3">
+      </p>
+      <p>
+        <input type="submit" value="Submit"> <input type="reset" value="Reset"><br>
       </p>
     </form>
-    <div id="display" style="display: none;">
-      <h3>Location: <span class="query"></span></h3>
-      <div class="current">
-        <h4>Current Conditions</h4>
-        <p>
-          <span class="desc"></span> <img class="icon-url"></img>
-        </p>
-        <p>
-          Wind: <span class="winddir"></span> at <span class="windspeed"></span> mph
-        </p>
-      </div>
 
-      <div class="forecast">
-        <h4>Forecast for <span class="date"></span></h4>
-        <p>
-          <span class="desc"></span> <img class="icon-url"></img>
-        </p>
-        <p>
-          Wind: <span class="winddir"></span> at <span class="windspeed"></span> mph
-        </p>
-      </div>
+    <p id="flash" style="display: none; background-color: #FFFFC8;"></p>
+  </footer>
 
-    </div>
-  </body>
+
+  <div class="template">
+    <p>
+      <strong class="date"></strong>
+    </p>
+    <p>
+      <span class="desc"></span> <img class="icon-url"></img>
+    </p>
+    <p>
+      <strong>Max / Min:</strong>&nbsp; <span class="temp-max"></span>&deg; / <span class="temp-min"></span>&deg;
+    </p>
+    <p>
+      <strong>Wind:</strong> <span class="winddir"></span> at <span class="windspeed"></span> mph
+    </p>
+  </div>
+
+  <script src="//ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1.min.js"></script>
+  <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.1.min.js"><\/script>')</script>
+
+  <script src="js/plugins.js"></script>
+  <script src="rskybox.js"></script>
+  <script src="rskybox-config.js"></script>
+  <script src="js/script.js"></script>
+
+  <!--<script>-->
+    <!--var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];-->
+    <!--(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];-->
+    <!--g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';-->
+    <!--s.parentNode.insertBefore(g,s)}(document,'script'));-->
+  <!--</script>-->
+</body>
 </html>

@@ -1,0 +1,33 @@
+body {
+  margin: 10px;
+  background-color: lightblue;
+}
+
+h1 {
+  color: lightgray;
+  background-color: black;
+}
+
+.template {
+  display: none;
+}
+
+.day {
+  float: left;
+  padding: 10px;
+  margin: 10px;
+  border: grey 1px solid;
+  white-space: nowrap;
+}
+
+.current {
+  background-color: white;
+}
+
+.clear {
+  clear: both;
+}
+
+.display {
+  display: none;
+}
