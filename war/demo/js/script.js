@@ -35,7 +35,6 @@ var RSKYBOX = (function (r, $) {
         $('.query').text(wx.request[0].query);
 
         cc = wx.current_condition[0];
-        //$('.current .time').text(wx.current_condition[0].observation_time);
         current.find('.desc').text(cc.weatherDesc[0].value);
         current.find('.temp').text(cc.temp_F);
         current.find('.humidity').text(cc.humidity);
@@ -99,7 +98,8 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('triggered', 'reset');
         $('#location').val('');
-        $('#display').hide();
+        $('.display').hide();
+        $('footer').show();
       } catch (e) {
         r.log.error(e, 'reset');
       }
@@ -130,7 +130,7 @@ var RSKYBOX = (function (r, $) {
   $(function () {
     try {
       $('#weather').on('submit', submit);
-      $('#weather').on('reset', reset);
+      $('.reset').on('click', reset);
     } catch (e) {
       r.log.error(e, 'jQuery.documentReady');
     }
