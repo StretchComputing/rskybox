@@ -31,3 +31,7 @@ h1 {
 .display {
   display: none;
 }
+
+.notifications {
+  display: none;
+}

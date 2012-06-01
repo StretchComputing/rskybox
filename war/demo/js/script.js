@@ -126,9 +126,14 @@ var RSKYBOX = (function (r, $) {
       }
     },
 
+    help = function () {
+      alert("we'll show some help here, but not in an alert box");
+    },
+
     generateError = function () {
       try {
         r.log.error(new Error('a generated error'), 'generateError');
+        flash('View they new log in the rSkybox application any time.');
       } catch (e) {
         r.log.error(e, 'generateError');
       }
@@ -140,6 +145,7 @@ var RSKYBOX = (function (r, $) {
       $('#weather').on('submit', submit);
       $('.reset').on('click', reset);
       $('.error').on('click', generateError);
+      $('.help').on('click', help);
     } catch (e) {
       r.log.error(e, 'jQuery.documentReady');
     }
