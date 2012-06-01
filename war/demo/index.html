@@ -6,7 +6,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <title></title>
+  <title>rSkybox Demo</title>
   <meta name="description" content="">
 
   <meta name="viewport" content="width=device-width">
@@ -19,11 +19,19 @@
   <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
   <header>
     <h1>rSkybox Demo</h1>
-    <p>(View Source for more information.)</p>
+    <ul>
+      <li>Open the <a href="https://rskybox-stretchcom.appspot.com/html5">rSkybox</a> application.</li>
+      <li>Watch the JavaScript console (Firebug, etc.) for JavaScript activity.</li>
+      <li>View Source for more information.</li>
+    </ul>
   </header>
 
 
   <div role="main">
+    <div class="actions">
+      <button class="error">Log an Error</button> &nbsp; <button class="something-else">Something Else</button>
+    </div>
+
     <div class="display">
       <h3>Current Conditions at <span class="query"></span> <button class="reset">New Search</buuton></h3>
       <div class="current day">
@@ -59,7 +67,7 @@
       </p>
       <p>
         <label for="days">Days to Forecast:</label>
-        <input id="days" size="2" type="number" min="1" max="5" value="3"> &nbsp;
+        <input id="days" size="1" type="number" min="1" max="5" value="3"> &nbsp;
         <input type="submit" value="Get My Weather">
       </p>
     </form>

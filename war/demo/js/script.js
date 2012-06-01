@@ -124,6 +124,14 @@ var RSKYBOX = (function (r, $) {
       } catch (e) {
         r.log.error(e, 'submit');
       }
+    },
+
+    generateError = function () {
+      try {
+        r.log.error(new Error('a generated error'), 'generateError');
+      } catch (e) {
+        r.log.error(e, 'generateError');
+      }
     };
 
 
@@ -131,6 +139,7 @@ var RSKYBOX = (function (r, $) {
     try {
       $('#weather').on('submit', submit);
       $('.reset').on('click', reset);
+      $('.error').on('click', generateError);
     } catch (e) {
       r.log.error(e, 'jQuery.documentReady');
     }
