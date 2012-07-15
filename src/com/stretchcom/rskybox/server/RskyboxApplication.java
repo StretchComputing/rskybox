@@ -22,6 +22,7 @@ public class RskyboxApplication extends Application {
     public static final String APP_ACTION_DATE_FORMAT = "yyyy-MM-dd kk:mm:ss.SSS";
     public static final String DEFAULT_LOCAL_TIME_ZONE = "America/Chicago";
 	public static final String CURRENT_USER = "rSkybox.currentUser";
+	public static final String CURRENT_APP = "rSkybox.currentApp";
 
     /**
      * Creates a root Restlet that will receive all incoming calls.
@@ -56,6 +57,11 @@ public class RskyboxApplication extends Application {
 
         router.attach("/applications/{applicationId}/endUsers", EndUsersResource.class);
         router.attach("/applications/{applicationId}/endUsers/{id}", EndUsersResource.class);
+
+        router.attach("/applications/{applicationId}/streams", StreamsResource.class);
+        router.attach("/applications/{applicationId}/streams/{id}", StreamsResource.class);
+
+        router.attach("/applications/{applicationId}/streams/{streamId}/packets", PacketsResource.class);
 
         router.attach("/mobileCarriers", MobileCarriersResource.class);
         router.attach("/cron/{job}", CronResource.class);

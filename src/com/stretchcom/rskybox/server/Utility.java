@@ -103,6 +103,11 @@ public class Utility {
     	HttpServletRequest servletRequest = ServletUtils.getRequest(theRequest);
     	return (User)servletRequest.getAttribute(RskyboxApplication.CURRENT_USER);
 	}
+	
+	public static Application getCurrentApp(Request theRequest) {
+    	HttpServletRequest servletRequest = ServletUtils.getRequest(theRequest);
+    	return (Application)servletRequest.getAttribute(RskyboxApplication.CURRENT_APP);
+	}
 
 	public static String encrypt(String thePlainText) {
 		String encryptedText = null;

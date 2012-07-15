@@ -72,24 +72,9 @@ public class UserAuthenticationFilter implements Filter {
     		String thisURL = getURL(httpRequest);
     		log.info("thisURL = " + thisURL);
     		
-    		List<User> outParameterList = new ArrayList<User>();
-    		Boolean isRequestAuthentic = isRequestAuthentic(thisURL, httpRequest, outParameterList);
+    		Boolean isRequestAuthentic = isRequestAuthentic(thisURL, httpRequest);
     		if(isRequestAuthentic) {
     			log.info("request is authentic");
-    			
-    			// if present, store in HTTP request for use downstream
-    			if(outParameterList.size() > 0) {
-    				User currentUser = (User)outParameterList.get(0);
-    				if(SystemProperty.environment.value() == SystemProperty.Environment.Value.Development) {
-    					// for now, in Dev, all users are super admins
-    					log.info("Dev Environment: making user a Super Admin");
-    					currentUser.setIsSuperAdmin(true);
-    				}
-    				log.info("isSuperAdmin = " + currentUser.getIsSuperAdmin());
-    				
-    				httpRequest.setAttribute(RskyboxApplication.CURRENT_USER, currentUser);
-    				log.info("setting currentUser for downstream use. currentUser = " + currentUser);
-    			}
     			
     			// adjust URL for non-REST calls
     			if(adjustUrl(thisURL, httpRequest, httpResponse)) {
@@ -112,8 +97,7 @@ public class UserAuthenticationFilter implements Filter {
     }
     
     
-    // theOutParameterList: if authentic and token is associated with a user, that 'current' user is stored in this out parameter list
-    private Boolean isRequestAuthentic(String theUrl, HttpServletRequest theHttpRequest, List<User> theOutParameterList) {
+    private Boolean isRequestAuthentic(String theUrl, HttpServletRequest theHttpRequest) {
     	// 1. if bypass API, return TRUE
     	if(isBypassApi(theUrl, theHttpRequest)) {
     		return true;
@@ -129,18 +113,36 @@ public class UserAuthenticationFilter implements Filter {
     	// 3. if token matches a user, put CurrentUser in out parameter and return TRUE
     	User currentUser = User.getUserWithToken(token);
     	if(currentUser != null) {
-    		theOutParameterList.add(currentUser);
+    		storeCurrentUserForDownstreamUse(theHttpRequest, currentUser);
     		return true;
     	}
     	
     	// 4. if token matches an app, return TRUE
     	Application currentApp = Application.getApplicationWithToken(token);
     	if(currentApp != null) {
+    		storeCurrentAppForDownstreamUse(theHttpRequest, currentApp);
     		return true;
     	}
     	
     	// 5. else return FALSE since we could not find a valid token
     	return false;
+    }
+    
+    private void storeCurrentUserForDownstreamUse(HttpServletRequest theHttpRequest, User theCurrentUser) {
+		if(SystemProperty.environment.value() == SystemProperty.Environment.Value.Development) {
+			// for now, in Dev, all users are super admins
+			log.info("Dev Environment: making user a Super Admin");
+			theCurrentUser.setIsSuperAdmin(true);
+		}
+		log.info("isSuperAdmin = " + theCurrentUser.getIsSuperAdmin());
+		
+		theHttpRequest.setAttribute(RskyboxApplication.CURRENT_USER, theCurrentUser);
+		log.info("setting currentUser for downstream use. currentUser = " + theCurrentUser);
+    }
+    
+    private void storeCurrentAppForDownstreamUse(HttpServletRequest theHttpRequest, Application theCurrentApp) {
+		theHttpRequest.setAttribute(RskyboxApplication.CURRENT_APP, theCurrentApp);
+		log.info("setting currentApp for downstream use. currentApp = " + theCurrentApp);
     }
     
     
