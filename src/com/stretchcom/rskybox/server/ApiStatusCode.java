@@ -50,6 +50,7 @@ public class ApiStatusCode {
 	public static final String WELL_KNOWN_TAG_REQUIRED = "321";
 	public static final String USER_ID_IS_REQUIRED = "322";
 	public static final String STREAM_ID_REQUIRED = "323";
+	public static final String EITHER_USER_ID_OR_MEMBER_ID_IS_REQUIRED = "324";
 	
 	public static final String INVALID_STATUS_PARAMETER = "400";
 	public static final String INVALID_RECORDED_DATE_PARAMETER = "401";
@@ -78,6 +79,8 @@ public class ApiStatusCode {
 	public static final String LAST_UPDATED_DATE_PARAMETER = "424";
 	public static final String INVALID_PAGE_SIZE_PARAMETER = "425";
 	public static final String STREAM_NAME_ALREADY_USED = "426";
+	public static final String STREAM_ALREADY_HAS_END_USER = "427";
+	public static final String STREAM_ALREADY_HAS_MEMBER = "428";
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 	public static final String NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID = "501";
