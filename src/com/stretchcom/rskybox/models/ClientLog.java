@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,6 +22,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 import com.stretchcom.rskybox.server.ApiStatusCode;
+import com.stretchcom.rskybox.server.EMF;
 import com.stretchcom.rskybox.server.GMT;
 
 @Entity
@@ -409,4 +411,32 @@ public class ClientLog {
         }
         return json;
     }
+    
+	// Returns list of users matching specified email address
+	public static void deleteSecondOldest(String theApplicationId, String theIncidentId) {
+        EntityManager em = EMF.get().createEntityManager();
+        List<ClientLog> clientLogs = null;
+
+		try {
+	    	clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationIdAndIncidentId")
+	    			.setParameter("applicationId", theApplicationId)
+	    			.setParameter("incidentId", theIncidentId)
+	    			.getResultList();
+	    	
+            int numOfLogs = clientLogs.size();
+            if(numOfLogs > 2) {
+            	int secondOldestIndex = numOfLogs - 2;
+            	ClientLog cl = clientLogs.get(secondOldestIndex);
+            	em.remove(cl);
+            	log.info("client log with name = " + cl.getLogName() + "and message = " + cl.getMessage() + " just removed from data store");
+            }
+		} catch (Exception e) {
+			log.severe("exception = " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			em.close();
+		}
+		return;
+	}
+
 }
