@@ -549,8 +549,9 @@ public class Incident {
     			log.info("existing incident -- incident details are being updated");
     			eventOwningIncident.incrementEventCount(theApplication.getMaxEventsPerIncident());
     			eventOwningIncident.setLastUpdatedGmtDate(now);
-    			
-    			// TODO enhance message by merging summaries?
+    			// TODO enhance message by merging summaries?  For now, always use the message from the latest event
+    			eventOwningIncident.setMessage(theMessage);
+    			eventOwningIncident.setSummary(theSummary);
     		}
 			
 			// update severity if appropriate
