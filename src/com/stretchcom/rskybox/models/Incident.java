@@ -549,8 +549,9 @@ public class Incident {
     			log.info("existing incident -- incident details are being updated");
     			eventOwningIncident.incrementEventCount(theApplication.getMaxEventsPerIncident());
     			eventOwningIncident.setLastUpdatedGmtDate(now);
-    			
-    			// TODO enhance message by merging summaries?
+    			// TODO enhance message by merging summaries?  For now, always use the message from the latest event
+    			eventOwningIncident.setMessage(theMessage);
+    			eventOwningIncident.setSummary(theSummary);
     		}
 			
 			// update severity if appropriate
@@ -561,15 +562,29 @@ public class Incident {
 				// 2. change in severity for an existing incident (old severity != new severity)
 				if(eventOwningIncident.getOldSeverity().equals(eventOwningIncident.getSeverity())) {
 					// this is a new incident
-					severityMsg = "a new " + eventOwningIncident.getNotificationTypeFromTag() + " created";
+					//severityMsg = "a new " + eventOwningIncident.getNotificationTypeFromTag() + " created";
+					severityMsg = "new";
 					log.info("severity changed because this is a new incident: oldSeverity = " + eventOwningIncident.getOldSeverity() + " newSeverity = " + eventOwningIncident.getSeverity());
 				} else {
-	            	severityMsg = "Severity of " + eventOwningIncident.getNotificationTypeFromTag() + " changed from " + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
+	            	//severityMsg = "Severity of " + eventOwningIncident.getNotificationTypeFromTag() + " changed from " + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
+	            	severityMsg = "" + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
 	            	log.info(severityMsg);
 				}
 				
-				// queue up notification
-	        	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), severityMsg, eventOwningIncident.getId());
+				// queue up notification.  message format:
+				//    [new] event.name.here >> this is the event message portion (and here we put the summary info)
+				//   [5->6] event.name.here >> this is the event message portion (and here we put the summary info)
+				StringBuffer sb = new StringBuffer();
+				sb.append("[");
+				sb.append(severityMsg);
+				sb.append("] ");
+				sb.append(theEventName);
+				sb.append(" >> ");
+				sb.append(theMessage);
+				sb.append(" (");
+				sb.append(theSummary);
+				sb.append(")");
+	        	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), sb.toString(), eventOwningIncident.getId());
 			}
         } finally {
         	// this should persist the changes

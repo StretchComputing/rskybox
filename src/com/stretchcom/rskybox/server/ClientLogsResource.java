@@ -464,12 +464,14 @@ public class ClientLogsResource extends ServerResource {
 			}
 			
 			if(owningIncident.getMaxEventCountReached()) {
-				// log NOT persisted if incident already storing max number of events
-				log.info("log not created because incident has reached maximum event count");
-			} else {
-				em.persist(clientLog);
-	            em.getTransaction().commit();
+				// log queue strategy: hold the first incident log forever. Once max cnt reached, replace the second oldest
+				// So over time, the log queue will contain the first log and then the most recent X logs where X is max incident log cnt
+				// TODO make this statistically based. When incident total cnt gets very large, only occasionally should new logs be inserted into queue
+				log.info("log reached maximum event count -- deleting second oldest log");
+				ClientLog.deleteSecondOldest(this.applicationId, owningIncident.getId());
 			}
+			em.persist(clientLog);
+            em.getTransaction().commit();
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
