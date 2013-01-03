@@ -331,6 +331,9 @@
           <button class="changeStatus" data-inline="true" data-theme="b" data-mini="true">
             <%= status === 'open' ? 'Close' : 'Re-open' %>
           </button>
+          <button class="issueTracking" data-inline="true" data-theme="b" data-mini="true">
+            <%= githubUrl === null ? 'Create Github Issue' : 'display issue on Github' %>
+          </button>
         </li>
       </ul>
       <% if (events && events.logs) { %>

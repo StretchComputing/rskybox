@@ -19,11 +19,13 @@ import javax.persistence.NonUniqueResultException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.restlet.data.Status;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.server.EMF;
 import com.stretchcom.rskybox.server.GMT;
+import com.stretchcom.rskybox.server.RskyboxApplication;
 
 @Entity
 @NamedQueries({
@@ -89,6 +91,8 @@ public class Incident {
 	public final static String CLOSED_STATUS = "closed";
 	public final static String ALL_STATUS = "all";
 
+	public final static String CREATE_ACTION = "create";
+
 	public final static Integer CRITICAL_SEVERITY = 10;
 	public final static Integer HIGH_SEVERITY = 8;
 	public final static Integer MEDIUM_SEVERITY = 5;
@@ -125,13 +129,13 @@ public class Incident {
 	private String remoteControlMode = Incident.ACTIVE_REMOTE_CONTROL_MODE;
 	private String summary;
 	private String message;
+	private String githubUrl;
 
 	///////////////////////////////////////
 	// place holder for future properties
 	///////////////////////////////////////
 	private String resolution;
 	private Boolean wasResolved = false;
-	private String githubUrl;
 	@Basic
 	private List<String> comments;	
 	@Basic
@@ -345,6 +349,22 @@ public class Incident {
 		this.message = message;
 	}
 
+	public String getGithubUrl() {
+		return githubUrl;
+	}
+
+	public void setGithubUrl(String githubUrl) {
+		this.githubUrl = githubUrl;
+	}
+
+	// returns true if the value updated, false otherwise
+	public Boolean updateGithubUrl(String githubUrl) {
+		boolean retValue = false;
+		if(this.githubUrl == null) retValue = true;
+		this.githubUrl = githubUrl;
+		return retValue;
+	}
+
 	// merges the provided tag list into the existing tag list
 	public Boolean addToTags(List<String> theNewTagList) {
 		if(theNewTagList == null || theNewTagList.size() == 0) {
@@ -425,6 +445,7 @@ public class Incident {
 			jsonObject.put("message", this.message);
 			jsonObject.put("summary", this.summary);
 			jsonObject.put("mode", this.remoteControlMode);
+			jsonObject.put("githubUrl", this.getGithubUrl());
 			
 		} catch (JSONException e) {
 			log.severe("exception building Incident JSON object, message = " + e.getMessage());
@@ -439,6 +460,11 @@ public class Incident {
 	
 	public static Boolean isStatusValid(String theStatus) {
 		if(theStatus.equalsIgnoreCase(Incident.OPEN_STATUS) || theStatus.equalsIgnoreCase(Incident.CLOSED_STATUS)) return true;
+		return false;
+	}
+	
+	public static Boolean isActionValid(String theAction) {
+		if(theAction.equalsIgnoreCase(Incident.CREATE_ACTION)) return true;
 		return false;
 	}
 	
@@ -706,7 +732,7 @@ public class Incident {
 		i.setTags((List<String>)theEntity.getProperty("tags"));
 		i.setEventName((String)theEntity.getProperty("eventName"));
 		
-		// NOTE: not sure why low leve Java API is returning Long instead of Integer, but it is ....
+		// NOTE: not sure why low level Java API is returning Long instead of Integer, but it is ....
 		Long numL = (Long)theEntity.getProperty("number");
 		Integer numI = numL == null ? null : numL.intValue();
 		i.setNumber(numI);
@@ -745,5 +771,66 @@ public class Incident {
 		i.setSummary((String)theEntity.getProperty("summary"));
 		i.setMessage((String)theEntity.getProperty("message"));
 		return i;
+	}
+	
+	public String buildBodyInMarkDown(String theApplicationId) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("## ");
+		sb.append("Overview");
+		sb.append("\n");
+		
+		// markdown link syntax: [example link](http://example.com/)
+		sb.append("* rSkybox: ");
+		sb.append("[link to incident](");
+		sb.append(RskyboxApplication.APPLICATION_BASE_URL);
+		sb.append("#log?id=");
+		sb.append(this.getId());
+		sb.append("&appId=");
+		sb.append(this.getApplicationId());
+		sb.append(")");
+		sb.append("\n");
+
+		sb.append("* Severity: ");
+		sb.append(this.severity.toString());
+		sb.append("\n");
+		sb.append("* ");
+		sb.append(this.message);
+		sb.append("\n");
+		sb.append("* ");
+		sb.append(this.summary);
+		sb.append("\n");
+		sb.append("* Created: ");
+		sb.append(GMT.dateToString(this.createdGmtDate));
+		sb.append(" GMT");
+		sb.append("\n");
+		sb.append("* Updated: ");
+		sb.append(GMT.dateToString(this.lastUpdatedGmtDate));
+		sb.append("\n\n");
+		
+		// only do the rest for Client Log events
+		String wellKnownTag = this.getWellKnownTag();
+		if(wellKnownTag.equalsIgnoreCase(Incident.LOG_TAG)) {
+			sb.append("## ");
+			sb.append("Last Log (total log count = ");
+			sb.append(this.getEventCount().toString());
+			sb.append(")\n");
+			buildLastLogMarkDown(sb, theApplicationId);
+		}
+		
+		return sb.toString();
+	}
+	
+	// StringBuffer theSb:  out parameter to append markdow to ...
+	private void buildLastLogMarkDown(StringBuffer theSb, String theApplicationId) {
+        EntityManager em = EMF.get().createEntityManager();
+		List<ClientLog> clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationIdAndIncidentId")
+    			.setParameter("applicationId", theApplicationId)
+    			.setParameter("incidentId", this.getId())
+    			.getResultList();
+		
+		if(clientLogs.size() > 0) {
+			ClientLog lastClientLog = clientLogs.get(0);
+			lastClientLog.getMarkDown(theSb);
+		}
 	}
 }

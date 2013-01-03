@@ -20,6 +20,7 @@ var RSKYBOX = (function (r, $) {
       mode: null,
       message: null,
       appActions: null,
+			githubUrl: null,
     },
   });
 

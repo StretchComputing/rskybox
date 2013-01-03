@@ -339,6 +339,28 @@ public class ClientLog {
 		return appActions;
 	}
 	
+	// StringBuffer theSb:  out parameter to append markdow to ...
+    public void getMarkDown(StringBuffer theSb) {
+		theSb.append("* Summary: ");
+		theSb.append(this.getSummary());
+		theSb.append("\n");
+		theSb.append("* User ID: ");
+		theSb.append(this.getUserId());
+		theSb.append("\n");
+		theSb.append("* App Actions: ");
+		theSb.append("\n");
+		
+    	List<AppAction> appActions = this.getAppActions();
+    	for(AppAction aa : appActions) {
+    		theSb.append("    * (");
+    		theSb.append(GMT.dateToString(aa.getTimestamp()));
+    		theSb.append(" GMT");
+    		theSb.append(") ");
+    		theSb.append(aa.getDescription());
+    		theSb.append("\n");
+    	}
+    }
+	
     public static JSONObject getJson(ClientLog clientLog, Boolean isList) {
     	return getJson(clientLog, null, isList);
     }

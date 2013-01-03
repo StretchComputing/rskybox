@@ -143,7 +143,7 @@ public class IncidentsResource extends ServerResource {
 		}
     	
     	if(this.remoteControl == null) {
-    		// Update Incident API
+    		// Update Incident API6
             return save_incident(entity, application);
     	} else {
     		// Remote Control Incident API
@@ -278,7 +278,7 @@ public class IncidentsResource extends ServerResource {
     }
 
     private JsonRepresentation show() {
-        log.info("UserResource in show()");
+        log.info("IncidentsResource in show()");
         EntityManager em = EMF.get().createEntityManager();
 
 		String apiStatus = ApiStatusCode.SUCCESS;
@@ -450,6 +450,31 @@ public class IncidentsResource extends ServerResource {
 	            		incident.setSeverity(severity);
 	            	} else {
 	            		apiStatus = ApiStatusCode.INVALID_SEVERITY_PARAMETER;
+	            	}
+	            }
+	            
+	            if(json.has("issueTracking")) {
+	            	String action = json.getString("issueTracking").toLowerCase();
+	            	if(Incident.isActionValid(action)) {
+	            		// TODO only allow this issue creation -- right now -- for rTeam and Arc
+	            		
+	            		// TODO for now, owner and repo hardcode
+	            		String owner = "StretchComputing";
+	            		String repo = "arc";
+	            		
+	            		String title = "[rSkybox #" + incident.getNumber().toString()  + "]" + " " + incident.getEventName();
+	            		String body = incident.buildBodyInMarkDown(this.applicationId);
+	            		String response = GitHubClient.createIssue(owner, repo, title, body);
+	            		if(response != null) {
+	            			// TODO pull just the url from the response !!!!!!!!!
+	            			log.info("response = " + response);
+		            		String githubUrl = response;
+		            		incident.updateGithubUrl(githubUrl);
+	            		} else {
+	            			log.info("response from GithubClient was null");
+	            		}
+	            	} else {
+						return Utility.apiError(this, ApiStatusCode.INVALID_STATUS_PARAMETER);
 	            	}
 	            }
 			} else {
