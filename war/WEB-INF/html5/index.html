@@ -325,6 +325,9 @@
         <li>Created: <%= RSKYBOX.format.longDate(createdDate) %></li>
         <li>Updated: <%= RSKYBOX.format.longDate(lastUpdatedDate) %></li>
         <li>
+          <button class="issueTracking" data-inline="true" data-mini="true">
+            <%= (githubUrl === null || githubUrl.length === 0) ? 'Create Github Issue' : 'display issue on Github' %>
+          </button>
           <button class="mode" data-inline="true" data-mini="true">
             <%= (mode === 'inactive') ? 'Activate' : 'Deactivate' %> Log Series
           </button>

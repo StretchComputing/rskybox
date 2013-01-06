@@ -88,6 +88,7 @@ public class CrashDetect {
 	private String summary;
 	// TODO support time zone and GMT for dates
 	private Date detectedGmtDate;
+	private String eventName;
 	private String userId;
 	private String userName;
 	private Text stackDataBase64;
@@ -211,6 +212,14 @@ public class CrashDetect {
 
 	public void setIncidentId(String incidentId) {
 		this.incidentId = incidentId;
+	}
+
+	public String getEventName() {
+		return eventName;
+	}
+
+	public void setEventName(String eventName) {
+		this.eventName = eventName;
 	}
 
 	public Boolean createAppActions(List<AppAction> theNewAppActionList) {

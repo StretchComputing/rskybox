@@ -281,6 +281,12 @@ public class CrashDetectsResource extends ServerResource {
 				crashDetect.setSummary(summary);
 			}
 			
+            String eventName = null;
+			if(!isUpdate && json.has("eventName")) {
+				eventName = json.getString("eventName");
+				crashDetect.setEventName(eventName);
+			}
+			
 			if(!isUpdate && json.has("userId")) {
 				crashDetect.setUserId(json.getString("userId"));
 			}
@@ -393,12 +399,8 @@ public class CrashDetectsResource extends ServerResource {
 				Date activeThruGmtDate = GMT.addDaysToDate(new Date(), daysUntilAutoArchive);
 				crashDetect.setActiveThruGmtDate(activeThruGmtDate);
 				
-				// find or create an incident that will 'own' this new crashDetect
-				// TODO something better for an eventName than the current date
-				Date now = new Date();
-				
 				String message = "new Crash Detect";
-				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.CRASH_TAG, incidentId, theApplication, message, summary);
+				owningIncident = Incident.fetchIncidentIncrementCount(eventName, Incident.CRASH_TAG, incidentId, theApplication, message, summary);
 				crashDetect.setIncidentId(owningIncident.getId());
 			}
             

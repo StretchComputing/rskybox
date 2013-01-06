@@ -55,7 +55,7 @@ public class GMT {
 		if(theGmtDate == null) {return null;}
 		String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     	DateFormat df = new SimpleDateFormat(dateFormat);
-		log.info("convertToIsoDate(): local date = " + df.format(theGmtDate));
+		//log.info("convertToIsoDate(): local date = " + df.format(theGmtDate));
 		return df.format(theGmtDate);
 	}
 

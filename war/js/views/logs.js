@@ -74,11 +74,12 @@ var RSKYBOX = (function (r, $) {
     events: {
       'click .changeStatus': 'changeStatus',
       'click .mode': 'changeMode',
+      'click .issueTracking': 'issueTracking',
     },
 
     initialize: function () {
       try {
-        _.bindAll(this, 'changeStatus', 'changeMode', 'success', 'apiError');
+        _.bindAll(this, 'changeStatus', 'changeMode', 'issueTracking', 'success', 'apiError');
         this.model.on('change', this.render, this);
         this.model.on('error', this.error, this);
         this.template = _.template($('#logTemplate').html());
@@ -118,6 +119,35 @@ var RSKYBOX = (function (r, $) {
           success: this.success,
           statusCode: r.statusCodeHandlers(this.apiError),
         });
+
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'LogView.changeMode');
+      }
+    },
+
+    issueTracking: function (evt) {
+      try {
+        var json;
+				var githubUrl = this.model.get('githubUrl');
+
+				if(githubUrl && githubUrl.length > 0) {
+					// the issue already exists - link to the issue using the URL. This link leaves the rskybox application
+					window.location.href = githubUrl;
+				} else {
+					// create the github issue
+					json = JSON.stringify({
+						issueTracking : 'create'
+					});
+					$.ajax({
+						url: this.model.urlRoot + "/" + this.model.get('id'),
+						type: 'PUT',
+						data: json,
+						success: this.success,
+						statusCode: r.statusCodeHandlers(this.apiError),
+					});
+				}
 
         evt.preventDefault();
         return false;
