@@ -14,6 +14,22 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+//****************************************************************************************
+// ********************* Process to get OAuth Token from Github **************************
+//****************************************************************************************
+// 1. On github, go to 'account settings=>applications"
+// 2. Register a new application with name 'rskybox'
+// 3. Copy-and-paste the applications CLIENT_ID and CLIENT_SECRET to rskybox-rest-test
+// 4. In rskybox-rest-test, manuallly run generateGithubToken() with 'rskybox' github
+//    user's credentials (login:rskybox  password:redst0ne)
+// 5. Copy-and-paste the OAuth token returned in JSON from github to this method below.
+// 6. Done -- ready to go ...
+// 7. Issues created in github will indicate they were created by github user 'rskybox'
+//    because that's the github user whose credentials were used to get the OAuth token.
+//****************************************************************************************
+//****************************************************************************************
+
+
 public class GitHubClient {
 	private static final Logger log = Logger.getLogger(GitHubClient.class.getName());
 	
@@ -26,10 +42,7 @@ public class GitHubClient {
 	private static final String GIT_HUB_BASE_URL = "https://api.github.com/";
 	private static final String ISSUE_RESOURCE_URI = "issues";
 	
-	private static final String RSKYBOX_CLIENT_ID = "a4ec3edf0db5370523e1";
-	private static final String RSKYBOX_CLIENT_SECRET = "585340aabdb07a0f48c7ff36a36321e2600cf891";
-	
-	// created 'manually' in rskybox-rest-test and copy-and-pasted here
+	// created 'manually' in rskybox-rest-test and copy-and-pasted here. See full description of this process above.
 	//private static final String GITHUB_OAUTH_TOKEN = "2465a575222a1c62e7c00a158be4221c1047b9ae"; // created by joepwro
 	private static final String GITHUB_OAUTH_TOKEN = "0c81f80e27556e45d156405c94fc9e16df202b2d"; // created by rSkybox
 	
@@ -69,7 +82,6 @@ public class GitHubClient {
 		
 		String response = null;
 		String issueUrl = null;
-		//String urlStr = GIT_HUB_BASE_URL + "repos/" + theOwner + "/" + theRepo + "/" + ISSUE_RESOURCE_URI + "?client_id=" + RSKYBOX_CLIENT_ID + "&client_secret=" + RSKYBOX_CLIENT_SECRET;
 		String urlStr = GIT_HUB_BASE_URL + "repos/" + theOwner + "/" + theRepo + "/" + ISSUE_RESOURCE_URI + "?access_token=" + GITHUB_OAUTH_TOKEN;
 				
 		URL url = null;
