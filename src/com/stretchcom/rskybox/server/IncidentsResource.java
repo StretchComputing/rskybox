@@ -457,6 +457,15 @@ public class IncidentsResource extends ServerResource {
 	            	String action = json.getString("issueTracking").toLowerCase();
 	            	if(Incident.isActionValid(action)) {
 	            		// TODO only allow this issue creation -- right now -- for rTeam and Arc
+	            		if(!incident.isIssueTrackingSupported()) {
+	            			return Utility.apiError(this, ApiStatusCode.ISSUE_TRACKING_NOT_SUPPORTED_FOR_THIS_APPLICATION);
+	            		}
+	            		
+	            		// only allow create issue
+	            		// TODO support update issue
+	            		if(incident.getGithubUrl() != null) {
+	            			return Utility.apiError(this, ApiStatusCode.ISSUE_TRACKING_ALREADY_CREATED);
+	            		}
 	            		
 	            		// TODO for now, owner and repo hardcode
 	            		String owner = "StretchComputing";
@@ -651,6 +660,7 @@ public class IncidentsResource extends ServerResource {
             	json.put("summary", incident.getSummary());
             	json.put("appId", incident.getApplicationId());
             	json.put("mode", incident.getRemoteControlMode());
+    			json.put("githubUrl", incident.getGithubUrl());
             	
             	if(this.includeEvents != null && this.includeEvents.equalsIgnoreCase("true")) {
             		json.put("events", getEventsJsonObj(incident));

@@ -23,6 +23,7 @@ import org.restlet.data.Status;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.utils.SystemProperty;
 import com.stretchcom.rskybox.server.EMF;
 import com.stretchcom.rskybox.server.GMT;
 import com.stretchcom.rskybox.server.RskyboxApplication;
@@ -783,6 +784,7 @@ public class Incident {
 		sb.append("* rSkybox: ");
 		sb.append("[link to incident](");
 		sb.append(RskyboxApplication.APPLICATION_BASE_URL);
+		sb.append("html5");
 		sb.append("#log?id=");
 		sb.append(this.getId());
 		sb.append("&appId=");
@@ -818,6 +820,26 @@ public class Incident {
 		}
 		
 		return sb.toString();
+	}
+	
+	// for now, only Arc, rTeam and rSkybox can have issues
+	// NOTE: if development, allow any application to have issues
+	public Boolean isIssueTrackingSupported() {
+		Boolean isIssueTrackingSupported = false;
+		
+		if(SystemProperty.environment.value() == SystemProperty.Environment.Value.Development) {
+			isIssueTrackingSupported = true;
+		} else {
+			Application thisApplication = Application.getApplicationWithId(this.getApplicationId());
+			if(thisApplication != null) {
+				String appName = thisApplication.getName();
+				if(appName.equalsIgnoreCase("rTeam") || appName.equalsIgnoreCase("rSkybox") || appName.equalsIgnoreCase("Arc") ) {
+					isIssueTrackingSupported = true;
+				}
+			}
+		}
+		
+		return isIssueTrackingSupported;
 	}
 	
 	// StringBuffer theSb:  out parameter to append markdow to ...

@@ -25,6 +25,8 @@ public class ApiStatusCode {
 	public static final String USER_NOT_AUTHORIZED = "218";
 	public static final String APP_OWNER_CANNOT_BE_DELETED = "219";
 	public static final String EMAIL_ADDRESS_AND_PHONE_NUMBER_MATCH_SEPARATE_USERS = "220";
+	public static final String ISSUE_TRACKING_ALREADY_CREATED = "221";
+	public static final String ISSUE_TRACKING_NOT_SUPPORTED_FOR_THIS_APPLICATION = "222";
 	
 	public static final String FEEDBACK_ID_REQUIRED = "300";
 	public static final String CRASH_DETECT_ID_REQUIRED = "301";

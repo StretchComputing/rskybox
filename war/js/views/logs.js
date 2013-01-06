@@ -132,16 +132,16 @@ var RSKYBOX = (function (r, $) {
         var json;
 				var githubUrl = this.model.get('githubUrl');
 
-				if(githubUrl) {
+				if(githubUrl && githubUrl.length > 0) {
 					// the issue already exists - link to the issue using the URL. This link leaves the rskybox application
-					windows.location.href = githubUrl;
+					window.location.href = githubUrl;
 				} else {
 					// create the github issue
 					json = JSON.stringify({
 						issueTracking : 'create'
 					});
 					$.ajax({
-						url: this.model.urlRoot + this.model.get('id'),
+						url: this.model.urlRoot + "/" + this.model.get('id'),
 						type: 'PUT',
 						data: json,
 						success: this.success,
