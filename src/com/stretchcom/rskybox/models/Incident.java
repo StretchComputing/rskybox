@@ -807,15 +807,18 @@ public class Incident {
 		sb.append("\n");
 		sb.append("* Updated: ");
 		sb.append(GMT.dateToString(this.lastUpdatedGmtDate));
+		sb.append(" GMT");
+		sb.append("\n");
+		sb.append("* Number of Logs: ");
+		sb.append(this.getEventCount().toString());
 		sb.append("\n\n");
 		
 		// only do the rest for Client Log events
 		String wellKnownTag = this.getWellKnownTag();
 		if(wellKnownTag.equalsIgnoreCase(Incident.LOG_TAG)) {
 			sb.append("## ");
-			sb.append("Last Log (total log count = ");
-			sb.append(this.getEventCount().toString());
-			sb.append(")\n");
+			sb.append("Most Recent Log");
+			sb.append("\n");
 			buildLastLogMarkDown(sb, theApplicationId);
 		}
 		

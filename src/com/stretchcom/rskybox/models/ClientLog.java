@@ -97,7 +97,7 @@ public class ClientLog {
 	private Date createdGmtDate;
 	private String userId;
 	private String userName;
-	private Text stackBackTrace;  // deprecated on 4/14/2012. Supported for legacy data in datastore. Replaces by array stackBackTraces below.
+	private Text stackBackTrace;  // deprecated on 4/14/2012. Supported for legacy data in datastore. Replaced by array stackBackTraces below.
 	private String instanceUrl;
 	private String status;
 	private String applicationId;
@@ -358,6 +358,17 @@ public class ClientLog {
     		theSb.append(") ");
     		theSb.append(aa.getDescription());
     		theSb.append("\n");
+    	}
+    	
+    	List<String> stackBackTraces = this.stackBackTraces;
+    	if(stackBackTraces != null && stackBackTraces.size() > 0) {
+    		theSb.append("* Stack Backtrace: ");
+    		theSb.append("\n");
+        	for(String trace : stackBackTraces) {
+        		theSb.append("    * ");
+        		theSb.append(trace);
+        		theSb.append("\n");
+        	}
     	}
     }
 	
