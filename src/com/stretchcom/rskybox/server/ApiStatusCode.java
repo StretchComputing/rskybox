@@ -28,6 +28,8 @@ public class ApiStatusCode {
 	public static final String ISSUE_TRACKING_ALREADY_CREATED = "221";
 	public static final String ISSUE_TRACKING_NOT_SUPPORTED_FOR_THIS_APPLICATION = "222";
 	public static final String APPLICATION_NOT_AUTHORIZED = "223";
+	public static final String NAME_ALREADY_IN_USE = "224";
+	public static final String STREAM_CLOSED = "225";
 	
 	public static final String FEEDBACK_ID_REQUIRED = "300";
 	public static final String CRASH_DETECT_ID_REQUIRED = "301";
@@ -53,6 +55,7 @@ public class ApiStatusCode {
 	public static final String USER_ID_IS_REQUIRED = "322";
 	public static final String STREAM_ID_REQUIRED = "323";
 	public static final String EITHER_USER_ID_OR_MEMBER_ID_IS_REQUIRED = "324";
+	public static final String NAME_IS_REQUIRED = "325";
 	
 	public static final String INVALID_STATUS_PARAMETER = "400";
 	public static final String INVALID_RECORDED_DATE_PARAMETER = "401";
@@ -83,6 +86,7 @@ public class ApiStatusCode {
 	public static final String STREAM_NAME_ALREADY_USED = "426";
 	public static final String STREAM_ALREADY_HAS_END_USER = "427";
 	public static final String STREAM_ALREADY_HAS_MEMBER = "428";
+	public static final String BOTH_USER_ID_AND_MEMBER_ID_SPECIFIED = "429";
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 	public static final String NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID = "501";

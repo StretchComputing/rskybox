@@ -21,6 +21,8 @@ import org.json.JSONObject;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.stretchcom.rskybox.server.ApiStatusCode;
 import com.stretchcom.rskybox.server.EMF;
 import com.stretchcom.rskybox.server.GMT;
@@ -172,7 +174,7 @@ public class Stream {
     
 	
 	// Returns list of users matching specified email address
-	public static List<Stream> getByName(String theName, String theApplicationId) {
+	public static List<Stream> getByNameAndNotClosed(String theName, String theApplicationId) {
         EntityManager em = EMF.get().createEntityManager();
         List<Stream> streams = null;
 
@@ -188,5 +190,27 @@ public class Stream {
 			em.close();
 		}
 		return streams;
+	}
+	
+	public static String getLowMarkerKey(String theApplicationId, String theStreamId) {
+		String idFragment = theApplicationId + "_" + theStreamId;
+		return "low_" + idFragment;
+	}
+	
+	public static String getHighMarkerKey(String theApplicationId, String theStreamId) {
+		String idFragment = theApplicationId + "_" + theStreamId;
+		return "high_" + idFragment;
+	}
+	
+	public static void createMarkers(String theApplicationId, String theStreamId) {
+		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
+		memcache.put(getLowMarkerKey(theApplicationId, theStreamId), 0);
+		memcache.put(getHighMarkerKey(theApplicationId, theStreamId), 0);
+	}
+	
+	public static void deleteMarkers(String theApplicationId, String theStreamId) {
+		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
+		memcache.delete(getLowMarkerKey(theApplicationId, theStreamId));
+		memcache.delete(getHighMarkerKey(theApplicationId, theStreamId));
 	}
 }

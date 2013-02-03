@@ -232,6 +232,8 @@ public class StreamsResource extends ServerResource {
     	
         em.getTransaction().begin();
 		Incident owningIncident = null;
+		Boolean wasStreamCreated = false;
+		String streamId = null;
         try {
             JSONObject json = new JsonRepresentation(entity).getJsonObject();
             
@@ -250,7 +252,10 @@ public class StreamsResource extends ServerResource {
         	}
             
             Boolean isUpdate = false;
-            if(id != null) {  // this is an update
+            if(id != null) {  
+            	////////////////////
+            	// this is an update
+            	////////////////////
 
                 Key key;
     			try {
@@ -262,25 +267,7 @@ public class StreamsResource extends ServerResource {
                 stream = (Stream) em.createNamedQuery("Stream.getByKey").setParameter("key", key).getSingleResult();
         		this.setStatus(Status.SUCCESS_OK);
                 isUpdate = true;
-            } else {  // this is a create
-                stream = new Stream();
-				stream.setCreatedGmtDate(new Date());
-				stream.setApplicationId(this.applicationId);
-				stream.setStatus(Stream.INIT_STATUS);
-            }
-			
-			if(!isUpdate && json.has("name")) {
-				String name = json.getString("name");
-				// make sure this name is not actively being used
-				List<Stream> streams = Stream.getByName(name, this.applicationId);
-				if(streams != null && streams.size() > 0) {
-    				log.info("stream name = " + name + " already being used by " + streams.size() + " streams.");
-    				return Utility.apiError(this, ApiStatusCode.STREAM_NAME_ALREADY_USED);
-				}
-				stream.setName(name);
-			}
-			
-			if(isUpdate) {
+                
 	            if(json.has("status")) {
 	            	String status = json.getString("status").toLowerCase();
 	            	if(Stream.isUpdateStatusValid(status)) {
@@ -289,10 +276,84 @@ public class StreamsResource extends ServerResource {
 						return Utility.apiError(this, ApiStatusCode.INVALID_STATUS);
 	            	}
 	            }
-			}
+            } else { 
+            	///////////////////
+            	// this is a create
+            	///////////////////
+				String endUserId = null;
+				String memberId = null;
+				if(json.has("userId")) {
+					endUserId = json.getString("userId");
+				}
+				if(json.has("memberId")) {
+					memberId = json.getString("memberId");
+				}
+				if(endUserId == null && memberId == null) {
+					return Utility.apiError(this, ApiStatusCode.EITHER_USER_ID_OR_MEMBER_ID_IS_REQUIRED);
+				} else if(endUserId != null && memberId != null) {
+					return Utility.apiError(this, ApiStatusCode.BOTH_USER_ID_AND_MEMBER_ID_SPECIFIED);
+				}
+
+				if(json.has("name")) {
+					String name = json.getString("name");
+					// make sure this name is not actively being used
+					List<Stream> streams = Stream.getByNameAndNotClosed(name, this.applicationId);
+					if(streams != null && streams.size() > 0) {
+	    				log.info("stream name = " + name + " already being used by " + streams.size() + " streams.");
+	    				if(streams.size() > 1) {
+	    					log.severe("should never happen - there are two or more non-closed streams with the same name");
+	    					this.setStatus(Status.SERVER_ERROR_INTERNAL);
+	    					return new JsonRepresentation(jsonReturn);
+	    				}
+	    				
+	    				stream = streams.get(0);
+	    				if(stream.getStatus().equalsIgnoreCase(Stream.OPEN_STATUS)) {
+	    					return Utility.apiError(this, ApiStatusCode.STREAM_NAME_ALREADY_USED);
+	    				}
+	    				
+	    				///////////////////////////////
+    					// stream must be in INIT state
+	    				///////////////////////////////
+	    				
+    					if(endUserId != null) {
+    						if(stream.getEndUserId() != null) {
+        						return Utility.apiError(this, ApiStatusCode.STREAM_ALREADY_HAS_END_USER);
+    						}
+    						stream.setEndUserId(endUserId);
+    					} else if(memberId != null) {
+    						if(stream.getMemberId() != null) {
+    							return Utility.apiError(this, ApiStatusCode.STREAM_ALREADY_HAS_MEMBER);
+    						}
+    						stream.setMemberId(memberId);
+    					}
+					} else {
+						// non-closed stream does not exist. So create it ...
+						wasStreamCreated = true;
+						stream = new Stream();
+						stream.setCreatedGmtDate(new Date());
+						stream.setApplicationId(this.applicationId);
+						stream.setStatus(Stream.INIT_STATUS);
+						stream.setEndUserId(endUserId);
+						stream.setMemberId(memberId);
+					}
+					stream.setName(name);
+				} else {
+					return Utility.apiError(this, ApiStatusCode.NAME_IS_REQUIRED);
+				}
+
+            }
 			
 			em.persist(stream);
             em.getTransaction().commit();
+            
+            if(isUpdate) {
+            	Stream.deleteMarkers(this.applicationId, streamId);
+            } else {
+                streamId = KeyFactory.keyToString(stream.getKey());
+    	    	jsonReturn.put("id", streamId);
+            	jsonReturn.put("created", wasStreamCreated);
+                Stream.createMarkers(this.applicationId, streamId);
+            }
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -315,7 +376,6 @@ public class StreamsResource extends ServerResource {
         
 	    try {
 	    	jsonReturn.put("apiStatus", apiStatus);
-	    	jsonReturn.put("incident", owningIncident.getJson());
 	    } catch (JSONException e) {
 	        log.severe("exception = " + e.getMessage());
 	    	e.printStackTrace();
