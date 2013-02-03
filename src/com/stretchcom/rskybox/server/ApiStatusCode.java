@@ -56,6 +56,7 @@ public class ApiStatusCode {
 	public static final String STREAM_ID_REQUIRED = "323";
 	public static final String EITHER_USER_ID_OR_MEMBER_ID_IS_REQUIRED = "324";
 	public static final String NAME_IS_REQUIRED = "325";
+	public static final String BODY_IS_REQUIRED = "326";
 	
 	public static final String INVALID_STATUS_PARAMETER = "400";
 	public static final String INVALID_RECORDED_DATE_PARAMETER = "401";

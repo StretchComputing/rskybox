@@ -202,6 +202,13 @@ public class Stream {
 		return "high_" + idFragment;
 	}
 	
+	public static String getPacketKey(Integer theSequence, String theApplicationId, String theStreamId) {
+		return theSequence.toString() + "_" + theApplicationId + "_" + theStreamId;
+	}
+	
+	// lowMarker: sequence of next packet to be consumed
+	// highMarker: sequence of where next produced packet will go
+	// if lowMarker == highMarker, there are no consumable packets
 	public static void createMarkers(String theApplicationId, String theStreamId) {
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		memcache.put(getLowMarkerKey(theApplicationId, theStreamId), 0);
@@ -212,5 +219,47 @@ public class Stream {
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		memcache.delete(getLowMarkerKey(theApplicationId, theStreamId));
 		memcache.delete(getHighMarkerKey(theApplicationId, theStreamId));
+	}
+	
+	public static Boolean producePacket(String theApplicationId, String theStreamId, String theBody) {
+		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
+		Boolean wasProduced = true;
+		
+		String highMarkerKey = getHighMarkerKey(theApplicationId, theStreamId);
+		if(memcache.contains(highMarkerKey)) {
+			int nextSequence = (Integer)memcache.get(highMarkerKey);
+			String packetKey = getPacketKey(nextSequence, theApplicationId, theStreamId);
+			memcache.put(packetKey, theBody);
+			memcache.increment(highMarkerKey, 1);
+		} else {
+			wasProduced = false;
+		}
+		
+		return wasProduced;
+	}
+	
+	public static List<String> consumePackets(String theApplicationId, String theStreamId) {
+		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
+		List<String> packets = new ArrayList<String>();
+
+		String highMarkerKey = getHighMarkerKey(theApplicationId, theStreamId);
+		String lowMarkerKey = getLowMarkerKey(theApplicationId, theStreamId);
+		if(memcache.contains(highMarkerKey) && memcache.contains(lowMarkerKey)) {
+			int lowSequence = (Integer)memcache.get(lowMarkerKey);
+			int highSequence = (Integer)memcache.get(highMarkerKey);
+			
+			int numberOfConsumablePackets = highSequence - lowSequence;
+			for(int i=0; i<numberOfConsumablePackets; i++) {
+				int sequence = lowSequence + i;
+				String packetKey = getPacketKey(sequence, theApplicationId, theStreamId);
+				packets.add((String)memcache.get(packetKey));
+				memcache.delete(packetKey);
+			}
+			memcache.increment(lowMarkerKey, numberOfConsumablePackets);
+		} else {
+			return null;
+		}
+			
+		return packets;
 	}
 }

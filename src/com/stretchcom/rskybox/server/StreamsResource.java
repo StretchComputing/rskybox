@@ -340,7 +340,6 @@ public class StreamsResource extends ServerResource {
 				} else {
 					return Utility.apiError(this, ApiStatusCode.NAME_IS_REQUIRED);
 				}
-
             }
 			
 			em.persist(stream);
