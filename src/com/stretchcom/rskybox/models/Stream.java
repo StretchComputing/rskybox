@@ -174,20 +174,17 @@ public class Stream {
     
 	
 	// Returns list of users matching specified email address
-	public static List<Stream> getByNameAndNotClosed(String theName, String theApplicationId) {
-        EntityManager em = EMF.get().createEntityManager();
+	public static List<Stream> getByNameAndNotClosed(String theName, String theApplicationId, EntityManager theEm) {
         List<Stream> streams = null;
 
 		try {
-    		streams = (List<Stream>)em.createNamedQuery("Stream.getByNameAndNotStatusApplicationId")
+    		streams = (List<Stream>)theEm.createNamedQuery("Stream.getByNameAndNotStatusApplicationId")
 				.setParameter("name", theName)
 				.setParameter("status", Stream.CLOSED_STATUS)
 				.setParameter("applicationId", theApplicationId)
 				.getResultList();
 		} catch (Exception e) {
 			log.severe("exception = " + e.getMessage());
-		} finally {
-			em.close();
 		}
 		return streams;
 	}
@@ -210,18 +207,21 @@ public class Stream {
 	// highMarker: sequence of where next produced packet will go
 	// if lowMarker == highMarker, there are no consumable packets
 	public static void createMarkers(String theApplicationId, String theStreamId) {
+		//log.info("%%%%%%%%%%%%%%%%%%%%%%%entering createMarkers");
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		memcache.put(getLowMarkerKey(theApplicationId, theStreamId), 0);
 		memcache.put(getHighMarkerKey(theApplicationId, theStreamId), 0);
 	}
 	
 	public static void deleteMarkers(String theApplicationId, String theStreamId) {
+		//log.info("%%%%%%%%%%%%%%%%%%%%%%%entering deleteMarkers");
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		memcache.delete(getLowMarkerKey(theApplicationId, theStreamId));
 		memcache.delete(getHighMarkerKey(theApplicationId, theStreamId));
 	}
 	
 	public static Boolean producePacket(String theApplicationId, String theStreamId, String theBody) {
+		//log.info("%%%%%%%%%%%%%%%%%%%%%%%entering producePacket");
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		Boolean wasProduced = true;
 		
@@ -239,12 +239,14 @@ public class Stream {
 	}
 	
 	public static List<String> consumePackets(String theApplicationId, String theStreamId) {
+		//log.info("%%%%%%%%%%%%%%%%%%%%%%% entering consumePackets");
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		List<String> packets = new ArrayList<String>();
 
 		String highMarkerKey = getHighMarkerKey(theApplicationId, theStreamId);
 		String lowMarkerKey = getLowMarkerKey(theApplicationId, theStreamId);
 		if(memcache.contains(highMarkerKey) && memcache.contains(lowMarkerKey)) {
+			//log.info("%%%%%%%%%%%%%%%%%%%%%%% markers present");
 			int lowSequence = (Integer)memcache.get(lowMarkerKey);
 			int highSequence = (Integer)memcache.get(highMarkerKey);
 			
@@ -257,6 +259,7 @@ public class Stream {
 			}
 			memcache.increment(lowMarkerKey, numberOfConsumablePackets);
 		} else {
+			//log.info("%%%%%%%%%%%%%%%%%%%%%%% markers GONE -- returning null");
 			return null;
 		}
 			

@@ -297,7 +297,7 @@ public class StreamsResource extends ServerResource {
 				if(json.has("name")) {
 					String name = json.getString("name");
 					// make sure this name is not actively being used
-					List<Stream> streams = Stream.getByNameAndNotClosed(name, this.applicationId);
+					List<Stream> streams = Stream.getByNameAndNotClosed(name, this.applicationId, em);
 					if(streams != null && streams.size() > 0) {
 	    				log.info("stream name = " + name + " already being used by " + streams.size() + " streams.");
 	    				if(streams.size() > 1) {
@@ -326,6 +326,9 @@ public class StreamsResource extends ServerResource {
     						}
     						stream.setMemberId(memberId);
     					}
+    					if(stream.getEndUserId() != null && stream.getMemberId() != null) {
+    						stream.setStatus(Stream.OPEN_STATUS);
+    					}
 					} else {
 						// non-closed stream does not exist. So create it ...
 						wasStreamCreated = true;
@@ -345,10 +348,10 @@ public class StreamsResource extends ServerResource {
 			em.persist(stream);
             em.getTransaction().commit();
             
+            streamId = KeyFactory.keyToString(stream.getKey());
             if(isUpdate) {
             	Stream.deleteMarkers(this.applicationId, streamId);
             } else {
-                streamId = KeyFactory.keyToString(stream.getKey());
     	    	jsonReturn.put("id", streamId);
             	jsonReturn.put("created", wasStreamCreated);
                 Stream.createMarkers(this.applicationId, streamId);
