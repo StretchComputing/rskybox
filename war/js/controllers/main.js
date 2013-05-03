@@ -8,7 +8,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.applicationsInit');
         r.applicationsView = new r.ApplicationsView({
-          collection: new r.Applications(),
+          collection: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.applicationsInit');
@@ -32,7 +32,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.applicationInit');
         r.applicationView = new r.ApplicationView({
           model: new r.Application(),
-          applications: new r.Applications(),
+          applications: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.applicationInit');
@@ -56,7 +56,7 @@ var RSKYBOX = (function (r, $) {
       try {
         r.log.info('entering', 'MainController.settingsInit');
         r.settingsView = new r.SettingsView({
-          model: new r.User(),
+          model: new r.User()
         });
       } catch (e) {
         r.log.error(e, 'MainController.settingsInit');
@@ -87,7 +87,7 @@ var RSKYBOX = (function (r, $) {
         }
         r.newAppView = new r.NewApplicationView({
           el: $('#newAppForm'),
-          model: new r.Application(),
+          model: new r.Application()
         });
       } catch (e) {
         r.log.error(e, 'MainController.newAppBeforeShow');
@@ -112,7 +112,7 @@ var RSKYBOX = (function (r, $) {
           collection: new r.Incidents(),
           applications: new r.Applications(),
           tag: 'feedback',
-          pageSize: 10,
+          pageSize: 10
         });
       } catch (e) {
         r.log.error(e, 'MainController.feedbackListInit');
@@ -135,7 +135,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.feedbackInit');
         r.feedbackView = new r.FeedbackView({
           model: new r.Incident(),
-          applications: new r.Applications(),
+          applications: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.feedbackInit');
@@ -154,11 +154,70 @@ var RSKYBOX = (function (r, $) {
         r.feedbackView.model.fetch({
           statusCode: r.statusCodeHandlers(r.feedbackView.apiError),
           data: {
-            includeEvents: true,
-          },
+            includeEvents: true
+          }
         });
       } catch (e) {
         r.log.error(e, 'MainController.feedbackShow');
+      }
+    },
+
+
+    // Streams
+    streamsInit: function () {
+      try {
+        r.log.info('entering', 'MainController.streamsInit');
+        r.streamsView = new r.StreamsView({
+          collection: new r.Streams(),
+          applications: new r.Applications(),
+          tag: 'stream',
+          pageSize: 10
+        });
+      } catch (e) {
+        r.log.error(e, 'MainController.streamsInit');
+      }
+    },
+
+    streamsShow: function () {
+      try {
+        r.log.info('entering', 'MainController.streamsShow');
+        r.streamsView.resetList('#streams');
+      } catch (e) {
+        r.log.error(e, 'MainController.streamsShow');
+      }
+    },
+
+
+    // Stream
+    streamInit: function () {
+      try {
+        r.log.info('entering', 'MainController.streamInit');
+        r.streamView = new r.StreamView({
+          model: new r.Stream(),
+          applications: new r.Applications()
+        });
+      } catch (e) {
+        r.log.error(e, 'MainController.streamInit');
+      }
+    },
+
+    streamShow: function () {
+      try {
+        r.log.info('entering', 'MainController.streamShow');
+        r.streamView.setElement($.mobile.activePage);
+        delete r.streamView.options.status;
+        r.streamView.model.clear({ silent: true });
+        r.streamView.model.set({id: r.session.params.id}, {silent: true});
+        r.streamView.model.setAppUrl(r.session.params.appId);
+        r.session.getCollection(r.session.keys.applications, r.streamView.options.applications);
+        r.streamView.model.fetch({
+          statusCode: r.statusCodeHandlers(r.streamView.apiError),
+          data: {
+            includeEvents: true
+          }
+        });
+      } catch (e) {
+        r.log.error(e, 'MainController.streamShow');
       }
     },
 
@@ -171,8 +230,7 @@ var RSKYBOX = (function (r, $) {
           collection: new r.Incidents(),
           applications: new r.Applications(),
           tag: 'log',
-          pageSize: 10,
-
+          pageSize: 10
         });
       } catch (e) {
         r.log.error(e, 'MainController.logsInit');
@@ -195,7 +253,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.logInit');
         r.logView = new r.LogView({
           model: new r.Incident(),
-          applications: new r.Applications(),
+          applications: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.logInit');
@@ -214,8 +272,8 @@ var RSKYBOX = (function (r, $) {
         r.logView.model.fetch({
           statusCode: r.statusCodeHandlers(r.logView.apiError),
           data: {
-            includeEvents: true,
-          },
+            includeEvents: true
+          }
         });
       } catch (e) {
         r.log.error(e, 'MainController.logShow');
@@ -231,7 +289,7 @@ var RSKYBOX = (function (r, $) {
           collection: new r.Incidents(),
           applications: new r.Applications(),
           tag: 'crash',
-          pageSize: 10,
+          pageSize: 10
         });
       } catch (e) {
         r.log.error(e, 'MainController.crashesInit');
@@ -254,7 +312,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.crashInit');
         r.crashView = new r.CrashView({
           model: new r.Incident(),
-          applications: new r.Applications(),
+          applications: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.crashInit');
@@ -273,8 +331,8 @@ var RSKYBOX = (function (r, $) {
         r.crashView.model.fetch({
           statusCode: r.statusCodeHandlers(r.crashView.apiError),
           data: {
-            includeEvents: true,
-          },
+            includeEvents: true
+          }
         });
       } catch (e) {
         r.log.error(e, 'MainController.crashShow');
@@ -288,7 +346,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.membersInit');
         r.membersView = new r.MembersView({
           collection: new r.Members(),
-          applications: new r.Applications(),
+          applications: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.membersInit');
@@ -302,7 +360,7 @@ var RSKYBOX = (function (r, $) {
         r.membersView.collection.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.membersView.options.applications);
         r.membersView.collection.fetch({
-          statusCode: r.statusCodeHandlers(),
+          statusCode: r.statusCodeHandlers()
         });
       } catch (e) {
         r.log.error(e, 'MainController.membersShow');
@@ -316,7 +374,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.memberInit');
         r.memberView = new r.MemberView({
           model: new r.Member(),
-          applications: new r.Applications(),
+          applications: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.memberInit');
@@ -332,7 +390,7 @@ var RSKYBOX = (function (r, $) {
         r.memberView.model.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.memberView.options.applications);
         r.memberView.model.fetch({
-          statusCode: r.statusCodeHandlers(r.memberView.apiError),
+          statusCode: r.statusCodeHandlers(r.memberView.apiError)
         });
       } catch (e) {
         r.log.error(e, 'MainController.memberShow');
@@ -351,7 +409,7 @@ var RSKYBOX = (function (r, $) {
         r.newMemberView = new r.NewMemberView({
           el: $.mobile.activePage,
           model: new r.Member(),
-          applications: new r.Applications(),
+          applications: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.newMemberBeforeShow');
@@ -377,7 +435,7 @@ var RSKYBOX = (function (r, $) {
         r.endusersView = new r.EndusersView({
           collection: new r.Endusers(),
           applications: new r.Applications(),
-          pageSize: 10,
+          pageSize: 10
         });
       } catch (e) {
         r.log.error(e, 'MainController.endusersInit');
@@ -400,7 +458,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.enduserInit');
         r.enduserView = new r.EnduserView({
           model: new r.Enduser(),
-          applications: new r.Applications(),
+          applications: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.enduserInit');
@@ -416,7 +474,7 @@ var RSKYBOX = (function (r, $) {
         r.enduserView.model.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.enduserView.options.applications);
         r.enduserView.model.fetch({
-          statusCode: r.statusCodeHandlers(r.enduserView.apiError),
+          statusCode: r.statusCodeHandlers(r.enduserView.apiError)
         });
       } catch (e) {
         r.log.error(e, 'MainController.enduserShow');
@@ -430,11 +488,11 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.setupSession');
         $(window).off('scroll');
         r.session = r.session || {};
-        r.session.params = r.router.getParams(location.hash);
+        r.session.params = r.router.getParams(window.location.hash);
       } catch (e) {
         r.log.error(e, 'MainController.setupSession');
       }
-    },
+    }
   };
 
 
@@ -443,7 +501,7 @@ var RSKYBOX = (function (r, $) {
     try {
       if (!r.isLoggedIn()) {
         r.log.info('not logged in', 'pagebeforechange');
-        r.destination.set(location.pathname + location.hash);
+        r.destination.set(window.location.pathname + window.location.hash);
         r.flash.set('warning', 'Login required');
         evt.preventDefault();
         r.changePage('login', 'signup');
@@ -482,6 +540,10 @@ var RSKYBOX = (function (r, $) {
       { '#feedbackList':            { handler: 'feedbackListShow',    events: 's'   } },
       { '#feedback[?]id=.*':        { handler: 'feedbackInit',        events: 'i'   } },
       { '#feedback[?]id=.*':        { handler: 'feedbackShow',        events: 's'   } },
+      { '#streams':                 { handler: 'streamsInit',         events: 'i'   } },
+      { '#streams':                 { handler: 'streamsShow',         events: 's'   } },
+      { '#stream[?]id=.*':          { handler: 'streamInit',          events: 'i'   } },
+      { '#stream[?]id=.*':          { handler: 'streamShow',          events: 's'   } },
       { '#logs':                    { handler: 'logsInit',            events: 'i'   } },
       { '#logs':                    { handler: 'logsShow',            events: 's'   } },
       { '#log[?]id=.*':             { handler: 'logInit',             events: 'i'   } },
@@ -499,7 +561,7 @@ var RSKYBOX = (function (r, $) {
       { '#endusers':                { handler: 'endusersInit',        events: 'i'   } },
       { '#endusers':                { handler: 'endusersShow',        events: 's'   } },
       { '#enduser[?]id=.*':         { handler: 'enduserInit',         events: 'i'   } },
-      { '#enduser[?]id=.*':         { handler: 'enduserShow',         events: 's'   } },
+      { '#enduser[?]id=.*':         { handler: 'enduserShow',         events: 's'   } }
     ], r.controller);
   } catch (e) {
     r.log.error(e, 'RSKYBOX.main.router');
