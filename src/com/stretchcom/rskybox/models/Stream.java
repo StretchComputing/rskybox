@@ -168,7 +168,7 @@ public class Stream implements Comparable<Stream> {
             	json.put("memberId", stream.getMemberId());
             	json.put("status", stream.getStatus());
             	json.put("name", stream.getName());
-            	//json.put("appId", stream.getApplicationId());
+            	json.put("appId", stream.getApplicationId());
         	}
         } catch (JSONException e) {
         	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());

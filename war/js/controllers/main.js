@@ -169,9 +169,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.streamsInit');
         r.streamsView = new r.StreamsView({
           collection: new r.Streams(),
-          applications: new r.Applications(),
-          tag: 'stream',
-          pageSize: 10
+          applications: new r.Applications()
         });
       } catch (e) {
         r.log.error(e, 'MainController.streamsInit');

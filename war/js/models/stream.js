@@ -6,8 +6,12 @@ var RSKYBOX = (function (r, $) {
     apiUrl: '/streams',
     fields: {
       id: null,
-      apiStatus: null,
-      status: null
+      appId: null,
+      endUserId: null,
+      memberId: null,
+      createdDate: null,
+      status: null,
+      name: null
     }
   });
 

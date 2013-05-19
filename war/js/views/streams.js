@@ -2,35 +2,36 @@ var RSKYBOX = (function (r, $) {
   'use strict';
 
 
-  // r.StreamEntryView = Backbone.View.extend({
-  //   tagName: 'li',
+  r.StreamEntryView = Backbone.View.extend({
+    tagName: 'li',
 
-  //   initialize: function () {
-  //     try {
-  //       _.bindAll(this, 'render');
-  //       this.template = _.template($('#streamEntryTemplate').html());
-  //     } catch (e) {
-  //       r.log.error(e, 'StreamEntryView.initialize');
-  //     }
-  //   },
+    initialize: function () {
+      try {
+        _.bindAll(this, 'render');
+        this.template = _.template($('#streamEntryTemplate').html());
+      } catch (e) {
+        r.log.error(e, 'StreamEntryView.initialize');
+      }
+    },
 
-  //   render: function () {
-  //     try {
-  //       var mock = this.model.getMock();
+    render: function () {
+      try {
+        var mock = this.model.getMock();
 
-  //       this.$el.html(this.template(mock));
-  //       return this;
-  //     } catch (e) {
-  //       r.log.error(e, 'StreamEntryView.render');
-  //     }
-  //   }
-  // });
+        this.$el.html(this.template(mock));
+        return this;
+      } catch (e) {
+        r.log.error(e, 'StreamEntryView.render');
+      }
+    }
+  });
 
 
   r.StreamsView = r.JqmPageBaseView.extend({
     initialize: function () {
       try {
         _.bindAll(this, 'render');
+        // this.collection.bind('reset', this.render, this);
         this.template = _.template($('#noStreamsTemplate').html());
       } catch (e) {
         r.log.error(e, 'StreamsView.initialize');
@@ -44,7 +45,7 @@ var RSKYBOX = (function (r, $) {
         this.appLink('back', 'application');
 
         this.getContent().empty();
-        if (this.collection.length <= 0) {
+        if (this.collection.isEmpty()) {
           this.getContent().html(this.template());
         } else {
           list = $('<ul>');
@@ -62,7 +63,7 @@ var RSKYBOX = (function (r, $) {
 
     addStreamEntry: function (list, stream) {
       try {
-        // list.append(new r.StreamEntryView({ model: stream }).render().el);
+        list.append(new r.StreamEntryView({ model: stream }).render().el);
       } catch (e) {
         r.log.error(e, 'StreamsView.addStreamEntry');
       }

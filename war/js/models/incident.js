@@ -31,6 +31,7 @@ var RSKYBOX = (function (r, $) {
 
     parse: function (response) {
       try {
+        console.log('parse****', response.streams);
         return response.incidents;
       } catch (e) {
         r.log.error(e, 'Incidents.parse');

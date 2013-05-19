@@ -45,6 +45,7 @@ var RSKYBOX = (function (r, $) {
         this.appLink('back', 'application');
 
         this.getContent().empty();
+        console.log('*****', this.collection);
         if (this.collection.length <= 0) {
           this.getContent().html(this.template());
         } else {
