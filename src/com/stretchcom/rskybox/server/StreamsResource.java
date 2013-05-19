@@ -127,7 +127,6 @@ public class StreamsResource extends ServerResource {
         return save_stream(entity, null);
     }
     
-    // NOT IMPLEMENTED YET
     private JsonRepresentation index() {
         log.info("in index");
         JSONObject json = new JSONObject();
@@ -146,18 +145,22 @@ public class StreamsResource extends ServerResource {
 				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
-            List<User> users = new ArrayList<User>();
             JSONArray ja = new JSONArray();
+	    	List<Stream> streams = (List<Stream>)em.createNamedQuery("Stream.getNotStatusAndApplicationId")
+	    			.setParameter("applicationId", this.applicationId)
+	    			.setParameter("status", Stream.CLOSED_STATUS)
+	    			.getResultList();
+			log.info("streams: not closed stream count = " + streams.size());
             
-//            for (ClientLog cl : clientLogs) {
-//            	JSONObject clientLogObj = ClientLog.getJson(cl, true);
-//            	if(clientLogObj == null) {
-//            		this.setStatus(Status.SERVER_ERROR_INTERNAL);
-//            		break;
-//            	}
-//                ja.put(clientLogObj);
-//            }
-//            json.put("clientLogs", ja);
+            for (Stream s : streams) {
+            	JSONObject streamObj = Stream.getJson(s, true);
+            	if(streamObj == null) {
+            		this.setStatus(Status.SERVER_ERROR_INTERNAL);
+            		break;
+            	}
+                ja.put(streamObj);
+            }
+            json.put("streams", ja);
             json.put("apiStatus", apiStatus);
         } catch (JSONException e) {
             log.severe("exception = " + e.getMessage());
