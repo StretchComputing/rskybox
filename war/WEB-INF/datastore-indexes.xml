@@ -145,10 +145,9 @@
         <property name="activeThruGmtDate" direction="asc"/>
     </datastore-index>
     
-    <!-- Used 4 times in query history -->
+    <!-- Used 2 times in query history -->
     <datastore-index kind="Stream" ancestor="false" source="auto">
         <property name="applicationId" direction="asc"/>
-        <property name="name" direction="asc"/>
         <property name="status" direction="asc"/>
     </datastore-index>
 

@@ -2,6 +2,7 @@ package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -151,6 +152,11 @@ public class StreamsResource extends ServerResource {
 	    			.setParameter("status", Stream.CLOSED_STATUS)
 	    			.getResultList();
 			log.info("streams: not closed stream count = " + streams.size());
+			
+			// datastore will not let me do a "not status" search and then order by date, so I have to do the date ordering in code
+			if(streams.size() > 0) {
+				Collections.sort(streams);
+			}
             
             for (Stream s : streams) {
             	JSONObject streamObj = Stream.getJson(s, true);

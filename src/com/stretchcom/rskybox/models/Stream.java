@@ -43,7 +43,7 @@ import com.stretchcom.rskybox.server.GMT;
     ),
     @NamedQuery(
     		name="Stream.getNotStatusAndApplicationId",
-     		query="SELECT s FROM Stream s WHERE s.applicationId = :applicationId and s.status <> :status ORDER BY s.createdGmtDate DESC"
+     		query="SELECT s FROM Stream s WHERE s.applicationId = :applicationId and s.status <> :status"
     ),
     @NamedQuery(
     		name="Stream.getByStatus",
@@ -66,7 +66,7 @@ import com.stretchcom.rskybox.server.GMT;
     		query="SELECT s FROM Stream s WHERE s.name = :name and s.status <> :status and s.applicationId = :applicationId"
     ),
 })
-public class Stream {
+public class Stream implements Comparable<Stream> {
 	private static final Logger log = Logger.getLogger(Stream.class.getName());
 	
 	public final static String INIT_STATUS = "init";
@@ -268,5 +268,23 @@ public class Stream {
 		}
 			
 		return packets;
+	}
+	
+	public int compareTo(Stream aThat) {
+		final int BEFORE = -1;
+		final int EQUAL = 0;
+		final int AFTER = 1;
+
+		if(this == aThat)
+			return EQUAL;
+		
+		// logic is reverse since sorting is done in reverse chronological order
+		if (this.createdGmtDate.before(aThat.createdGmtDate)) {
+			return AFTER;
+		} else if (this.createdGmtDate.after(aThat.createdGmtDate)) {
+			return BEFORE;
+		} else {
+			return EQUAL;
+		}
 	}
 }
