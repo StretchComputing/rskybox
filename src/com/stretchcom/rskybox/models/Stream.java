@@ -162,12 +162,13 @@ public class Stream implements Comparable<Stream> {
         		json.put("id", KeyFactory.keyToString(stream.getKey()));
             	Date createdDate = stream.getCreatedGmtDate();
             	if(createdDate != null) {
-            		json.put("date", GMT.convertToIsoDate(createdDate));
+            		json.put("createdDate", GMT.convertToIsoDate(createdDate));
             	}
             	json.put("endUserId", stream.getEndUserId());
             	json.put("memberId", stream.getMemberId());
             	json.put("status", stream.getStatus());
-            	json.put("appId", stream.getApplicationId());
+            	json.put("name", stream.getName());
+            	//json.put("appId", stream.getApplicationId());
         	}
         } catch (JSONException e) {
         	log.severe("UsersResrouce::getUserJson() error creating JSON return object. Exception = " + e.getMessage());
