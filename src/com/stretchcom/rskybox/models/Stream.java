@@ -42,6 +42,10 @@ import com.stretchcom.rskybox.server.GMT;
     		query="SELECT s FROM Stream s WHERE s.applicationId = :applicationId ORDER BY s.createdGmtDate DESC"
     ),
     @NamedQuery(
+    		name="Stream.getNotStatusAndApplicationId",
+     		query="SELECT s FROM Stream s WHERE s.applicationId = :applicationId and s.status <> :status ORDER BY s.createdGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="Stream.getByStatus",
     		query="SELECT s FROM Stream s WHERE s.status = :status  ORDER BY s.createdGmtDate DESC"
     ),
