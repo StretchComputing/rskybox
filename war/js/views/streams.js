@@ -73,87 +73,46 @@ var RSKYBOX = (function (r, $) {
 
   r.StreamView = r.JqmPageBaseView.extend({
     events: {
-      'click .changeStatus': 'changeStatus',
-      'click .mode': 'changeMode',
-      'click .issueTracking': 'issueTracking'
     },
 
     initialize: function () {
       try {
-        _.bindAll(this, 'changeStatus', 'changeMode', 'issueTracking', 'success', 'apiError');
-        this.model.on('change', this.render, this);
-        this.model.on('error', this.error, this);
-        this.template = _.template($('#streamTemplate').html());
+        _.bindAll(this, 'render', 'success', 'apiError');
+        this.collection.on('change reset', this.render, this);
+        this.collection.on('error', this.error, this);
+        this.template = _.template($('#packetsTemplate').html());
+        this.templateNoPackets = _.template($('#noPacketsTemplate').html());
       } catch (e) {
-        r.stream.error(e, 'StreamView.initialize');
+        r.log.error(e, 'StreamView.initialize');
       }
+    },
+
+    fetchPackets: function () {
+      console.log('<<<<<<<< fetchPackets >>>>>>>>>>', 'entered');
     },
 
     render: function () {
       try {
-        var mock = this.model.getMock();
+        var list;
 
-        if (!this.options.status) {
-          this.options.status = this.model.get('status');
+        this.appLink('back', 'streams');
+
+        if (this.collection.length <= 0) {
+          this.getContent().html(this.templateNoPackets());
+        } else {
+          list = $('<ul>');
+          this.collection.each(function (packet) {
+            var item = $('<li>');
+
+            item.html(packet.get('body'));
+            list.append(item);
+          }, this);
+          this.getContent().html(list);
+          list.listview();
         }
-        this.appLink('back', 'streams', this.options.status);
-
-        this.getContent().html(this.template(mock));
-        this.$el.trigger('create');
         return this;
       } catch (e) {
         r.log.error(e, 'StreamView.render');
-      }
-    },
-
-    changeMode: function (evt) {
-      try {
-        var json;
-
-        json = JSON.stringify({
-          mode : (this.model.get('mode') === 'inactive' ? 'active' : 'inactive')
-        });
-        $.ajax({
-          url: this.model.urlRoot + '/remoteControl/' + this.model.get('id'),
-          type: 'PUT',
-          data: json,
-          success: this.success,
-          statusCode: r.statusCodeHandlers(this.apiError)
-        });
-
-        evt.preventDefault();
-        return false;
-      } catch (e) {
-        r.log.error(e, 'StreamView.changeMode');
-      }
-    },
-
-    issueTracking: function (evt) {
-      try {
-        var json;
-				var githubUrl = this.model.get('githubUrl');
-
-				if(githubUrl && githubUrl.length > 0) {
-					// the issue already exists - link to the issue using the URL. This link leaves the rskybox application
-					window.location.href = githubUrl;
-				} else {
-					// create the github issue
-					json = JSON.stringify({
-						issueTracking : 'create'
-					});
-					$.ajax({
-						url: this.model.urlRoot + "/" + this.model.get('id'),
-						type: 'PUT',
-						data: json,
-						success: this.success,
-						statusCode: r.statusCodeHandlers(this.apiError)
-					});
-				}
-
-        evt.preventDefault();
-        return false;
-      } catch (e) {
-        r.log.error(e, 'StreamView.changeMode');
       }
     },
 

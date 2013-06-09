@@ -4,6 +4,7 @@ var RSKYBOX = (function (r, $) {
 
   r.Stream = r.BaseModel.extend({
     apiUrl: '/streams',
+    packetsUrl: '/packets',
     fields: {
       id: null,
       appId: null,

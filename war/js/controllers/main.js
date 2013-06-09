@@ -192,6 +192,7 @@ var RSKYBOX = (function (r, $) {
         r.log.info('entering', 'MainController.streamInit');
         r.streamView = new r.StreamView({
           model: new r.Stream(),
+          collection: new r.Packets(),
           applications: new r.Applications()
         });
       } catch (e) {
@@ -207,13 +208,12 @@ var RSKYBOX = (function (r, $) {
         r.streamView.model.clear({ silent: true });
         r.streamView.model.set({id: r.session.params.id}, {silent: true});
         r.streamView.model.setAppUrl(r.session.params.appId);
+        // Need to also have a collection for Packets and must set up Backbone URLs manually.
+        r.streamView.collection.apiUrl = r.streamView.model.apiUrl + '/' + r.streamView.model.id + r.streamView.collection.packetsUrl;
+        r.streamView.collection.setUrl();
+        r.streamView.collection.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.streamView.options.applications);
-        r.streamView.model.fetch({
-          statusCode: r.statusCodeHandlers(r.streamView.apiError),
-          data: {
-            includeEvents: true
-          }
-        });
+        r.streamView.collection.fetch({ reset: true });
       } catch (e) {
         r.log.error(e, 'MainController.streamShow');
       }

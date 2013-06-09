@@ -28,6 +28,7 @@
     <script src="/js/helpers/store.js"></script>
     <script src="/js/helpers/session.js"></script>
     <script src="/js/models/base.js"></script>
+    <script src="/js/models/packet.js"></script>
     <script src="/js/models/stream.js"></script>
     <script src="/js/models/incident.js"></script>
     <script src="/js/models/user.js"></script>
@@ -308,6 +309,22 @@
       <a href="#stream?id=<%= id %>&appId=<%= appId %>">
         <h1><%= name %></h1>
         <p><%= RSKYBOX.format.longDate(createdDate) %></p></a>
+    </script>
+
+    <div data-role="page" id="stream" data-title="Stream">
+      <div data-role="header">
+        <a href="#" class="back" data-icon="arrow-l" data-mini="true">List</a>
+        <h1>Stream</h1>
+      </div>
+      <div class="applicationName"></div>
+      <div data-role="content"></div>
+    </div>
+    <script type="text/template" id="noPacketsTemplate">
+      <h3>No packets at this time.</h3>
+    </script>
+    <script type="text/template" id="packetsTemplate">
+      <ul data-role="listview" data-inset="true">
+      </ul>
     </script>
 
 
