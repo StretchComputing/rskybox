@@ -77,7 +77,8 @@ var RSKYBOX = (function (r, $) {
 
     initialize: function () {
       try {
-        _.bindAll(this, 'render', 'success', 'apiError');
+        _.bindAll(this, 'render', 'success', 'apiError', 'fetchPackets');
+        this.packetTimer = null;
         this.collection.on('change reset', this.render, this);
         this.collection.on('error', this.error, this);
         this.template = _.template($('#packetsTemplate').html());
@@ -89,11 +90,16 @@ var RSKYBOX = (function (r, $) {
 
     fetchPackets: function () {
       console.log('<<<<<<<< fetchPackets >>>>>>>>>>', 'entered');
+      this.collection.fetch({
+        success: this.render,
+        statusCode: r.statusCodeHandlers(this.apiError),
+        add: true
+      });
     },
 
     render: function () {
       try {
-        var list;
+        var list, that = this;
 
         this.appLink('back', 'streams');
 
@@ -110,6 +116,8 @@ var RSKYBOX = (function (r, $) {
           this.getContent().html(list);
           list.listview();
         }
+        console.log(this.collection.models.length);
+        this.packetTimer = window.setTimeout(function () { that.fetchPackets(); }, 4000);
         return this;
       } catch (e) {
         r.log.error(e, 'StreamView.render');

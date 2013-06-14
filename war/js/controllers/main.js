@@ -213,13 +213,15 @@ var RSKYBOX = (function (r, $) {
         r.streamView.collection.setUrl();
         r.streamView.collection.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.streamView.options.applications);
-        r.streamView.collection.fetch({
-          reset: true,
-          statusCode: r.statusCodeHandlers(r.streamView.apiError),
-        });
+        r.streamView.fetchPackets();
       } catch (e) {
         r.log.error(e, 'MainController.streamShow');
       }
+    },
+
+    streamHide: function () {
+      console.log('...... streamHide');
+      window.clearTimeout(r.streamView.packetTimer);
     },
 
 
@@ -545,6 +547,7 @@ var RSKYBOX = (function (r, $) {
       { '#streams':                 { handler: 'streamsShow',         events: 's'   } },
       { '#stream[?]id=.*':          { handler: 'streamInit',          events: 'i'   } },
       { '#stream[?]id=.*':          { handler: 'streamShow',          events: 's'   } },
+      { '#stream[?]id=.*':          { handler: 'streamHide',          events: 'h'   } },
       { '#logs':                    { handler: 'logsInit',            events: 'i'   } },
       { '#logs':                    { handler: 'logsShow',            events: 's'   } },
       { '#log[?]id=.*':             { handler: 'logInit',             events: 'i'   } },
