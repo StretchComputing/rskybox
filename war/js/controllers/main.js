@@ -213,7 +213,10 @@ var RSKYBOX = (function (r, $) {
         r.streamView.collection.setUrl();
         r.streamView.collection.setAppUrl(r.session.params.appId);
         r.session.getCollection(r.session.keys.applications, r.streamView.options.applications);
-        r.streamView.collection.fetch({ reset: true });
+        r.streamView.collection.fetch({
+          reset: true,
+          statusCode: r.statusCodeHandlers(r.streamView.apiError),
+        });
       } catch (e) {
         r.log.error(e, 'MainController.streamShow');
       }
