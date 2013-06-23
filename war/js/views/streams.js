@@ -79,7 +79,6 @@ var RSKYBOX = (function (r, $) {
       try {
         _.bindAll(this, 'render', 'success', 'apiError', 'fetchPackets');
         this.packetTimer = null;
-        this.collection.on('change reset', this.render, this);
         this.collection.on('error', this.error, this);
         this.template = _.template($('#packetsTemplate').html());
         this.templateNoPackets = _.template($('#noPacketsTemplate').html());
@@ -89,24 +88,25 @@ var RSKYBOX = (function (r, $) {
     },
 
     fetchPackets: function () {
-      console.log('<<<<<<<< fetchPackets >>>>>>>>>>', 'entered');
+      var that = this;
+
       this.collection.fetch({
         success: this.render,
-        statusCode: r.statusCodeHandlers(this.apiError),
-        add: true
+        statusCode: r.statusCodeHandlers(this.apiError)
       });
+      this.packetTimer = window.setTimeout(function () { that.fetchPackets(); }, 4000);
     },
 
     render: function () {
       try {
-        var list, that = this;
+        var list = this.getContent().find('ul');
 
         this.appLink('back', 'streams');
 
-        if (this.collection.length <= 0) {
+        if (!list[0] && this.collection.length <= 0) {
           this.getContent().html(this.templateNoPackets());
         } else {
-          list = $('<ul>');
+          list = list[0] ? $(list[0]) : $('<ul>');
           this.collection.each(function (packet) {
             var item = $('<li>');
 
@@ -116,8 +116,6 @@ var RSKYBOX = (function (r, $) {
           this.getContent().html(list);
           list.listview();
         }
-        console.log(this.collection.models.length);
-        this.packetTimer = window.setTimeout(function () { that.fetchPackets(); }, 4000);
         return this;
       } catch (e) {
         r.log.error(e, 'StreamView.render');
