@@ -315,6 +315,15 @@ var RSKYBOX = (function (r, $) {
     }
   };
 
+  r.isPendingJoin = function(theStatus, theId) {
+    try {
+      if(theStatus === 'init' && !theId) {return true;}
+      else {return false;} 
+    } catch (e) {
+      r.log.error(e, 'RSKYBOX.isPendingJoin');
+    }
+  };
+
 
   r.format = {
     longDate: function (isoDate, showMilliseconds) {

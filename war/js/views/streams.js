@@ -5,9 +5,14 @@ var RSKYBOX = (function (r, $) {
   r.StreamEntryView = Backbone.View.extend({
     tagName: 'li',
 
+    events: {
+      'click .join': 'join',
+      'click .close': 'close'
+    },
+
     initialize: function () {
       try {
-        _.bindAll(this, 'render');
+        _.bindAll(this, 'render', 'join', 'close');
         this.template = _.template($('#streamEntryTemplate').html());
       } catch (e) {
         r.log.error(e, 'StreamEntryView.initialize');
@@ -23,7 +28,55 @@ var RSKYBOX = (function (r, $) {
       } catch (e) {
         r.log.error(e, 'StreamEntryView.render');
       }
+    },
+
+    close: function(evt) {
+      try {
+        r.log.info('entering', 'StreamEntryView.close');
+
+        $("a.confirmbtn .ui-btn-text").text('Yes, Close it') ;
+        $("p.confirmtxt").text("Are you sure you want to close the stream  "+this.model.get("name")+"?") ;
+        $("#streamActionDialog").popup() ;
+        $("#streamActionDialog").popup("open") ;
+
+        // remove any previous 'click'  event handlers from the button so they don't accumulate
+        var that = this;
+        $('a.confirmbtn').off('click');
+        $('a.confirmbtn').on('click', function(){ $("#streamActionDialog").popup("close");
+                                                  r.closeStream(that.model);
+                                                  return false; }) ;
+
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'StreamEntryView.close');
+      }
+    },
+
+    join: function(evt) {
+      try {
+        r.log.info('entering', 'StreamEntryView.join');
+
+        $("a.confirmbtn .ui-btn-text").text('Yes, Join it') ;
+        $("p.confirmtxt").text("Are you sure you want to join the stream  "+this.model.get("name")+"?") ;
+        $("#streamActionDialog").popup() ;
+        $("#streamActionDialog").popup("open") ;
+
+        // remove any previous 'click'  event handlers from the button so they don't accumulate
+        var that = this;
+        $('a.confirmbtn').off('click');
+        $('a.confirmbtn').on('click', function(){ $("#streamActionDialog").popup("close");
+                                                  r.joinStream(that.model);
+                                                  return false; }) ;
+
+        evt.preventDefault();
+        return false;
+      } catch (e) {
+        r.log.error(e, 'StreamEntryView.join');
+      }
     }
+
+
   });
 
 
@@ -63,7 +116,9 @@ var RSKYBOX = (function (r, $) {
 
     addStreamEntry: function (list, stream) {
       try {
-        list.append(new r.StreamEntryView({ model: stream }).render().el);
+        // By adding the "id" to the view constructor, the list item with contain that ID as an attribute -->  <li id='<xyz>' >
+        // With this unique ID, list items can be modified later (e.g. updating the stream status after joining)
+        list.append(new r.StreamEntryView({ model: stream, id: stream.get('id') }).render().el);
       } catch (e) {
         r.log.error(e, 'StreamsView.addStreamEntry');
       }
@@ -163,6 +218,62 @@ var RSKYBOX = (function (r, $) {
     }
   });
 
+  // may be called by multiple stream views
+  r.closeStream = function(streamModel) {
+    try {
+      var closeurl = streamModel.urlroot + '/streams/' + streamModel.get('id');
+      var jsonobj = {"status" : "closed"};
+
+      $.ajax({
+        type: 'put',
+        data: json.stringify(jsonobj),
+        datatype: 'json',
+        contenttype: 'application/json',
+        url: closeurl,
+        statuscode: r.statuscodehandlers(),
+        success: function() {
+                    try {
+                      // in the stream entry list, update the status of this stream
+                      $('#' + streamModel.get('id')).find('.streamStatus').html("Closed");
+                      r.flash.info("stream successfully closed", 3);
+                    } catch (e) {
+                      r.log.error(e, 'closeStream.success');
+                    }
+                  }
+      });
+    } catch (e) {
+      r.log.error(e, 'closeStream');
+    }
+  };
+
+  // may be called by multiple stream views
+  r.joinStream = function(streamModel) {
+    try {
+      var joinurl = streamModel.urlroot + '/streams';
+      var currentUser = r.store.getItem(r.session.keys.currentUser);
+      var jsonobj = {"name" : streamModel.get('name'), "memberId" : currentUser.emailAddress};
+
+      $.ajax({
+        type: 'post',
+        data: json.stringify(jsonobj),
+        datatype: 'json',
+        contenttype: 'application/json',
+        url: joinurl,
+        statuscode: r.statuscodehandlers(),
+        success: function() {
+                    try {
+                      // in the stream entry list, update the status of this stream
+                      $('#' + streamModel.get('id')).find('.streamStatus').html("Open");
+                      r.flash.info("stream successfully joined", 3);
+                    } catch (e) {
+                      r.log.error(e, 'joinStream.success');
+                    }
+                  }
+      });
+    } catch (e) {
+      r.log.error(e, 'joinStream');
+    }
+  };
 
   return r;
 }(RSKYBOX || {}, jQuery));
