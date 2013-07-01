@@ -86,7 +86,8 @@ public class Feedback {
 	private Date recordedGmtDate;
 	private String userId;
 	private String userName;
-	private String instanceUrl;
+	private String localEndpoint;
+	private String remoteEndpoint;
 	private String status;
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
@@ -133,12 +134,20 @@ public class Feedback {
 		this.userName = userName;
 	}
 
-	public String getInstanceUrl() {
-		return instanceUrl;
+	public String getLocalEndpoint() {
+		return localEndpoint;
 	}
 
-	public void setInstanceUrl(String instanceUrl) {
-		this.instanceUrl = instanceUrl;
+	public void setLocalEndpoint(String localEndpoint) {
+		this.localEndpoint = localEndpoint;
+	}
+
+	public String getRemoteEndpoint() {
+		return remoteEndpoint;
+	}
+
+	public void setRemoteEndpoint(String remoteEndpoint) {
+		this.remoteEndpoint = remoteEndpoint;
 	}
 
 	public String getStatus() {
@@ -212,7 +221,8 @@ public class Feedback {
             	
             	json.put("userId", feedback.getUserId());
             	json.put("userName", feedback.getUserName());
-            	json.put("instanceUrl", feedback.getInstanceUrl());
+            	json.put("localEndpoint", feedback.getLocalEndpoint());
+            	json.put("remoteEndpoint", feedback.getRemoteEndpoint());
             	json.put("status", feedback.getStatus());
             	json.put("appId", feedback.getApplicationId());
             	json.put("incidentId", feedback.getIncidentId());

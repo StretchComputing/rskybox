@@ -357,8 +357,17 @@ public class ClientLogsResource extends ServerResource {
 				clientLog.setUserName(json.getString("userName"));
 			}
 			
-			if(!isUpdate && json.has("instanceUrl")) {
-				clientLog.setInstanceUrl(json.getString("instanceUrl"));
+			if(!isUpdate) {
+				if(json.has("localEndPoint")) {
+					clientLog.setLocalEndpoint(json.getString("localEndPoint"));
+				}
+				if(json.has("remoteEndPoint")) {
+					clientLog.setRemoteEndpoint(json.getString("remoteEndPoint"));
+				}
+				if((clientLog.getLocalEndpoint() != null && clientLog.getRemoteEndpoint() == null) ||
+				   (clientLog.getLocalEndpoint() == null && clientLog.getRemoteEndpoint() != null)) {
+					return Utility.apiError(this, ApiStatusCode.LOCAL_AND_REMOTE_ENDPOINTS_MUST_BE_SPECIFIED_TOGETHER);
+				}
 			}
 			
 			String summary = null;

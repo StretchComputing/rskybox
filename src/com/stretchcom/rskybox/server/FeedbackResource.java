@@ -188,8 +188,17 @@ public class FeedbackResource extends ServerResource {
 			}
 			feedback.setRecordedGmtDate(gmtRecordedDate);
 			
-			if(!isUpdate && json.has("instanceUrl")) {
-				feedback.setInstanceUrl(json.getString("instanceUrl"));
+			if(!isUpdate) {
+				if(json.has("localEndPoint")) {
+					feedback.setLocalEndpoint(json.getString("localEndPoint"));
+				}
+				if(json.has("remoteEndPoint")) {
+					feedback.setRemoteEndpoint(json.getString("remoteEndPoint"));
+				}
+				if((feedback.getLocalEndpoint() != null && feedback.getRemoteEndpoint() == null) ||
+				   (feedback.getLocalEndpoint() == null && feedback.getRemoteEndpoint() != null)) {
+					return Utility.apiError(this, ApiStatusCode.LOCAL_AND_REMOTE_ENDPOINTS_MUST_BE_SPECIFIED_TOGETHER);
+				}
 			}
 			
 			String incidentId = null;

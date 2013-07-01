@@ -322,8 +322,17 @@ public class CrashDetectsResource extends ServerResource {
 			}
 			crashDetect.setDetectedGmtDate(gmtDetectedDate);
 			
-			if(!isUpdate && json.has("instanceUrl")) {
-				crashDetect.setInstanceUrl(json.getString("instanceUrl"));
+			if(!isUpdate) {
+				if(json.has("localEndPoint")) {
+					crashDetect.setLocalEndpoint(json.getString("localEndPoint"));
+				}
+				if(json.has("remoteEndPoint")) {
+					crashDetect.setRemoteEndpoint(json.getString("remoteEndPoint"));
+				}
+				if((crashDetect.getLocalEndpoint() != null && crashDetect.getRemoteEndpoint() == null) ||
+				   (crashDetect.getLocalEndpoint() == null && crashDetect.getRemoteEndpoint() != null)) {
+					return Utility.apiError(this, ApiStatusCode.LOCAL_AND_REMOTE_ENDPOINTS_MUST_BE_SPECIFIED_TOGETHER);
+				}
 			}
 			
 			if(!isUpdate && json.has("appActions")) {

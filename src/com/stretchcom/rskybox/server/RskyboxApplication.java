@@ -61,6 +61,9 @@ public class RskyboxApplication extends Application {
         router.attach("/applications/{applicationId}/streams", StreamsResource.class);
         router.attach("/applications/{applicationId}/streams/{id}", StreamsResource.class);
 
+        router.attach("/applications/{applicationId}/endpointFilters", EndpointFiltersResource.class);
+        router.attach("/applications/{applicationId}/endpointFilters/{id}", EndpointFiltersResource.class);
+
         router.attach("/applications/{applicationId}/streams/{streamId}/packets", PacketsResource.class);
 
         router.attach("/mobileCarriers", MobileCarriersResource.class);

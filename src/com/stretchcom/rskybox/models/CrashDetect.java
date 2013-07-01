@@ -92,7 +92,8 @@ public class CrashDetect {
 	private String userId;
 	private String userName;
 	private Text stackDataBase64;
-	private String instanceUrl;
+	private String localEndpoint;
+	private String remoteEndpoint;
 	private String status;
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
@@ -156,12 +157,20 @@ public class CrashDetect {
 		this.stackDataBase64 = new Text(stackDataBase64);
 	}
 
-	public String getInstanceUrl() {
-		return instanceUrl;
+	public String getLocalEndpoint() {
+		return localEndpoint;
 	}
 
-	public void setInstanceUrl(String instanceUrl) {
-		this.instanceUrl = instanceUrl;
+	public void setLocalEndpoint(String localEndpoint) {
+		this.localEndpoint = localEndpoint;
+	}
+
+	public String getRemoteEndpoint() {
+		return remoteEndpoint;
+	}
+
+	public void setRemoteEndpoint(String remoteEndpoint) {
+		this.remoteEndpoint = remoteEndpoint;
 	}
 	
 	public String getStatus() {
@@ -319,7 +328,8 @@ public class CrashDetect {
             	
             	json.put("userId", crashDetect.getUserId());
             	json.put("userName", crashDetect.getUserName());
-            	json.put("instanceUrl", crashDetect.getInstanceUrl());
+            	json.put("localEndpoint", crashDetect.getLocalEndpoint());
+            	json.put("remoteEndpoint", crashDetect.getRemoteEndpoint());
             	json.put("incidentId", crashDetect.getIncidentId());
             	
             	JSONArray appActionsJsonArray = new JSONArray();

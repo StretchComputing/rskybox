@@ -98,7 +98,8 @@ public class ClientLog {
 	private String userId;
 	private String userName;
 	private Text stackBackTrace;  // deprecated on 4/14/2012. Supported for legacy data in datastore. Replaced by array stackBackTraces below.
-	private String instanceUrl;
+	private String localEndpoint;
+	private String remoteEndpoint;
 	private String status;
 	private String applicationId;
 	private Date activeThruGmtDate;  // Active thru this date.  Application specific.
@@ -167,12 +168,20 @@ public class ClientLog {
 		this.stackBackTrace = new Text(stackBackTrace);
 	}
 
-	public String getInstanceUrl() {
-		return instanceUrl;
+	public String getLocalEndpoint() {
+		return localEndpoint;
 	}
 
-	public void setInstanceUrl(String instanceUrl) {
-		this.instanceUrl = instanceUrl;
+	public void setLocalEndpoint(String localEndpoint) {
+		this.localEndpoint = localEndpoint;
+	}
+
+	public String getRemoteEndpoint() {
+		return remoteEndpoint;
+	}
+
+	public void setRemoteEndpoint(String remoteEndpoint) {
+		this.remoteEndpoint = remoteEndpoint;
 	}
 	
 	public String getStatus() {
@@ -392,7 +401,8 @@ public class ClientLog {
             	}
             	json.put("userId", clientLog.getUserId());
             	json.put("userName", clientLog.getUserName());
-            	json.put("instanceUrl", clientLog.getInstanceUrl());
+            	json.put("localEndpoint", clientLog.getLocalEndpoint());
+            	json.put("remoteEndpoint", clientLog.getRemoteEndpoint());
             	json.put("logLevel", clientLog.getLogLevel());
             	json.put("logName", clientLog.getLogName());
             	json.put("message", clientLog.getMessage());
