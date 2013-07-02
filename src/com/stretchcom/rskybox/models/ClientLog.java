@@ -348,7 +348,7 @@ public class ClientLog {
 		return appActions;
 	}
 	
-	// StringBuffer theSb:  out parameter to append markdow to ...
+	// StringBuffer theSb:  out parameter to append markdown to ...
     public void getMarkDown(StringBuffer theSb) {
 		theSb.append("* Summary: ");
 		theSb.append(this.getSummary());

@@ -834,6 +834,12 @@ public class Incident {
 		sb.append(")");
 		sb.append("\n");
 
+		sb.append("* Local Endpoint: ");
+		sb.append(this.getLocalEndpoint());
+		sb.append("\n");
+		sb.append("* Remote Endpoint: ");
+		sb.append(this.getRemoteEndpoint());
+		sb.append("\n");
 		sb.append("* Severity: ");
 		sb.append(this.severity.toString());
 		sb.append("\n");
@@ -887,7 +893,7 @@ public class Incident {
 		return isIssueTrackingSupported;
 	}
 	
-	// StringBuffer theSb:  out parameter to append markdow to ...
+	// StringBuffer theSb:  out parameter to append markdown to ...
 	private void buildLastLogMarkDown(StringBuffer theSb, String theApplicationId) {
         EntityManager em = EMF.get().createEntityManager();
 		List<ClientLog> clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationIdAndIncidentId")
