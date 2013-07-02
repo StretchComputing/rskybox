@@ -464,7 +464,9 @@ public class ClientLogsResource extends ServerResource {
 				clientLog.setActiveThruGmtDate(activeThruGmtDate);
 				
 				// find or create an incident that will 'own' this new clientLog
-				owningIncident = Incident.fetchIncidentIncrementCount(logName, Incident.LOG_TAG, incidentId, theApplication, message, summary);
+				String lep = clientLog.getLocalEndpoint() == null ? Incident.DEFAULT_ENDPOINT : clientLog.getLocalEndpoint();
+				String rep = clientLog.getRemoteEndpoint() == null ? Incident.DEFAULT_ENDPOINT : clientLog.getRemoteEndpoint();
+				owningIncident = Incident.fetchIncidentIncrementCount(logName, lep, rep, Incident.LOG_TAG, incidentId, theApplication, message, summary);
 				if(owningIncident == null) {
 					// assume problem was incident ID specified was not valid
 					return Utility.apiError(this, ApiStatusCode.INCIDENT_NOT_FOUND);

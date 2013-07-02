@@ -46,6 +46,15 @@ import com.stretchcom.rskybox.server.RskyboxApplication;
     			  "i.tags = :tag ORDER BY i.createdGmtDate DESC"
     ),
     @NamedQuery(
+    		name="Incident.getByApplicationIdAndEventNameAndLocalEndpointAndRemoteEndpointAndTag",
+    		query="SELECT i FROM Incident i WHERE " +
+    		      "i.applicationId = :applicationId" + " AND " +
+    		      "i.eventName = :eventName" + " AND " +
+    		      "i.localEndpoint = :localEndpoint" + " AND " +
+    		      "i.remoteEndpoint = :remoteEndpoint" + " AND " +
+    			  "i.tags = :tag ORDER BY i.createdGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="Incident.getAllWithApplicationIdAndTag",
     		query="SELECT i FROM Incident i WHERE " +
     		"i.applicationId = :applicationId" + " AND " +
@@ -88,6 +97,8 @@ import com.stretchcom.rskybox.server.RskyboxApplication;
 public class Incident {
 	private static final Logger log = Logger.getLogger(Incident.class.getName());
 	
+	public final static String DEFAULT_ENDPOINT = "default";
+	
 	public final static String OPEN_STATUS = "open";
 	public final static String CLOSED_STATUS = "closed";
 	public final static String ALL_STATUS = "all";
@@ -114,6 +125,8 @@ public class Incident {
 	private Integer number;  // sequential number auto assigned to incidents with scope of the application
 	private String eventName;
 	private Integer eventCount;
+	private String localEndpoint;
+	private String remoteEndpoint;
 	private Boolean maxEventCountReached = false;
 	private Integer severity = Incident.MINIMUM_SEVERITY;
 	private Integer oldSeverity = Incident.INITIALIZATION_SEVERITY;
@@ -254,6 +267,22 @@ public class Incident {
 		this.eventName = eventName;
 	}
 
+	public String getLocalEndpoint() {
+		return localEndpoint;
+	}
+
+	public void setLocalEndpoint(String localEndpoint) {
+		this.localEndpoint = localEndpoint;
+	}
+
+	public String getRemoteEndpoint() {
+		return remoteEndpoint;
+	}
+
+	public void setRemoteEndpoint(String remoteEndpoint) {
+		this.remoteEndpoint = remoteEndpoint;
+	}
+	
 	public String getApplicationId() {
 		return applicationId;
 	}
@@ -433,6 +462,8 @@ public class Incident {
 			jsonObject.put("status", this.status);
 			jsonObject.put("severity", this.severity);
 			jsonObject.put("name", this.eventName);
+			jsonObject.put("localEndpoint", this.localEndpoint);
+			jsonObject.put("remoteEndpoint", this.remoteEndpoint);
 			jsonObject.put("lastUpdatedDate", GMT.convertToIsoDate(this.lastUpdatedGmtDate));
 			jsonObject.put("createdDate", GMT.convertToIsoDate(this.createdGmtDate));
 			
@@ -511,7 +542,13 @@ public class Incident {
 	
 	// pretty much guaranteed to return an Incident (short of a server error)
 	// either finds the 'owning' incident associated with the specified event or creates a new incident
-	public static Incident fetchIncidentIncrementCount(String theEventName, String theWellKnownTag, String theIncidentId, Application theApplication, String theMessage, String theSummary) {
+	public static Incident fetchIncidentIncrementCount(String theEventName, String theLEP, String theREP, String theWellKnownTag, String theIncidentId,
+			                                           Application theApplication, String theMessage, String theSummary) {
+		if(theLEP == null || theLEP.length() == 0 || theREP == null || theREP.length() == 0) {
+			log.severe("fetchIncidentIncrementCount(): should never happen - local endpoint or remote endpoint was not specified");
+			return null;
+		}
+		
 		Incident eventOwningIncident = null;
 		List<Incident> relatedIncidents = null;
         EntityManager em = EMF.get().createEntityManager();
@@ -535,15 +572,17 @@ public class Incident {
         		}
             } else {
         		try {
-        			relatedIncidents = (List<Incident>)em.createNamedQuery("Incident.getByApplicationIdAndEventNameAndTag")
+        			relatedIncidents = (List<Incident>)em.createNamedQuery("Incident.getByApplicationIdAndEventNameAndLocalEndpointAndRemoteEndpointAndTag")
         				.setParameter("applicationId", theApplication.getId())
         				.setParameter("eventName", theEventName)
+        				.setParameter("localEndpoint", theLEP)
+        				.setParameter("remoteEndpoint", theREP)
         				.setParameter("tag", theWellKnownTag)
         				.getResultList();
         			if(relatedIncidents.size() == 0) {
             			// this is NOT an error -- there is just no incident yet associated with this event so create one
         				log.info("incident matching event name = " + theEventName + " NOT found. Creating a new incident.");
-            			eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage, theSummary);
+            			eventOwningIncident = Incident.createIncident(theEventName, theLEP, theREP, theWellKnownTag, theApplication, theMessage, theSummary);
         				isExistingIncident = false;
         			} else {
             			// always choose the most recently created incident which will be on the top of the list
@@ -566,7 +605,7 @@ public class Incident {
     				log.info("fetchIncidentIncrementCount() reopening existing incident");
     			} else {
     				// create a new incident
-    				eventOwningIncident = Incident.createIncident(theEventName, theWellKnownTag, theApplication, theMessage, theSummary);
+    				eventOwningIncident = Incident.createIncident(theEventName, theLEP, theREP, theWellKnownTag, theApplication, theMessage, theSummary);
     				isExistingIncident = false;
     				log.info("fetchIncidentIncrementCount() existing incident CLOSED and too old to reopen");
     			}
@@ -611,7 +650,7 @@ public class Incident {
 				sb.append(" (");
 				sb.append(theSummary);
 				sb.append(")");
-	        	User.sendNotifications(theApplication.getId(), eventOwningIncident.getNotificationTypeFromTag(), sb.toString(), eventOwningIncident.getId());
+	        	User.sendNotifications(theApplication.getId(), eventOwningIncident, sb.toString());
 			}
         } finally {
         	// this should persist the changes
@@ -621,7 +660,8 @@ public class Incident {
 		return eventOwningIncident;
 	}
 	
-	public static Incident createIncident(String theEventName, String theWellKnownTag, Application theApplication, String theMessage, String theSummary) {
+	public static Incident createIncident(String theEventName, String theLEP, String theREP, String theWellKnownTag, Application theApplication, 
+			                              String theMessage, String theSummary) {
         EntityManager em = EMF.get().createEntityManager();
         Incident incident = null;
         
@@ -629,6 +669,8 @@ public class Incident {
 		try {
 			incident = new Incident();
 			incident.setEventName(theEventName);
+			incident.setLocalEndpoint(theLEP);
+			incident.setRemoteEndpoint(theREP);
 			incident.setEventCount(1);
 			incident.addToTags(theWellKnownTag);
 			incident.setSummary(theSummary);

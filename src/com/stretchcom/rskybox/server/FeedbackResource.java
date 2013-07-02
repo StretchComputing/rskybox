@@ -230,7 +230,9 @@ public class FeedbackResource extends ServerResource {
 				// find or create an incident that will 'own' this new feedback
 				// TODO something better for an eventName than the current date
 				Date now = new Date();
-				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), Incident.FEEDBACK_TAG, incidentId, theApplication, "new Feedback", "NA");
+				String lep = feedback.getLocalEndpoint() == null ? Incident.DEFAULT_ENDPOINT : feedback.getLocalEndpoint();
+				String rep = feedback.getRemoteEndpoint() == null ? Incident.DEFAULT_ENDPOINT : feedback.getRemoteEndpoint();
+				owningIncident = Incident.fetchIncidentIncrementCount(now.toString(), lep, rep, Incident.FEEDBACK_TAG, incidentId, theApplication, "new Feedback", "NA");
 				feedback.setIncidentId(owningIncident.getId());
 			}
 

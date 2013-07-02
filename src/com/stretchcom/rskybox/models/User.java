@@ -296,8 +296,10 @@ public class User {
 	// Sends a notification (if appropriate) to all active members of the specified application
 	// TODO notifications options should be application specific. When that happens, also put both the email address and phone
 	//      number in AppMember then the notifications can be sent without having to retrieve the User entity for each AppMember
-	public static void sendNotifications(String theApplicationId, String theNotificationType, String theMessage, String theIncidentId) {
+	public static void sendNotifications(String theApplicationId, Incident theIncident, String theMessage) {
         EntityManager em = EMF.get().createEntityManager();
+        String incidentId = KeyFactory.keyToString(theIncident.getKey());
+        String notificationType = theIncident.getNotificationTypeFromTag();
         
         try {
             List<AppMember> appMembers = new ArrayList<AppMember>();
@@ -308,7 +310,7 @@ public class User {
             		.getResultList();
             
             if(appMembers.size() > 0) {
-            	log.info("email/SMS message type = '" + theNotificationType + "' sent to " + appMembers.size() + " members.");
+            	log.info("email/SMS message type = '" + notificationType + "' (unfiltered) sent to " + appMembers.size() + " members.");
             } else {
             	log.info("no active members found for specified application");
             }
@@ -333,7 +335,12 @@ public class User {
                         
                         // only queue the notification if either email or SMS is active
                         if(isEmailActive || isSmsActive) {
-                            Notification.queueNotification(user, theApplicationId, am, theNotificationType, theMessage, theIncidentId, isEmailActive, isSmsActive);
+                            List<EndpointFilter> endpointFilters = getUserEndpointFilters(theApplicationId, userId);
+                            
+                            // endpoint filters are used to filter OUT notifications, so only notify if no endpoint filters match
+                            if(!anyFilterMatches(endpointFilters, theIncident.getLocalEndpoint(), theIncident.getRemoteEndpoint())) {
+                                Notification.queueNotification(user, theApplicationId, am, notificationType, theMessage, incidentId, isEmailActive, isSmsActive);
+                            }
                         }
                 	}
             	}
@@ -399,6 +406,38 @@ public class User {
 			em.close();
 		}
 		return users;
+	}
+	
+	// Returns list of users matching specified email address
+	public static List<EndpointFilter> getUserEndpointFilters(String theApplicationId, String theUserId) {
+        EntityManager em = EMF.get().createEntityManager();
+        List<EndpointFilter> endpointFilters = null;
+
+		try {
+			endpointFilters = (List<EndpointFilter>)em.createNamedQuery("EndpointFilter.getByUserIdAndApplicationId")
+				.setParameter("applicationId", theApplicationId)
+				.setParameter("userId", theUserId)
+				.getResultList();
+    		// access the first user to prevent 'lazy loading' which would break the calling routines
+    		if(endpointFilters.size() > 0) {
+        		EndpointFilter epf = endpointFilters.get(0);
+    		}
+		} catch (Exception e) {
+			log.severe("exception = " + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			em.close();
+		}
+		return endpointFilters;
+	}
+	
+	public static Boolean anyFilterMatches(List<EndpointFilter> theEndpointFilters, String theLEP, String theREP) {
+		for(EndpointFilter ef : theEndpointFilters) {
+			if(ef.matches(theLEP, theREP)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static Boolean isAuthenticated(String theEmailAddress) {

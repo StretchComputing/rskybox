@@ -96,6 +96,13 @@ public class EndpointFilter {
 	public void setRemoteEndpoint(String remoteEndpoint) {
 		this.remoteEndpoint = remoteEndpoint;
 	}
+	
+	public Boolean matches(String theLEP, String theREP) {
+		if(this.localEndpoint.equalsIgnoreCase(theLEP) && this.remoteEndpoint.equalsIgnoreCase(theREP)) {
+			return true;
+		}
+		return false;
+	}
 
     public static JSONObject getJson(EndpointFilter feedback, Boolean isList) {
     	return getJson(feedback, null, isList);

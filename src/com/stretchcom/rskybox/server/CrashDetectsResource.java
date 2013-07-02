@@ -409,7 +409,9 @@ public class CrashDetectsResource extends ServerResource {
 				crashDetect.setActiveThruGmtDate(activeThruGmtDate);
 				
 				String message = "new Crash Detect";
-				owningIncident = Incident.fetchIncidentIncrementCount(eventName, Incident.CRASH_TAG, incidentId, theApplication, message, summary);
+				String lep = crashDetect.getLocalEndpoint() == null ? Incident.DEFAULT_ENDPOINT : crashDetect.getLocalEndpoint();
+				String rep = crashDetect.getRemoteEndpoint() == null ? Incident.DEFAULT_ENDPOINT : crashDetect.getRemoteEndpoint();
+				owningIncident = Incident.fetchIncidentIncrementCount(eventName, lep, rep, Incident.CRASH_TAG, incidentId, theApplication, message, summary);
 				crashDetect.setIncidentId(owningIncident.getId());
 			}
             
