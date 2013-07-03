@@ -48,6 +48,7 @@ public class EndpointFilter {
 	private String applicationId;
 	private String localEndpoint;
 	private String remoteEndpoint;
+	private Boolean isActive;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -96,6 +97,14 @@ public class EndpointFilter {
 	public void setRemoteEndpoint(String remoteEndpoint) {
 		this.remoteEndpoint = remoteEndpoint;
 	}
+
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
 	
 	public Boolean matches(String theLEP, String theREP) {
 		if(this.localEndpoint.equalsIgnoreCase(theLEP) && this.remoteEndpoint.equalsIgnoreCase(theREP)) {
@@ -116,7 +125,10 @@ public class EndpointFilter {
         		json.put("apiStatus", theApiStatus);
         	}
         	if(endpointFilter != null && (theApiStatus == null || (theApiStatus !=null && theApiStatus.equals(ApiStatusCode.SUCCESS)))) {
-        		json.put("id", KeyFactory.keyToString(endpointFilter.getKey()));
+        		if(endpointFilter.getKey() != null) {
+            		json.put("id", KeyFactory.keyToString(endpointFilter.getKey()));
+        		}
+            	json.put("active", endpointFilter.getIsActive());
             	json.put("localEndPoint", endpointFilter.getLocalEndpoint());
             	json.put("remoteEndPoint", endpointFilter.getRemoteEndpoint());
             	json.put("appId", endpointFilter.getApplicationId());
@@ -127,4 +139,43 @@ public class EndpointFilter {
         }
         return json;
     }
+    
+    @Override
+    // if two objects are equal according to the equals() method, they must have the same hashCode()
+    // value (although the reverse is not generally true)
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + ((localEndpoint == null) ? 0 : localEndpoint.hashCode());
+      return result;
+    }
+
+    @Override
+    // determined by email address and phone number
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+     
+      // email takes precedence on the compare and is used if either object being compared has an non-null email address
+      EndpointFilter other = (EndpointFilter) obj;
+      if (localEndpoint == null) {
+    	  if(other.localEndpoint != null) {return false;}
+      } else {
+    	  if(other.localEndpoint != null && !localEndpoint.equals(other.localEndpoint)) {return false;}
+      }
+      
+      if (remoteEndpoint == null) {
+    	  if(other.remoteEndpoint != null) {return false;}
+      } else {
+    	  if(other.remoteEndpoint != null && !remoteEndpoint.equals(other.remoteEndpoint)) {return false;}
+      }
+      
+      return true;
+    }
+
 }

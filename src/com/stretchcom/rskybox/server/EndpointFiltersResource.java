@@ -19,9 +19,11 @@ import org.restlet.data.Status;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.representation.Variant;
+import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
 import org.restlet.resource.Options;
 import org.restlet.resource.Post;
+import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
 import org.restlet.resource.ServerResource;
 
@@ -73,7 +75,7 @@ public class EndpointFiltersResource extends ServerResource {
 		headers.add("Access-Control-Allow-Origin", "*");
 		headers.add("Access-Control-Allow-Methods", "OPTIONS, POST");
 		headers.add("Access-Control-Allow-Headers", "Authorization");
-    		return new JsonRepresentation(new JSONObject());
+		return new JsonRepresentation(new JSONObject());
     }
 
     // Handles 'Create Endpoint Filter API'
@@ -87,6 +89,83 @@ public class EndpointFiltersResource extends ServerResource {
 		}
 		
         return save_endpoint_filter(entity, application);
+    }
+
+    // Handles 'Update Endpoint Filter API'
+    @Put("json")
+    public JsonRepresentation put(Representation entity) {
+        log.info("in put");
+		if(this.applicationId == null) {return Utility.apiError(this, ApiStatusCode.APPLICATION_ID_REQUIRED);}
+		Application application = Application.getApplicationWithId(this.applicationId);
+		if(application == null) {
+			return Utility.apiError(this, ApiStatusCode.APPLICATION_NOT_FOUND);
+		}
+    	
+		// endpoint filter ID is required
+    	if (this.id == null || this.id.length() == 0) {
+			return Utility.apiError(this, ApiStatusCode.ENDPOINT_FILTER_ID_REQUIRED);
+		}
+    	
+        return save_endpoint_filter(entity, application);
+    }
+
+    // Handles 'Delete Endpoint Filter API'
+    @Delete("json")
+    public JsonRepresentation delete() {
+        log.info("in delete");
+        JSONObject json = new JSONObject();
+        EntityManager em = EMF.get().createEntityManager();
+        
+		String apiStatus = ApiStatusCode.SUCCESS;
+        this.setStatus(Status.SUCCESS_OK);
+    	User currentUser = Utility.getCurrentUser(getRequest());
+        em.getTransaction().begin();
+        try {
+        	//////////////////////
+        	// Authorization Rules
+        	//////////////////////
+        	AppMember currentUserMember = AppMember.getAppMember(this.applicationId, KeyFactory.keyToString(currentUser.getKey()));
+        	if(currentUserMember == null) {
+				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
+        	}
+
+        	if (this.id == null || this.id.length() == 0) {
+				return Utility.apiError(this, ApiStatusCode.ENDPOINT_FILTER_ID_REQUIRED);
+			}
+			
+            Key key;
+			try {
+				key = KeyFactory.stringToKey(this.id);
+			} catch (Exception e) {
+				log.info("ID provided cannot be converted to a Key");
+				return Utility.apiError(this, ApiStatusCode.ENDPOINT_FILTER_NOT_FOUND);
+			}
+
+    		EndpointFilter endpointFilter = (EndpointFilter)em.createNamedQuery("EndpointFilter.getByKey")
+				.setParameter("key", key)
+				.getSingleResult();
+            
+            em.remove(endpointFilter);
+            em.getTransaction().commit();
+        } catch (NoResultException e) {
+    		return Utility.apiError(this, ApiStatusCode.ENDPOINT_FILTER_NOT_FOUND);
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more endpoint filters have same key");
+			this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		} finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
+        
+        try {
+			json.put("apiStatus", apiStatus);
+		} catch (JSONException e) {
+            log.severe("exception = " + e.getMessage());
+            this.setStatus(Status.SERVER_ERROR_INTERNAL);
+		}
+        return new JsonRepresentation(json);
     }
     
     private JsonRepresentation index() {
@@ -108,11 +187,13 @@ public class EndpointFiltersResource extends ServerResource {
         	}
 
             JSONArray ja = new JSONArray();
+						endpointFilters= (List<EndpointFilter>)em.createNamedQuery("EndpointFilter.getByUserIdAndApplicationId")
+								.setParameter("applicationId", this.applicationId)
+								.setParameter("userId", currentUser.getId())
+								.getResultList();
+						log.info("endpointFilters: applicationId result set count = " + endpointFilters.size());
 			
-	    	endpointFilters= (List<EndpointFilter>)em.createNamedQuery("EndpointFilter.getAllWithApplicationId")
-	    			.setParameter("applicationId", this.applicationId)
-	    			.getResultList();
-			log.info("endpointFilters: applicationId result set count = " + endpointFilters.size());
+            Incident.mergePotentialEndpointFilters(this.applicationId, currentUser, endpointFilters);
             
             for (EndpointFilter ef : endpointFilters) {
             	JSONObject endpointFilterObj = EndpointFilter.getJson(ef, true);
@@ -183,9 +264,21 @@ public class EndpointFiltersResource extends ServerResource {
 			}
 
 			if(isUpdate) {
-	            // update not supported yet
+				// for now, only 'active' can be updated
+	            if(json.has("active")) {
+	            	try {
+	            		Boolean isActive = json.getBoolean("active");
+	            		endpointFilter.setIsActive(isActive);
+	            	} catch (JSONException e) {
+	                    return Utility.apiError(this, ApiStatusCode.INVALID_ACTIVE_PARAMETER);
+	                }	            	
+	            }
 			} else {
 				// set the defaults for create
+				endpointFilter.setUserId(currentUser.getId());
+				endpointFilter.setApplicationId(this.applicationId);
+				endpointFilter.setCreatedGmtDate(new Date());
+				endpointFilter.setIsActive(true);
 			}
 			
 			em.persist(endpointFilter);

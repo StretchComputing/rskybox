@@ -91,6 +91,7 @@ public class ApiStatusCode {
 	public static final String STREAM_ALREADY_HAS_END_USER = "427";
 	public static final String STREAM_ALREADY_HAS_MEMBER = "428";
 	public static final String BOTH_USER_ID_AND_MEMBER_ID_SPECIFIED = "429";
+	public static final String INVALID_ACTIVE_PARAMETER = "430";
 	
 	public static final String PHONE_NUMBER_AND_MOBILE_CARRIER_ID_MUST_BE_SPECIFIED_TOGETHER = "500";
 	public static final String NO_PHONE_NUMBER_TO_ASSOCIATE_WITH_CARRIER_ID = "501";

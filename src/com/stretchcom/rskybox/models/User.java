@@ -108,6 +108,10 @@ public class User {
         return key;
     }
 	
+	public String getId() {
+		return KeyFactory.keyToString(this.key);
+	}
+	
 	public String getFirstName() {
 		return firstName;
 	}
