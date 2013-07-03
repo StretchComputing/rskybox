@@ -88,6 +88,8 @@ import com.stretchcom.rskybox.server.RskyboxApplication;
 public class Incident {
 	private static final Logger log = Logger.getLogger(Incident.class.getName());
 	
+	public final static String DEFAULT_ENDPOINT = "NA";
+	
 	public final static String OPEN_STATUS = "open";
 	public final static String CLOSED_STATUS = "closed";
 	public final static String ALL_STATUS = "all";
@@ -858,4 +860,38 @@ public class Incident {
 			lastClientLog.getMarkDown(theSb);
 		}
 	}
+	
+	// For now, potential endpoint filters are derived from open incidents. This algorithm could be enhanced down the road.
+	public static void mergePotentialEndpointFilters(String theApplicationId, User theCurrentUser, List<EndpointFilter> theEndpointFilters) {
+        EntityManager em = EMF.get().createEntityManager();
+        List<Incident> openIncidents = null;
+
+		try {
+			openIncidents = (List<Incident>)em.createNamedQuery("Incident.getByStatusAndApplicationId")
+				.setParameter("applicationId", theApplicationId)
+				.setParameter("status", OPEN_STATUS)
+				.getResultList();
+			log.info("mergePotentialEndpointFilters(): number of open incidents found = " + openIncidents.size());
+			
+			for(Incident i : openIncidents) {
+				EndpointFilter endpointFilter = new EndpointFilter();
+				endpointFilter.setIsActive(false);
+				endpointFilter.setLocalEndpoint(i.getLocalEndpoint());
+				endpointFilter.setRemoteEndpoint(i.getRemoteEndpoint());
+				endpointFilter.setUserId(theCurrentUser.getId());
+				endpointFilter.setApplicationId(theApplicationId);
+				endpointFilter.setCreatedGmtDate(new Date());
+				
+				if(!theEndpointFilters.contains(endpointFilter)) {
+					theEndpointFilters.add(endpointFilter);
+				}
+			}
+		} catch (Exception e) {
+			log.severe("exception = " + e.getMessage());
+		} finally {
+			em.close();
+		}
+		return;
+	}
+
 }
