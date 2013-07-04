@@ -32,8 +32,10 @@ import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
 import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.CrashDetect;
+import com.stretchcom.rskybox.models.EndpointFilter;
 import com.stretchcom.rskybox.models.Feedback;
 import com.stretchcom.rskybox.models.Incident;
+import com.stretchcom.rskybox.models.Notification;
 import com.stretchcom.rskybox.models.User;
 
 import com.google.appengine.api.datastore.Cursor;
@@ -270,10 +272,14 @@ public class IncidentsResource extends ServerResource {
             QueryResultList<Entity> results = pq.asQueryResultList(fetchOptions);
             log.info("number of incidents from query = " + results.size());
             
+            List<EndpointFilter> endpointFilters = User.getUserEndpointFilters(this.applicationId, currentUser.getId());
             JSONArray ja = new JSONArray();
             for (Entity entity : results) {
             	Incident i = Incident.build(entity);
-                ja.put(getIncidentJson(i, true));
+                // endpoint filters are used to filter OUT incidents, so only return incident if no endpoint filters match
+                if(!User.anyFilterMatches(endpointFilters, i.getLocalEndpoint(), i.getRemoteEndpoint())) {
+                    ja.put(getIncidentJson(i, true));
+                }
             }
             json.put("incidents", ja);
             json.put("apiStatus", apiStatus);
