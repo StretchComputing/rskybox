@@ -151,7 +151,6 @@ public class EndpointFilter {
     }
 
     @Override
-    // determined by email address and phone number
     public boolean equals(Object obj) {
       if (this == obj)
         return true;

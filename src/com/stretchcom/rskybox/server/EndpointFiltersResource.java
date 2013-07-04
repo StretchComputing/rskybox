@@ -186,16 +186,18 @@ public class EndpointFiltersResource extends ServerResource {
 				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
 
+        	List<EndpointFilter> allFilters = new ArrayList<EndpointFilter>();
             JSONArray ja = new JSONArray();
-						endpointFilters= (List<EndpointFilter>)em.createNamedQuery("EndpointFilter.getByUserIdAndApplicationId")
-								.setParameter("applicationId", this.applicationId)
-								.setParameter("userId", currentUser.getId())
-								.getResultList();
-						log.info("endpointFilters: applicationId result set count = " + endpointFilters.size());
+			endpointFilters= (List<EndpointFilter>)em.createNamedQuery("EndpointFilter.getByUserIdAndApplicationId")
+					.setParameter("applicationId", this.applicationId)
+					.setParameter("userId", currentUser.getId())
+					.getResultList();
+			log.info("endpointFilters: applicationId result set count = " + endpointFilters.size());
+			allFilters.addAll(endpointFilters);
 			
-            Incident.mergePotentialEndpointFilters(this.applicationId, currentUser, endpointFilters);
+            Incident.mergePotentialEndpointFilters(this.applicationId, currentUser, allFilters);
             
-            for (EndpointFilter ef : endpointFilters) {
+            for (EndpointFilter ef : allFilters) {
             	JSONObject endpointFilterObj = EndpointFilter.getJson(ef, true);
             	if(endpointFilterObj == null) {
             		this.setStatus(Status.SERVER_ERROR_INTERNAL);

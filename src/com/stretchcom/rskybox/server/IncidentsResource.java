@@ -43,6 +43,10 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.Filter;
+import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.QueryResultList;
 
@@ -98,8 +102,6 @@ public class IncidentsResource extends ServerResource {
     	if(!appIdStatus.equalsIgnoreCase(ApiStatusCode.SUCCESS)) {
     		return Utility.apiError(this, appIdStatus);
     	}
-    	
-         JSONObject jsonReturn;
 
         log.info("in get for Incident resource");
         if (this.id != null) {
@@ -227,24 +229,33 @@ public class IncidentsResource extends ServerResource {
 
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             Query q = new Query("Incident");
-            
-            q.addFilter("applicationId", Query.FilterOperator.EQUAL, this.applicationId);
+            Filter appIdFilter = new FilterPredicate("applicationId",FilterOperator.EQUAL, this.applicationId);
+            Filter statusFilter = null;
+            Filter tagsFilter = null;
+            Filter completeFilter = null;
             q.addSort("lastUpdatedGmtDate", SortDirection.DESCENDING);
 			if(this.tag == null) {
 			    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
 			    	// no additional filter need here
+			    	q.setFilter(appIdFilter);
 			    	log.info("query conditions 1");
 			    } else {
-		            q.addFilter("status", Query.FilterOperator.EQUAL, this.incidentStatus);
+		            statusFilter = new FilterPredicate("status",FilterOperator.EQUAL,this.incidentStatus);
+		            completeFilter = CompositeFilterOperator.and(appIdFilter, statusFilter);
+		            q.setFilter(completeFilter);
 			    	log.info("query conditions 2");
 			    } 
 			} else {
 			    if(this.incidentStatus.equalsIgnoreCase(Incident.ALL_STATUS)){
-		            q.addFilter("tags", Query.FilterOperator.EQUAL, this.tag);
+		            tagsFilter = new FilterPredicate("tags",FilterOperator.EQUAL, this.tag);
+		            completeFilter = CompositeFilterOperator.and(appIdFilter, tagsFilter);
+		            q.setFilter(completeFilter);
 			    	log.info("query conditions 3");
 			    } else {
-		            q.addFilter("status", Query.FilterOperator.EQUAL, this.incidentStatus);
-		            q.addFilter("tags", Query.FilterOperator.EQUAL, this.tag);
+		            statusFilter = new FilterPredicate("status",FilterOperator.EQUAL, this.incidentStatus);
+		            tagsFilter = new FilterPredicate("tags",FilterOperator.EQUAL, this.tag);
+		            completeFilter = CompositeFilterOperator.and(appIdFilter, statusFilter, tagsFilter);
+		            q.setFilter(completeFilter);
 			    	log.info("query conditions 4. status = " + this.incidentStatus + " tag = " + this.tag);
 			    }
 			}

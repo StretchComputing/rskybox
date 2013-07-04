@@ -358,11 +358,11 @@ public class ClientLogsResource extends ServerResource {
 			}
 			
 			if(!isUpdate) {
-				if(json.has("localEndPoint")) {
-					clientLog.setLocalEndpoint(json.getString("localEndPoint"));
+				if(json.has("localEndpoint")) {
+					clientLog.setLocalEndpoint(json.getString("localEndpoint"));
 				}
-				if(json.has("remoteEndPoint")) {
-					clientLog.setRemoteEndpoint(json.getString("remoteEndPoint"));
+				if(json.has("remoteEndpoint")) {
+					clientLog.setRemoteEndpoint(json.getString("remoteEndpoint"));
 				}
 				if((clientLog.getLocalEndpoint() != null && clientLog.getRemoteEndpoint() == null) ||
 				   (clientLog.getLocalEndpoint() == null && clientLog.getRemoteEndpoint() != null)) {
