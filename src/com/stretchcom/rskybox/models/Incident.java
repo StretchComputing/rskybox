@@ -454,9 +454,16 @@ public class Incident {
     	return notificationType;
 	}
 	
-	public JSONObject getJson() {
+    public JSONObject getJson(String theIncludeEvents) {
+    	return getJson(null, theIncludeEvents);
+    }
+
+    public JSONObject getJson(String theApiStatus, String theIncludeEvents) {
 		JSONObject jsonObject = new JSONObject();
 		try {
+        	if(theApiStatus != null) {
+        		jsonObject.put("apiStatus", theApiStatus);
+        	}
 			jsonObject.put("id", this.getId());
 			jsonObject.put("number", this.number);
 			jsonObject.put("status", this.status);
@@ -464,26 +471,108 @@ public class Incident {
 			jsonObject.put("name", this.eventName);
 			jsonObject.put("localEndpoint", this.localEndpoint);
 			jsonObject.put("remoteEndpoint", this.remoteEndpoint);
-			jsonObject.put("lastUpdatedDate", GMT.convertToIsoDate(this.lastUpdatedGmtDate));
-			jsonObject.put("createdDate", GMT.convertToIsoDate(this.createdGmtDate));
 			
+        	Date createdDate = this.getCreatedGmtDate();
+        	if(createdDate != null) {
+        		jsonObject.put("createdDate", GMT.convertToIsoDate(this.createdGmtDate));
+        	}
+        	
+        	Date lastUpdatedDate = this.getLastUpdatedGmtDate();
+        	if(lastUpdatedDate != null) {
+        		jsonObject.put("lastUpdatedDate", GMT.convertToIsoDate(this.lastUpdatedGmtDate));
+        	}
+
         	JSONArray tagsJsonArray = new JSONArray();
         	for(String tag : this.tags) {
         		tagsJsonArray.put(tag);
         	}
+        	log.info("# of tags = " + tags.size());
 			jsonObject.put("tags", tagsJsonArray);
 			
 			jsonObject.put("eventCount", this.eventCount);
 			jsonObject.put("message", this.message);
 			jsonObject.put("summary", this.summary);
+			jsonObject.put("appId", this.getApplicationId());
 			jsonObject.put("mode", this.remoteControlMode);
 			jsonObject.put("githubUrl", this.getGithubUrl());
-			
+        	
+        	if(theIncludeEvents != null && theIncludeEvents.equalsIgnoreCase("true")) {
+        		jsonObject.put("events", getEventsJsonObj());
+        	}
 		} catch (JSONException e) {
 			log.severe("exception building Incident JSON object, message = " + e.getMessage());
 		}
 		return jsonObject;
 	}
+    
+    private JSONObject getEventsJsonObj() {
+    	JSONObject eventsObj = new JSONObject();
+        EntityManager em = EMF.get().createEntityManager();
+        
+        try {
+        	// for now, incidents are contain only one of the event types: logs/crashes/feedback
+        	String wellKnownTag = this.getWellKnownTag();
+            JSONArray emptyJa = new JSONArray();
+            JSONArray ja = new JSONArray();
+        	if(wellKnownTag.equalsIgnoreCase(Incident.LOG_TAG)) {
+        		List<ClientLog> clientLogs= (List<ClientLog>)em.createNamedQuery("ClientLog.getAllWithApplicationIdAndIncidentId")
+		    			.setParameter("applicationId", this.applicationId)
+		    			.setParameter("incidentId", this.getId())
+		    			.getResultList();
+        		
+                for (ClientLog cl : clientLogs) {
+                	JSONObject clientLogObj = ClientLog.getJson(cl, true);
+                	if(clientLogObj == null) {
+                		break;
+                	}
+                    ja.put(clientLogObj);
+                }
+                eventsObj.put("crashes", emptyJa);
+                eventsObj.put("logs", ja);
+                eventsObj.put("feedback", emptyJa);
+        	} else if(wellKnownTag.equalsIgnoreCase(Incident.CRASH_TAG)) {
+        		List<CrashDetect> crashDetects= (List<CrashDetect>)em.createNamedQuery("CrashDetect.getAllWithApplicationIdAndIncidentId")
+		    			.setParameter("applicationId", this.applicationId)
+		    			.setParameter("incidentId", this.getId())
+		    			.getResultList();
+        		
+                for (CrashDetect cd : crashDetects) {
+                	JSONObject crashDetectObj = CrashDetect.getJson(cd, true);
+                	if(crashDetectObj == null) {
+                		break;
+                	}
+                    ja.put(crashDetectObj);
+                }
+                eventsObj.put("crashes", ja);
+                eventsObj.put("logs", emptyJa);
+                eventsObj.put("feedback", emptyJa);
+        	} else if(wellKnownTag.equalsIgnoreCase(Incident.FEEDBACK_TAG)) {
+        		List<Feedback> feedbacks= (List<Feedback>)em.createNamedQuery("Feedback.getAllWithApplicationIdAndIncidentId")
+		    			.setParameter("applicationId", this.applicationId)
+		    			.setParameter("incidentId", this.getId())
+		    			.getResultList();
+        		
+                for (Feedback fb : feedbacks) {
+                	JSONObject feedbackObj = Feedback.getJson(fb, true);
+                	if(feedbackObj == null) {
+                		break;
+                	}
+                    ja.put(feedbackObj);
+                }
+                eventsObj.put("crashes", emptyJa);
+                eventsObj.put("logs", emptyJa);
+                eventsObj.put("feedback", ja);
+        	} else {
+        		log.severe("getEventsJsonObj() well known tag not set properly");
+        	}
+        } catch (Exception e) {
+            log.severe("getEventsJsonObj(): exception = " + e.getMessage());
+        } finally {
+			em.close();
+		}
+    	
+    	return eventsObj;
+    }
 	
 	public static Boolean isModeValid(String theMode) {
 		if(theMode.equalsIgnoreCase(Incident.ACTIVE_REMOTE_CONTROL_MODE) || theMode.equalsIgnoreCase(Incident.INACTIVE_REMOTE_CONTROL_MODE)) return true;
@@ -813,6 +902,8 @@ public class Incident {
 		i.setRemoteControlMode((String)theEntity.getProperty("remoteControlMode"));
 		i.setSummary((String)theEntity.getProperty("summary"));
 		i.setMessage((String)theEntity.getProperty("message"));
+		i.setLocalEndpoint((String)theEntity.getProperty("localEndpoint"));
+		i.setRemoteEndpoint((String)theEntity.getProperty("remoteEndpoint"));
 		return i;
 	}
 	

@@ -36,6 +36,10 @@ import com.stretchcom.rskybox.server.GMT;
     		query="SELECT ef FROM EndpointFilter ef WHERE ef.userId = :userId and ef.applicationId = :applicationId ORDER BY ef.createdGmtDate DESC"
     ),
     @NamedQuery(
+    		name="EndpointFilter.getByUserIdAndApplicationIdAndIsActive",
+    		query="SELECT ef FROM EndpointFilter ef WHERE ef.userId = :userId and ef.applicationId = :applicationId and ef.isActive = :isActive ORDER BY ef.createdGmtDate DESC"
+    ),
+    @NamedQuery(
     		name="EndpointFilter.getByKey",
     		query="SELECT ef FROM EndpointFilter ef WHERE ef.key = :key"
     ),

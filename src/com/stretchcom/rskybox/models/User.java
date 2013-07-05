@@ -339,7 +339,7 @@ public class User {
                         
                         // only queue the notification if either email or SMS is active
                         if(isEmailActive || isSmsActive) {
-                            List<EndpointFilter> endpointFilters = getUserEndpointFilters(theApplicationId, userId);
+                            List<EndpointFilter> endpointFilters = getActiveUserEndpointFilters(theApplicationId, userId);
                             
                             // endpoint filters are used to filter OUT notifications, so only notify if no endpoint filters match
                             if(!anyFilterMatches(endpointFilters, theIncident.getLocalEndpoint(), theIncident.getRemoteEndpoint())) {
@@ -413,14 +413,15 @@ public class User {
 	}
 	
 	// Returns list of users matching specified email address
-	public static List<EndpointFilter> getUserEndpointFilters(String theApplicationId, String theUserId) {
+	public static List<EndpointFilter> getActiveUserEndpointFilters(String theApplicationId, String theUserId) {
         EntityManager em = EMF.get().createEntityManager();
         List<EndpointFilter> endpointFilters = null;
 
 		try {
-			endpointFilters = (List<EndpointFilter>)em.createNamedQuery("EndpointFilter.getByUserIdAndApplicationId")
+			endpointFilters = (List<EndpointFilter>)em.createNamedQuery("EndpointFilter.getByUserIdAndApplicationIdAndIsActive")
 				.setParameter("applicationId", theApplicationId)
 				.setParameter("userId", theUserId)
+				.setParameter("isActive", true)
 				.getResultList();
     		// access the first user to prevent 'lazy loading' which would break the calling routines
     		if(endpointFilters.size() > 0) {
