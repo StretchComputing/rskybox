@@ -151,4 +151,12 @@
         <property name="status" direction="asc"/>
     </datastore-index>
 
+    <!-- Used 1 time in query history -->
+    <datastore-index kind="EndpointFilter" ancestor="false" source="auto">
+        <property name="applicationId" direction="asc"/>
+        <property name="isActive" direction="asc"/>
+        <property name="userId" direction="asc"/>
+        <property name="createdGmtDate" direction="desc"/>
+    </datastore-index>
+
 </datastore-indexes>
