@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.Feedback;
+import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.MobileCarrier;
 
 public class MigrationTaskServlet extends HttpServlet {
@@ -70,6 +71,8 @@ public class MigrationTaskServlet extends HttpServlet {
 	    		archiver();
 	    	} else if(migrationName.equalsIgnoreCase("cleanRskyboxLogsTask")) {
 	    		cleanRskyboxLogs();
+	    	} else if(migrationName.equalsIgnoreCase("setLepRepInIncidentsTask")) {
+	    		setLepRepInIncidents();
 	    	} else {
 	    		log.info("task unknown");
 	    	}
@@ -108,6 +111,31 @@ public class MigrationTaskServlet extends HttpServlet {
 			}
 		}
     	log.info("number of numberOfClientLogsMatched = " + numberOfClientLogsMatched);
+	}
+	
+	private void setLepRepInIncidents() {
+		EntityManager emIncident = EMF.get().createEntityManager();
+		int numberOfIncidentLepsUpdated = 0;
+		int numberOfIncidentRepsUpdated = 0;
+		
+		List<Incident> incidents = (List<Incident>)emIncident.createNamedQuery("Incident.getAll")
+				.getResultList();
+    	log.info("setLepRepInIncidents(): number of total incidents = " + incidents.size());
+    	
+		for(Incident i : incidents) {
+			emIncident.getTransaction().begin();
+			if(i.getLocalEndpoint() == null) {
+				numberOfIncidentLepsUpdated++;
+				i.setLocalEndpoint(Incident.DEFAULT_ENDPOINT);
+			}
+			if(i.getRemoteEndpoint() == null) {
+				numberOfIncidentRepsUpdated++;
+				i.setRemoteEndpoint(Incident.DEFAULT_ENDPOINT);
+			}
+			emIncident.getTransaction().commit();
+		}
+    	log.info("setLepRepInIncidents(): number of incidents with LEPs updated = " + numberOfIncidentLepsUpdated);
+    	log.info("setLepRepInIncidents(): number of incidents with REPs updated = " + numberOfIncidentRepsUpdated);
 	}
 	
 	private Boolean matchesTargetDate(Date theDate) {
