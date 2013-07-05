@@ -278,7 +278,7 @@ public class IncidentsResource extends ServerResource {
             	Incident i = Incident.build(entity);
                 // endpoint filters are used to filter OUT incidents, so only return incident if no endpoint filters match
                 if(!User.anyFilterMatches(endpointFilters, i.getLocalEndpoint(), i.getRemoteEndpoint())) {
-                    ja.put(i.getJson(this.includeEvents));
+                    ja.put(i.getJson(null, this.includeEvents));
                 }
             }
             json.put("incidents", ja);

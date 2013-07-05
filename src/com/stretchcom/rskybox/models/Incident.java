@@ -454,8 +454,8 @@ public class Incident {
     	return notificationType;
 	}
 	
-    public JSONObject getJson(String theIncludeEvents) {
-    	return getJson(null, theIncludeEvents);
+    public JSONObject getJson() {
+    	return getJson(null, null);
     }
 
     public JSONObject getJson(String theApiStatus, String theIncludeEvents) {
