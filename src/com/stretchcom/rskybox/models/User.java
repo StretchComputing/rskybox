@@ -438,7 +438,8 @@ public class User {
 	
 	public static Boolean anyFilterMatches(List<EndpointFilter> theEndpointFilters, String theLEP, String theREP) {
 		for(EndpointFilter ef : theEndpointFilters) {
-			if(ef.matches(theLEP, theREP)) {
+			if(  ef.matches(theLEP, theREP) || 
+				(ef.getLocalEndpoint().equalsIgnoreCase(EndpointFilter.ALL_FILTER) && ef.getRemoteEndpoint().equalsIgnoreCase(EndpointFilter.ALL_FILTER))  ) {
 				return true;
 			}
 		}

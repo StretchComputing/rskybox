@@ -27,6 +27,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
+import com.stretchcom.rskybox.models.EndpointFilter;
 import com.stretchcom.rskybox.models.User;
 
 public class ApplicationsResource extends ServerResource {
@@ -224,6 +225,8 @@ public class ApplicationsResource extends ServerResource {
 		JSONObject jsonReturn = getApplicationJson(application, apiStatus, false, memberRole);
 		try {
 			jsonReturn.put("isAdmin", User.isAdmin());
+			Boolean isAllFilterActive = EndpointFilter.isAllFilterActive(currentUser.getId(), this.id);
+			jsonReturn.put("allFilterActive", isAllFilterActive);
 		} catch (JSONException e) {
 			log.severe("JSONException = " + e.getMessage());
 		}

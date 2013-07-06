@@ -5,11 +5,14 @@ import java.util.logging.Logger;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +22,7 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 import com.stretchcom.rskybox.server.ApiStatusCode;
+import com.stretchcom.rskybox.server.EMF;
 import com.stretchcom.rskybox.server.GMT;
 
 @Entity
@@ -36,6 +40,10 @@ import com.stretchcom.rskybox.server.GMT;
     		query="SELECT ef FROM EndpointFilter ef WHERE ef.userId = :userId and ef.applicationId = :applicationId ORDER BY ef.createdGmtDate DESC"
     ),
     @NamedQuery(
+    		name="EndpointFilter.getByUserIdAndApplicationIdandLepAndRep",
+    		query="SELECT ef FROM EndpointFilter ef WHERE ef.userId = :userId and ef.applicationId = :applicationId and ef.localEndpoint = :localEndpoint and ef.remoteEndpoint = :remoteEndpoint"
+    ),
+    @NamedQuery(
     		name="EndpointFilter.getByUserIdAndApplicationIdAndIsActive",
     		query="SELECT ef FROM EndpointFilter ef WHERE ef.userId = :userId and ef.applicationId = :applicationId and ef.isActive = :isActive ORDER BY ef.createdGmtDate DESC"
     ),
@@ -46,6 +54,8 @@ import com.stretchcom.rskybox.server.GMT;
 })
 public class EndpointFilter {
 	private static final Logger log = Logger.getLogger(EndpointFilter.class.getName());
+	
+	public final static String ALL_FILTER = "ALL";
 	
 	private Date createdGmtDate;
 	private String userId;
@@ -180,5 +190,70 @@ public class EndpointFilter {
       
       return true;
     }
+    
+    // Create all filter if it doesn't already exist
+	public static void createAllFilter(String theUserId, String theApplicationId) {
+        EntityManager em = EMF.get().createEntityManager();
+        EndpointFilter allFilter = null;
+		
+		try {
+			allFilter = (EndpointFilter)em.createNamedQuery("EndpointFilter.getByUserIdAndApplicationIdandLepAndRep")
+				.setParameter("userId", theUserId)
+				.setParameter("applicationId", theApplicationId)
+				.setParameter("localEndpoint", EndpointFilter.ALL_FILTER)
+				.setParameter("remoteEndpoint", EndpointFilter.ALL_FILTER)
+				.getSingleResult();
+		} catch (NoResultException e) {
+			// Not an error -- if there is no ALL filter, then create it
+	        em.getTransaction().begin();
+			try {
+				allFilter = new EndpointFilter();
+				allFilter.setApplicationId(theApplicationId);
+				allFilter.setUserId(theUserId);
+				allFilter.setIsActive(false);
+				allFilter.setLocalEndpoint(EndpointFilter.ALL_FILTER);
+				allFilter.setRemoteEndpoint(EndpointFilter.ALL_FILTER);
+				allFilter.setCreatedGmtDate(new Date());
+				em.persist(allFilter);
+				em.getTransaction().commit();
+			} catch (Exception e1) {
+				log.severe("createAllFilter() exception = " + e1.getMessage());
+			} finally {
+	            if (em.getTransaction().isActive()) {
+	                em.getTransaction().rollback();
+	            }
+	        }
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more EndpointFilters have the same key");
+		} finally {
+			em.close();
+		}
+	}
+	
+	public static Boolean isAllFilterActive(String theUserId, String theApplicationId) {
+        EntityManager em = EMF.get().createEntityManager();
+        EndpointFilter allFilter = null;
+		Boolean allFilterActive = false;
+		
+		try {
+			allFilter = (EndpointFilter)em.createNamedQuery("EndpointFilter.getByUserIdAndApplicationIdandLepAndRep")
+				.setParameter("userId", theUserId)
+				.setParameter("applicationId", theApplicationId)
+				.setParameter("localEndpoint", EndpointFilter.ALL_FILTER)
+				.setParameter("remoteEndpoint", EndpointFilter.ALL_FILTER)
+				.getSingleResult();
+			
+			if(allFilter.getIsActive()) {
+				allFilterActive = true;
+			}
+		} catch (NoResultException e) {
+			// Not an error -- function will now end up returning false
+		} catch (NonUniqueResultException e) {
+			log.severe("should never happen - two or more EndpointFilters have the same key");
+		} finally {
+			em.close();
+		}
+		return allFilterActive;
+	}
 
 }

@@ -185,6 +185,9 @@ public class EndpointFiltersResource extends ServerResource {
         	if(appMember == null) {
 				return Utility.apiError(this, ApiStatusCode.USER_NOT_AUTHORIZED_FOR_APPLICATION);
         	}
+        	
+        	// Create an All filter for this user if it doesn't already exist.
+        	EndpointFilter.createAllFilter(currentUser.getId(), this.applicationId);
 
         	List<EndpointFilter> allFilters = new ArrayList<EndpointFilter>();
             JSONArray ja = new JSONArray();
