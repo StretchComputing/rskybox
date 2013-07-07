@@ -225,6 +225,34 @@ var RSKYBOX = (function (r, $) {
     },
 
 
+    // EndpointFilters
+    endpointFiltersInit: function () {
+      try {
+        r.log.info('entering', 'MainController.endpointFiltersInit');
+        r.endpointFiltersView = new r.EndpointFiltersView({
+          collection: new r.EndpointFilters(),
+          applications: new r.Applications()
+        });
+      } catch (e) {
+        r.log.error(e, 'MainController.endpointFiltersInit');
+      }
+    },
+
+    endpointFiltersShow: function () {
+      try {
+        r.log.info('entering', 'MainController.endpointFiltersShow');
+        r.endpointFiltersView.setElement($.mobile.activePage);
+        r.endpointFiltersView.collection.setAppUrl(r.session.params.appId);
+        r.session.getCollection(r.session.keys.applications, r.endpointFiltersView.options.applications);
+        r.endpointFiltersView.collection.fetch({
+          statusCode: r.statusCodeHandlers()
+        });
+      } catch (e) {
+        r.log.error(e, 'MainController.endpointFiltersShow');
+      }
+    },
+
+
     // Logs
     logsInit: function () {
       try {
@@ -548,6 +576,8 @@ var RSKYBOX = (function (r, $) {
       { '#stream[?]id=.*':          { handler: 'streamInit',          events: 'i'   } },
       { '#stream[?]id=.*':          { handler: 'streamShow',          events: 's'   } },
       { '#stream[?]id=.*':          { handler: 'streamHide',          events: 'h'   } },
+      { '#endpointFilters':         { handler: 'endpointFiltersInit', events: 'i'   } },
+      { '#endpointFilters':         { handler: 'endpointFiltersShow', events: 's'   } },
       { '#logs':                    { handler: 'logsInit',            events: 'i'   } },
       { '#logs':                    { handler: 'logsShow',            events: 's'   } },
       { '#log[?]id=.*':             { handler: 'logInit',             events: 'i'   } },
