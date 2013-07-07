@@ -240,6 +240,7 @@ public class ApplicationsResource extends ServerResource {
         
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_OK);
+    	User currentUser = Utility.getCurrentUser(getRequest());
         try {
 			List<Application> applications = null;
             JSONArray ja = new JSONArray();
@@ -249,8 +250,11 @@ public class ApplicationsResource extends ServerResource {
         	if(user != null) {
         		String userId = KeyFactory.keyToString(user.getKey());
     			applications = user.getApplications();
+    			Boolean isAllFilterActive = null;
                 for (Application app : applications) {
                     ja.put(getApplicationJson(app, true, app.getMemberRole()));
+        			isAllFilterActive = EndpointFilter.isAllFilterActive(currentUser.getId(), app.getId());
+        			json.put("allFilterActive", isAllFilterActive);
                 }
                 json.put("applications", ja);
                 json.put("apiStatus", apiStatus);
