@@ -176,7 +176,7 @@ public class ApplicationsResource extends ServerResource {
         }
         
         if(isUpdate) {
-        	jsonReturn = getApplicationJson(application, apiStatus, false, memberRole);
+        	jsonReturn = getApplicationJson(application, apiStatus, false, memberRole, currentUser);
         }
         log.info("about to return");
         return new JsonRepresentation(jsonReturn);
@@ -222,7 +222,7 @@ public class ApplicationsResource extends ServerResource {
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} 
         
-		JSONObject jsonReturn = getApplicationJson(application, apiStatus, false, memberRole);
+		JSONObject jsonReturn = getApplicationJson(application, apiStatus, false, memberRole, currentUser);
 		try {
 			jsonReturn.put("isAdmin", User.isAdmin());
 			Boolean isAllFilterActive = EndpointFilter.isAllFilterActive(currentUser.getId(), this.id);
@@ -250,11 +250,8 @@ public class ApplicationsResource extends ServerResource {
         	if(user != null) {
         		String userId = KeyFactory.keyToString(user.getKey());
     			applications = user.getApplications();
-    			Boolean isAllFilterActive = null;
                 for (Application app : applications) {
-                    ja.put(getApplicationJson(app, true, app.getMemberRole()));
-        			isAllFilterActive = EndpointFilter.isAllFilterActive(currentUser.getId(), app.getId());
-        			json.put("allFilterActive", isAllFilterActive);
+                    ja.put(getApplicationJson(app, true, app.getMemberRole(), currentUser));
                 }
                 json.put("applications", ja);
                 json.put("apiStatus", apiStatus);
@@ -269,11 +266,11 @@ public class ApplicationsResource extends ServerResource {
         return new JsonRepresentation(json);
     }
     
-    private JSONObject getApplicationJson(Application application, Boolean isList, String memberRole) {
-    	return getApplicationJson(application, null, isList, memberRole);
+    private JSONObject getApplicationJson(Application application, Boolean isList, String memberRole, User theCurrentUser) {
+    	return getApplicationJson(application, null, isList, memberRole, theCurrentUser);
     }
 
-    private JSONObject getApplicationJson(Application theApplication, String theApiStatus, Boolean theIsList, String theMemberRole) {
+    private JSONObject getApplicationJson(Application theApplication, String theApiStatus, Boolean theIsList, String theMemberRole, User theCurrentUser) {
         JSONObject json = new JSONObject();
 
         try {
@@ -295,6 +292,8 @@ public class ApplicationsResource extends ServerResource {
             	json.put("numberOfOpenLogs", theApplication.getNumberOfOpenLogs());
             	json.put("numberOfOpenCrashes", theApplication.getNumberOfOpenCrashes());
             	json.put("numberOfOpenFeedback", theApplication.getNumberOfOpenFeedbacks());
+    			Boolean isAllFilterActive = EndpointFilter.isAllFilterActive(theCurrentUser.getId(), theApplication.getId());
+    			json.put("allFilterActive", isAllFilterActive);
             	             	
             	User user = Utility.getCurrentUser(getRequest());
             	if(user != null) {
