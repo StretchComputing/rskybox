@@ -144,6 +144,23 @@
         <property name="status" direction="asc"/>
         <property name="activeThruGmtDate" direction="asc"/>
     </datastore-index>
+
+    <!-- Used 10 times in query history -->
+    <datastore-index kind="Incident" ancestor="false" source="auto">
+        <property name="applicationId" direction="asc"/>
+        <property name="eventName" direction="asc"/>
+        <property name="localEndpoint" direction="asc"/>
+        <property name="remoteEndpoint" direction="asc"/>
+        <property name="tags" direction="asc"/>
+        <property name="createdGmtDate" direction="desc"/>
+    </datastore-index>
+
+    <!-- Used 4 times in query history -->
+    <datastore-index kind="Incident" ancestor="false" source="auto">
+        <property name="applicationId" direction="asc"/>
+        <property name="status" direction="asc"/>
+        <property name="lastUpdatedGmtDate" direction="desc"/>
+    </datastore-index>
     
     <!-- Used 2 times in query history -->
     <datastore-index kind="Stream" ancestor="false" source="auto">
@@ -155,6 +172,13 @@
     <datastore-index kind="EndpointFilter" ancestor="false" source="auto">
         <property name="applicationId" direction="asc"/>
         <property name="isActive" direction="asc"/>
+        <property name="userId" direction="asc"/>
+        <property name="createdGmtDate" direction="desc"/>
+    </datastore-index>
+
+    <!-- Used 4 times in query history -->
+    <datastore-index kind="EndpointFilter" ancestor="false" source="auto">
+        <property name="applicationId" direction="asc"/>
         <property name="userId" direction="asc"/>
         <property name="createdGmtDate" direction="desc"/>
     </datastore-index>
