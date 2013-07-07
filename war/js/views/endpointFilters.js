@@ -5,6 +5,10 @@ var RSKYBOX = (function (r, $) {
   r.EndpointFilterEntryView = Backbone.View.extend({
     tagName: 'li',
 
+    events: {
+      'click': 'toggleActive'
+    },
+
     initialize: function () {
       try {
         _.bindAll(this, 'render');
@@ -21,13 +25,17 @@ var RSKYBOX = (function (r, $) {
       } catch (e) {
         r.log.error(e, 'EndpointFilterEntryView.render');
       }
+    },
+
+    toggleActive: function () {
+      this.model.save({ active: !this.model.get('active') });
     }
   });
 
   r.EndpointFiltersView = r.JqmPageBaseView.extend({
     initialize: function () {
       try {
-        this.collection.bind('reset', this.render, this);
+        this.collection.bind('reset change', this.render, this);
         this.template = _.template($('#noEndpointFiltersTemplate').html());
       } catch (e) {
         r.log.error(e, 'EndpointFiltersView.initialize');

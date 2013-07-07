@@ -374,12 +374,10 @@
       <h3>No endpoint filters at this time.</h3>
     </script>
     <script type="text/template" id="endpointFilterEntryTemplate">
-      <a href="#endpointFilters?id=<%= id %>&appId=<%= appId %>">
-        <p><%= id %></p>
-        <p><%= localEndPoint %></p>
-        <p><%= remoteEndPoint %></p>
-        <p><%= active ? 'active' : 'inactive' %></p>
-      </a>
+      <p>
+      Local: <%= localEndPoint %><br>
+      Remote: <%= remoteEndPoint %></p>
+      Status: <%= active ? 'active' : 'inactive' %>
     </script>
 
 
