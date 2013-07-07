@@ -12,6 +12,7 @@ var RSKYBOX = (function (r, $) {
     initialize: function () {
       try {
         _.bindAll(this, 'render');
+        this.model.bind('change', this.updateApplication, this);
         this.template = _.template($('#endpointFilterEntryTemplate').html());
       } catch (e) {
         r.log.error(e, 'EndpointFilterEntryView.initialize');
@@ -29,6 +30,10 @@ var RSKYBOX = (function (r, $) {
 
     toggleActive: function () {
       this.model.save({ active: !this.model.get('active') });
+    },
+
+    updateApplication: function () {
+      r.session.reset();
     }
   });
 

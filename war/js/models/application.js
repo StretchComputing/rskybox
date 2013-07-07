@@ -15,6 +15,7 @@ var RSKYBOX = (function (r, $) {
       numberOfOpenLogs: null,
       numberOfOpenCrashes: null,
       numberOfOpenFeedback: null,
+      allFilterActive: null
     },
 
     initialize: function () {

@@ -89,7 +89,7 @@
     <script type="text/template" id="applicationTemplate">
       <ul data-role="listview" data-inset="true">
         <li><a href="#streams?appId=<%= id %>">Live Debug</a></li>
-        <li><a href="#endpointFilters?appId=<%= id %>">Endpoint Filters</a></li>
+        <li><a href="#endpointFilters?appId=<%= id %>">Endpoint Filters <%= allFilterActive ? '("ALL" filter enabled)' : '' %></a></li>
       </ul>
       <ul data-role="listview" data-inset="true">
         <li>
