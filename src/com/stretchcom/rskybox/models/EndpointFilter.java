@@ -143,8 +143,8 @@ public class EndpointFilter {
             		json.put("id", KeyFactory.keyToString(endpointFilter.getKey()));
         		}
             	json.put("active", endpointFilter.getIsActive());
-            	json.put("localEndPoint", endpointFilter.getLocalEndpoint());
-            	json.put("remoteEndPoint", endpointFilter.getRemoteEndpoint());
+            	json.put("localEndpoint", endpointFilter.getLocalEndpoint());
+            	json.put("remoteEndpoint", endpointFilter.getRemoteEndpoint());
             	json.put("appId", endpointFilter.getApplicationId());
         	}
         } catch (JSONException e) {
@@ -179,13 +179,13 @@ public class EndpointFilter {
       if (localEndpoint == null) {
     	  if(other.localEndpoint != null) {return false;}
       } else {
-    	  if(other.localEndpoint != null && !localEndpoint.equals(other.localEndpoint)) {return false;}
+    	  if(other.localEndpoint != null && !localEndpoint.equalsIgnoreCase(other.localEndpoint)) {return false;}
       }
       
       if (remoteEndpoint == null) {
     	  if(other.remoteEndpoint != null) {return false;}
       } else {
-    	  if(other.remoteEndpoint != null && !remoteEndpoint.equals(other.remoteEndpoint)) {return false;}
+    	  if(other.remoteEndpoint != null && !remoteEndpoint.equalsIgnoreCase(other.remoteEndpoint)) {return false;}
       }
       
       return true;

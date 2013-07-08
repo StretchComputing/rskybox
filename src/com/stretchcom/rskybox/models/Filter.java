@@ -63,8 +63,8 @@ public class Filter {
 	private String userId;
 	private String status;
 	private String applicationId;
-    private String localEndPoint;
-    private String remoteEndPoint;
+	private String localEndpoint;
+	private String remoteEndpoint;
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -116,20 +116,20 @@ public class Filter {
 		this.applicationId = applicationId;
 	}
 
-	public String getLocalEndPoint() {
-		return localEndPoint;
+	public String getLocalEndpoint() {
+		return localEndpoint;
 	}
 
-	public void setLocalEndPoint(String localEndPoint) {
-		this.localEndPoint = localEndPoint;
+	public void setLocalEndpoint(String localEndpoint) {
+		this.localEndpoint = localEndpoint;
 	}
 
-	public String getRemoteEndPoint() {
-		return remoteEndPoint;
+	public String getRemoteEndpoint() {
+		return remoteEndpoint;
 	}
 
-	public void setRemoteEndPoint(String remoteEndPoint) {
-		this.remoteEndPoint = remoteEndPoint;
+	public void setRemoteEndpoint(String remoteEndpoint) {
+		this.remoteEndpoint = remoteEndpoint;
 	}
 	
     public static JSONObject getJson(Filter clientLog, Boolean isList) {

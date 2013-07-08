@@ -189,11 +189,11 @@ public class FeedbackResource extends ServerResource {
 			feedback.setRecordedGmtDate(gmtRecordedDate);
 			
 			if(!isUpdate) {
-				if(json.has("localEndPoint")) {
-					feedback.setLocalEndpoint(json.getString("localEndPoint"));
+				if(json.has("localEndpoint")) {
+					feedback.setLocalEndpoint(json.getString("localEndpoint"));
 				}
-				if(json.has("remoteEndPoint")) {
-					feedback.setRemoteEndpoint(json.getString("remoteEndPoint"));
+				if(json.has("remoteEndpoint")) {
+					feedback.setRemoteEndpoint(json.getString("remoteEndpoint"));
 				}
 				if((feedback.getLocalEndpoint() != null && feedback.getRemoteEndpoint() == null) ||
 				   (feedback.getLocalEndpoint() == null && feedback.getRemoteEndpoint() != null)) {

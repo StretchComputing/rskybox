@@ -8,8 +8,8 @@ var RSKYBOX = (function (r, $) {
       id: null,
       appId: null,
       active: null,
-      localEndPoint: null,
-      remoteEndPoint: null
+      localEndpoint: null,
+      remoteEndpoint: null
     }
   });
 

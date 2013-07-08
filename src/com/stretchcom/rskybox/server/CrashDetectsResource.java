@@ -323,11 +323,11 @@ public class CrashDetectsResource extends ServerResource {
 			crashDetect.setDetectedGmtDate(gmtDetectedDate);
 			
 			if(!isUpdate) {
-				if(json.has("localEndPoint")) {
-					crashDetect.setLocalEndpoint(json.getString("localEndPoint"));
+				if(json.has("localEndpoint")) {
+					crashDetect.setLocalEndpoint(json.getString("localEndpoint"));
 				}
-				if(json.has("remoteEndPoint")) {
-					crashDetect.setRemoteEndpoint(json.getString("remoteEndPoint"));
+				if(json.has("remoteEndpoint")) {
+					crashDetect.setRemoteEndpoint(json.getString("remoteEndpoint"));
 				}
 				if((crashDetect.getLocalEndpoint() != null && crashDetect.getRemoteEndpoint() == null) ||
 				   (crashDetect.getLocalEndpoint() == null && crashDetect.getRemoteEndpoint() != null)) {
