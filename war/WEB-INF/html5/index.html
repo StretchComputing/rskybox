@@ -243,6 +243,8 @@
       <a href="#feedback?id=<%= id %>&appId=<%= appId %>">
         <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
         <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
+        <p>Local Endpoint: <%- localEndpoint %></p>
+        <p>Remote Endpoint: <%- remoteEndpoint %></p>
         <p><%- name %></p>
         <p><%- message %></p></a>
         <span class="ui-li-count count-bubble"><%= eventCount %></span>
@@ -260,6 +262,8 @@
       <ul data-role="listview" data-inset="true">
         <li class="long-lines">#<%= number %> - <%- name %></li>
         <li>Severity: <%= severity %></li>
+        <li>Local Endpoint: <%- localEndpoint %></li>
+        <li>Remote Endpoint: <%- remoteEndpoint %></li>
         <li><%- message %></li>
         <li><%- summary %></li>
         <li>Created: <%= RSKYBOX.format.longDate(createdDate) %></li>
@@ -398,6 +402,8 @@
       <a href="#log?id=<%= id %>&appId=<%= appId %>">
         <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
         <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
+        <p>Local Endpoint: <%- localEndpoint %></p>
+        <p>Remote Endpoint: <%- remoteEndpoint %></p>
         <p><%- name %></p>
         <p><%- message %></p></a>
         <span class="ui-li-count count-bubble"><%= eventCount %></span>
@@ -415,6 +421,8 @@
       <ul data-role="listview" data-inset="true">
         <li class="long-lines">#<%= number %> - <%- name %></li>
         <li>Severity: <%= severity %></li>
+        <li>Local Endpoint: <%- localEndpoint %></li>
+        <li>Remote Endpoint: <%- remoteEndpoint %></li>
         <li><%- message %></li>
         <li><%- summary %></li>
         <li>Created: <%= RSKYBOX.format.longDate(createdDate) %></li>
@@ -497,6 +505,8 @@
       <a href="#crash?id=<%= id %>&appId=<%= appId %>">
         <h1>#<%= number %> - Severity: <%= severity %> <%= status === 'closed' ? '(closed)' : '' %></h1>
         <p><%= RSKYBOX.format.longDate(lastUpdatedDate) %></p>
+        <p>Local Endpoint: <%- localEndpoint %></p>
+        <p>Remote Endpoint: <%- remoteEndpoint %></p>
         <p><%- name %></p>
         <p><%- message %></p></a>
     </script>
@@ -513,6 +523,8 @@
       <ul data-role="listview" data-inset="true">
         <li class="long-lines">#<%= number %> - <%- name %></li>
         <li>Severity: <%= severity %></li>
+        <li>Local Endpoint: <%- localEndpoint %></li>
+        <li>Remote Endpoint: <%- remoteEndpoint %></li>
         <li><%- message %></li>
         <li><%- summary %></li>
         <li>Created: <%= RSKYBOX.format.longDate(createdDate) %></li>

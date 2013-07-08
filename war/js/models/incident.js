@@ -11,6 +11,8 @@ var RSKYBOX = (function (r, $) {
       status: null,
       severity: null,
       name: null,
+      localEndpoint: null,
+      remoteEndpoint: null,
       lastUpdatedDate: null,
       createdDate: null,
       tags: null,
@@ -20,8 +22,8 @@ var RSKYBOX = (function (r, $) {
       mode: null,
       message: null,
       appActions: null,
-			githubUrl: null,
-    },
+			githubUrl: null
+    }
   });
 
 
