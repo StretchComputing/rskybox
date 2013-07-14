@@ -22,6 +22,7 @@ import org.restlet.representation.Representation;
 import org.restlet.representation.Variant;
 import org.restlet.resource.Delete;
 import org.restlet.resource.Get;
+import org.restlet.resource.Options;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ResourceException;
@@ -90,6 +91,20 @@ public class EndUsersResource extends ServerResource {
         	log.info("Get List of End Users API");
         	return index();
         }
+    }
+
+    // Handles 'EndUser OPTIONS'
+    @Options("json")
+    public JsonRepresentation options(Representation entity) {
+		Form headers = (Form) getResponseAttributes().get("org.restlet.http.headers");
+		if (headers == null) {
+			headers = new Form();
+			getResponseAttributes().put("org.restlet.http.headers", headers);
+		}
+		headers.add("Access-Control-Allow-Origin", "*");
+		headers.add("Access-Control-Allow-Methods", "OPTIONS, POST");
+		headers.add("Access-Control-Allow-Headers", "Authorization,Content-Type");
+    		return new JsonRepresentation(new JSONObject());
     }
 
     // Handles 'Create End User API'

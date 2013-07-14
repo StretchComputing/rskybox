@@ -94,7 +94,7 @@ public class StreamsResource extends ServerResource {
 		}
 		headers.add("Access-Control-Allow-Origin", "*");
 		headers.add("Access-Control-Allow-Methods", "OPTIONS, POST");
-		headers.add("Access-Control-Allow-Headers", "Authorization");
+		headers.add("Access-Control-Allow-Headers", "Authorization,Content-Type");
     		return new JsonRepresentation(new JSONObject());
     }
 
