@@ -21,7 +21,7 @@ var RSKYBOX = (function (r, $) {
       warn: 10,
       info: 25,
       debug: 50,
-      local: 75,
+      local: 75
     },
 
     apiCodes = {
@@ -30,7 +30,7 @@ var RSKYBOX = (function (r, $) {
       315: 'Log name is required.',
       414: 'Invalid timestamp parameter.',
       415: 'Invalid duration parameter.',
-      605: 'Application not found.',
+      605: 'Application not found.'
     },
 
 
@@ -59,7 +59,7 @@ var RSKYBOX = (function (r, $) {
         }
         localStorage[this.indexKey] = index + 1;
         return index;
-      },
+      }
     },
 
     getAppActions = function () {
@@ -97,7 +97,7 @@ var RSKYBOX = (function (r, $) {
 
       localStorage[key] = JSON.stringify({
         description: name + ': ' + message,
-        timestamp: new Date(),
+        timestamp: new Date()
       });
     },
 
@@ -211,7 +211,7 @@ var RSKYBOX = (function (r, $) {
 
         isEnabled: function () {
           return guarding;
-        },
+        }
       };
     }()),
 
@@ -238,7 +238,7 @@ var RSKYBOX = (function (r, $) {
           userName: r.config.getUserName(),
           summary: r.config.getSummary(),
           instanceUrl: r.config.getInstanceUrl(),
-          appActions: getAppActions(),
+          appActions: getAppActions()
         };
 
         // Error level logs generall have an Error object as the message.
@@ -278,8 +278,8 @@ var RSKYBOX = (function (r, $) {
           },
           statusCode: r.config.log.statusCodeHandlers,
           headers: {
-            Authorization: r.config.getAuthHeader(),
-          },
+            Authorization: r.config.getAuthHeader()
+          }
         });
 
         guard.disable();
@@ -337,7 +337,7 @@ var RSKYBOX = (function (r, $) {
 
     local: function (message, name) {
       base('local', message, name);
-    },
+    }
   };
 
 
@@ -353,7 +353,7 @@ var RSKYBOX = (function (r, $) {
     apiCodes = {
       305: 'Application ID required.',
       319: 'User ID is required.',
-      605: 'Application not found.',
+      605: 'Application not found.'
     },
 
 
@@ -369,8 +369,6 @@ var RSKYBOX = (function (r, $) {
     // Make sure we have valid attributes for logging to the server.
     isValid = function (attrs) {
       try {
-        var console = r.config.getConsole();
-
         if (!attrs) {
           r.log.local('attrs not defined', 'RSKYBOX.enduser.isValid');
           return false;
@@ -405,7 +403,7 @@ var RSKYBOX = (function (r, $) {
             application: r.config.getApplicationName(),
             version: r.config.getApplicationVersion(),
             summary: r.config.getSummary(),
-            instanceUrl: r.config.getInstanceUrl(),
+            instanceUrl: r.config.getInstanceUrl()
           };
 
         r.log.info('entering', 'RSKYBOX.enduser.server');
@@ -424,8 +422,8 @@ var RSKYBOX = (function (r, $) {
           success: r.config.enduser.successHandler,
           statusCode: r.config.enduser.statusCodeHandlers,
           headers: {
-            Authorization: r.config.getAuthHeader(),
-          },
+            Authorization: r.config.getAuthHeader()
+          }
         });
       } catch (e) {
         window.console.error(e, 'RSKYBOX.enduser.server');
@@ -437,7 +435,7 @@ var RSKYBOX = (function (r, $) {
     // Access to the apiCodes if the client app wants to use our messages.
     getApiCodes: function () {
       return apiCodes;
-    },
+    }
   };
 
   $(function () {
@@ -451,4 +449,3 @@ var RSKYBOX = (function (r, $) {
 
   return r;
 }(RSKYBOX || {}, jQuery));
-

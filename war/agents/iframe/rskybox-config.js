@@ -8,7 +8,7 @@
 // express written permission, distribute or commercially exploit the content.
 //
 
-var RSKYBOX = (function (r, $) {
+var RSKYBOX = (function (r) {
   'use strict';
 
 
@@ -25,7 +25,7 @@ var RSKYBOX = (function (r, $) {
     // Your application's name.
     getApplicationName: function () {
       try {
-        return 'factor';
+        return r.rskyboxConfig.aplicationName;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationName');
       }
@@ -35,7 +35,7 @@ var RSKYBOX = (function (r, $) {
     // Your application's version.
     getApplicationVersion: function () {
       try {
-        return '';
+        return r.rskyboxConfig.aplicationVersion || 'not set';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationVersion');
       }
@@ -45,7 +45,7 @@ var RSKYBOX = (function (r, $) {
     // Your rSkybox application ID.
     getApplicationId: function () {
       try {
-        return 'ahRzfnJza3lib3gtc3RyZXRjaGNvbXIYCxILQXBwbGljYXRpb24YgICAgKCx9AgM';
+        return r.rskyboxConfig.applicationId;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationId');
       }
@@ -55,7 +55,7 @@ var RSKYBOX = (function (r, $) {
     // Your rSkybox authentication token.
     getAuthHeader: function () {
       try {
-        return 'Basic clNreWJveExvZ2luOmdrZHZiOTM3ZGpzZjBoOWt1YTB0b2Yyc2Zw';
+        return r.rskyboxConfig.authHeader;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getAuthHeader');
       }
@@ -65,7 +65,7 @@ var RSKYBOX = (function (r, $) {
     // Track information about who experienced the issue here.
     getUserId: function () {
       try {
-        return 'Insert code to retrieve user ID here.';
+        return r.rskyboxConfig.userId || 'not set';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserId');
       }
@@ -73,7 +73,7 @@ var RSKYBOX = (function (r, $) {
 
     getUserName: function () {
       try {
-        return 'Insert code to retrieve user name here.';
+        return r.rskyboxConfig.userId || 'not set';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserName');
       }
@@ -164,8 +164,8 @@ var RSKYBOX = (function (r, $) {
           } catch (e) {
             window.console.error(e, 'RSKYBOX.config.log.apiErrorHandler');
           }
-        },
-      },
+        }
+      }
     },
 
 
@@ -210,11 +210,11 @@ var RSKYBOX = (function (r, $) {
           } catch (e) {
             window.console.error(e, 'RSKYBOX.config.enduser.apiErrorHandler');
           }
-        },
-      },
-    },
+        }
+      }
+    }
   };
 
 
   return r;
-}(RSKYBOX || {}, jQuery));
+}(RSKYBOX || {}));

@@ -8,7 +8,7 @@
 // express written permission, distribute or commercially exploit the content.
 //
 
-var RSKYBOX = (function (r, $) {
+var RSKYBOX = (function (r) {
   'use strict';
 
 
@@ -164,8 +164,8 @@ var RSKYBOX = (function (r, $) {
           } catch (e) {
             window.console.error(e, 'RSKYBOX.config.log.apiErrorHandler');
           }
-        },
-      },
+        }
+      }
     },
 
 
@@ -210,11 +210,11 @@ var RSKYBOX = (function (r, $) {
           } catch (e) {
             window.console.error(e, 'RSKYBOX.config.enduser.apiErrorHandler');
           }
-        },
-      },
-    },
+        }
+      }
+    }
   };
 
 
   return r;
-}(RSKYBOX || {}, jQuery));
+}(RSKYBOX || {}));
