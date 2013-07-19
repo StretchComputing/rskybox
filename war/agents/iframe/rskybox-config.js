@@ -118,6 +118,7 @@ var RSKYBOX = (function (r) {
     // information you want to track.
     getInstanceUrl: function () {
       try {
+        return;
         return this.appWindow.location.hash;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getInstanceUrl');

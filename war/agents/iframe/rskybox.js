@@ -65,6 +65,7 @@ var RSKYBOX = (function (r, $) {
     getAppActions = function () {
       var action, actions = [], i;
 
+      return;
       for (i = appAction.first; i <= appAction.max; i += 1) {
         action = r.config.appWindow.localStorage[appAction.key + i];
         if (action) {
@@ -97,6 +98,7 @@ var RSKYBOX = (function (r, $) {
     },
 
     saveAppAction = function (name, message) {
+      return;
       var
         key = appAction.key + appAction.getIndex();
 
