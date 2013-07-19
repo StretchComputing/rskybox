@@ -12,8 +12,42 @@ var RSKYBOX = (function (r) {
   'use strict';
 
 
+  var receiveMessage = function (event) {
+    var data = event.data.data;
+
+    if (data.appConfig) {
+      r.config.appConfig = data.appConfig;
+    }
+
+    switch (event.data.level) {
+    case 'error':
+      r.log.error(data.message, data.name);
+      break;
+    case 'warn':
+      r.log.warn(data.message, data.name);
+      break;
+    case 'info':
+      r.log.info(data.message, data.name);
+      break;
+    case 'debug':
+      r.log.debug(data.message, data.name);
+      break;
+    case 'local':
+      r.log.local(data.message, data.name);
+      break;
+    default:
+      window.console.log('unknown level received ' + event.data.level);
+      break;
+    }
+  };
+
+  window.addEventListener('message', receiveMessage, false);
+
+
   // Make sure we have an object to work with.
   r.config = {
+    appWindow: window.parent,
+
     // A function that returns the object to use for logging locally.
     // Must support the following methods: error(), warn(), info(), debug(), log().
     // Return nothing or undefined to turn off local logging.
@@ -25,7 +59,7 @@ var RSKYBOX = (function (r) {
     // Your application's name.
     getApplicationName: function () {
       try {
-        return r.rskyboxConfig.aplicationName;
+        return this.appConfig.applicationName || 'not set';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationName');
       }
@@ -35,7 +69,7 @@ var RSKYBOX = (function (r) {
     // Your application's version.
     getApplicationVersion: function () {
       try {
-        return r.rskyboxConfig.aplicationVersion || 'not set';
+        return this.appConfig.applicationVersion || 'not set';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationVersion');
       }
@@ -45,7 +79,7 @@ var RSKYBOX = (function (r) {
     // Your rSkybox application ID.
     getApplicationId: function () {
       try {
-        return r.rskyboxConfig.applicationId;
+        return this.appConfig.applicationId;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getApplicationId');
       }
@@ -55,7 +89,7 @@ var RSKYBOX = (function (r) {
     // Your rSkybox authentication token.
     getAuthHeader: function () {
       try {
-        return r.rskyboxConfig.authHeader;
+        return this.appConfig.authHeader;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getAuthHeader');
       }
@@ -65,7 +99,7 @@ var RSKYBOX = (function (r) {
     // Track information about who experienced the issue here.
     getUserId: function () {
       try {
-        return r.rskyboxConfig.userId || 'not set';
+        return this.appConfig.userId || 'not set';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserId');
       }
@@ -73,7 +107,7 @@ var RSKYBOX = (function (r) {
 
     getUserName: function () {
       try {
-        return r.rskyboxConfig.userId || 'not set';
+        return this.appConfig.userId || 'not set';
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getUserName');
       }
@@ -84,7 +118,7 @@ var RSKYBOX = (function (r) {
     // information you want to track.
     getInstanceUrl: function () {
       try {
-        return location.hash;
+        return this.appWindow.location.hash;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getInstanceUrl');
       }
@@ -166,55 +200,8 @@ var RSKYBOX = (function (r) {
           }
         }
       }
-    },
-
-
-    enduser: {
-      // A callback function to respond to success returned by the REST/Ajax call.
-      successHandler: function (data, status, jqXHR) {
-        try {
-          window.console.info('entering', 'RSKYBOX.config.enduser.successHandler');
-        } catch (e) {
-          window.console.error(e, 'RSKYBOX.config.enduser.getSuccessHandler');
-        }
-      },
-
-
-      // A callback function to respond to errors returned by the REST/Ajax call.
-      errorHandler: function (jqXHR, textStatus, errorThrown) {
-        try {
-          if (jqXHR.responseText) { return; }  // This is an apiError.
-          window.console.warn(textStatus, 'RSKYBOX.config.enduser.errorHandler');
-        } catch (e) {
-          window.console.error(e, 'RSKYBOX.config.enduser.errorHandler');
-        }
-      },
-
-
-      // An object compatible with jQuery's Ajax statusCode option.
-      // This is an object of key/value pairs where the key is the status code to
-      // respond to, and the value is the callback function that responds.
-      // rSkybox API errors are returned in HTTP code 422.
-      statusCodeHandlers: {
-        422: function (jqXHR) {
-          try {
-            var
-              apiCodes = r.enduser.getApiCodes(),
-              code = JSON.parse(jqXHR.responseText).apiStatus;
-
-            window.console.info(code, 'RSKYBOX.config.enduser.apiErrorHandler');
-
-            if (!apiCodes[code]) {
-              window.console.info('Undefined apiStatus: ' + code, 'RSKYBOX.config.enduser.apiErrorHandler');
-            }
-          } catch (e) {
-            window.console.error(e, 'RSKYBOX.config.enduser.apiErrorHandler');
-          }
-        }
-      }
     }
   };
-
 
   return r;
 }(RSKYBOX || {}));

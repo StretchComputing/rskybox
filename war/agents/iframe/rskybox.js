@@ -52,12 +52,12 @@ var RSKYBOX = (function (r, $) {
       indexKey: 'rAppActionIndex',
 
       getIndex: function () {
-        var index = +localStorage[this.indexKey] || this.first;
+        var index = +r.config.appWindow.localStorage[this.indexKey] || this.first;
 
         if (index > this.max) {
           index = this.first;
         }
-        localStorage[this.indexKey] = index + 1;
+        r.config.appWindow.localStorage[this.indexKey] = index + 1;
         return index;
       }
     },
@@ -66,13 +66,18 @@ var RSKYBOX = (function (r, $) {
       var action, actions = [], i;
 
       for (i = appAction.first; i <= appAction.max; i += 1) {
-        action = localStorage[appAction.key + i];
+        action = r.config.appWindow.localStorage[appAction.key + i];
         if (action) {
           action = JSON.parse(action);
           action.timestamp = new Date(action.timestamp);
           actions.push(action);
         }
       }
+
+      if (actions.length <= 0) {
+        return;
+      }
+
       actions.sort(function (a1, a2) {
         if (a1.timestamp < a2.timestamp) {
           return -1;
@@ -95,7 +100,7 @@ var RSKYBOX = (function (r, $) {
       var
         key = appAction.key + appAction.getIndex();
 
-      localStorage[key] = JSON.stringify({
+      r.config.appWindow.localStorage[key] = JSON.stringify({
         description: name + ': ' + message,
         timestamp: new Date()
       });
@@ -354,112 +359,6 @@ var RSKYBOX = (function (r, $) {
       base('local', message, name);
     }
   };
-
-
-  return r;
-}(RSKYBOX || {}, jQuery));
-
-
-
-var RSKYBOX = (function (r, $) {
-  'use strict';
-
-  var
-    apiCodes = {
-      305: 'Application ID required.',
-      319: 'User ID is required.',
-      605: 'Application not found.'
-    },
-
-
-    // The URL for the REST call to create an rSkybox enduser.
-    getUrl = function () {
-      try {
-        return r.restUrlBase + '/applications/' + r.config.getApplicationId() + '/endUsers';
-      } catch (e) {
-        window.console.error(e, 'RSKYBOX.enduser.getUrl');
-      }
-    },
-
-    // Make sure we have valid attributes for logging to the server.
-    isValid = function (attrs) {
-      try {
-        if (!attrs) {
-          r.log.local('attrs not defined', 'RSKYBOX.enduser.isValid');
-          return false;
-        }
-        if (!attrs.appId) {
-          r.log.local('appId not specified', 'RSKYBOX.enduser.isValid');
-          return false;
-        }
-        if (!attrs.authHeader) {
-          r.log.local('authHeader not specified', 'RSKYBOX.enduser.isValid');
-          return false;
-        }
-        if (!attrs.userName) {
-          r.log.local('userName not set', 'RSKYBOX.enduser.isValid');
-          delete attrs.userName;
-        }
-
-        return true;
-      } catch (e) {
-        window.console.error(e, 'RSKYBOX.log.isValid');
-      }
-    },
-
-    server = function () {
-      try {
-        var
-          attrs = {
-            appId: r.config.getApplicationId(),
-            authHeader: r.config.getAuthHeader(),
-            userId: r.config.getUserId(),
-            userName: r.config.getUserName(),
-            application: r.config.getApplicationName(),
-            version: r.config.getApplicationVersion(),
-            summary: r.config.getSummary(),
-            instanceUrl: r.config.getInstanceUrl()
-          };
-
-        r.log.info('entering', 'RSKYBOX.enduser.server');
-
-        // Ensure attrs are valid for making an Ajax call.
-        if (!isValid(attrs)) { return; }
-
-        delete attrs.appId;
-        delete attrs.authHeader;
-
-        $.ajax({
-          type: 'POST',
-          data: JSON.stringify(attrs),
-          url: getUrl(),
-          error: r.config.enduser.errorHandler,
-          success: r.config.enduser.successHandler,
-          statusCode: r.config.enduser.statusCodeHandlers,
-          headers: {
-            Authorization: r.config.getAuthHeader()
-          }
-        });
-      } catch (e) {
-        window.console.error(e, 'RSKYBOX.enduser.server');
-      }
-    };
-
-
-  r.enduser = {
-    // Access to the apiCodes if the client app wants to use our messages.
-    getApiCodes: function () {
-      return apiCodes;
-    }
-  };
-
-  $(function () {
-    function sendToServer() {
-      server();
-      setTimeout(sendToServer, 15 * 60 * 1000); // every fifteen minutes
-    }
-    setTimeout(sendToServer, 30 * 1000);  // wait a bit before sending first message
-  });
 
 
   return r;
