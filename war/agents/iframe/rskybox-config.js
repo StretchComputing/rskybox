@@ -118,8 +118,7 @@ var RSKYBOX = (function (r) {
     // information you want to track.
     getInstanceUrl: function () {
       try {
-        return;
-        return this.appWindow.location.hash;
+        return this.appConfig.instanceUrl;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getInstanceUrl');
       }
@@ -129,9 +128,18 @@ var RSKYBOX = (function (r) {
     // A good place to put information about the user's environment.
     getSummary: function () {
       try {
-        return navigator.userAgent;
+        return this.appConfig.summary;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getSummary');
+      }
+    },
+
+
+    getAppActions: function () {
+      try {
+        return this.appConfig.appActions;
+      } catch (e) {
+        window.console.error(e, 'RSKYBOX.config.getAppActions');
       }
     },
 
