@@ -368,6 +368,8 @@ public class ClientLogsResource extends ServerResource {
 				   (clientLog.getLocalEndpoint() == null && clientLog.getRemoteEndpoint() != null)) {
 					return Utility.apiError(this, ApiStatusCode.LOCAL_AND_REMOTE_ENDPOINTS_MUST_BE_SPECIFIED_TOGETHER);
 				}
+				log.info("Create Client Log: localEndpoint = " + clientLog.getLocalEndpoint());
+				log.info("Create Client Log: remoteEndpoint = " + clientLog.getRemoteEndpoint());
 			}
 			
 			String summary = null;
