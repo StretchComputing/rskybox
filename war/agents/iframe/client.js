@@ -1,38 +1,42 @@
-window.onload = function () {
-  'use strict';
-
-
-  RSKYBOX.rskyboxWindow = document.getElementById('rskybox').contentWindow,
-
-  RSKYBOX.rskyboxConfig = {
-    applicationName: '<%- app name goes here %>',
-    applicationVersion: null,
-    applicationId: '<%- app id goes here %>',
-    authHeader: '<%- auth header goes here %>',
-    userId: 'not set',
-    userName: 'not set'
-  };
-};
-
-
 var RSKYBOX = (function (r) {
   'use strict';
 
 
   var
-    base = function (level, message, name) {
-      r.rskyboxConfig.appActions = getAppActions(),
-      r.rskyboxConfig.instanceUrl = window.location.hash;
-      r.rskyboxConfig.summary = navigator.userAgent;
+    rskyboxWindow,
+    rskyboxConfig = {
+      applicationName: '<%- appName %>',
+      applicationVersion: null,
+      applicationId: '<%= appId %>',
+      authHeader: '<%= authHeader %>',
+      userId: 'not set',
+      userName: 'not set'
+    },
 
-      r.rskyboxWindow.postMessage({
-        level: level,
-        data: {
-          appConfig: r.rskyboxConfig,
-          message: level !== 'error' ? message : { stack: message.stack },
-          name: name
+
+    base = function (level, message, name) {
+      rskyboxConfig.appActions = getAppActions(),
+      rskyboxConfig.instanceUrl = window.location.hash;
+      rskyboxConfig.summary = navigator.userAgent;
+
+      function later() {
+        if (!RSKYBOX.IFRAME_READY) {
+          window.setTimeout(later, 250);
+          console.log('later');
+          return;
         }
-      }, '*');
+        rskyboxWindow = rskyboxWindow || document.getElementById('rskybox').contentWindow;
+        rskyboxWindow.postMessage({
+          level: level,
+          data: {
+            appConfig: rskyboxConfig,
+            message: level !== 'error' ? message : { stack: message.stack },
+            name: name
+          }
+        }, 'https://rskybox-stretchcom.appspot.com');
+      }
+
+      later();
     },
 
     // AppActions that go along with a server log.
@@ -95,8 +99,16 @@ var RSKYBOX = (function (r) {
         description: name + ': ' + message,
         timestamp: new Date()
       });
+    },
+
+    receiveMessage = function (event) {
+      if (event.data === 'ready') {
+        RSKYBOX.IFRAME_READY = true;
+      }
     };
 
+
+  window.addEventListener('message', receiveMessage, false);
 
   r.log = {
     error: function (e, name) {
@@ -117,6 +129,7 @@ var RSKYBOX = (function (r) {
       base('local', message, name);
     }
   };
+
 
   return r;
 })(RSKYBOX || {});
