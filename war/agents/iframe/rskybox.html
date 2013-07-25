@@ -9,6 +9,11 @@
     <script src="/js/lib/jquery-1.7.1.min.js"></script>
     <script src="/agents/iframe/rskybox.js"></script>
     <script src="/agents/iframe/rskybox-config.js"></script>
+    <script>
+      window.onload = function () {
+        window.parent.postMessage('ready', '*');
+      };
+    </script>
   </head>
   <body></body>
 </html>
