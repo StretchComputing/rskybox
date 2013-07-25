@@ -23,8 +23,10 @@ public class EmailToSmsClient {
 	private static final String HTTP_GET = "GET";
 	
 	// Email-to-SMS URL
-	private static final String EMAIL_TO_SMS_BASE_URL = "https://50.57.64.254:8443/rTeamSms/";
+	private static final String EMAIL_TO_SMS_BASE_URL = "https://166.78.114.103:8443/rTeamSms/";
+	//private static final String EMAIL_TO_SMS_BASE_URL = "https://50.57.64.254:8443/rTeamSms/";
 	//private static final String EMAIL_TO_SMS_BASE_URL = "http://50.57.64.254:8080/rTeamSms/";
+	
 	private static final String EMAIL_RESOURCE_URI = "email";
 	private static final String IS_ALIVE_RESOURCE_URI = "vitals";
 	
