@@ -36,6 +36,7 @@ import com.stretchcom.rskybox.models.ClientLog;
 import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.EndpointFilter;
 import com.stretchcom.rskybox.models.Incident;
+import com.stretchcom.rskybox.models.Stream;
 import com.stretchcom.rskybox.models.User;
 
 public class EndpointFiltersResource extends ServerResource {
@@ -288,6 +289,9 @@ public class EndpointFiltersResource extends ServerResource {
 			
 			em.persist(endpointFilter);
             em.getTransaction().commit();
+            
+            id = KeyFactory.keyToString(endpointFilter.getKey());
+            jsonReturn.put("id", id);
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
