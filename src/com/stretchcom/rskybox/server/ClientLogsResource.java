@@ -30,6 +30,7 @@ import org.restlet.resource.ServerResource;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Text;
 import com.stretchcom.rskybox.models.AppAction;
 import com.stretchcom.rskybox.models.AppMember;
 import com.stretchcom.rskybox.models.Application;
@@ -338,12 +339,12 @@ public class ClientLogsResource extends ServerResource {
 			}
 			
 			if(!isUpdate && json.has("stackBackTrace")) {
-				List<String> stackBackTraces = new ArrayList<String>();
+				List<Text> stackBackTraces = new ArrayList<Text>();
 	        	JSONArray stackBackTracesJsonArray = json.getJSONArray("stackBackTrace");
 				int arraySize = stackBackTracesJsonArray.length();
 				log.info("stackBackTraces json array length = " + arraySize);
 				for(int i=0; i<arraySize; i++) {
-					String stackBackTrace = stackBackTracesJsonArray.getString(i);
+					Text stackBackTrace = new Text(stackBackTracesJsonArray.getString(i));
 					stackBackTraces.add(stackBackTrace);
 				}
 				clientLog.setStackBackTraces(stackBackTraces);

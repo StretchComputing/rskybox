@@ -121,7 +121,7 @@ public class ClientLog {
 	private List<Integer> appActionDurations;
 	
 	@Basic
-	private List<String> stackBackTraces;
+	private List<Text> stackBackTraces;
 
 
 	public Key getKey() {
@@ -258,11 +258,11 @@ public class ClientLog {
 		this.number = number;
 	}
     	
-	public List<String> getStackBackTraces() {
+	public List<Text> getStackBackTraces() {
 		return stackBackTraces;
 	}
 
-	public void setStackBackTraces(List<String> stackBackTraces) {
+	public void setStackBackTraces(List<Text> stackBackTraces) {
 		this.stackBackTraces = stackBackTraces;
 	}
 	
@@ -369,13 +369,13 @@ public class ClientLog {
     		theSb.append("\n");
     	}
     	
-    	List<String> stackBackTraces = this.stackBackTraces;
+    	List<Text> stackBackTraces = this.stackBackTraces;
     	if(stackBackTraces != null && stackBackTraces.size() > 0) {
     		theSb.append("* Stack Backtrace: ");
     		theSb.append("\n");
-        	for(String trace : stackBackTraces) {
+        	for(Text trace : stackBackTraces) {
         		theSb.append("    * ");
-        		theSb.append(trace);
+        		theSb.append(trace.getValue());
         		theSb.append("\n");
         	}
     	}
@@ -410,23 +410,23 @@ public class ClientLog {
             	json.put("incidentId", clientLog.getIncidentId());
             	
             	JSONArray stackBackTracesJsonArray = new JSONArray();
-            	List<String> stackBackTraces = clientLog.getStackBackTraces();
+            	List<Text> stackBackTraces = clientLog.getStackBackTraces();
             	
             	//////////////////////////////////////////////////
             	// TODO - remove support of stackBackTrace string
             	//////////////////////////////////////////////////
             	if(stackBackTraces == null || stackBackTraces.size() == 0) {
         			log.info("returning legacy stackBackTrace");
-            		stackBackTraces = new ArrayList<String>();
-            		String stackBackTrace = clientLog.getStackBackTrace();
-            		if(stackBackTrace != null && stackBackTrace.length() > 0) {
+            		stackBackTraces = new ArrayList<Text>();
+            		Text stackBackTrace = new Text(clientLog.getStackBackTrace());
+            		if(stackBackTrace != null && stackBackTrace.toString().length() > 0) {
                 		stackBackTraces.add(stackBackTrace);
             		}
             	}
             	//////////////////////////////////////////////////
 
-            	for(String sbt: stackBackTraces) {
-            		stackBackTracesJsonArray.put(sbt);
+            	for(Text sbt: stackBackTraces) {
+            		stackBackTracesJsonArray.put(sbt.getValue());
             	}
             	log.info("stackBackTraces # of parts = " + stackBackTraces.size());
             	json.put("stackBackTrace", stackBackTracesJsonArray);
