@@ -401,11 +401,13 @@ var RSKYBOX = (function (r, $) {
   hidePageLoadingMessage = function () {
     if (pageLoad('decrement') <= 0) {
       $.mobile.hidePageLoadingMsg();
+      $.mobile.activePage.removeClass('ui-disabled');
     }
   };
 
   showPageLoadingMessage = function () {
     pageLoad('increment');
+    $.mobile.activePage.addClass('ui-disabled');
     $.mobile.showPageLoadingMsg();
   };
 
