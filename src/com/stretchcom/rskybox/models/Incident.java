@@ -975,7 +975,7 @@ public class Incident {
 			Application thisApplication = Application.getApplicationWithId(this.getApplicationId());
 			if(thisApplication != null) {
 				String appName = thisApplication.getName();
-				if(appName.equalsIgnoreCase("rTeam") || appName.equalsIgnoreCase("rSkybox") || appName.equalsIgnoreCase("Arc") ) {
+				if(appName.equalsIgnoreCase("rTeam") || appName.equalsIgnoreCase("rSkybox") || appName.equalsIgnoreCase("Arc Suite") ) {
 					isIssueTrackingSupported = true;
 				}
 			}
