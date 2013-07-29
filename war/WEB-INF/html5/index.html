@@ -381,7 +381,11 @@
       <p>
       Local: <%= localEndpoint %><br>
       Remote: <%= remoteEndpoint %></p>
-      Status: <%= active ? 'active' : 'inactive' %>
+			<% if(active) { %>
+				Endpoint activity filtered out
+			<% } else { %>
+				Endpoint activity visible
+		  <% } %>
     </script>
 
 
