@@ -181,6 +181,9 @@ public class Notification {
 		int listSize = this.applicationIds.size();
 		for(int i=0; i<listSize; i++) {
 			NotificationDetails nd = new NotificationDetails();
+			
+			// TODO
+			// if anything corrupt below, maybe need to delete the record from the datastore
 
 			///////////////////////////////////////////////////////////////////////
 			// Convert "default" values stored in Big Table to "normal Java" values
@@ -189,7 +192,7 @@ public class Notification {
 			if(this.applicationIds.size() > i) {
 				applicationId = this.applicationIds.get(i).equals("") ? null : this.applicationIds.get(i);
 			} else {
-				log.severe("applicationIds array size corrupt");
+				log.severe("applicationIds array size corrupt: i = " + i + " array size = " + this.applicationIds.size());
 			}
 			nd.setApplicationId(applicationId);
 			
@@ -197,7 +200,7 @@ public class Notification {
 			if(this.applicationNames.size() > i) {
 				applicationName = this.applicationNames.get(i).equals("") ? null : this.applicationNames.get(i);
 			} else {
-				log.severe("applicationNames array size corrupt");
+				log.severe("applicationNames array size corrupt: i = " + i + " array size = " + this.applicationNames.size());
 			}
 			nd.setApplicationName(applicationName);
 			
@@ -205,7 +208,7 @@ public class Notification {
 			if(this.clientLogCounts.size() > i) {
 				clientLogCount = this.clientLogCounts.get(i);
 			} else {
-				log.severe("clientLogCounts array size corrupt");
+				log.severe("clientLogCounts array size corrupt: i = " + i + " array size = " + this.clientLogCounts.size());
 			}
 			nd.setClientLogCount(clientLogCount);
 			
@@ -213,7 +216,7 @@ public class Notification {
 			if(this.clientLogMessages.size() > i) {
 				clientLogMessage = this.clientLogMessages.get(i).equals("") ? null : this.clientLogMessages.get(i);
 			} else {
-				log.severe("client log messages array size corrupt");
+				log.severe("client log messages array size corrupt: i = " + i + " array size = " + this.clientLogMessages.size());
 			}
 			nd.setClientLogMessage(clientLogMessage);
 			
@@ -221,7 +224,7 @@ public class Notification {
 			if(this.clientLogIds.size() > i) {
 				clientLogId = this.clientLogIds.get(i).equals("") ? null : this.clientLogIds.get(i);
 			} else {
-				log.severe("clientLogIds array size corrupt");
+				log.severe("clientLogIds array size corrupt: i = " + i + " array size = " + this.clientLogIds.size());
 			}
 			nd.setClientLogId(clientLogId);
 			
@@ -229,7 +232,7 @@ public class Notification {
 			if(this.updatedLogCounts.size() > i) {
 				updatedLogCount = this.updatedLogCounts.get(i);
 			} else {
-				log.severe("updatedLogCounts array size corrupt");
+				log.severe("updatedLogCounts array size corrupt: i = " + i + " array size = " + this.updatedLogCounts.size());
 			}
 			nd.setUpdatedLogCount(updatedLogCount);
 			
@@ -237,7 +240,7 @@ public class Notification {
 			if(this.updatedLogMessages.size() > i) {
 				updatedLogMessage = this.updatedLogMessages.get(i).equals("") ? null : this.updatedLogMessages.get(i);
 			} else {
-				log.severe("updated log messages array size corrupt");
+				log.severe("updated log messages array size corrupt: i = " + i + " array size = " + this.updatedLogMessages.size());
 			}
 			nd.setUpdatedLogMessage(updatedLogMessage);
 			
@@ -245,7 +248,7 @@ public class Notification {
 			if(this.updatedLogIds.size() > i) {
 				updatedLogId = this.updatedLogIds.get(i).equals("") ? null : this.updatedLogIds.get(i);
 			} else {
-				log.severe("updatedLogIds array size corrupt");
+				log.severe("updatedLogIds array size corrupt: i = " + i + " array size = " + this.updatedLogIds.size());
 			}
 			nd.setUpdatedLogId(updatedLogId);
 			
@@ -253,7 +256,7 @@ public class Notification {
 			if(this.crashCounts.size() > i) {
 				crashCount = this.crashCounts.get(i);
 			} else {
-				log.severe("crashCounts array size corrupt");
+				log.severe("crashCounts array size corrupt: i = " + i + " array size = " + this.crashCounts.size());
 			}
 			nd.setCrashCount(crashCount);
 			
@@ -261,7 +264,7 @@ public class Notification {
 			if(this.crashMessages.size() > i) {
 				crashMessage = this.crashMessages.get(i).equals("") ? null : this.crashMessages.get(i);
 			} else {
-				log.severe("crash messages array size corrupt");
+				log.severe("crash messages array size corrupt: i = " + i + " array size = " + this.crashMessages.size());
 			}
 			nd.setCrashMessage(crashMessage);
 			
@@ -269,7 +272,7 @@ public class Notification {
 			if(this.crashIds.size() > i) {
 				crashId = this.crashIds.get(i).equals("") ? null : this.crashIds.get(i);
 			} else {
-				log.severe("crashIds array size corrupt");
+				log.severe("crashIds array size corrupt: i = " + i + " array size = " + this.crashIds.size());
 			}
 			nd.setCrashId(crashId);
 			
@@ -277,7 +280,7 @@ public class Notification {
 			if(this.feedbackCounts.size() > i) {
 				feedbackCount = this.feedbackCounts.get(i);
 			} else {
-				log.severe("feedbackCounts array size corrupt");
+				log.severe("feedbackCounts array size corrupt: i = " + i + " array size = " + this.feedbackCounts.size());
 			}
 			nd.setFeedbackCount(feedbackCount);
 			
@@ -285,7 +288,7 @@ public class Notification {
 			if(this.feedbackMessages.size() > i) {
 				feedbackMessage = this.feedbackMessages.get(i).equals("") ? null : this.feedbackMessages.get(i);
 			} else {
-				log.severe("feedback messages array size corrupt");
+				log.severe("feedback messages array size corrupt: i = " + i + " array size = " + this.feedbackMessages.size());
 			}
 			nd.setFeedbackMessage(feedbackMessage);
 			
@@ -293,7 +296,7 @@ public class Notification {
 			if(this.feedbackIds.size() > i) {
 				feedbackId = this.feedbackIds.get(i).equals("") ? null : this.feedbackIds.get(i);
 			} else {
-				log.severe("itemIds array size corrupt");
+				log.severe("itemIds array size corrupt: i = " + i + " array size = " + this.feedbackIds.size());
 			}
 			nd.setFeedbackId(feedbackId);
 			
