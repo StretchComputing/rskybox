@@ -166,7 +166,8 @@ var RSKYBOX = (function (r, $) {
           userId: r.config.getUserId(),
           userName: r.config.getUserName(),
           summary: r.config.getSummary(),
-          instanceUrl: r.config.getInstanceUrl(),
+          localEndpoint: r.config.getLocalEndpoint(),
+          remoteEndpoint: r.config.getRemoteEndpoint(),
           appActions: r.config.getAppActions()
         };
 

@@ -10,13 +10,14 @@ var RSKYBOX = (function (r) {
       applicationId: '<%= appId %>',
       authHeader: '<%= authHeader %>',
       userId: 'not set',
-      userName: 'not set'
+      userName: 'not set',
+			localEndpoint: null,
+			remoteEndpoint: null
     },
 
 
     base = function (level, message, name) {
       rskyboxConfig.appActions = getAppActions(),
-      rskyboxConfig.instanceUrl = window.location.hash;
       rskyboxConfig.summary = navigator.userAgent;
 
       function later() {

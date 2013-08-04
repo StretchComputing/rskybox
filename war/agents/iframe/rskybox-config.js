@@ -114,17 +114,6 @@ var RSKYBOX = (function (r) {
     },
 
 
-    // Set the url of the current page, or use the field for some other type of
-    // information you want to track.
-    getInstanceUrl: function () {
-      try {
-        return this.appConfig.instanceUrl;
-      } catch (e) {
-        window.console.error(e, 'RSKYBOX.config.getInstanceUrl');
-      }
-    },
-
-
     // A good place to put information about the user's environment.
     getSummary: function () {
       try {
@@ -140,6 +129,26 @@ var RSKYBOX = (function (r) {
         return this.appConfig.appActions;
       } catch (e) {
         window.console.error(e, 'RSKYBOX.config.getAppActions');
+      }
+    },
+
+
+    // Your application's localEndpoint.
+    getLocalEndpoint: function () {
+      try {
+        return this.appConfig.localEndpoint || 'NA';
+      } catch (e) {
+        window.console.error(e, 'RSKYBOX.config.getLocalEndpoint');
+      }
+    },
+
+
+    // Your application's remoteEndpoint.
+    getRemoteEndpoint: function () {
+      try {
+        return this.appConfig.remoteEndpoint || 'NA';
+      } catch (e) {
+        window.console.error(e, 'RSKYBOX.config.getRemoteEndpoint');
       }
     },
 
