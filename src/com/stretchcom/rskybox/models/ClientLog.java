@@ -112,7 +112,7 @@ public class ClientLog {
     private Key key;
 	
 	@Basic
-	private List<String> appActionDescriptions;
+	private List<Text> appActionDescriptions;
 	
 	@Basic
 	private List<Date> appActionTimestamps;
@@ -279,7 +279,7 @@ public class ClientLog {
 			return false;
 		}
 		
-		this.appActionDescriptions = new ArrayList<String>();
+		this.appActionDescriptions = new ArrayList<Text>();
 		this.appActionTimestamps = new ArrayList<Date>();
 		this.appActionDurations = new ArrayList<Integer>();
 		
@@ -288,7 +288,7 @@ public class ClientLog {
 			// Convert "normal Java" values to "default" values in Big Table
 			////////////////////////////////////////////////////////////////
 			String description = aa.getDescription() == null ? "" : aa.getDescription();
-			this.appActionDescriptions.add(description);
+			this.appActionDescriptions.add(new Text(description));
 			
 			if(aa.getTimestamp() == null) {
 				log.severe("AppAction has a null timestamp -- not allowed");
@@ -321,7 +321,7 @@ public class ClientLog {
 			///////////////////////////////////////////////////////////////////////
 			String description = null;
 			if(appActionDescriptions.size() > i) {
-				description = this.appActionDescriptions.get(i).equals("") ? null : this.appActionDescriptions.get(i);
+				description = this.appActionDescriptions.get(i).getValue().equals("") ? null : this.appActionDescriptions.get(i).getValue();
 			} else {
 				log.severe("appActionDescriptions array size corrupt");
 			}
