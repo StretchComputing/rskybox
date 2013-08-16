@@ -284,7 +284,7 @@ var RSKYBOX = (function (r, $) {
           delete params.confirmationCode;
           r.changePage('confirm', 'signup', params);
           r.flash.info('Please supply a password to complete your registration.');
-          location.reload();
+          //location.reload();
           return;
         }
 
