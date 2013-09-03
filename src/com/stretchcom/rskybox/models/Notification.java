@@ -18,19 +18,59 @@ import javax.persistence.NonUniqueResultException;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.stretchcom.rskybox.server.EMF;
 import com.stretchcom.rskybox.server.Emailer;
 import com.stretchcom.rskybox.server.GMT;
 import com.stretchcom.rskybox.server.RskyboxApplication;
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Only one notification entity per user. The one notification holds the notification details for all a user's notifications for all their applications
-// Each of the user's applications has it's own NotificationDetails
-// sendGmtDate field is shared among the applications and represents the shortest notifications time of notifications queued up
-// (assumption: each application will eventually support setting a minimum notifications interval)
-// Cron job that sends notifications can do so using just the data in this entity (not normalized for performance reasons)
-// After notification sent, sendGmtDate is set to 2099 and notificationsDetails are cleared
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Refactor: 8/25/2013
+// -------------------
+// The Notification entity in the datastore was not working because the same Notification entry would get corrupt when new logs came in too fast
+// (an entry in the datastore can only be updated 4 or 5 times every second -- which is inadequate for notifications).
+//
+// Notification Layered Architecture
+// ---------------------------------
+// Logs are potentially created very rapidly. To allow the user notification updates to keep pace, the first layer of notifications are
+// implemented in memcache. A memcache cron job runs every minute and merges notification strings in memcache into the Notification entity in the
+// datastore.  The datastore cron job runs every 5 minutes and posts any user notifications that are "ready".
+//
+// Memcache challenge
+//-------------------
+// Memcache storage is not reliable and it is possible that memcache can get cleared.  If this happens, accumulated notifications for the last minute
+// will be lost. This design assumes that the a memcache clear happens infrequently enough that a minute of lost notifications be tolerated when
+// it does occur.
+//
+// Two Memcache Queues: Accumulating and Merging
+//----------------------------------------------
+// Two memcache notification queues are needed so that notifications can accumulate by CreateLog request threads at the same time the memcache cron
+// job is merging notification strings into the datastore. This makes the memcache portion of the design multi-thread safe.
+//
+// Accumulate Notifications
+//------------------------
+// As logs come in via CreateLog API requests, two memcache constructs are used to accumulate notifications. The first is a user Notification string
+// which is stored in memcache with the user ID as key. The Notification string "mirrors" the notification entity in the datastore but is obviously
+// a string based version. Like the Notification entity in the datastore, the Notification string is composed of multiple NotificationDetails strings.
+// Again, the NotificationDetails string "mirrors" the NotificationDetails object used by the Notification entity.
+//
+// As new logs come in, the memcache user notification strings can quickly be accessed using the user ID as key.  If the user Notification string
+// does not yet exist, it is created.  As each user notification string is created, the user ID is added to a sequential list of Pending Users also
+// stored in the memcache.
+//
+// Merging Notifications
+//---------------------
+// The memcache cron job runs once a minute. The first thing it does is flip flop the accumulating and merging queues. After this point, any new logs come
+// in are added to the 'new' accumulating queue which starts empty.  The cron job -- using what is now the merging queue -- goes through the Pending User
+// sequential list one-by-one to see which users need merging.  Then, for each pending user, the notification string is merged into the associated
+// Notification entity in the datastore.  The pending user list and all notification strings in merging queue are deleted and the memcache cron job finishes.
+// The merginq queue is now empty and is ready to become the accumulating queue at the beginning of the next cycle of the memcache cron job.
+//
+// Sending Notifications
+// ---------------------
+// The datastore cron job runs once every 5 minutes.  It queries for any notifications that are ready to send using the sendGmtDate and sends the
+// notifications to the appropriate users. Currently, the notification frequency is every 5 minutes. Eventually, each user will be able to configure
+// their own notification frequency based on parameters like severity.
 
 @Entity
 @NamedQueries({
@@ -65,6 +105,15 @@ public class Notification {
 	public static final String UPDATED_LOG = "updatedLog";
 	
 	public static final int DEFAULT_NOTIFICATION_PERIOD = 5;
+	private static final String ACCUMULATE_QUEUE_INDICATOR_KEY = "accumulateQueueIndicator";
+	private static final String BASE_PENDING_USER_LIST_COUNTER_KEY = "_pendingUsersListCounter";
+	private static final String BASE_PENDING_USER_LIST_ENTRY_KEY = "_pendingUserListEntry";
+	private static final String BASE_NOTIFICATION_STRING_KEY = "_notificationString";
+	
+	private static final String QUEUE1 = "q1";
+	private static final String QUEUE2 = "q2";
+	private static final String FIELD_DELIMETER = "_!_";
+	private static final String NOTIFICATION_DETAILS_DELIMETER = "__!!__";
 
 	private String userId;
 	private String emailAddress;
@@ -338,103 +387,6 @@ public class Notification {
 			}
 		}
 		return true;
-	}
-	
-	public static void queueNotification(User theUser, String theApplicationId, AppMember theAppMember, String theNotificationType, 
-			                             String theMessage, String theIncidentId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
-        EntityManager em = EMF.get().createEntityManager();
-        
-        String userId = null;
-        try {
-        	userId = KeyFactory.keyToString(theUser.getKey());
-		} catch (IllegalArgumentException e1) {
-			log.severe("exception = " + e1.getMessage());
-			e1.printStackTrace();
-			return;
-		}
-
-		em.getTransaction().begin();
-        try {
-        	Notification notification = null;
-        	try {
-            	notification = (Notification)em.createNamedQuery("Notification.getByUserId")
-        				.setParameter("userId", userId)
-        				.getSingleResult();
-            	log.info("existing notification found in datastore");
-        	} catch (NoResultException e) {
-    			// this is NOT an error, just the very first time a notification is being sent. Notification will be created just below ...
-    		} catch (NonUniqueResultException e) {
-    			log.severe("should never happen - two or more Users have the same key");
-    			e.printStackTrace();
-    		}
-        	
-        	//////////////////////////////////////////////////////////////////////
-        	// there is no Notification entity for this user yet, so create it now
-        	//////////////////////////////////////////////////////////////////////
-        	if(notification == null) {
-        		log.info("new notification instantiated");
-        		notification = new Notification();
-        		notification.setUserId(userId);
-        		notification.setSendGmtDateToFarFuture();  // to start, entity for this user is inactive
-        	}
-        	
-        	NotificationDetails notificationDetails = new NotificationDetails();
-        	notificationDetails.setApplicationId(theApplicationId);
-        	notificationDetails.setApplicationName(theAppMember.getApplicationName());
-        	
-        	notificationDetails.setCrashCount(0);
-        	notificationDetails.setClientLogCount(0);
-        	notificationDetails.setUpdatedLogCount(0);
-        	notificationDetails.setFeedbackCount(0);
-
-        	if(theNotificationType.equalsIgnoreCase(Notification.CRASH)) {
-        		notificationDetails.setCrashCount(1);
-            	notificationDetails.setCrashMessage(theMessage);
-            	notificationDetails.setCrashId(theIncidentId);
-        	} else if(theNotificationType.equalsIgnoreCase(Notification.CLIENT_LOG)) {
-        		notificationDetails.setClientLogCount(1);
-            	notificationDetails.setClientLogMessage(theMessage);
-            	notificationDetails.setClientLogId(theIncidentId);
-        	} else if(theNotificationType.equalsIgnoreCase(Notification.UPDATED_LOG)) {
-        		notificationDetails.setUpdatedLogCount(1);
-            	notificationDetails.setUpdatedLogMessage(theMessage);
-            	notificationDetails.setUpdatedLogId(theIncidentId);
-        	} else if(theNotificationType.equalsIgnoreCase(Notification.FEEDBACK)) {
-        		notificationDetails.setFeedbackCount(1);
-            	notificationDetails.setFeedbackMessage(theMessage);
-            	notificationDetails.setFeedbackId(theIncidentId);
-        	}
-        	notification.updateNotificationDetailsList(notificationDetails);
-        	
-        	///////////////////////////////////////////////////////////////////////////////////////////
-        	// update emailAddress and smsEmailAddress based on whether email and SMS are now activated
-        	///////////////////////////////////////////////////////////////////////////////////////////
-        	if(theIsEmailActive) {
-        		notification.setEmailAddress(theUser.getEmailAddress());
-        	} else {
-        		notification.setEmailAddress(null);
-        	}
-        	if(theIsSmsActive) {
-        		notification.setSmsEmailAddress(theUser.getSmsEmailAddress());
-        	} else {
-        		notification.setSmsEmailAddress(null);
-        	}
-        	
-        	// check if sendGmtDate needs to be updated
-        	if(!GMT.isDateBeforeNowPlusOffsetMinutes(notification.getSendGmtDate(), DEFAULT_NOTIFICATION_PERIOD)) {
-        		log.info("setting sendGmtDate to 5 minutes in the future");
-        		// set sendGmtDate to five minutes in the future
-        		notification.setSendGmtDate(GMT.addMinutesToDate(new Date(), DEFAULT_NOTIFICATION_PERIOD));
-        	}
-        	
-        	em.persist(notification);
-        	em.getTransaction().commit();
-		}  finally {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
-            em.close();
-        }
 	}
 	
 	private void initNotificationDetails() {
@@ -771,4 +723,556 @@ public class Notification {
     	log.info("SMS URL = " + url);
         return url;
 	}
+	
+	private static void ensureMemcacheValid(MemcacheService theMemcache) {
+		if(!theMemcache.contains(ACCUMULATE_QUEUE_INDICATOR_KEY)) {
+			log.info("isMemcacheValid() memcache was NOT valid, had to be initialized");
+			createNotificationQueues(theMemcache);
+		}
+	}
+	
+	private static void createNotificationQueues(MemcacheService theMemcache) {
+		// initialize Pending User List for Accumulating queue
+		theMemcache.put(getAccumulatingPendingUserListCounterKey(theMemcache), 0);
+		// initialize Pending User List for Merging queue
+		theMemcache.put(getMergingPendingUserListCounterKey(theMemcache), 0);
+
+		// q1 is initially the accumulating queue -- it flip flops from there every cycle of the memcache cron job
+		theMemcache.put(ACCUMULATE_QUEUE_INDICATOR_KEY, "q1");
+	}
+	
+	private static String getAccumulatingQueueKey(MemcacheService theMemcache) {
+		return (String)theMemcache.get(ACCUMULATE_QUEUE_INDICATOR_KEY);
+	}
+	
+	private static String getMergingQueueKey(MemcacheService theMemcache) {
+		String indicator = (String)theMemcache.get(ACCUMULATE_QUEUE_INDICATOR_KEY);
+		if(indicator.equals(QUEUE1)) {
+			return QUEUE2;
+		} else {
+			return QUEUE1;
+		}
+	}
+	
+	private static void flipFlopQueues(MemcacheService theMemcache) {
+		String indicator = (String)theMemcache.get(ACCUMULATE_QUEUE_INDICATOR_KEY);
+		if(indicator.equals(QUEUE1)) {
+			theMemcache.put(ACCUMULATE_QUEUE_INDICATOR_KEY, QUEUE2);
+		} else {
+			theMemcache.put(ACCUMULATE_QUEUE_INDICATOR_KEY, QUEUE1);
+		}
+	}
+	
+	private static String getAccumulatingPendingUserListCounterKey(MemcacheService theMemcache) {
+		return getAccumulatingQueueKey(theMemcache) + BASE_PENDING_USER_LIST_COUNTER_KEY;
+	}
+	
+	private static String getMergingPendingUserListCounterKey(MemcacheService theMemcache) {
+		return getMergingQueueKey(theMemcache) + BASE_PENDING_USER_LIST_COUNTER_KEY;
+	}
+	
+	private static String getAccumulatingPendingUserListEntryKey(Integer theSequence, MemcacheService theMemcache) {
+		return theSequence.toString() + "_" + getAccumulatingQueueKey(theMemcache) + BASE_PENDING_USER_LIST_ENTRY_KEY;
+	}
+	
+	private static String getMergingPendingUserListEntryKey(Integer theSequence, MemcacheService theMemcache) {
+		return theSequence.toString() + "_" + getMergingQueueKey(theMemcache) + BASE_PENDING_USER_LIST_ENTRY_KEY;
+	}
+	
+	private static String getAccumulatingNotificationStringKey(String theUserId, MemcacheService theMemcache) {
+		return theUserId + "_" + getAccumulatingQueueKey(theMemcache) + BASE_NOTIFICATION_STRING_KEY;
+	}
+	
+	private static String getMergingNotificationStringKey(String theUserId, MemcacheService theMemcache) {
+		return theUserId + "_" + getMergingQueueKey(theMemcache) + BASE_NOTIFICATION_STRING_KEY;
+	}
+	
+	// Operates on Accumulating Queue
+	private static void updateNotificationString(String theUserId, NotificationDetails theNotificationsDetails, MemcacheService theMemcache) {
+		String notificationStringKey = getAccumulatingNotificationStringKey(theUserId, theMemcache);
+		String existingNotificationString = "";
+		if(!theMemcache.contains(notificationStringKey)) {
+			// this user has no prior notifications -- so add to the Pending User list
+			String pendingUserListCounterKey = getAccumulatingPendingUserListCounterKey(theMemcache);
+			// put the userId in the Pending User sequential list which is the work list for the cron job
+			int nextSequence = (Integer)theMemcache.get(pendingUserListCounterKey);
+			String entryKey = getAccumulatingPendingUserListEntryKey(nextSequence, theMemcache);
+			theMemcache.put(entryKey, theUserId);
+			theMemcache.increment(pendingUserListCounterKey, 1);
+		} else {
+			existingNotificationString = (String)theMemcache.get(notificationStringKey);
+		}
+		
+		String newNotificationString = mergeNotificationDetails(theNotificationsDetails, existingNotificationString);
+		theMemcache.put(notificationStringKey, newNotificationString);
+	}
+	
+	// Operates on Accumulating Queue
+	private static String mergeNotificationDetails(NotificationDetails theNotificationsDetails, String theExistingNotificationString) {
+		if(theExistingNotificationString.length() == 0) {
+			// first user notification -- easy peasy
+			return fromNotificationDetailsToString(theNotificationsDetails);
+		}
+		
+		Integer targetNotificationDetailsIndex = getTargetNotificationDetails(theExistingNotificationString, theNotificationsDetails.getApplicationId());
+		if(targetNotificationDetailsIndex == null) {
+			// this notificationString does NOT have a notificationDetailString for this application ID, so just add one to the end
+			return theExistingNotificationString + fromNotificationDetailsToString(theNotificationsDetails);
+		} else {
+			return replaceNotificatonDetails(theExistingNotificationString, targetNotificationDetailsIndex);
+		}
+	}
+	
+	private static Integer getTargetNotificationDetails(String theExistingNotificationString, String theApplicationID) {
+		Integer targetNotificationDetailsIndex = null;
+		
+		int notificationDetailsIndex = 0;
+		while(true) {
+			int appIdDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, notificationDetailsIndex);
+			if(appIdDelimeterIndex == -1) {
+				log.severe("getTargetNotificationDetails(): application ID field delimeter not found - should NOT happen");
+				break;
+			}
+			
+			String appId = theExistingNotificationString.substring(notificationDetailsIndex, appIdDelimeterIndex);
+			if(appId.equalsIgnoreCase(theApplicationID)) {
+				// found the matching NotificationDetails substring
+				targetNotificationDetailsIndex = notificationDetailsIndex;
+				break;
+			}
+			
+			int notificationDetailsDelimeterIndex = theExistingNotificationString.indexOf(NOTIFICATION_DETAILS_DELIMETER, notificationDetailsIndex);
+			if(notificationDetailsDelimeterIndex == -1) {
+				log.severe("getTargetNotificationDetails(): notificationsDetails delimeter not found - should NOT happen");
+				break;
+			}
+			
+			notificationDetailsIndex = notificationDetailsDelimeterIndex + NOTIFICATION_DETAILS_DELIMETER.length();
+			if(theExistingNotificationString.length() <= notificationDetailsIndex ) {
+				// there are no more notifications details in this notification string so stop checking for match
+				break;
+			}
+		}
+		
+		return targetNotificationDetailsIndex;
+	}
+	
+	private static String fromNotificationDetailsToString(NotificationDetails theNotificationsDetails) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(theNotificationsDetails.getApplicationId());
+		sb.append(FIELD_DELIMETER);
+		sb.append(theNotificationsDetails.getApplicationName());
+		sb.append(FIELD_DELIMETER);
+		
+		sb.append(theNotificationsDetails.getClientLogCount());
+		sb.append(FIELD_DELIMETER);
+		sb.append(encodeEmbeddedDelimeters(theNotificationsDetails.getClientLogMessage()));
+		sb.append(FIELD_DELIMETER);
+		sb.append(theNotificationsDetails.getClientLogId());
+		sb.append(FIELD_DELIMETER);
+		
+		sb.append(theNotificationsDetails.getUpdatedLogCount());
+		sb.append(FIELD_DELIMETER);
+		sb.append(encodeEmbeddedDelimeters(theNotificationsDetails.getUpdatedLogMessage()));
+		sb.append(FIELD_DELIMETER);
+		sb.append(theNotificationsDetails.getUpdatedLogId());
+		sb.append(FIELD_DELIMETER);
+		
+		sb.append(theNotificationsDetails.getCrashCount());
+		sb.append(FIELD_DELIMETER);
+		sb.append(encodeEmbeddedDelimeters(theNotificationsDetails.getCrashMessage()));
+		sb.append(FIELD_DELIMETER);
+		sb.append(theNotificationsDetails.getCrashId());
+		sb.append(FIELD_DELIMETER);
+		
+		sb.append(theNotificationsDetails.getFeedbackCount());
+		sb.append(FIELD_DELIMETER);
+		sb.append(encodeEmbeddedDelimeters(theNotificationsDetails.getFeedbackMessage()));
+		sb.append(FIELD_DELIMETER);
+		sb.append(theNotificationsDetails.getFeedbackId());
+		sb.append(FIELD_DELIMETER);
+		sb.append(NOTIFICATION_DETAILS_DELIMETER);
+		
+		return sb.toString();
+	}
+	
+	private static NotificationDetails fromStringToNotificationDetails(int theNotificationDetailsStartIndex, int theNotificationDetailsEndIndex, String theExistingNotificationString) {
+		NotificationDetails nd = new NotificationDetails();
+		int startOfFieldIndex = 0;
+		int fieldDelimeterIndex;
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): applicationID field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setApplicationId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): applicationName field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setApplicationName(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		//////////////
+		// Client Log
+		/////////////
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): clientLogCount field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setClientLogCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex)));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): clientLogMessage field delimeter not found - should NOT happen");
+			return null;
+		}
+		String clientLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex);
+		clientLogMessage = decodeEmbeddedDelimeters(clientLogMessage);
+		nd.setClientLogMessage(clientLogMessage);
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): clientLogId field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setClientLogId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		//////////////
+		// Updated Log
+		//////////////
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): updatedLogCount field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setUpdatedLogCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex)));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): updatedLogMessage field delimeter not found - should NOT happen");
+			return null;
+		}
+		String updatedLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex);
+		updatedLogMessage = decodeEmbeddedDelimeters(updatedLogMessage);
+		nd.setUpdatedLogMessage(updatedLogMessage);
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): updatedLogId field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setUpdatedLogId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		////////
+		// Crash
+		////////
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): crashCount field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setCrashCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex)));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): crashMessage field delimeter not found - should NOT happen");
+			return null;
+		}
+		String crashMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex);
+		crashMessage = decodeEmbeddedDelimeters(crashMessage);
+		nd.setCrashMessage(crashMessage);
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): crashId field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setCrashId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		///////////
+		// Feedback
+		///////////
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): feedbackCount field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setFeedbackCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex)));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): feedbackMessage field delimeter not found - should NOT happen");
+			return null;
+		}
+		String feedbackMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex);
+		feedbackMessage = decodeEmbeddedDelimeters(feedbackMessage);
+		nd.setFeedbackMessage(feedbackMessage);
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		
+		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
+		if(fieldDelimeterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): feedbackId field delimeter not found - should NOT happen");
+			return null;
+		}
+		nd.setFeedbackId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
+		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+
+		return nd;
+	}
+
+	
+	private static String replaceNotificatonDetails(String theExistingNotificationString, Integer theTargetNotificationDetailsIndex) {
+		
+		// TODO *******************************************  
+		//jpw;
+		
+/*
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			// ID and Message Fields updated only for the first entry (that is, when the count is going from zero to one)
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			/////////////////////////////////////////////////////////////////////////////////////
+			// Counts are NOT set, but incremented based on value in notificationDetail passed in
+			/////////////////////////////////////////////////////////////////////////////////////
+			Integer newClientLogCount = theNewNotificationDetails.getClientLogCount();
+			if(newClientLogCount > 0) {
+				Integer originalClientLogCount = this.clientLogCounts.get(applicationIdIndex);
+				if(originalClientLogCount == 0) {
+					String clientLogMessage = theNewNotificationDetails.getClientLogMessage() == null ? "" : theNewNotificationDetails.getClientLogMessage();
+					this.clientLogMessages.set(applicationIdIndex, clientLogMessage);
+
+					String clientLogId = theNewNotificationDetails.getClientLogId() == null ? "" : theNewNotificationDetails.getClientLogId();
+					this.clientLogIds.set(applicationIdIndex, clientLogId);
+				}
+				originalClientLogCount++;
+				this.clientLogCounts.set(applicationIdIndex, originalClientLogCount);
+			}
+			
+			Integer newUpdatedLogCount = theNewNotificationDetails.getUpdatedLogCount();
+			if(newUpdatedLogCount > 0) {
+				Integer originalUpdatedLogCount = this.updatedLogCounts.get(applicationIdIndex);
+				if(originalUpdatedLogCount == 0) {
+					String updatedLogMessage = theNewNotificationDetails.getUpdatedLogMessage() == null ? "" : theNewNotificationDetails.getUpdatedLogMessage();
+					this.updatedLogMessages.set(applicationIdIndex, updatedLogMessage);
+
+					String updatedLogId = theNewNotificationDetails.getUpdatedLogId() == null ? "" : theNewNotificationDetails.getUpdatedLogId();
+					this.updatedLogIds.set(applicationIdIndex, updatedLogId);
+				}
+				originalUpdatedLogCount++;
+				this.updatedLogCounts.set(applicationIdIndex, originalUpdatedLogCount);
+			}
+			
+			Integer newCrashCount = theNewNotificationDetails.getCrashCount();
+			if(newCrashCount > 0) {
+				Integer originalCrashCount = this.crashCounts.get(applicationIdIndex);
+				if(originalCrashCount == 0) {
+					String crashMessage = theNewNotificationDetails.getCrashMessage() == null ? "" : theNewNotificationDetails.getCrashMessage();
+					this.crashMessages.set(applicationIdIndex, crashMessage);
+
+					String crashId = theNewNotificationDetails.getCrashId() == null ? "" : theNewNotificationDetails.getCrashId();
+					this.crashIds.set(applicationIdIndex, crashId);
+				}
+				originalCrashCount++;
+				this.crashCounts.set(applicationIdIndex, originalCrashCount);
+			}
+			
+			Integer newFeedbackCount = theNewNotificationDetails.getFeedbackCount();
+			if(newFeedbackCount > 0) {
+				Integer originalFeedbackCount = this.feedbackCounts.get(applicationIdIndex);
+				if(originalFeedbackCount == 0) {
+					String feedbackMessage = theNewNotificationDetails.getFeedbackMessage() == null ? "" : theNewNotificationDetails.getFeedbackMessage();
+					this.feedbackMessages.set(applicationIdIndex, feedbackMessage);
+
+					String feedbackId = theNewNotificationDetails.getFeedbackId() == null ? "" : theNewNotificationDetails.getFeedbackId();
+					this.feedbackIds.set(applicationIdIndex, feedbackId);
+				}
+				originalFeedbackCount++;
+				this.feedbackCounts.set(applicationIdIndex, originalFeedbackCount);
+			}
+ */
+		
+		return null;
+	}
+	
+	private static String encodeEmbeddedDelimeters(String theStringToEncode) {
+		
+		// TODO *******************************************  
+		
+		return null;
+	}
+	
+	private static String decodeEmbeddedDelimeters(String theStringToDecode) {
+		
+		// TODO *******************************************  
+		
+		return null;
+	}
+	
+	////////////////////
+	// Major ENTRY POINT
+	////////////////////
+	// Operates on Accumulating Queue
+	// Called by the CreateLog threads to queue notifications
+	public static void queueNotification(User theUser, String theApplicationId, AppMember theAppMember, String theNotificationType, 
+                                         String theMessage, String theIncidentId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
+		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
+		ensureMemcacheValid(memcache);
+        
+        String userId = null;
+        try {
+        	userId = KeyFactory.keyToString(theUser.getKey());
+		} catch (IllegalArgumentException e1) {
+			log.severe("exception = " + e1.getMessage());
+			e1.printStackTrace();
+			return;
+		}
+		
+    	NotificationDetails notificationDetails = new NotificationDetails();
+    	notificationDetails.setApplicationId(theApplicationId);
+    	notificationDetails.setApplicationName(theAppMember.getApplicationName());
+    	
+    	notificationDetails.setCrashCount(0);
+    	notificationDetails.setClientLogCount(0);
+    	notificationDetails.setUpdatedLogCount(0);
+    	notificationDetails.setFeedbackCount(0);
+
+    	if(theNotificationType.equalsIgnoreCase(Notification.CRASH)) {
+    		notificationDetails.setCrashCount(1);
+        	notificationDetails.setCrashMessage(theMessage);
+        	notificationDetails.setCrashId(theIncidentId);
+    	} else if(theNotificationType.equalsIgnoreCase(Notification.CLIENT_LOG)) {
+    		notificationDetails.setClientLogCount(1);
+        	notificationDetails.setClientLogMessage(theMessage);
+        	notificationDetails.setClientLogId(theIncidentId);
+    	} else if(theNotificationType.equalsIgnoreCase(Notification.UPDATED_LOG)) {
+    		notificationDetails.setUpdatedLogCount(1);
+        	notificationDetails.setUpdatedLogMessage(theMessage);
+        	notificationDetails.setUpdatedLogId(theIncidentId);
+    	} else if(theNotificationType.equalsIgnoreCase(Notification.FEEDBACK)) {
+    		notificationDetails.setFeedbackCount(1);
+        	notificationDetails.setFeedbackMessage(theMessage);
+        	notificationDetails.setFeedbackId(theIncidentId);
+    	}
+    	updateNotificationString(userId, notificationDetails, memcache);
+	}
+
+	// Major ENTRY POINT
+	// called by the memcache cron job to merge memcache queued notifications into the datastore Notification entities
+	public static void mergeQueuedNotifications() {
+		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
+		ensureMemcacheValid(memcache);
+		
+		// accumulating queue becomes merging and merging queue become accumulating  allowing both activities to proceed simultaneously
+		flipFlopQueues(memcache);
+		
+		// walk thru the Merging Queue's Pending Users list. For each pending user, get the associated NotificationString and merge that into the datastore
+		Integer puCount = (Integer)memcache.get(getMergingPendingUserListCounterKey(memcache));
+		for(int index=0; index<puCount; index++) {
+			String pendingUserKey = getMergingPendingUserListEntryKey(index, memcache);
+			String userId = (String)memcache.get(pendingUserKey);
+			String notificationStringKey = getMergingNotificationStringKey(userId, memcache);
+			String notificationString = (String)memcache.get(notificationStringKey);
+			
+			// empty the memcache elements no longer needed
+			memcache.delete(pendingUserKey);
+			memcache.delete(notificationStringKey);
+		}		
+		// TODO set Merging Queue Count to zero
+		
+
+		// TODO
+		// for each user in Pending User list
+		// get Notification from datastore -- if it doesn't exist, create it
+		// merge the Notification string in memcache into the Notification entity
+		// end of for
+	}
+	
+	// TODO - need to drive these notifications into memcache instead *************************************************************
+	public static void old_queueNotification(User theUser, String theApplicationId, AppMember theAppMember, String theNotificationType, 
+			                             String theMessage, String theIncidentId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
+        EntityManager em = EMF.get().createEntityManager();
+        
+        String userId = null;
+        try {
+        	userId = KeyFactory.keyToString(theUser.getKey());
+		} catch (IllegalArgumentException e1) {
+			log.severe("exception = " + e1.getMessage());
+			e1.printStackTrace();
+			return;
+		}
+
+		em.getTransaction().begin();
+        try {
+        	Notification notification = null;
+        	try {
+            	notification = (Notification)em.createNamedQuery("Notification.getByUserId")
+        				.setParameter("userId", userId)
+        				.getSingleResult();
+            	log.info("existing notification found in datastore");
+        	} catch (NoResultException e) {
+    			// this is NOT an error, just the very first time a notification is being sent. Notification will be created just below ...
+    		} catch (NonUniqueResultException e) {
+    			log.severe("should never happen - two or more Users have the same key");
+    			e.printStackTrace();
+    		}
+        	
+        	//////////////////////////////////////////////////////////////////////
+        	// there is no Notification entity for this user yet, so create it now
+        	//////////////////////////////////////////////////////////////////////
+        	if(notification == null) {
+        		log.info("new notification instantiated");
+        		notification = new Notification();
+        		notification.setUserId(userId);
+        		notification.setSendGmtDateToFarFuture();  // to start, entity for this user is inactive
+        	}
+        	
+        	notification.updateNotificationDetailsList(notificationDetails);
+        	
+        	///////////////////////////////////////////////////////////////////////////////////////////
+        	// update emailAddress and smsEmailAddress based on whether email and SMS are now activated
+        	///////////////////////////////////////////////////////////////////////////////////////////
+        	if(theIsEmailActive) {
+        		notification.setEmailAddress(theUser.getEmailAddress());
+        	} else {
+        		notification.setEmailAddress(null);
+        	}
+        	if(theIsSmsActive) {
+        		notification.setSmsEmailAddress(theUser.getSmsEmailAddress());
+        	} else {
+        		notification.setSmsEmailAddress(null);
+        	}
+        	
+        	// check if sendGmtDate needs to be updated
+        	if(!GMT.isDateBeforeNowPlusOffsetMinutes(notification.getSendGmtDate(), DEFAULT_NOTIFICATION_PERIOD)) {
+        		log.info("setting sendGmtDate to 5 minutes in the future");
+        		// set sendGmtDate to five minutes in the future
+        		notification.setSendGmtDate(GMT.addMinutesToDate(new Date(), DEFAULT_NOTIFICATION_PERIOD));
+        	}
+        	
+        	em.persist(notification);
+        	em.getTransaction().commit();
+		}  finally {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            em.close();
+        }
+	}
+
 }

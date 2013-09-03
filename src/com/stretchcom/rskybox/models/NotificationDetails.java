@@ -1,17 +1,6 @@
 package com.stretchcom.rskybox.models;
 
-import java.util.Date;
-import java.util.List;
 import java.util.logging.Logger;
-
-import javax.persistence.Basic;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import com.google.appengine.api.datastore.Key;
 
 public class NotificationDetails {
     private static final Logger log = Logger.getLogger(NotificationDetails.class.getName());
