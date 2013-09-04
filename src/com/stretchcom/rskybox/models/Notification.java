@@ -803,24 +803,21 @@ public class Notification {
 			existingNotificationString = (String)theMemcache.get(notificationStringKey);
 		}
 		
-		String newNotificationString = mergeNotificationDetails(theNotificationsDetails, existingNotificationString);
-		theMemcache.put(notificationStringKey, newNotificationString);
-	}
-	
-	// Operates on Accumulating Queue
-	private static String mergeNotificationDetails(NotificationDetails theNotificationsDetails, String theExistingNotificationString) {
-		if(theExistingNotificationString.length() == 0) {
+		String newNotificationString = null;
+		if(existingNotificationString.length() == 0) {
 			// first user notification -- easy peasy
-			return fromNotificationDetailsToString(theNotificationsDetails);
+			newNotificationString = fromNotificationDetailsToString(theNotificationsDetails);
+		} else {
+			Integer targetNotificationDetailsIndex = getTargetNotificationDetails(existingNotificationString, theNotificationsDetails.getApplicationId());
+			if(targetNotificationDetailsIndex == null) {
+				// this notificationString does NOT have a notificationDetailsString for this application ID, so just add one to the end
+				newNotificationString = existingNotificationString + fromNotificationDetailsToString(theNotificationsDetails);
+			} else {
+				newNotificationString = updateNotificatonDetailsString(theNotificationsDetails, existingNotificationString, targetNotificationDetailsIndex);
+			}
 		}
 		
-		Integer targetNotificationDetailsIndex = getTargetNotificationDetails(theExistingNotificationString, theNotificationsDetails.getApplicationId());
-		if(targetNotificationDetailsIndex == null) {
-			// this notificationString does NOT have a notificationDetailString for this application ID, so just add one to the end
-			return theExistingNotificationString + fromNotificationDetailsToString(theNotificationsDetails);
-		} else {
-			return replaceNotificatonDetails(theExistingNotificationString, targetNotificationDetailsIndex);
-		}
+		theMemcache.put(notificationStringKey, newNotificationString);
 	}
 	
 	private static Integer getTargetNotificationDetails(String theExistingNotificationString, String theApplicationID) {
@@ -896,7 +893,7 @@ public class Notification {
 		return sb.toString();
 	}
 	
-	private static NotificationDetails fromStringToNotificationDetails(int theNotificationDetailsStartIndex, int theNotificationDetailsEndIndex, String theExistingNotificationString) {
+	private static NotificationDetails fromStringToNotificationDetails(int theNotificationDetailsStartIndex, String theExistingNotificationString) {
 		NotificationDetails nd = new NotificationDetails();
 		int startOfFieldIndex = 0;
 		int fieldDelimeterIndex;
@@ -1036,75 +1033,81 @@ public class Notification {
 		return nd;
 	}
 
-	
-	private static String replaceNotificatonDetails(String theExistingNotificationString, Integer theTargetNotificationDetailsIndex) {
+	private static String updateNotificatonDetailsString(NotificationDetails theNewNotificationDetails, String theExistingNotificationString, Integer theTargetNotificationDetailsIndex) {
+		// convert the existing, embedded NotificationDetailsString to a NotificationDetails object
+		NotificationDetails existingNotificationDetails = fromStringToNotificationDetails(theTargetNotificationDetailsIndex, theExistingNotificationString);
 		
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		// ID and Message Fields updated only for the first entry (that is, when the count is going from zero to one)
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		/////////////////////////////////////////////////////////////////////////////////////
+		// Counts are NOT set, but incremented based on value in notificationDetail passed in
+		/////////////////////////////////////////////////////////////////////////////////////
+		Integer newClientLogCount = theNewNotificationDetails.getClientLogCount();
+		if(newClientLogCount > 0) {
+			Integer originalClientLogCount = existingNotificationDetails.getClientLogCount();
+			if(originalClientLogCount == 0) {
+				String clientLogMessage = theNewNotificationDetails.getClientLogMessage() == null ? "" : theNewNotificationDetails.getClientLogMessage();
+				existingNotificationDetails.setClientLogMessage(clientLogMessage);
+
+				String clientLogId = theNewNotificationDetails.getClientLogId() == null ? "" : theNewNotificationDetails.getClientLogId();
+				existingNotificationDetails.setClientLogId(clientLogId);
+			}
+			originalClientLogCount++;
+			existingNotificationDetails.setClientLogCount(originalClientLogCount);
+		}
+		
+		Integer newUpdatedLogCount = theNewNotificationDetails.getUpdatedLogCount();
+		if(newUpdatedLogCount > 0) {
+			Integer originalUpdatedLogCount = existingNotificationDetails.getUpdatedLogCount();
+			if(originalUpdatedLogCount == 0) {
+				String updatedLogMessage = theNewNotificationDetails.getUpdatedLogMessage() == null ? "" : theNewNotificationDetails.getUpdatedLogMessage();
+				existingNotificationDetails.setUpdatedLogMessage(updatedLogMessage);
+
+				String updatedLogId = theNewNotificationDetails.getUpdatedLogId() == null ? "" : theNewNotificationDetails.getUpdatedLogId();
+				existingNotificationDetails.setUpdatedLogId(updatedLogId);
+			}
+			originalUpdatedLogCount++;
+			existingNotificationDetails.setUpdatedLogCount(originalUpdatedLogCount);
+		}
+		
+		Integer newCrashCount = theNewNotificationDetails.getCrashCount();
+		if(newCrashCount > 0) {
+			Integer originalCrashCount = existingNotificationDetails.getCrashCount();
+			if(originalCrashCount == 0) {
+				String crashMessage = theNewNotificationDetails.getCrashMessage() == null ? "" : theNewNotificationDetails.getCrashMessage();
+				existingNotificationDetails.setCrashMessage(crashMessage);
+
+				String crashId = theNewNotificationDetails.getCrashId() == null ? "" : theNewNotificationDetails.getCrashId();
+				existingNotificationDetails.setCrashId(crashId);
+			}
+			originalCrashCount++;
+			existingNotificationDetails.setCrashCount(originalCrashCount);
+		}
+		
+		Integer newFeedbackCount = theNewNotificationDetails.getFeedbackCount();
+		if(newFeedbackCount > 0) {
+			Integer originalFeedbackCount = existingNotificationDetails.getFeedbackCount();
+			if(originalFeedbackCount == 0) {
+				String feedbackMessage = theNewNotificationDetails.getFeedbackMessage() == null ? "" : theNewNotificationDetails.getFeedbackMessage();
+				existingNotificationDetails.setFeedbackMessage(feedbackMessage);
+
+				String feedbackId = theNewNotificationDetails.getFeedbackId() == null ? "" : theNewNotificationDetails.getFeedbackId();
+				existingNotificationDetails.setFeedbackId(feedbackId);
+			}
+			originalFeedbackCount++;
+			existingNotificationDetails.setFeedbackCount(originalFeedbackCount);
+		}
+		
+		// I AM HERE ****************
+		
+		// TODO  embedded the now updated existingNotificationDetails into the NotificationString
 		// TODO *******************************************  
-		//jpw;
 		
 /*
-			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// ID and Message Fields updated only for the first entry (that is, when the count is going from zero to one)
-			/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
-			/////////////////////////////////////////////////////////////////////////////////////
-			// Counts are NOT set, but incremented based on value in notificationDetail passed in
-			/////////////////////////////////////////////////////////////////////////////////////
-			Integer newClientLogCount = theNewNotificationDetails.getClientLogCount();
-			if(newClientLogCount > 0) {
-				Integer originalClientLogCount = this.clientLogCounts.get(applicationIdIndex);
-				if(originalClientLogCount == 0) {
-					String clientLogMessage = theNewNotificationDetails.getClientLogMessage() == null ? "" : theNewNotificationDetails.getClientLogMessage();
-					this.clientLogMessages.set(applicationIdIndex, clientLogMessage);
-
-					String clientLogId = theNewNotificationDetails.getClientLogId() == null ? "" : theNewNotificationDetails.getClientLogId();
-					this.clientLogIds.set(applicationIdIndex, clientLogId);
-				}
-				originalClientLogCount++;
-				this.clientLogCounts.set(applicationIdIndex, originalClientLogCount);
-			}
 			
-			Integer newUpdatedLogCount = theNewNotificationDetails.getUpdatedLogCount();
-			if(newUpdatedLogCount > 0) {
-				Integer originalUpdatedLogCount = this.updatedLogCounts.get(applicationIdIndex);
-				if(originalUpdatedLogCount == 0) {
-					String updatedLogMessage = theNewNotificationDetails.getUpdatedLogMessage() == null ? "" : theNewNotificationDetails.getUpdatedLogMessage();
-					this.updatedLogMessages.set(applicationIdIndex, updatedLogMessage);
-
-					String updatedLogId = theNewNotificationDetails.getUpdatedLogId() == null ? "" : theNewNotificationDetails.getUpdatedLogId();
-					this.updatedLogIds.set(applicationIdIndex, updatedLogId);
-				}
-				originalUpdatedLogCount++;
-				this.updatedLogCounts.set(applicationIdIndex, originalUpdatedLogCount);
-			}
-			
-			Integer newCrashCount = theNewNotificationDetails.getCrashCount();
-			if(newCrashCount > 0) {
-				Integer originalCrashCount = this.crashCounts.get(applicationIdIndex);
-				if(originalCrashCount == 0) {
-					String crashMessage = theNewNotificationDetails.getCrashMessage() == null ? "" : theNewNotificationDetails.getCrashMessage();
-					this.crashMessages.set(applicationIdIndex, crashMessage);
-
-					String crashId = theNewNotificationDetails.getCrashId() == null ? "" : theNewNotificationDetails.getCrashId();
-					this.crashIds.set(applicationIdIndex, crashId);
-				}
-				originalCrashCount++;
-				this.crashCounts.set(applicationIdIndex, originalCrashCount);
-			}
-			
-			Integer newFeedbackCount = theNewNotificationDetails.getFeedbackCount();
-			if(newFeedbackCount > 0) {
-				Integer originalFeedbackCount = this.feedbackCounts.get(applicationIdIndex);
-				if(originalFeedbackCount == 0) {
-					String feedbackMessage = theNewNotificationDetails.getFeedbackMessage() == null ? "" : theNewNotificationDetails.getFeedbackMessage();
-					this.feedbackMessages.set(applicationIdIndex, feedbackMessage);
-
-					String feedbackId = theNewNotificationDetails.getFeedbackId() == null ? "" : theNewNotificationDetails.getFeedbackId();
-					this.feedbackIds.set(applicationIdIndex, feedbackId);
-				}
-				originalFeedbackCount++;
-				this.feedbackCounts.set(applicationIdIndex, originalFeedbackCount);
-			}
  */
 		
 		return null;
@@ -1193,10 +1196,10 @@ public class Notification {
 			memcache.delete(pendingUserKey);
 			memcache.delete(notificationStringKey);
 		}		
-		// TODO set Merging Queue Count to zero
+		// TODO set Merging Queue Count to zero  ***********************************************************
 		
 
-		// TODO
+		// TODO  ***********************************************************
 		// for each user in Pending User list
 		// get Notification from datastore -- if it doesn't exist, create it
 		// merge the Notification string in memcache into the Notification entity
