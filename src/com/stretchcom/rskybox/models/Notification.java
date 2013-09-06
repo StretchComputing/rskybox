@@ -1100,20 +1100,44 @@ public class Notification {
 			existingNotificationDetails.setFeedbackCount(originalFeedbackCount);
 		}
 		
-		// I AM HERE ****************
+		String newNotificationString = replaceNotificatonDetailsString(existingNotificationDetails, theExistingNotificationString, theTargetNotificationDetailsIndex);
+		return newNotificationString;
+	}
+
+	private static String replaceNotificatonDetailsString(NotificationDetails theNewNotificationDetails, String theExistingNotificationString, Integer theTargetNotificationDetailsIndex) {
+		String newNotificationDetailsString = fromNotificationDetailsToString(theNewNotificationDetails);
 		
-		// TODO  embedded the now updated existingNotificationDetails into the NotificationString
-		// TODO *******************************************  
+		// find the ending index of the old notificationDetailsString (we already know where it starts)
 		
-/*
-			
-			
- */
+		int notificationDetailsDelimeterIndex = theExistingNotificationString.indexOf(NOTIFICATION_DETAILS_DELIMETER, theTargetNotificationDetailsIndex);
+		if(notificationDetailsDelimeterIndex == -1) {
+			log.severe("replaceNotificatonDetailsString(): notificationsDetails delimeter not found - should NOT happen");
+			// deal with this by just returning the original NotificationString
+			return theExistingNotificationString;
+		}
 		
-		return null;
+		int nextNotificationDetailsIndex = notificationDetailsDelimeterIndex + NOTIFICATION_DETAILS_DELIMETER.length();
+		
+		// use substring and rebuild the NotificationString from the parts
+		StringBuffer sb = new StringBuffer();
+		if(theTargetNotificationDetailsIndex > 0) {
+			// copy the NotificationDetailsStrings in the NotificationString BEFORE the one being replaced
+			sb.append(theExistingNotificationString.substring(0, theTargetNotificationDetailsIndex));
+		}
+		// replace the notificationDetailsString with the new one
+		sb.append(newNotificationDetailsString);
+		if(theExistingNotificationString.length() > nextNotificationDetailsIndex ) {
+			// copy the NotificationDetailsStrings in the NotificationString AFTER the one being replaced
+			sb.append(theExistingNotificationString.substring(nextNotificationDetailsIndex));
+		}
+		
+		return sb.toString();
 	}
 	
 	private static String encodeEmbeddedDelimeters(String theStringToEncode) {
+		
+		
+		// I AM HERE **************** jpw
 		
 		// TODO *******************************************  
 		
