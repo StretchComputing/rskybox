@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
@@ -112,8 +114,16 @@ public class Notification {
 	
 	private static final String QUEUE1 = "q1";
 	private static final String QUEUE2 = "q2";
-	private static final String FIELD_DELIMETER = "_!_";
-	private static final String NOTIFICATION_DETAILS_DELIMETER = "__!!__";
+	private static final String FIELD_DELIMITER = "_!~";							// designed to have no regex special characters
+	private static final String ENCODED_FIELD_DELIMITER = "@#%";					// designed to have no regex special characters
+	private static final String NOTIFICATION_DETAILS_DELIMITER = "__!!~~";			// designed to have no regex special characters
+	private static final String ENCODED_NOTIFICATION_DETAILS_DELIMITER = "@@##%%";	// designed to have no regex special characters
+	
+	private static Pattern fieldDelimiterPattern = Pattern.compile(FIELD_DELIMITER);
+	private static Pattern encodedFieldDelimiterPattern = Pattern.compile(ENCODED_FIELD_DELIMITER);
+	private static Pattern notificationDetailsDelimiterPattern = Pattern.compile(NOTIFICATION_DETAILS_DELIMITER);
+	private static Pattern encodedNotificationDetailsDelimiterPattern = Pattern.compile(ENCODED_NOTIFICATION_DETAILS_DELIMITER);
+
 
 	private String userId;
 	private String emailAddress;
@@ -825,26 +835,26 @@ public class Notification {
 		
 		int notificationDetailsIndex = 0;
 		while(true) {
-			int appIdDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, notificationDetailsIndex);
-			if(appIdDelimeterIndex == -1) {
-				log.severe("getTargetNotificationDetails(): application ID field delimeter not found - should NOT happen");
+			int appIdDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, notificationDetailsIndex);
+			if(appIdDelimiterIndex == -1) {
+				log.severe("getTargetNotificationDetails(): application ID field delimiter not found - should NOT happen");
 				break;
 			}
 			
-			String appId = theExistingNotificationString.substring(notificationDetailsIndex, appIdDelimeterIndex);
+			String appId = theExistingNotificationString.substring(notificationDetailsIndex, appIdDelimiterIndex);
 			if(appId.equalsIgnoreCase(theApplicationID)) {
 				// found the matching NotificationDetails substring
 				targetNotificationDetailsIndex = notificationDetailsIndex;
 				break;
 			}
 			
-			int notificationDetailsDelimeterIndex = theExistingNotificationString.indexOf(NOTIFICATION_DETAILS_DELIMETER, notificationDetailsIndex);
-			if(notificationDetailsDelimeterIndex == -1) {
-				log.severe("getTargetNotificationDetails(): notificationsDetails delimeter not found - should NOT happen");
+			int notificationDetailsDelimiterIndex = theExistingNotificationString.indexOf(NOTIFICATION_DETAILS_DELIMITER, notificationDetailsIndex);
+			if(notificationDetailsDelimiterIndex == -1) {
+				log.severe("getTargetNotificationDetails(): notificationsDetails delimiter not found - should NOT happen");
 				break;
 			}
 			
-			notificationDetailsIndex = notificationDetailsDelimeterIndex + NOTIFICATION_DETAILS_DELIMETER.length();
+			notificationDetailsIndex = notificationDetailsDelimiterIndex + NOTIFICATION_DETAILS_DELIMITER.length();
 			if(theExistingNotificationString.length() <= notificationDetailsIndex ) {
 				// there are no more notifications details in this notification string so stop checking for match
 				break;
@@ -857,38 +867,38 @@ public class Notification {
 	private static String fromNotificationDetailsToString(NotificationDetails theNotificationsDetails) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(theNotificationsDetails.getApplicationId());
-		sb.append(FIELD_DELIMETER);
+		sb.append(FIELD_DELIMITER);
 		sb.append(theNotificationsDetails.getApplicationName());
-		sb.append(FIELD_DELIMETER);
+		sb.append(FIELD_DELIMITER);
 		
 		sb.append(theNotificationsDetails.getClientLogCount());
-		sb.append(FIELD_DELIMETER);
-		sb.append(encodeEmbeddedDelimeters(theNotificationsDetails.getClientLogMessage()));
-		sb.append(FIELD_DELIMETER);
+		sb.append(FIELD_DELIMITER);
+		sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getClientLogMessage()));
+		sb.append(FIELD_DELIMITER);
 		sb.append(theNotificationsDetails.getClientLogId());
-		sb.append(FIELD_DELIMETER);
+		sb.append(FIELD_DELIMITER);
 		
 		sb.append(theNotificationsDetails.getUpdatedLogCount());
-		sb.append(FIELD_DELIMETER);
-		sb.append(encodeEmbeddedDelimeters(theNotificationsDetails.getUpdatedLogMessage()));
-		sb.append(FIELD_DELIMETER);
+		sb.append(FIELD_DELIMITER);
+		sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getUpdatedLogMessage()));
+		sb.append(FIELD_DELIMITER);
 		sb.append(theNotificationsDetails.getUpdatedLogId());
-		sb.append(FIELD_DELIMETER);
+		sb.append(FIELD_DELIMITER);
 		
 		sb.append(theNotificationsDetails.getCrashCount());
-		sb.append(FIELD_DELIMETER);
-		sb.append(encodeEmbeddedDelimeters(theNotificationsDetails.getCrashMessage()));
-		sb.append(FIELD_DELIMETER);
+		sb.append(FIELD_DELIMITER);
+		sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getCrashMessage()));
+		sb.append(FIELD_DELIMITER);
 		sb.append(theNotificationsDetails.getCrashId());
-		sb.append(FIELD_DELIMETER);
+		sb.append(FIELD_DELIMITER);
 		
 		sb.append(theNotificationsDetails.getFeedbackCount());
-		sb.append(FIELD_DELIMETER);
-		sb.append(encodeEmbeddedDelimeters(theNotificationsDetails.getFeedbackMessage()));
-		sb.append(FIELD_DELIMETER);
+		sb.append(FIELD_DELIMITER);
+		sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getFeedbackMessage()));
+		sb.append(FIELD_DELIMITER);
 		sb.append(theNotificationsDetails.getFeedbackId());
-		sb.append(FIELD_DELIMETER);
-		sb.append(NOTIFICATION_DETAILS_DELIMETER);
+		sb.append(FIELD_DELIMITER);
+		sb.append(NOTIFICATION_DETAILS_DELIMITER);
 		
 		return sb.toString();
 	}
@@ -896,139 +906,139 @@ public class Notification {
 	private static NotificationDetails fromStringToNotificationDetails(int theNotificationDetailsStartIndex, String theExistingNotificationString) {
 		NotificationDetails nd = new NotificationDetails();
 		int startOfFieldIndex = 0;
-		int fieldDelimeterIndex;
+		int fieldDelimiterIndex;
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): applicationID field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): applicationID field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setApplicationId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setApplicationId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): applicationName field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): applicationName field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setApplicationName(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setApplicationName(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		//////////////
 		// Client Log
 		/////////////
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): clientLogCount field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): clientLogCount field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setClientLogCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex)));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setClientLogCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex)));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): clientLogMessage field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): clientLogMessage field delimiter not found - should NOT happen");
 			return null;
 		}
-		String clientLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex);
-		clientLogMessage = decodeEmbeddedDelimeters(clientLogMessage);
+		String clientLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		clientLogMessage = decodeEmbeddedDelimiters(clientLogMessage);
 		nd.setClientLogMessage(clientLogMessage);
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): clientLogId field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): clientLogId field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setClientLogId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setClientLogId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		//////////////
 		// Updated Log
 		//////////////
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): updatedLogCount field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): updatedLogCount field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setUpdatedLogCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex)));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setUpdatedLogCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex)));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): updatedLogMessage field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): updatedLogMessage field delimiter not found - should NOT happen");
 			return null;
 		}
-		String updatedLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex);
-		updatedLogMessage = decodeEmbeddedDelimeters(updatedLogMessage);
+		String updatedLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		updatedLogMessage = decodeEmbeddedDelimiters(updatedLogMessage);
 		nd.setUpdatedLogMessage(updatedLogMessage);
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): updatedLogId field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): updatedLogId field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setUpdatedLogId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setUpdatedLogId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		////////
 		// Crash
 		////////
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): crashCount field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): crashCount field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setCrashCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex)));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setCrashCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex)));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): crashMessage field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): crashMessage field delimiter not found - should NOT happen");
 			return null;
 		}
-		String crashMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex);
-		crashMessage = decodeEmbeddedDelimeters(crashMessage);
+		String crashMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		crashMessage = decodeEmbeddedDelimiters(crashMessage);
 		nd.setCrashMessage(crashMessage);
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): crashId field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): crashId field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setCrashId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setCrashId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		///////////
 		// Feedback
 		///////////
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): feedbackCount field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): feedbackCount field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setFeedbackCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex)));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setFeedbackCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex)));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): feedbackMessage field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): feedbackMessage field delimiter not found - should NOT happen");
 			return null;
 		}
-		String feedbackMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex);
-		feedbackMessage = decodeEmbeddedDelimeters(feedbackMessage);
+		String feedbackMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		feedbackMessage = decodeEmbeddedDelimiters(feedbackMessage);
 		nd.setFeedbackMessage(feedbackMessage);
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
-		fieldDelimeterIndex = theExistingNotificationString.indexOf(FIELD_DELIMETER, startOfFieldIndex);
-		if(fieldDelimeterIndex == -1) {
-			log.severe("fromStringToNotificationDetails(): feedbackId field delimeter not found - should NOT happen");
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): feedbackId field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setFeedbackId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimeterIndex));
-		startOfFieldIndex = fieldDelimeterIndex + FIELD_DELIMETER.length();
+		nd.setFeedbackId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 
 		return nd;
 	}
@@ -1109,14 +1119,14 @@ public class Notification {
 		
 		// find the ending index of the old notificationDetailsString (we already know where it starts)
 		
-		int notificationDetailsDelimeterIndex = theExistingNotificationString.indexOf(NOTIFICATION_DETAILS_DELIMETER, theTargetNotificationDetailsIndex);
-		if(notificationDetailsDelimeterIndex == -1) {
-			log.severe("replaceNotificatonDetailsString(): notificationsDetails delimeter not found - should NOT happen");
+		int notificationDetailsdelimiterIndex = theExistingNotificationString.indexOf(NOTIFICATION_DETAILS_DELIMITER, theTargetNotificationDetailsIndex);
+		if(notificationDetailsdelimiterIndex == -1) {
+			log.severe("replaceNotificatonDetailsString(): notificationsDetails delimiter not found - should NOT happen");
 			// deal with this by just returning the original NotificationString
 			return theExistingNotificationString;
 		}
 		
-		int nextNotificationDetailsIndex = notificationDetailsDelimeterIndex + NOTIFICATION_DETAILS_DELIMETER.length();
+		int nextNotificationDetailsIndex = notificationDetailsdelimiterIndex + NOTIFICATION_DETAILS_DELIMITER.length();
 		
 		// use substring and rebuild the NotificationString from the parts
 		StringBuffer sb = new StringBuffer();
@@ -1134,21 +1144,28 @@ public class Notification {
 		return sb.toString();
 	}
 	
-	private static String encodeEmbeddedDelimeters(String theStringToEncode) {
+	private static String encodeEmbeddedDelimiters(String theStringToEncode) {
+		String encodedString = null;
 		
+		// first encode the any field delimiters embedded in theStringToEncode
+		Matcher fieldMatcher = fieldDelimiterPattern.matcher(theStringToEncode);
+		encodedString = fieldMatcher.replaceAll(ENCODED_FIELD_DELIMITER);
 		
-		// I AM HERE **************** jpw
-		
-		// TODO *******************************************  
-		
-		return null;
+		// now encode the any notificationDetails delimiters embedded in theStringToEncode
+		Matcher ndMatcher = notificationDetailsDelimiterPattern.matcher(encodedString);
+		return ndMatcher.replaceAll(ENCODED_NOTIFICATION_DETAILS_DELIMITER);
 	}
 	
-	private static String decodeEmbeddedDelimeters(String theStringToDecode) {
+	private static String decodeEmbeddedDelimiters(String theStringToDecode) {
+		String decodedString = null;
 		
-		// TODO *******************************************  
+		// first decode the any encoded field delimiters embedded in theStringToDecode
+		Matcher fieldMatcher = encodedFieldDelimiterPattern.matcher(theStringToDecode);
+		decodedString = fieldMatcher.replaceAll(FIELD_DELIMITER);
 		
-		return null;
+		// now decode the any encoded notificationDetails delimiters embedded in theStringToDecode
+		Matcher ndMatcher = encodedNotificationDetailsDelimiterPattern.matcher(decodedString);
+		return ndMatcher.replaceAll(NOTIFICATION_DETAILS_DELIMITER);
 	}
 	
 	////////////////////
