@@ -1177,6 +1177,23 @@ public class Notification {
                                          String theMessage, String theIncidentId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		ensureMemcacheValid(memcache);
+		
+		jpw;
+		// I AM HERE
+		// need to store theIsEmailActive and theIsSmsActive in the NotificationString -- it's needed later by the CRON
+		// job when merging the datastore Notification
+		//
+		// just use the latest values -- over writting an previous values
+		//
+		// OR
+		//
+		// should I just get the user from the datastore and use those values
+		//
+		// OR
+		//
+		// store it in the Pending User list with userId -- that would save the CRON from looking up each user in the datastore
+		//
+		// ****************************************************************************************
         
         String userId = null;
         try {
@@ -1226,55 +1243,39 @@ public class Notification {
 		flipFlopQueues(memcache);
 		
 		// walk thru the Merging Queue's Pending Users list. For each pending user, get the associated NotificationString and merge that into the datastore
-		Integer puCount = (Integer)memcache.get(getMergingPendingUserListCounterKey(memcache));
+		String pendingUserListCounterKey = getMergingPendingUserListCounterKey(memcache);
+		Integer puCount = (Integer)memcache.get(pendingUserListCounterKey);
 		for(int index=0; index<puCount; index++) {
 			String pendingUserKey = getMergingPendingUserListEntryKey(index, memcache);
 			String userId = (String)memcache.get(pendingUserKey);
 			String notificationStringKey = getMergingNotificationStringKey(userId, memcache);
 			String notificationString = (String)memcache.get(notificationStringKey);
 			
+			mergeNotificationString(userId, notificationString);
+			
 			// empty the memcache elements no longer needed
 			memcache.delete(pendingUserKey);
 			memcache.delete(notificationStringKey);
-		}		
-		// TODO set Merging Queue Count to zero  ***********************************************************
-		
-
-		// TODO  ***********************************************************
-		// for each user in Pending User list
-		// get Notification from datastore -- if it doesn't exist, create it
-		// merge the Notification string in memcache into the Notification entity
-		// end of for
+		}
+		memcache.put(pendingUserListCounterKey, 0);
 	}
 	
-	// TODO - need to drive these notifications into memcache instead *************************************************************
-	public static void old_queueNotification(User theUser, String theApplicationId, AppMember theAppMember, String theNotificationType, 
-			                             String theMessage, String theIncidentId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
+	private static void mergeNotificationString(String theUserId, String theNotificationString) {
         EntityManager em = EMF.get().createEntityManager();
-        
-        String userId = null;
-        try {
-        	userId = KeyFactory.keyToString(theUser.getKey());
-		} catch (IllegalArgumentException e1) {
-			log.severe("exception = " + e1.getMessage());
-			e1.printStackTrace();
-			return;
-		}
 
 		em.getTransaction().begin();
         try {
         	Notification notification = null;
         	try {
             	notification = (Notification)em.createNamedQuery("Notification.getByUserId")
-        				.setParameter("userId", userId)
+        				.setParameter("userId", theUserId)
         				.getSingleResult();
             	log.info("existing notification found in datastore");
         	} catch (NoResultException e) {
     			// this is NOT an error, just the very first time a notification is being sent. Notification will be created just below ...
     		} catch (NonUniqueResultException e) {
-    			log.severe("should never happen - two or more Users have the same key");
-    			e.printStackTrace();
-    		}
+    			log.severe("mergeNotificationString(): should never happen - two or more Users have the same key. exception = " + e.getMessage());
+     		}
         	
         	//////////////////////////////////////////////////////////////////////
         	// there is no Notification entity for this user yet, so create it now
@@ -1282,7 +1283,7 @@ public class Notification {
         	if(notification == null) {
         		log.info("new notification instantiated");
         		notification = new Notification();
-        		notification.setUserId(userId);
+        		notification.setUserId(theUserId);
         		notification.setSendGmtDateToFarFuture();  // to start, entity for this user is inactive
         	}
         	
@@ -1317,6 +1318,6 @@ public class Notification {
             }
             em.close();
         }
+		
 	}
-
 }
