@@ -343,7 +343,9 @@ public class User {
                             
                             // endpoint filters are used to filter OUT notifications, so only notify if no endpoint filters match
                             if(!anyFilterMatches(endpointFilters, theIncident.getLocalEndpoint(), theIncident.getRemoteEndpoint())) {
-                                Notification.queueNotification(user, theApplicationId, am, notificationType, theMessage, incidentId, isEmailActive, isSmsActive);
+                                String emailAddress = isEmailActive ? user.getEmailAddress() : null;
+                                String smsEmailAddress = isSmsActive ? user.getSmsEmailAddress() : null;
+                                Notification.queueNotification(user, theApplicationId, am, notificationType, theMessage, incidentId, emailAddress, smsEmailAddress);
                             }
                         }
                 	}

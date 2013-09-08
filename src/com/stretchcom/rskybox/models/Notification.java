@@ -468,6 +468,12 @@ public class Notification {
 
 		String feedbackId = nd.getFeedbackId() == null ? "" : nd.getFeedbackId();
 		this.feedbackIds.add(feedbackId);
+		
+		String emailAddress = nd.getEmailAddress() == null ? "" : nd.getEmailAddress();
+		this.emailAddress = emailAddress;
+		
+		String smsEmailAddress = nd.getSmsEmailAddress() == null ? "" : nd.getSmsEmailAddress();
+		this.smsEmailAddress = smsEmailAddress;
 	}
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -594,6 +600,12 @@ public class Notification {
 				originalFeedbackCount++;
 				this.feedbackCounts.set(applicationIdIndex, originalFeedbackCount);
 			}
+			
+			String emailAddress = theNewNotificationDetails.getEmailAddress() == null ? "" : theNewNotificationDetails.getEmailAddress();
+			this.emailAddress = emailAddress;
+			
+			String smsEmailAddress = theNewNotificationDetails.getSmsEmailAddress() == null ? "" : theNewNotificationDetails.getSmsEmailAddress();
+			this.smsEmailAddress = smsEmailAddress;
 		} catch(IndexOutOfBoundsException e) {
 			log.severe("IndexOutOfBoundsException =" + e.getMessage());
 			e.printStackTrace();
@@ -799,9 +811,11 @@ public class Notification {
 	
 	// Operates on Accumulating Queue
 	private static void updateNotificationString(String theUserId, NotificationDetails theNotificationsDetails, MemcacheService theMemcache) {
+		log.info("updateNotificationString() entered: userId = " + theUserId);
 		String notificationStringKey = getAccumulatingNotificationStringKey(theUserId, theMemcache);
 		String existingNotificationString = "";
 		if(!theMemcache.contains(notificationStringKey)) {
+			log.info("updateNotificationString(): no prior notifications -- adding to pending user list");
 			// this user has no prior notifications -- so add to the Pending User list
 			String pendingUserListCounterKey = getAccumulatingPendingUserListCounterKey(theMemcache);
 			// put the userId in the Pending User sequential list which is the work list for the cron job
@@ -811,6 +825,7 @@ public class Notification {
 			theMemcache.increment(pendingUserListCounterKey, 1);
 		} else {
 			existingNotificationString = (String)theMemcache.get(notificationStringKey);
+			log.info("updateNotificationString(): existing notification string = " + existingNotificationString);
 		}
 		
 		String newNotificationString = null;
@@ -826,6 +841,7 @@ public class Notification {
 				newNotificationString = updateNotificatonDetailsString(theNotificationsDetails, existingNotificationString, targetNotificationDetailsIndex);
 			}
 		}
+		log.info("updateNotificationString(): newNotificationString = " + newNotificationString);
 		
 		theMemcache.put(notificationStringKey, newNotificationString);
 	}
@@ -897,6 +913,11 @@ public class Notification {
 		sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getFeedbackMessage()));
 		sb.append(FIELD_DELIMITER);
 		sb.append(theNotificationsDetails.getFeedbackId());
+		sb.append(FIELD_DELIMITER);
+		
+		sb.append(theNotificationsDetails.getEmailAddress());
+		sb.append(FIELD_DELIMITER);
+		sb.append(theNotificationsDetails.getSmsEmailAddress());
 		sb.append(FIELD_DELIMITER);
 		sb.append(NOTIFICATION_DETAILS_DELIMITER);
 		
@@ -1039,11 +1060,34 @@ public class Notification {
 		}
 		nd.setFeedbackId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
+		
+		////////////////
+		// Email Address
+		////////////////
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): email address field delimiter not found - should NOT happen");
+			return null;
+		}
+		nd.setEmailAddress(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
+		
+		////////////////////
+		// SMS Email Address
+		////////////////////
+		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
+		if(fieldDelimiterIndex == -1) {
+			log.severe("fromStringToNotificationDetails(): SMS email address field delimiter not found - should NOT happen");
+			return null;
+		}
+		nd.setSmsEmailAddress(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 
 		return nd;
 	}
 
 	private static String updateNotificatonDetailsString(NotificationDetails theNewNotificationDetails, String theExistingNotificationString, Integer theTargetNotificationDetailsIndex) {
+		log.info("updateNotificatonDetailsString() entered");
 		// convert the existing, embedded NotificationDetailsString to a NotificationDetails object
 		NotificationDetails existingNotificationDetails = fromStringToNotificationDetails(theTargetNotificationDetailsIndex, theExistingNotificationString);
 		
@@ -1110,7 +1154,14 @@ public class Notification {
 			existingNotificationDetails.setFeedbackCount(originalFeedbackCount);
 		}
 		
+		// email and smsEmail are always set/overwritten to the most current value
+		existingNotificationDetails.setEmailAddress(theNewNotificationDetails.getEmailAddress());
+		existingNotificationDetails.setSmsEmailAddress(theNewNotificationDetails.getSmsEmailAddress());
+		
+		log.info("updateNotificatonDetailsString() updated notificationDetailsString = " + existingNotificationDetails);
+		
 		String newNotificationString = replaceNotificatonDetailsString(existingNotificationDetails, theExistingNotificationString, theTargetNotificationDetailsIndex);
+		log.info("updateNotificatonDetailsString() updated notificationString = " + newNotificationString);
 		return newNotificationString;
 	}
 
@@ -1174,26 +1225,9 @@ public class Notification {
 	// Operates on Accumulating Queue
 	// Called by the CreateLog threads to queue notifications
 	public static void queueNotification(User theUser, String theApplicationId, AppMember theAppMember, String theNotificationType, 
-                                         String theMessage, String theIncidentId, Boolean theIsEmailActive, Boolean theIsSmsActive) {
+                                         String theMessage, String theIncidentId, String theEmailAddress, String theSmsEmailAddress) {
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		ensureMemcacheValid(memcache);
-		
-		jpw;
-		// I AM HERE
-		// need to store theIsEmailActive and theIsSmsActive in the NotificationString -- it's needed later by the CRON
-		// job when merging the datastore Notification
-		//
-		// just use the latest values -- over writting an previous values
-		//
-		// OR
-		//
-		// should I just get the user from the datastore and use those values
-		//
-		// OR
-		//
-		// store it in the Pending User list with userId -- that would save the CRON from looking up each user in the datastore
-		//
-		// ****************************************************************************************
         
         String userId = null;
         try {
@@ -1207,6 +1241,8 @@ public class Notification {
     	NotificationDetails notificationDetails = new NotificationDetails();
     	notificationDetails.setApplicationId(theApplicationId);
     	notificationDetails.setApplicationName(theAppMember.getApplicationName());
+    	notificationDetails.setEmailAddress(theEmailAddress);
+    	notificationDetails.setSmsEmailAddress(theSmsEmailAddress);
     	
     	notificationDetails.setCrashCount(0);
     	notificationDetails.setClientLogCount(0);
@@ -1260,6 +1296,23 @@ public class Notification {
 		memcache.put(pendingUserListCounterKey, 0);
 	}
 	
+	// returns the index of the next NotificationDetailsString or null if there are no more
+	private static Integer getNextNotificationDetails(String theExistingNotificationString, Integer theStartingOffset) {
+		Integer nextNotificationDetailsIndex = null;
+		
+		int notificationDetailsDelimiterIndex = theExistingNotificationString.indexOf(NOTIFICATION_DETAILS_DELIMITER, theStartingOffset);
+		if(notificationDetailsDelimiterIndex == -1) {
+			log.severe("getNextNotificationDetails(): notificationsDetails delimiter not found - should NOT happen");
+			return null;
+		}
+		nextNotificationDetailsIndex = notificationDetailsDelimiterIndex + NOTIFICATION_DETAILS_DELIMITER.length();
+		if(nextNotificationDetailsIndex >= theExistingNotificationString.length()) {
+			nextNotificationDetailsIndex = null;
+		}
+		return nextNotificationDetailsIndex;
+	}
+
+	
 	private static void mergeNotificationString(String theUserId, String theNotificationString) {
         EntityManager em = EMF.get().createEntityManager();
 
@@ -1287,21 +1340,12 @@ public class Notification {
         		notification.setSendGmtDateToFarFuture();  // to start, entity for this user is inactive
         	}
         	
-        	notification.updateNotificationDetailsList(notificationDetails);
-        	
-        	///////////////////////////////////////////////////////////////////////////////////////////
-        	// update emailAddress and smsEmailAddress based on whether email and SMS are now activated
-        	///////////////////////////////////////////////////////////////////////////////////////////
-        	if(theIsEmailActive) {
-        		notification.setEmailAddress(theUser.getEmailAddress());
-        	} else {
-        		notification.setEmailAddress(null);
-        	}
-        	if(theIsSmsActive) {
-        		notification.setSmsEmailAddress(theUser.getSmsEmailAddress());
-        	} else {
-        		notification.setSmsEmailAddress(null);
-        	}
+        	Integer nextNotificationDetailsIndex = 0;
+        	do {
+        		NotificationDetails nd = fromStringToNotificationDetails(nextNotificationDetailsIndex, theNotificationString);
+            	notification.updateNotificationDetailsList(nd);
+        		nextNotificationDetailsIndex = getNextNotificationDetails(theNotificationString, nextNotificationDetailsIndex);
+        	} while (nextNotificationDetailsIndex != null);
         	
         	// check if sendGmtDate needs to be updated
         	if(!GMT.isDateBeforeNowPlusOffsetMinutes(notification.getSendGmtDate(), DEFAULT_NOTIFICATION_PERIOD)) {

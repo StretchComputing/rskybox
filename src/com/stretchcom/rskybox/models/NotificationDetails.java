@@ -19,7 +19,8 @@ public class NotificationDetails {
 	private Integer feedbackCount;
 	private String feedbackMessage;
 	private String feedbackId;
-	
+	private String emailAddress;
+	private String smsEmailAddress;
 	public String getApplicationId() {
 		return applicationId;
 	}
@@ -116,5 +117,19 @@ public class NotificationDetails {
 	}
 	public void setFeedbackId(String feedbackId) {
 		this.feedbackId = feedbackId;
+	}
+	
+	public String getEmailAddress() {
+		return emailAddress;
+	}
+	public void setEmailAddress(String emailAddress) {
+		this.emailAddress = emailAddress;
+	}
+	
+	public String getSmsEmailAddress() {
+		return smsEmailAddress;
+	}
+	public void setSmsEmailAddress(String smsEmailAddress) {
+		this.smsEmailAddress = smsEmailAddress;
 	}
 }
