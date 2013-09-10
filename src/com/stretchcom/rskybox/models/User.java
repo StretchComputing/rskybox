@@ -347,6 +347,9 @@ public class User {
                                 String smsEmailAddress = isSmsActive ? user.getSmsEmailAddress() : null;
                                 Notification.queueNotification(user, theApplicationId, am, notificationType, theMessage, incidentId, emailAddress, smsEmailAddress);
                             }
+                            
+                            // TODO test code
+                            Notification.mergeQueuedNotifications();
                         }
                 	}
             	}

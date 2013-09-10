@@ -380,10 +380,10 @@ public class Notification {
 			//////////////////////////////////////////////////
 			// Lists exist, but are empty, so just add to list
 			//////////////////////////////////////////////////
-			log.info("notification array sizes are zero");
+			log.info("updateNotificationDetailsList(): notification array sizes are zero");
 			addNotificationDetails(theNewNotificationDetails);
 		} else {
-			log.info("applicationIds.size = " + this.applicationIds.size());
+			log.info("updateNotificationDetailsList(): applicationIds.size = " + this.applicationIds.size());
 			//////////////////////////////////////////////////////////
 			// Lists are non-empty, so must match using application ID
 			//////////////////////////////////////////////////////////
@@ -754,13 +754,20 @@ public class Notification {
 	}
 	
 	private static void createNotificationQueues(MemcacheService theMemcache) {
-		// initialize Pending User List for Accumulating queue
-		theMemcache.put(getAccumulatingPendingUserListCounterKey(theMemcache), 0);
-		// initialize Pending User List for Merging queue
-		theMemcache.put(getMergingPendingUserListCounterKey(theMemcache), 0);
+		log.info("createNotificationQueues() entered");
 
 		// q1 is initially the accumulating queue -- it flip flops from there every cycle of the memcache cron job
 		theMemcache.put(ACCUMULATE_QUEUE_INDICATOR_KEY, "q1");
+		
+		// initialize Pending User List for Accumulating queue
+		String accumulatingPendingUserListCounterKey = getAccumulatingPendingUserListCounterKey(theMemcache);
+		log.info("accumulatingPendingUserListCounterKey = " + accumulatingPendingUserListCounterKey);
+		theMemcache.put(accumulatingPendingUserListCounterKey, 0);
+		
+		// initialize Pending User List for Merging queue
+		String mergingPendingUserListCounterKey = getMergingPendingUserListCounterKey(theMemcache);
+		log.info("mergingPendingUserListCounterKey = " + mergingPendingUserListCounterKey);
+		theMemcache.put(getMergingPendingUserListCounterKey(theMemcache), 0);
 	}
 	
 	private static String getAccumulatingQueueKey(MemcacheService theMemcache) {
@@ -769,18 +776,20 @@ public class Notification {
 	
 	private static String getMergingQueueKey(MemcacheService theMemcache) {
 		String indicator = (String)theMemcache.get(ACCUMULATE_QUEUE_INDICATOR_KEY);
-		if(indicator.equals(QUEUE1)) {
-			return QUEUE2;
-		} else {
+		if(indicator == null || indicator.equals(QUEUE2)) {
 			return QUEUE1;
+		} else {
+			return QUEUE2;
 		}
 	}
 	
 	private static void flipFlopQueues(MemcacheService theMemcache) {
 		String indicator = (String)theMemcache.get(ACCUMULATE_QUEUE_INDICATOR_KEY);
 		if(indicator.equals(QUEUE1)) {
+			log.info("flipFlopQueues(); QUEUE2 now accumulate queue");
 			theMemcache.put(ACCUMULATE_QUEUE_INDICATOR_KEY, QUEUE2);
 		} else {
+			log.info("flipFlopQueues(); QUEUE1 now accumulate queue");
 			theMemcache.put(ACCUMULATE_QUEUE_INDICATOR_KEY, QUEUE1);
 		}
 	}
@@ -818,8 +827,10 @@ public class Notification {
 			log.info("updateNotificationString(): no prior notifications -- adding to pending user list");
 			// this user has no prior notifications -- so add to the Pending User list
 			String pendingUserListCounterKey = getAccumulatingPendingUserListCounterKey(theMemcache);
+			log.info("pendingUserListCounterKey = " + pendingUserListCounterKey);;
 			// put the userId in the Pending User sequential list which is the work list for the cron job
-			int nextSequence = (Integer)theMemcache.get(pendingUserListCounterKey);
+			Integer nextSequence = (Integer)theMemcache.get(pendingUserListCounterKey);
+			log.info("nextSequence = " + nextSequence);
 			String entryKey = getAccumulatingPendingUserListEntryKey(nextSequence, theMemcache);
 			theMemcache.put(entryKey, theUserId);
 			theMemcache.increment(pendingUserListCounterKey, 1);
@@ -882,42 +893,42 @@ public class Notification {
 	
 	private static String fromNotificationDetailsToString(NotificationDetails theNotificationsDetails) {
 		StringBuffer sb = new StringBuffer();
-		sb.append(theNotificationsDetails.getApplicationId());
+		if(theNotificationsDetails.getApplicationId() != null) sb.append(theNotificationsDetails.getApplicationId());
 		sb.append(FIELD_DELIMITER);
-		sb.append(theNotificationsDetails.getApplicationName());
-		sb.append(FIELD_DELIMITER);
-		
-		sb.append(theNotificationsDetails.getClientLogCount());
-		sb.append(FIELD_DELIMITER);
-		sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getClientLogMessage()));
-		sb.append(FIELD_DELIMITER);
-		sb.append(theNotificationsDetails.getClientLogId());
+		if(theNotificationsDetails.getApplicationName() != null) sb.append(theNotificationsDetails.getApplicationName());
 		sb.append(FIELD_DELIMITER);
 		
-		sb.append(theNotificationsDetails.getUpdatedLogCount());
+		if(theNotificationsDetails.getClientLogCount() != null) sb.append(theNotificationsDetails.getClientLogCount());
 		sb.append(FIELD_DELIMITER);
-		sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getUpdatedLogMessage()));
+		if(theNotificationsDetails.getClientLogMessage() != null) sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getClientLogMessage()));
 		sb.append(FIELD_DELIMITER);
-		sb.append(theNotificationsDetails.getUpdatedLogId());
-		sb.append(FIELD_DELIMITER);
-		
-		sb.append(theNotificationsDetails.getCrashCount());
-		sb.append(FIELD_DELIMITER);
-		sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getCrashMessage()));
-		sb.append(FIELD_DELIMITER);
-		sb.append(theNotificationsDetails.getCrashId());
+		if(theNotificationsDetails.getClientLogId() != null) sb.append(theNotificationsDetails.getClientLogId());
 		sb.append(FIELD_DELIMITER);
 		
-		sb.append(theNotificationsDetails.getFeedbackCount());
+		if(theNotificationsDetails.getUpdatedLogCount() != null) sb.append(theNotificationsDetails.getUpdatedLogCount());
 		sb.append(FIELD_DELIMITER);
-		sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getFeedbackMessage()));
+		if(theNotificationsDetails.getUpdatedLogMessage() != null) sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getUpdatedLogMessage()));
 		sb.append(FIELD_DELIMITER);
-		sb.append(theNotificationsDetails.getFeedbackId());
+		if(theNotificationsDetails.getUpdatedLogId() != null) sb.append(theNotificationsDetails.getUpdatedLogId());
 		sb.append(FIELD_DELIMITER);
 		
-		sb.append(theNotificationsDetails.getEmailAddress());
+		if(theNotificationsDetails.getCrashCount() != null) sb.append(theNotificationsDetails.getCrashCount());
 		sb.append(FIELD_DELIMITER);
-		sb.append(theNotificationsDetails.getSmsEmailAddress());
+		if(theNotificationsDetails.getCrashMessage() != null) sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getCrashMessage()));
+		sb.append(FIELD_DELIMITER);
+		if(theNotificationsDetails.getCrashId() != null) sb.append(theNotificationsDetails.getCrashId());
+		sb.append(FIELD_DELIMITER);
+		
+		if(theNotificationsDetails.getFeedbackCount() != null) sb.append(theNotificationsDetails.getFeedbackCount());
+		sb.append(FIELD_DELIMITER);
+		if(theNotificationsDetails.getFeedbackMessage() != null) sb.append(encodeEmbeddedDelimiters(theNotificationsDetails.getFeedbackMessage()));
+		sb.append(FIELD_DELIMITER);
+		if(theNotificationsDetails.getFeedbackId() != null) sb.append(theNotificationsDetails.getFeedbackId());
+		sb.append(FIELD_DELIMITER);
+		
+		if(theNotificationsDetails.getEmailAddress() != null) sb.append(theNotificationsDetails.getEmailAddress());
+		sb.append(FIELD_DELIMITER);
+		if(theNotificationsDetails.getSmsEmailAddress() != null) sb.append(theNotificationsDetails.getSmsEmailAddress());
 		sb.append(FIELD_DELIMITER);
 		sb.append(NOTIFICATION_DETAILS_DELIMITER);
 		
@@ -934,7 +945,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): applicationID field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setApplicationId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		String applicationId = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			applicationId = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		}
+		nd.setApplicationId(applicationId);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
@@ -942,7 +957,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): applicationName field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setApplicationName(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		String applicationName = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			applicationName = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		}
+		nd.setApplicationName(applicationName);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		//////////////
@@ -953,7 +972,15 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): clientLogCount field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setClientLogCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex)));
+		Integer clientLogCount = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			try {
+				clientLogCount = new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+			} catch(NumberFormatException e) {
+				log.severe("fromStringToNotificationDetails(): clientLogCount not an integer - should NOT happen");
+			}
+		}
+		nd.setClientLogCount(clientLogCount);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
@@ -961,8 +988,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): clientLogMessage field delimiter not found - should NOT happen");
 			return null;
 		}
-		String clientLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
-		clientLogMessage = decodeEmbeddedDelimiters(clientLogMessage);
+		String clientLogMessage = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			clientLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+			clientLogMessage = decodeEmbeddedDelimiters(clientLogMessage);
+		}
 		nd.setClientLogMessage(clientLogMessage);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
@@ -971,7 +1001,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): clientLogId field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setClientLogId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		String clientLogId = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			clientLogId = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		}
+		nd.setClientLogId(clientLogId);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		//////////////
@@ -982,7 +1016,15 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): updatedLogCount field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setUpdatedLogCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex)));
+		Integer updatedLogCount = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			try {
+				updatedLogCount = new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+			} catch(NumberFormatException e) {
+				log.severe("fromStringToNotificationDetails(): updatedLogCount not an integer - should NOT happen");
+			}
+		}
+		nd.setUpdatedLogCount(updatedLogCount);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
@@ -990,8 +1032,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): updatedLogMessage field delimiter not found - should NOT happen");
 			return null;
 		}
-		String updatedLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
-		updatedLogMessage = decodeEmbeddedDelimiters(updatedLogMessage);
+		String updatedLogMessage = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			updatedLogMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+			updatedLogMessage = decodeEmbeddedDelimiters(updatedLogMessage);
+		}
 		nd.setUpdatedLogMessage(updatedLogMessage);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
@@ -1000,7 +1045,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): updatedLogId field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setUpdatedLogId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		String updatedLogId = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			updatedLogId = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		}
+		nd.setUpdatedLogId(updatedLogId);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		////////
@@ -1011,7 +1060,15 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): crashCount field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setCrashCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex)));
+		Integer crashCount = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			try {
+				crashCount = new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+			} catch(NumberFormatException e) {
+				log.severe("fromStringToNotificationDetails(): crashCount not an integer - should NOT happen");
+			}
+		}
+		nd.setCrashCount(crashCount);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
@@ -1019,8 +1076,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): crashMessage field delimiter not found - should NOT happen");
 			return null;
 		}
-		String crashMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
-		crashMessage = decodeEmbeddedDelimiters(crashMessage);
+		String crashMessage = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			crashMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+			crashMessage = decodeEmbeddedDelimiters(crashMessage);
+		}
 		nd.setCrashMessage(crashMessage);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
@@ -1029,7 +1089,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): crashId field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setCrashId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		String crashId = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			crashId = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		}
+		nd.setCrashId(crashId);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		///////////
@@ -1040,7 +1104,15 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): feedbackCount field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setFeedbackCount(new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex)));
+		Integer feedbackCount = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			try {
+				feedbackCount = new Integer(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+			} catch(NumberFormatException e) {
+				log.severe("fromStringToNotificationDetails(): feedbackCount not an integer - should NOT happen");
+			}
+		}
+		nd.setFeedbackCount(feedbackCount);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		fieldDelimiterIndex = theExistingNotificationString.indexOf(FIELD_DELIMITER, startOfFieldIndex);
@@ -1048,8 +1120,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): feedbackMessage field delimiter not found - should NOT happen");
 			return null;
 		}
-		String feedbackMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
-		feedbackMessage = decodeEmbeddedDelimiters(feedbackMessage);
+		String feedbackMessage = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			feedbackMessage = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+			feedbackMessage = decodeEmbeddedDelimiters(feedbackMessage);
+		}
 		nd.setFeedbackMessage(feedbackMessage);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
@@ -1058,7 +1133,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): feedbackId field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setFeedbackId(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		String feedbackId = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			feedbackId = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		}
+		nd.setFeedbackId(feedbackId);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		////////////////
@@ -1069,7 +1148,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): email address field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setEmailAddress(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		String emailAddress = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			emailAddress = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		}
+		nd.setEmailAddress(emailAddress);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 		
 		////////////////////
@@ -1080,7 +1163,11 @@ public class Notification {
 			log.severe("fromStringToNotificationDetails(): SMS email address field delimiter not found - should NOT happen");
 			return null;
 		}
-		nd.setSmsEmailAddress(theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex));
+		String smsEmailAddress = null;
+		if(fieldDelimiterIndex > startOfFieldIndex) {
+			smsEmailAddress = theExistingNotificationString.substring(startOfFieldIndex, fieldDelimiterIndex);
+		}
+		nd.setSmsEmailAddress(smsEmailAddress);
 		startOfFieldIndex = fieldDelimiterIndex + FIELD_DELIMITER.length();
 
 		return nd;
@@ -1196,6 +1283,9 @@ public class Notification {
 	}
 	
 	private static String encodeEmbeddedDelimiters(String theStringToEncode) {
+		if(theStringToEncode == null || theStringToEncode.length() == 0) {
+			return theStringToEncode;
+		}
 		String encodedString = null;
 		
 		// first encode the any field delimiters embedded in theStringToEncode
@@ -1208,6 +1298,9 @@ public class Notification {
 	}
 	
 	private static String decodeEmbeddedDelimiters(String theStringToDecode) {
+		if(theStringToDecode == null || theStringToDecode.length() == 0) {
+			return theStringToDecode;
+		}
 		String decodedString = null;
 		
 		// first decode the any encoded field delimiters embedded in theStringToDecode
@@ -1272,6 +1365,7 @@ public class Notification {
 	// Major ENTRY POINT
 	// called by the memcache cron job to merge memcache queued notifications into the datastore Notification entities
 	public static void mergeQueuedNotifications() {
+		log.info("mergeQueuedNotifications(); entered");
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		ensureMemcacheValid(memcache);
 		
@@ -1314,6 +1408,8 @@ public class Notification {
 
 	
 	private static void mergeNotificationString(String theUserId, String theNotificationString) {
+		log.info("mergeNotificationString(); entered");
+
         EntityManager em = EMF.get().createEntityManager();
 
 		em.getTransaction().begin();
@@ -1323,7 +1419,7 @@ public class Notification {
             	notification = (Notification)em.createNamedQuery("Notification.getByUserId")
         				.setParameter("userId", theUserId)
         				.getSingleResult();
-            	log.info("existing notification found in datastore");
+            	log.info("mergeNotificationString(); existing notification found in datastore");
         	} catch (NoResultException e) {
     			// this is NOT an error, just the very first time a notification is being sent. Notification will be created just below ...
     		} catch (NonUniqueResultException e) {
@@ -1334,7 +1430,7 @@ public class Notification {
         	// there is no Notification entity for this user yet, so create it now
         	//////////////////////////////////////////////////////////////////////
         	if(notification == null) {
-        		log.info("new notification instantiated");
+        		log.info("mergeNotificationString(); new notification instantiated");
         		notification = new Notification();
         		notification.setUserId(theUserId);
         		notification.setSendGmtDateToFarFuture();  // to start, entity for this user is inactive
@@ -1349,7 +1445,7 @@ public class Notification {
         	
         	// check if sendGmtDate needs to be updated
         	if(!GMT.isDateBeforeNowPlusOffsetMinutes(notification.getSendGmtDate(), DEFAULT_NOTIFICATION_PERIOD)) {
-        		log.info("setting sendGmtDate to 5 minutes in the future");
+        		log.info("mergeNotificationString(); setting sendGmtDate to 5 minutes in the future");
         		// set sendGmtDate to five minutes in the future
         		notification.setSendGmtDate(GMT.addMinutesToDate(new Date(), DEFAULT_NOTIFICATION_PERIOD));
         	}
