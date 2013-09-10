@@ -26,6 +26,7 @@ import com.stretchcom.rskybox.models.CrashDetect;
 import com.stretchcom.rskybox.models.Feedback;
 import com.stretchcom.rskybox.models.Incident;
 import com.stretchcom.rskybox.models.MobileCarrier;
+import com.stretchcom.rskybox.models.Notification;
 
 public class MigrationTaskServlet extends HttpServlet {
 	private static final Logger log = Logger.getLogger(MigrationTaskServlet.class.getName());
@@ -73,6 +74,8 @@ public class MigrationTaskServlet extends HttpServlet {
 	    		cleanRskyboxLogs();
 	    	} else if(migrationName.equalsIgnoreCase("setLepRepInIncidentsTask")) {
 	    		setLepRepInIncidents();
+	    	} else if(migrationName.equalsIgnoreCase("clearNotificationsTask")) {
+	    		clearNotifications();
 	    	} else {
 	    		log.info("task unknown");
 	    	}
@@ -91,6 +94,22 @@ public class MigrationTaskServlet extends HttpServlet {
 			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.getWriter().println(response);
 		}
+	}
+	
+	private void clearNotifications() {
+		EntityManager emClearer = EMF.get().createEntityManager();
+		int numberOfNotificationsCleared = 0;
+				
+		List<Notification> notifications = (List<Notification>)emClearer.createNamedQuery("Notification.getAll").setMaxResults(250).getResultList();
+    	log.info("number of total notifications = " + notifications.size());
+    	
+		for(Notification n : notifications) {
+			emClearer.getTransaction().begin();
+			emClearer.remove(n);
+			emClearer.getTransaction().commit();
+			numberOfNotificationsCleared++;
+		}
+    	log.info("number of notifications cleared = " + numberOfNotificationsCleared);
 	}
 	
 	private void cleanRskyboxLogs() {

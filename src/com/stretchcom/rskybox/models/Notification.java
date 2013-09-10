@@ -81,6 +81,10 @@ import com.stretchcom.rskybox.server.RskyboxApplication;
     		query="SELECT n FROM Notification n WHERE n.key = :key"
     ),
     @NamedQuery(
+    		name="Notification.getAll",
+    		query="SELECT n FROM Notification n LIMIT 1000"
+    ),
+    @NamedQuery(
     		name="Notification.getByApplicationId",
     		query="SELECT n FROM Notification n WHERE n.applicationIds = :applicationId"
     ),
@@ -609,14 +613,14 @@ public class Notification {
 	}
 	
 	private String getEmailNotification() {
-        if(this.getEmailAddress() == null) {
+        if(this.getEmailAddress() == null || this.getEmailAddress().trim().length() == 0) {
         	return null;
         }
     	return Emailer.getNotificationEmailBody(this.getNotificationDetailsList(), RskyboxApplication.APPLICATION_BASE_URL);
 	}
 	
 	private String getSmsNotification() {
-        if(this.getSmsEmailAddress() == null) {
+        if(this.getSmsEmailAddress() == null || this.getSmsEmailAddress().trim().length() == 0) {
         	return null;
         }
 
