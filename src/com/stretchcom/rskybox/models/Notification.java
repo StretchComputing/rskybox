@@ -1392,6 +1392,7 @@ public class Notification {
 			memcache.delete(pendingUserKey);
 			memcache.delete(notificationStringKey);
 		}
+		log.info("number of pending users merged = " + index);
 		memcache.put(pendingUserListCounterKey, 0);
 		return index;
 	}
