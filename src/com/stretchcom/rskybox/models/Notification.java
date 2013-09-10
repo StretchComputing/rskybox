@@ -555,8 +555,7 @@ public class Notification {
 					String clientLogId = theNewNotificationDetails.getClientLogId() == null ? "" : theNewNotificationDetails.getClientLogId();
 					this.clientLogIds.set(applicationIdIndex, clientLogId);
 				}
-				originalClientLogCount++;
-				this.clientLogCounts.set(applicationIdIndex, originalClientLogCount);
+				this.clientLogCounts.set(applicationIdIndex, originalClientLogCount+newClientLogCount);
 			}
 			
 			Integer newUpdatedLogCount = theNewNotificationDetails.getUpdatedLogCount();
@@ -569,8 +568,7 @@ public class Notification {
 					String updatedLogId = theNewNotificationDetails.getUpdatedLogId() == null ? "" : theNewNotificationDetails.getUpdatedLogId();
 					this.updatedLogIds.set(applicationIdIndex, updatedLogId);
 				}
-				originalUpdatedLogCount++;
-				this.updatedLogCounts.set(applicationIdIndex, originalUpdatedLogCount);
+				this.updatedLogCounts.set(applicationIdIndex, originalUpdatedLogCount+newUpdatedLogCount);
 			}
 			
 			Integer newCrashCount = theNewNotificationDetails.getCrashCount();
@@ -583,8 +581,7 @@ public class Notification {
 					String crashId = theNewNotificationDetails.getCrashId() == null ? "" : theNewNotificationDetails.getCrashId();
 					this.crashIds.set(applicationIdIndex, crashId);
 				}
-				originalCrashCount++;
-				this.crashCounts.set(applicationIdIndex, originalCrashCount);
+				this.crashCounts.set(applicationIdIndex, originalCrashCount+newCrashCount);
 			}
 			
 			Integer newFeedbackCount = theNewNotificationDetails.getFeedbackCount();
@@ -597,8 +594,7 @@ public class Notification {
 					String feedbackId = theNewNotificationDetails.getFeedbackId() == null ? "" : theNewNotificationDetails.getFeedbackId();
 					this.feedbackIds.set(applicationIdIndex, feedbackId);
 				}
-				originalFeedbackCount++;
-				this.feedbackCounts.set(applicationIdIndex, originalFeedbackCount);
+				this.feedbackCounts.set(applicationIdIndex, originalFeedbackCount+newFeedbackCount);
 			}
 			
 			String emailAddress = theNewNotificationDetails.getEmailAddress() == null ? "" : theNewNotificationDetails.getEmailAddress();
@@ -758,7 +754,7 @@ public class Notification {
 
 		// q1 is initially the accumulating queue -- it flip flops from there every cycle of the memcache cron job
 		theMemcache.put(ACCUMULATE_QUEUE_INDICATOR_KEY, "q1");
-		
+
 		// initialize Pending User List for Accumulating queue
 		String accumulatingPendingUserListCounterKey = getAccumulatingPendingUserListCounterKey(theMemcache);
 		log.info("accumulatingPendingUserListCounterKey = " + accumulatingPendingUserListCounterKey);
@@ -821,6 +817,7 @@ public class Notification {
 	// Operates on Accumulating Queue
 	private static void updateNotificationString(String theUserId, NotificationDetails theNotificationsDetails, MemcacheService theMemcache) {
 		log.info("updateNotificationString() entered: userId = " + theUserId);
+		log.info("theNotificationsDetails = " + theNotificationsDetails.toString());
 		String notificationStringKey = getAccumulatingNotificationStringKey(theUserId, theMemcache);
 		String existingNotificationString = "";
 		if(!theMemcache.contains(notificationStringKey)) {
@@ -1177,7 +1174,8 @@ public class Notification {
 		log.info("updateNotificatonDetailsString() entered");
 		// convert the existing, embedded NotificationDetailsString to a NotificationDetails object
 		NotificationDetails existingNotificationDetails = fromStringToNotificationDetails(theTargetNotificationDetailsIndex, theExistingNotificationString);
-		
+		log.info("updateNotificatonDetailsString() existing notificationDetailsString = " + existingNotificationDetails.toString());
+	
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// ID and Message Fields updated only for the first entry (that is, when the count is going from zero to one)
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1245,7 +1243,7 @@ public class Notification {
 		existingNotificationDetails.setEmailAddress(theNewNotificationDetails.getEmailAddress());
 		existingNotificationDetails.setSmsEmailAddress(theNewNotificationDetails.getSmsEmailAddress());
 		
-		log.info("updateNotificatonDetailsString() updated notificationDetailsString = " + existingNotificationDetails);
+		log.info("updateNotificatonDetailsString() updated notificationDetailsString = " + existingNotificationDetails.toString());
 		
 		String newNotificationString = replaceNotificatonDetailsString(existingNotificationDetails, theExistingNotificationString, theTargetNotificationDetailsIndex);
 		log.info("updateNotificatonDetailsString() updated notificationString = " + newNotificationString);
@@ -1362,9 +1360,11 @@ public class Notification {
     	updateNotificationString(userId, notificationDetails, memcache);
 	}
 
+	////////////////////
 	// Major ENTRY POINT
+	////////////////////
 	// called by the memcache cron job to merge memcache queued notifications into the datastore Notification entities
-	public static void mergeQueuedNotifications() {
+	public static Integer mergeQueuedNotifications() {
 		log.info("mergeQueuedNotifications(); entered");
 		MemcacheService memcache = MemcacheServiceFactory.getMemcacheService();
 		ensureMemcacheValid(memcache);
@@ -1375,7 +1375,8 @@ public class Notification {
 		// walk thru the Merging Queue's Pending Users list. For each pending user, get the associated NotificationString and merge that into the datastore
 		String pendingUserListCounterKey = getMergingPendingUserListCounterKey(memcache);
 		Integer puCount = (Integer)memcache.get(pendingUserListCounterKey);
-		for(int index=0; index<puCount; index++) {
+		int index;
+		for(index=0; index<puCount; index++) {
 			String pendingUserKey = getMergingPendingUserListEntryKey(index, memcache);
 			String userId = (String)memcache.get(pendingUserKey);
 			String notificationStringKey = getMergingNotificationStringKey(userId, memcache);
@@ -1388,6 +1389,7 @@ public class Notification {
 			memcache.delete(notificationStringKey);
 		}
 		memcache.put(pendingUserListCounterKey, 0);
+		return index;
 	}
 	
 	// returns the index of the next NotificationDetailsString or null if there are no more

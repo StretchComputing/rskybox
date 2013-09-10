@@ -11,4 +11,9 @@
     <schedule>every day 02:00</schedule>
     <timezone>America/New_York</timezone>
   </cron>
+  <cron>
+    <url>/rest/v1/cron/mergeNotifications</url>
+    <description>Periodically merge memcache notifications into datastore notifications</description>
+    <schedule>every 1 minutes</schedule>
+  </cron>
 </cronentries>

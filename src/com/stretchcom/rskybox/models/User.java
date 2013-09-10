@@ -346,10 +346,18 @@ public class User {
                                 String emailAddress = isEmailActive ? user.getEmailAddress() : null;
                                 String smsEmailAddress = isSmsActive ? user.getSmsEmailAddress() : null;
                                 Notification.queueNotification(user, theApplicationId, am, notificationType, theMessage, incidentId, emailAddress, smsEmailAddress);
+                                // TODO test code
+//       Notification.queueNotification(user, theApplicationId, am, notificationType, "2nd message", incidentId, "fake2@email.com", "fake2@smsemail.com");
+//       Notification.queueNotification(user, theApplicationId, am, notificationType, "3rd message", incidentId, "fake3@email.com", "fake3@smsemail.com");
+//       Notification.queueNotification(user, theApplicationId, am, notificationType, "4th message", incidentId, "fake4@email.com", "fake4@smsemail.com");
+//       Notification.queueNotification(user, theApplicationId, am, notificationType, "5th message", incidentId, "fake5@email.com", "fake5@smsemail.com");
+//       Notification.queueNotification(user, theApplicationId, am, notificationType, "6th message", incidentId, "fake6@email.com", "fake6@smsemail.com");
+//       Notification.queueNotification(user, theApplicationId, am, notificationType, "7th message", incidentId, "fake7@email.com", "fake7@smsemail.com");
+//       Notification.queueNotification(user, theApplicationId, am, notificationType, "8th message", incidentId, "fake8@email.com", "fake8@smsemail.com");
                             }
                             
                             // TODO test code
-                            Notification.mergeQueuedNotifications();
+                            //Notification.mergeQueuedNotifications();
                         }
                 	}
             	}

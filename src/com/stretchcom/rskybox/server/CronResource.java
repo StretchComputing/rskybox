@@ -51,6 +51,8 @@ public class CronResource extends ServerResource {
     		runNotificationSender();
     	} else if(this.job != null && this.job.equalsIgnoreCase("archiver")) {
     		runArchiver();
+    	} else if(this.job != null && this.job.equalsIgnoreCase("mergeNotifications")) {
+    		runMergeNotifications();
     	}
     	
     	return new StringRepresentation("success");
@@ -225,4 +227,28 @@ public class CronResource extends ServerResource {
     		emCronLog.close();
     	}
     }
+    
+    
+    private void runMergeNotifications() {
+    	log.info("runMergeNotifications() entered");
+    	
+    	CronLog mergeNotificationsCronLog = null;
+    	int numberOfUsersWithPendingNotifications = Notification.mergeQueuedNotifications();
+    	
+    	mergeNotificationsCronLog = new CronLog();
+    	mergeNotificationsCronLog.setJobName("mergeNotifications");
+    	String logMessage = "Number of pending users with notifications merged = " + numberOfUsersWithPendingNotifications + ".";
+    	mergeNotificationsCronLog.setLogMessage(logMessage);
+    	mergeNotificationsCronLog.setCreatedGmtDate(new Date());
+    	
+    	EntityManager emCronLog = EMF.get().createEntityManager();
+    	try {
+    		emCronLog.persist(mergeNotificationsCronLog);
+    	} catch(Exception e) {
+    		log.severe("exception persisting cron Logs. Message = " + e.getMessage());
+    	} finally {
+    		emCronLog.close();
+    	}
+    }
+
 }

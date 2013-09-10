@@ -21,6 +21,29 @@ public class NotificationDetails {
 	private String feedbackId;
 	private String emailAddress;
 	private String smsEmailAddress;
+
+	@Override public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("applicationId = " + this.applicationId);
+		sb.append(" applicationName = " + this.applicationName);
+		sb.append(" clientLogCount = " + this.clientLogCount);
+		sb.append(" clientLogMessage = " + this.clientLogMessage);
+		sb.append(" clientLogId = " + this.clientLogId);
+		sb.append(" updatedLogCount = " + this.updatedLogCount);
+		sb.append(" updatedLogMessage = " + this.updatedLogMessage);
+		sb.append(" updatedLogId = " + this.updatedLogId);
+		sb.append(" crashCount = " + this.crashCount);
+		sb.append(" crashMessage = " + this.crashMessage);
+		sb.append(" crashId = " + this.crashId);
+		sb.append(" feedbackCount = " + this.feedbackCount);
+		sb.append(" feebackMessage = " + this.feedbackMessage);
+		sb.append(" feedbackId = " + this.feedbackId);
+		sb.append(" emailAddress = " + this.emailAddress);
+		sb.append(" smsEmailAddress = " + this.smsEmailAddress);
+		
+		return sb.toString();
+	}
+	
 	public String getApplicationId() {
 		return applicationId;
 	}
