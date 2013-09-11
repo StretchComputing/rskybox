@@ -2,6 +2,7 @@ package com.stretchcom.rskybox.server;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -201,6 +202,11 @@ public class EndpointFiltersResource extends ServerResource {
 			
             Incident.mergePotentialEndpointFilters(this.applicationId, currentUser, allFilters);
             
+			// sort so active endpoint Filters are displayed at the top
+			if(allFilters.size() > 0) {
+				Collections.sort(allFilters);
+			}
+
             for (EndpointFilter ef : allFilters) {
             	JSONObject endpointFilterObj = EndpointFilter.getJson(ef, true);
             	if(endpointFilterObj == null) {

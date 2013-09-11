@@ -52,7 +52,7 @@ import com.stretchcom.rskybox.server.GMT;
     		query="SELECT ef FROM EndpointFilter ef WHERE ef.key = :key"
     ),
 })
-public class EndpointFilter {
+public class EndpointFilter implements Comparable<EndpointFilter> {
 	private static final Logger log = Logger.getLogger(EndpointFilter.class.getName());
 	
 	public final static String ALL_FILTER = "ALL";
@@ -254,6 +254,24 @@ public class EndpointFilter {
 			em.close();
 		}
 		return allFilterActive;
+	}
+	
+	public int compareTo(EndpointFilter aThat) {
+		final int BEFORE = -1;
+		final int EQUAL = 0;
+		final int AFTER = 1;
+
+		if(this == aThat)
+			return EQUAL;
+		
+		// logic is reverse since sorting is done in reverse chronological order
+		if (this.isActive && !aThat.isActive) {
+			return AFTER;
+		} else if (!this.isActive && aThat.isActive) {
+			return BEFORE;
+		} else {
+			return this.localEndpoint.compareTo(aThat.localEndpoint);
+		}
 	}
 
 }
