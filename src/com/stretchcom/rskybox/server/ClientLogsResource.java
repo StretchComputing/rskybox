@@ -284,7 +284,6 @@ public class ClientLogsResource extends ServerResource {
 		String apiStatus = ApiStatusCode.SUCCESS;
         this.setStatus(Status.SUCCESS_CREATED);
     	User currentUser = Utility.getCurrentUser(getRequest());
-        em.getTransaction().begin();
 		Incident owningIncident = null;
         try {
             clientLog = new ClientLog();
@@ -485,7 +484,6 @@ public class ClientLogsResource extends ServerResource {
 				ClientLog.deleteSecondOldest(this.applicationId, owningIncident.getId());
 			}
 			em.persist(clientLog);
-            em.getTransaction().commit();
         } catch (IOException e) {
             log.severe("error extracting JSON object from Post. exception = " + e.getMessage());
             e.printStackTrace();
@@ -500,9 +498,6 @@ public class ClientLogsResource extends ServerResource {
 			log.severe("should never happen - two or more client logs have same key");
 			this.setStatus(Status.SERVER_ERROR_INTERNAL);
 		} finally {
-            if (em.getTransaction().isActive()) {
-                em.getTransaction().rollback();
-            }
             em.close();
         }
         

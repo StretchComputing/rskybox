@@ -480,8 +480,9 @@ public class ClientLog {
             				.getSingleResult();
         			singleClientLogEm.remove(singleClientLog);
                 	singleClientLogEm.close();
+        			log.info("::WATCH_deleteSecondOldest successful!");
                 } catch(Exception e) {
-        			log.severe("should never happen - could not get ClientLog via key");
+        			log.severe("::WATCH_deleteSecondOldest should never happen - could not get ClientLog via key. Exception = " + e.getMessage());
         			return;
                 }
 
@@ -491,7 +492,6 @@ public class ClientLog {
 			log.severe("exception = " + e.getMessage());
 			e.printStackTrace();
 		} finally {
-			//::PROBLEM:: search all em.close throughout code base to see if this "update portion of result set" is used anywhere else.
 			em.close();
 		}
 		return;
