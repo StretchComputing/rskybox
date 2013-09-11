@@ -35,6 +35,10 @@ import com.stretchcom.rskybox.server.RskyboxApplication;
     		query="SELECT i FROM Incident i ORDER BY i.lastUpdatedGmtDate DESC"
     ),
     @NamedQuery(
+    		name="Incident.getByKey",
+    		query="SELECT i FROM Incident i WHERE i.key = :key"
+    ),
+    @NamedQuery(
     		name="Incident.getAllWithApplicationId",
     		query="SELECT i FROM Incident i WHERE i.applicationId = :applicationId ORDER BY i.lastUpdatedGmtDate DESC"
     ),
@@ -639,6 +643,7 @@ public class Incident {
 		}
 		
 		Incident eventOwningIncident = null;
+		Incident singleIncident = null;
 		List<Incident> relatedIncidents = null;
         EntityManager em = EMF.get().createEntityManager();
         Date now = new Date();
@@ -683,18 +688,29 @@ public class Incident {
         			return null;
         		}
             }
+            
+            // Get the incident using another entityManager. Want to get it by itself so it is more efficient when it is persisted
+            EntityManager singleIncidentEm = EMF.get().createEntityManager();
+    		try {
+    			singleIncident = (Incident)singleIncidentEm.createNamedQuery("Incident.getByKey")
+        				.setParameter("key", eventOwningIncident.getKey())
+        				.getSingleResult();
+            } catch(Exception e) {
+    			log.severe("should never happen - could not get Incident via key");
+    			return null;
+            }
     		
     		// if incident recently closed, re-open it. Closed too long, then create a new one.
             // TODO maybe only re-open if it was auto closed
-    		if(eventOwningIncident.getStatus().equalsIgnoreCase(Incident.CLOSED_STATUS)) {
-    			Date finalRevivalDate = GMT.addDaysToDate(eventOwningIncident.getLastUpdatedGmtDate(), theApplication.getDaysInLimbo());
+    		if(singleIncident.getStatus().equalsIgnoreCase(Incident.CLOSED_STATUS)) {
+    			Date finalRevivalDate = GMT.addDaysToDate(singleIncident.getLastUpdatedGmtDate(), theApplication.getDaysInLimbo());
     			if(finalRevivalDate.after(now)) {
     				// reopen this puppy
-    				eventOwningIncident.changeStatus(theWellKnownTag, Incident.OPEN_STATUS, theApplication);
+    				singleIncident.changeStatus(theWellKnownTag, Incident.OPEN_STATUS, theApplication);
     				log.info("fetchIncidentIncrementCount() reopening existing incident");
     			} else {
     				// create a new incident
-    				eventOwningIncident = Incident.createIncident(theEventName, theLEP, theREP, theWellKnownTag, theApplication, theMessage, theSummary);
+    				singleIncident = Incident.createIncident(theEventName, theLEP, theREP, theWellKnownTag, theApplication, theMessage, theSummary);
     				isExistingIncident = false;
     				log.info("fetchIncidentIncrementCount() existing incident CLOSED and too old to reopen");
     			}
@@ -702,27 +718,27 @@ public class Incident {
     		
     		if(isExistingIncident){
     			log.info("existing incident -- incident details are being updated");
-    			eventOwningIncident.incrementEventCount(theApplication.getMaxEventsPerIncident());
-    			eventOwningIncident.setLastUpdatedGmtDate(now);
+    			singleIncident.incrementEventCount(theApplication.getMaxEventsPerIncident());
+    			singleIncident.setLastUpdatedGmtDate(now);
     			// TODO enhance message by merging summaries?  For now, always use the message from the latest event
-    			eventOwningIncident.setMessage(theMessage);
-    			eventOwningIncident.setSummary(theSummary);
+    			singleIncident.setMessage(theMessage);
+    			singleIncident.setSummary(theSummary);
     		}
 			
 			// update severity if appropriate
-			severityChanged = checkForSeverityUpdate(eventOwningIncident, theApplication);
+			severityChanged = checkForSeverityUpdate(singleIncident, theApplication);
 			if(severityChanged) {
 				// two scenarios to deal with
 				// 1. this is a new incident (old severity = new severity)
 				// 2. change in severity for an existing incident (old severity != new severity)
-				if(eventOwningIncident.getOldSeverity().equals(eventOwningIncident.getSeverity())) {
+				if(singleIncident.getOldSeverity().equals(singleIncident.getSeverity())) {
 					// this is a new incident
 					//severityMsg = "a new " + eventOwningIncident.getNotificationTypeFromTag() + " created";
 					severityMsg = "new";
-					log.info("severity changed because this is a new incident: oldSeverity = " + eventOwningIncident.getOldSeverity() + " newSeverity = " + eventOwningIncident.getSeverity());
+					log.info("severity changed because this is a new incident: oldSeverity = " + singleIncident.getOldSeverity() + " newSeverity = " + singleIncident.getSeverity());
 				} else {
 	            	//severityMsg = "Severity of " + eventOwningIncident.getNotificationTypeFromTag() + " changed from " + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
-	            	severityMsg = "" + eventOwningIncident.getOldSeverity().toString() + " to " + eventOwningIncident.getSeverity().toString();
+	            	severityMsg = "" + singleIncident.getOldSeverity().toString() + " to " + singleIncident.getSeverity().toString();
 	            	log.info(severityMsg);
 				}
 				
@@ -739,14 +755,16 @@ public class Incident {
 				sb.append(" (");
 				sb.append(theSummary);
 				sb.append(")");
-	        	User.sendNotifications(theApplication.getId(), eventOwningIncident, sb.toString());
+	        	User.sendNotifications(theApplication.getId(), singleIncident, sb.toString());
 			}
+			
+			singleIncidentEm.close();
         } finally {
         	// this should persist the changes
         	em.close();
         }
         
-		return eventOwningIncident;
+		return singleIncident;
 	}
 	
 	public static Incident createIncident(String theEventName, String theLEP, String theREP, String theWellKnownTag, Application theApplication, 

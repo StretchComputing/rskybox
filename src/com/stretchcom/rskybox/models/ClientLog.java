@@ -1,8 +1,6 @@
 package com.stretchcom.rskybox.models;
 
 import java.util.ArrayList;
-
-
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -472,13 +470,28 @@ public class ClientLog {
             if(numOfLogs > 2) {
             	int secondOldestIndex = numOfLogs - 2;
             	ClientLog cl = clientLogs.get(secondOldestIndex);
-            	em.remove(cl);
+            	
+                // Get the incident using another entityManager. Want to get it by itself so it is more efficient when it is persisted
+            	ClientLog singleClientLog = null;
+                EntityManager singleClientLogEm = EMF.get().createEntityManager();
+        		try {
+        			singleClientLog = (ClientLog)singleClientLogEm.createNamedQuery("ClientLog.getByKey")
+            				.setParameter("key", cl.getKey())
+            				.getSingleResult();
+        			singleClientLogEm.remove(singleClientLog);
+                	singleClientLogEm.close();
+                } catch(Exception e) {
+        			log.severe("should never happen - could not get ClientLog via key");
+        			return;
+                }
+
             	log.info("client log with name = " + cl.getLogName() + "and message = " + cl.getMessage() + " just removed from data store");
             }
 		} catch (Exception e) {
 			log.severe("exception = " + e.getMessage());
 			e.printStackTrace();
 		} finally {
+			//::PROBLEM:: search all em.close throughout code base to see if this "update portion of result set" is used anywhere else.
 			em.close();
 		}
 		return;

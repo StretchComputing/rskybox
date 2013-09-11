@@ -937,6 +937,10 @@ public class Notification {
 	}
 	
 	private static NotificationDetails fromStringToNotificationDetails(int theNotificationDetailsStartIndex, String theExistingNotificationString) {
+		if(theExistingNotificationString == null) {
+			return null;
+		}
+		
 		NotificationDetails nd = new NotificationDetails();
 		int startOfFieldIndex = 0;
 		int fieldDelimiterIndex;
@@ -1385,8 +1389,12 @@ public class Notification {
 			String userId = (String)memcache.get(pendingUserKey);
 			String notificationStringKey = getMergingNotificationStringKey(userId, memcache);
 			String notificationString = (String)memcache.get(notificationStringKey);
-			
-			mergeNotificationString(userId, notificationString);
+			if(notificationString == null) {
+				log.severe("notificationString at index = " + index + " is null. Number of pending users = " + puCount);
+				log.severe("pendingUserKey = " + pendingUserKey + "  notificationStringKey = " + notificationStringKey);
+			} else {
+				mergeNotificationString(userId, notificationString);
+			}
 			
 			// empty the memcache elements no longer needed
 			memcache.delete(pendingUserKey);
