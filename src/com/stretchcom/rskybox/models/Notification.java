@@ -1383,6 +1383,7 @@ public class Notification {
 		// walk thru the Merging Queue's Pending Users list. For each pending user, get the associated NotificationString and merge that into the datastore
 		String pendingUserListCounterKey = getMergingPendingUserListCounterKey(memcache);
 		Integer puCount = (Integer)memcache.get(pendingUserListCounterKey);
+		log.info("number of pending users needing to be merged = " + puCount);
 		int index;
 		for(index=0; index<puCount; index++) {
 			String pendingUserKey = getMergingPendingUserListEntryKey(index, memcache);
@@ -1437,6 +1438,7 @@ public class Notification {
             	log.info("mergeNotificationString(); existing notification found in datastore");
         	} catch (NoResultException e) {
     			// this is NOT an error, just the very first time a notification is being sent. Notification will be created just below ...
+        		log.info("mergeNotificationString(); no existing notification found in datastore so it will be added");
     		} catch (NonUniqueResultException e) {
     			log.severe("mergeNotificationString(): should never happen - two or more Users have the same key. exception = " + e.getMessage());
      		}

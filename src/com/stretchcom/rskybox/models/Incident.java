@@ -688,9 +688,16 @@ public class Incident {
         			return null;
         		}
             }
-            
-            // Get the incident using another entityManager. Want to get it by itself so it is more efficient when it is persisted
-            EntityManager singleIncidentEm = EMF.get().createEntityManager();
+        }catch (Exception e) {
+			log.severe("trying to init eventOwningIncident. Exception = " + e.getMessage());
+			return null;
+        } finally {
+        	em.close();
+        }
+        
+        // Get the incident using another entityManager. Want to get it by itself so it is more efficient when it is persisted
+        EntityManager singleIncidentEm = EMF.get().createEntityManager();
+        try {
     		try {
     			singleIncident = (Incident)singleIncidentEm.createNamedQuery("Incident.getByKey")
         				.setParameter("key", eventOwningIncident.getKey())
@@ -757,11 +764,10 @@ public class Incident {
 				sb.append(")");
 	        	User.sendNotifications(theApplication.getId(), singleIncident, sb.toString());
 			}
-			
-			singleIncidentEm.close();
+        } catch(Exception e) {
+        	log.severe("updating existing incident. Exception = " + e.getMessage());
         } finally {
-        	// this should persist the changes
-        	em.close();
+			singleIncidentEm.close();
         }
         
 		return singleIncident;
