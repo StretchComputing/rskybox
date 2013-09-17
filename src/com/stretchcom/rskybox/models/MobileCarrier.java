@@ -124,9 +124,11 @@ public final class MobileCarrier {
 	public static Boolean usesFromAddress(String theSmsEmailAddress) {
 		if(theSmsEmailAddress == null) {return false;}
 		
-		if(theSmsEmailAddress.contains("att.net")) {
-			return true;
-		}
+		// 9/17/13 -- AT&T text messages started coming in with what appears to be a corrupted from address
+		//            so just send everything thru the media server and see if that fixes the problem
+		//if(theSmsEmailAddress.contains("att.net")) {
+			 //return true;
+		//}
 		
 		return false;
 	}
