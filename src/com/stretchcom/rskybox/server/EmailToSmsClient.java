@@ -48,6 +48,7 @@ public class EmailToSmsClient {
 			jsonPayload = new JSONObject();
 			jsonPayload.put("subject", theSubject);
 			jsonPayload.put("body", theBody);
+			jsonPayload.put("type", "text");
 			jsonPayload.put("toEmailAddress", theToEmailAddress);
 			jsonPayload.put("fromEmailAddress", theFromEmailAddress);
 		} catch (JSONException e1) {
